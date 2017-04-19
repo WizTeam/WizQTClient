@@ -7,9 +7,6 @@
 #include "WizDef.h"
 #include <QDir>
 #include <QMutex>
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
 
 class WizAnalyzer
 {

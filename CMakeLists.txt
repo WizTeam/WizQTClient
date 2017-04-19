@@ -75,8 +75,6 @@ else(APPLE)
 endif(APPLE)
 
 if (WIN32)
-    add_definitions(-DMAKE_CLUCENE_SHARED_LIB)
-    add_definitions(-DMAKE_CLUCENE_CORE_LIB)
     add_definitions(-DQUAZIP_STATIC)
 endif()
 

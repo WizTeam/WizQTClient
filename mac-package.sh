@@ -10,7 +10,7 @@ echo "build version : " $REV
 package_home="./macos-package"
 package_output_path="$HOME"
 
-QTDIR="/Users/weishijun/Qt5.7.0/5.7/clang_64"
+QTDIR="/Users/weishijun/Qt5.7.1/5.7/clang_64"
 
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
@@ -59,5 +59,3 @@ if [ -e "$package_home" ]; then
 else
         echo "error:${package_home} not exist"
 fi
-
-

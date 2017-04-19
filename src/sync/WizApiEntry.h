@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QMap>
+#include <QMutex>
 
 class WizCommonApiEntry
 {
@@ -14,6 +15,7 @@ public:
     static QString syncUrl();
     static QString asServerUrl();
     static QString messageServerUrl();
+    static QString searchUrl();
     static QString systemAvatarUrl(const QString& avatarName);
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();
@@ -45,6 +47,8 @@ public:
 
     static QString appstoreParam(bool useAndSymbol = true);
 
+    static QString newAsServerUrl();
+
 private:
     static QString requestUrl(const QString& strCommand);
     static void getEndPoints();
@@ -52,6 +56,7 @@ private:
     static QString getUrlFromCache(const QString& strCommand);
 
 private:
+    static QMutex m_mutex;
     static QString m_server;
     static QMap<QString, QString> m_cacheMap;
     static QMap<QString, QString> m_mapkUrl;

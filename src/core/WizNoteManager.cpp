@@ -8,7 +8,7 @@
 #include <fstream>
 #include <QDebug>
 
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizMisc.h"
 #include "sync/WizApiEntry.h"
@@ -228,9 +228,9 @@ void WizNoteManager::downloadTemplatePurchaseRecord()
 
 bool WizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetworkAccessManager& manager)
 {
-    rapidjson::Document d;
-    d.Parse(newJsonData.constData());
-    if (d.HasParseError())
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(newJsonData.constData(), d))
         return false;
 
     QString localFile = Utils::WizPathResolve::wizTemplateJsonFilePath();
@@ -241,15 +241,13 @@ bool WizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwor
     {
         QTextStream stream(&file);
         QString jsonData = stream.readAll();
-        rapidjson::Document localD;
-        localD.Parse(jsonData.toUtf8().constData());
-
-        if (!localD.HasParseError())
+        Json::Value localD;
+        if (reader.parse(jsonData.toUtf8().constData(), localD))
         {
-            if (localD.HasMember("template_js_version") && d.HasMember("template_js_version"))
+            if (localD.isMember("template_js_version") && d.isMember("template_js_version"))
             {
-                needUpdateJs = (localD.FindMember("template_js_version")->value.GetString() !=
-                        d.FindMember("template_js_version")->value.GetString());
+                needUpdateJs = (localD["template_js_version"].asString() !=
+                        d["template_js_version"].asString());
             }
         }
 
@@ -260,9 +258,9 @@ bool WizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwor
     if (needUpdateJs)
     {
         QString link;
-        if (d.HasMember("template_js_link"))
+        if (d.isMember("template_js_link"))
         {
-            link = d.FindMember("template_js_link")->value.GetString();
+            link = QString::fromStdString(d["template_js_link"].asString());
         }
         if (!link.isEmpty())
         {

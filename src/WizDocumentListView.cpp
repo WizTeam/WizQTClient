@@ -74,6 +74,7 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     , m_nLeadInfoState(DocumentLeadInfo_None)
     , m_nAddedDocumentCount(0)
     , m_bSortDocumentsAfterAdded(false)
+    , m_searchResult(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -135,6 +136,10 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
             SLOT(on_documentReadCount_changed(const WIZDOCUMENTDATA&)));
     connect(&m_dbMgr, SIGNAL(documentAccessDateModified(WIZDOCUMENTDATA)),
             SLOT(on_documentAccessDate_changed(WIZDOCUMENTDATA)));
+    //
+    connect(&m_dbMgr, SIGNAL(documentUploaded(const QString&, const QString&)),
+            SLOT(on_documentUploaded(const QString&, const QString&)));
+
 
     // message
     //connect(&m_dbMgr.db(), SIGNAL(messageModified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)),
@@ -267,16 +272,34 @@ void WizDocumentListView::resizeEvent(QResizeEvent* event)
     QListWidget::resizeEvent(event);
 }
 
-void WizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
+void WizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument, bool searchResult /*= false*/)
 {
     //reset
     clear();
     m_sectionItems.clear();
-
+    //
+    m_searchResult = searchResult;
 
     verticalScrollBar()->setValue(0);
 
-    appendDocuments(arrayDocument);
+    if (searchResult)
+    {
+        appendDocumentsNoSort(arrayDocument);
+    }
+    else
+    {
+        appendDocuments(arrayDocument);
+    }
+}
+
+void WizDocumentListView::appendDocumentsNoSort(const CWizDocumentDataArray& arrayDocument)
+{
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+        addDocument(*it);
+    }
+
+    Q_EMIT documentCountChanged();
 }
 
 void WizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -293,7 +316,7 @@ void WizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDocu
     Q_EMIT documentCountChanged();
 }
 
-int WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
+int WizDocumentListView::addDocument(const WIZDOCUMENTDATAEX& doc, bool sort)
 {
     addDocument(doc);
 #ifdef QT_DEBUG
@@ -341,7 +364,7 @@ int WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
     return nCount;
 }
 
-void WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
+void WizDocumentListView::addDocument(const WIZDOCUMENTDATAEX& doc)
 {
     WizDocumentListViewItemData data;
     data.doc = doc;
@@ -355,7 +378,7 @@ void WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
 
 
     WizDocumentListViewDocumentItem* pItem = new WizDocumentListViewDocumentItem(m_app, data);
-    pItem->setSizeHint(QSize(sizeHint().width(), Utils::WizStyleHelper::listViewItemHeight(m_nViewType)));
+    pItem->setSizeHint(QSize(sizeHint().width(), Utils::WizStyleHelper::listViewItemHeight(viewType())));
     pItem->setLeadInfoState(m_nLeadInfoState);
     pItem->setSortingType(m_nSortingType);
 
@@ -1239,32 +1262,13 @@ void WizDocumentListView::resetItemsViewType(int type)
         if (item(i)->type() != WizDocumentListType_Document)
             continue;
 
-        int nHeight = Utils::WizStyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? m_nViewType : (int)Utils::WizStyleHelper::ListTypeSection);
+        int nHeight = Utils::WizStyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? viewType() : (int)Utils::WizStyleHelper::ListTypeSection);
         item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
     }
     //
     m_app.userSettings().set("VIEW_TYPE", QString::number(type));
 }
 
-QSize WizDocumentListView::itemSizeFromViewType(ViewType type)
-{
-    QSize sz = sizeHint();
-    switch (type) {
-    case WizDocumentListView::TypeOneLine:
-        sz.setHeight(fontMetrics().height() + 12);
-        return sz;
-    case WizDocumentListView::TypeTwoLine:
-        sz.setHeight(fontMetrics().height() * 2 + 15);
-        return sz;
-    case WizDocumentListView::TypeThumbnail:
-        sz.setHeight(Utils::WizStyleHelper::thumbnailHeight());
-        return sz;
-    default:
-        Q_ASSERT(0);
-    }
-
-    return sz;
-}
 
 void WizDocumentListView::setLeadInfoState(int state)
 {
@@ -1396,7 +1400,20 @@ void WizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentOl
         }
     }
     //
-    WizKMSyncThread::quickSyncKb(documentNew.strKbGUID);
+    WizMainWindow::instance()->quickSyncKb(documentNew.strKbGUID);
+}
+
+
+void WizDocumentListView::on_documentUploaded(const QString& kbGuid, const QString& docGuid)
+{
+    int index = documentIndexFromGUID(docGuid);
+    if (-1 == index)
+        return;
+    //
+    if (WizDocumentListViewDocumentItem* pItem = documentItemAt(index)) {
+        pItem->reload(m_dbMgr.db(kbGuid));
+        update(indexFromItem(pItem));
+    }
 }
 
 void WizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
@@ -1823,13 +1840,16 @@ void WizDocumentListView::on_action_copyWebClientLink()
 
 void WizDocumentListView::on_action_showDocumentInFloatWindow()
 {
-    ::WizGetAnalyzer().logAction("documentListMenuOpenInFloatWindow");
-    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
-    foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
-    {
-        const WIZDOCUMENTDATA& document = item->document();
-        mainWindow->viewNoteInSeparateWindow(document);
-    }
+    WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        ::WizGetAnalyzer().logAction("documentListMenuOpenInFloatWindow");
+        WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
+        foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
+        {
+            const WIZDOCUMENTDATA& document = item->document();
+            mainWindow->viewNoteInSeparateWindow(document);
+        }
+    });
 }
 
 void WizDocumentListView::on_menu_aboutToHide()
@@ -1843,29 +1863,35 @@ void WizDocumentListView::on_menu_aboutToHide()
 
 void WizDocumentListView::on_action_encryptDocument()
 {
-    ::WizGetAnalyzer().logAction("documentListMenuEncryptDocument");
-    foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
-    {
-        WIZDOCUMENTDATA doc = item->document();
-        WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-        db.encryptDocument(doc);
-    }
+    WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        ::WizGetAnalyzer().logAction("documentListMenuEncryptDocument");
+        foreach (WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
+        {
+            WIZDOCUMENTDATA doc = item->document();
+            WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            db.encryptDocument(doc);
+        }
+    });
 }
 
 void WizDocumentListView::on_action_cancelEncryption()
 {
-    ::WizGetAnalyzer().logAction("documentListMenuCancelEncryptionn");
-    //
-    foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
-    {
-        WIZDOCUMENTDATA doc = item->document();
-        if (doc.nProtected)
+    WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        ::WizGetAnalyzer().logAction("documentListMenuCancelEncryptionn");
+        //
+        foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
         {
-            WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-            if (!db.cancelDocumentEncryption(doc))
-                return;
+            WIZDOCUMENTDATA doc = item->document();
+            if (doc.nProtected)
+            {
+                WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+                if (!db.cancelDocumentEncryption(doc))
+                    return;
+            }
         }
-    }
+    });
 }
 
 
@@ -2095,7 +2121,7 @@ void WizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt
         int nRightMargin = 12;
         QStyleOptionViewItem newVopt(*vopt);
         newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
-        pItem->draw(p, &newVopt, m_nViewType);
+        pItem->draw(p, &newVopt, viewType());
 
         p->restore();
     }
@@ -2146,4 +2172,55 @@ void WizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QSt
             pItem->setNeedUpdate();
         }
     }
+}
+
+
+void WizDocumentListView::paintEvent(QPaintEvent *e)
+{
+    QListView::paintEvent(e);
+    if (model() && model()->rowCount(rootIndex()) > 0)
+       return;
+    // The view is empty.
+
+    QPainter p(viewport());
+    //
+    if (m_emptyFolder.isNull()) {
+        QString fileName = Utils::WizStyleHelper::skinResourceFileName("empty_folder", true);
+        m_emptyFolder = QPixmap(fileName);
+    }
+    if (m_emptySearch.isNull()) {
+        QString fileName = Utils::WizStyleHelper::skinResourceFileName("empty_search", true);
+        m_emptySearch = QPixmap(fileName);
+    }
+    //
+    QPixmap pixmap = isSearchResult() ? m_emptySearch : m_emptyFolder;
+    QSize imageSize = pixmap.size();
+    QRect rc = rect();
+    //
+    imageSize.setWidth(imageSize.width() / pixmap.devicePixelRatio());
+    imageSize.setHeight(imageSize.height() / pixmap.devicePixelRatio());
+    //
+    QString text = isSearchResult()
+            ? tr("No search results...\nTry to change another keyword or advanced searching")
+            : tr("Nothing in here\nGo to create a note");
+    //
+    int spacing = 10;
+    //
+    QRect textRect = rc;
+    textRect.adjust(16, 0, -16, 0);
+    QFontMetrics fm(p.font());
+    int textHeight = fm.boundingRect(textRect, Qt::TextWordWrap, text).height();
+    int totalHeight = imageSize.height() + textHeight + spacing;
+    //
+    int x = (rc.size().width() - imageSize.width()) / 2;
+    int y = (rc.size().height() - totalHeight) / 2;
+    //
+    p.drawPixmap(x, y, pixmap);
+    //
+    int textY = y + imageSize.height() + spacing;
+    textRect.setTop(textY);
+    textRect.setHeight(textHeight);
+    //
+    p.setPen(QColor(0xcc, 0xcc, 0xcc));
+    p.drawText(textRect, Qt::AlignCenter | Qt::TextWordWrap, text);
 }

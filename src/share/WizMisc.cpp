@@ -29,6 +29,7 @@
 #include "sync/WizApiEntry.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
+#include "share/WizEventLoop.h"
 #include "WizDatabaseManager.h"
 #include "WizObjectDataDownloader.h"
 #include "WizProgressDialog.h"
@@ -1207,6 +1208,17 @@ bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& str
     return true;
 }
 
+bool WizSaveUnicodeTextToData(QByteArray& data, const QString& strText, bool addBom)
+{
+    QTextStream stream(&data);
+    stream.setCodec("UTF-8");
+    stream.setGenerateByteOrderMark(addBom ? true : false);
+    stream << strText;
+    stream.flush();
+    return true;
+}
+
+
 BOOL WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
 {
     QStringList strings = strText.split(ch, QString::SkipEmptyParts);
@@ -2058,6 +2070,15 @@ bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDes
             qDebug() << "[Editor] failed to copy image to: " << strDestFile;
             return false;
         }
+        //
+        QFile::setPermissions(strImageFile,
+                              QFile::ReadOwner
+                            | QFile::WriteOwner
+                            | QFile::ReadUser
+                            | QFile::WriteUser
+                            | QFile::ReadGroup
+                            | QFile::ReadOther
+                            );
     }
     //
     strHtml = getImageHtmlLabelByFile(strDestFile);
@@ -2239,6 +2260,29 @@ WizWaitCursor::~WizWaitCursor()
     QApplication::restoreOverrideCursor();
 }
 
+
+WizTempFileGuard::WizTempFileGuard(const QString& fileName)
+    : m_fileName(fileName)
+{
+}
+WizTempFileGuard::WizTempFileGuard()
+{
+    m_fileName = Utils::WizPathResolve::tempPath() + ::WizGenGUIDLowerCaseLetterOnly();
+}
+
+WizTempFileGuard::~WizTempFileGuard()
+{
+    WizDeleteFile(m_fileName);
+    if (WizPathFileExists(m_fileName))
+    {
+        TOLOG1(_T("Failed to delete temp file: %1"), m_fileName);
+    }
+}
+//
+QString WizTempFileGuard::fileName()
+{
+    return m_fileName;
+}
 
 
 void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, const QSize& sz, bool dialogResizable)
@@ -2439,8 +2483,8 @@ bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCo
 
 void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
-    CString strExt = WizFormatString2("obj_guid=%1&kb_guid=%2&obj_type=document",
-                                      doc.strGUID, doc.strKbGUID);
+    CString strExt = WizFormatString3("obj_guid=%1&kb_guid=%2&doc_guid=%3&obj_type=document",
+                                      doc.strGUID, doc.strKbGUID, doc.strGUID);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
@@ -2684,8 +2728,8 @@ void WizIniFileEx::getSection(const QString& section, QMap<QString, QString>& da
 
 void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent)
 {
-    CString strExt = WizFormatString2("obj_guid=%1&kb_guid=%2&obj_type=attachment",
-                                      attach.strGUID, attach.strKbGUID);
+    CString strExt = WizFormatString3("obj_guid=%1&kb_guid=%2&doc_guid=%3&obj_type=attachment",
+                                      attach.strGUID, attach.strKbGUID, attach.strDocumentGUID);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
@@ -2864,22 +2908,37 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
     QString newUrl = url;
     QNetworkAccessManager netCtrl;
     QNetworkReply* reply;
+    //
+    bool redirect = false;
+    QByteArray byData;
     do
     {
         QNetworkRequest request(newUrl);
-        QEventLoop loop;
-        loop.connect(&netCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        //
         reply = netCtrl.get(request);
+        WizAutoTimeOutEventLoop loop(reply);
+        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
         loop.exec();
 
-        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-        newUrl = redirectUrl.toString();
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            return false;
+        }
+        //
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301) {
+            redirect = true;
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            newUrl = redirectUrl.toString();
+        } else {
+            redirect = false;
+            byData = loop.result();
+        }
+        //
     }
-    while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+    while (redirect);
 
     WizDeleteFile(fileName);
 
-    QByteArray byData = reply->readAll();
     if (isImage)
     {
         QPixmap pix;
@@ -2893,6 +2952,43 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
     file.write(byData);
     file.close();
 
+    return true;
+}
+
+bool WizURLDownloadToData(const QString& url, QByteArray& data)
+{
+    QString newUrl = url;
+    QNetworkAccessManager netCtrl;
+    QNetworkReply* reply;
+    //
+    bool redirect = false;
+    do
+    {
+        QNetworkRequest request(newUrl);
+        //
+        reply = netCtrl.get(request);
+        WizAutoTimeOutEventLoop loop(reply);
+        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+        loop.exec();
+
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            return false;
+        }
+
+        //
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301) {
+            redirect = true;
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            newUrl = redirectUrl.toString();
+        } else {
+            redirect = false;
+            data = loop.result();
+        }
+        //
+    }
+    while (redirect);
+    //
     return true;
 }
 

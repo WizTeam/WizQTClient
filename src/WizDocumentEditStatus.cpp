@@ -2,7 +2,7 @@
 #include "sync/WizApiEntry.h"
 #include "sync/WizToken.h"
 #include "share/WizMisc.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
 #include "sync/WizToken.h"
@@ -264,223 +264,6 @@ bool WizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlia
     return reply->error() == QNetworkReply::NoError;
 }
 
-/*
-CWizDocumentStatusCheckThread::CWizDocumentStatusCheckThread(QObject* parent)
-    : QThread(parent)
-    , m_stop(false)
-    , m_mutexWait(QMutex::NonRecursive)
-    , m_needRecheck(false)
-    , m_timer(0)
-    , m_checkNow(false)
-{
-
-}
-
-CWizDocumentStatusCheckThread::~CWizDocumentStatusCheckThread()
-{
-    if (m_timer)
-        delete m_timer;
-}
-
-void CWizDocumentStatusCheckThread::waitForDone()
-{
-    stop();
-    //
-    WizWaitForThread(this);
-}
-
-void CWizDocumentStatusCheckThread::needRecheck()
-{
-    m_needRecheck = true;
-}
-
-void CWizDocumentStatusCheckThread::onTimeOut()
-{
-    qDebug() << "document check thread time out " << m_strCurGUID;
-    emit checkTimeOut(m_strCurGUID);
-}
-
-void CWizDocumentStatusCheckThread::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
-{
-    setDocmentGUID(strKbGUID, strGUID);
-    m_checkNow = true;
-}
-
-void CWizDocumentStatusCheckThread::downloadData(const QString& strUrl)
-{
-    QNetworkAccessManager net;
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-
-    QEventLoop loop;
-    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
-    loop.exec();
-
-    if (reply->error()) {
-        Q_EMIT checkFinished(QString(), QStringList());
-        reply->deleteLater();
-        return;
-    }
-
-    rapidjson::Document d;
-    d.Parse<0>(reply->readAll().constData());
-    if (d.IsArray())
-    {
-        QStringList strList;
-        QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-        QTextDecoder* encoder = codec->makeDecoder();
-        for (rapidjson::SizeType i = 0; i < d.Size(); i++)
-        {
-            const rapidjson::Value& u = d[i];
-            strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
-        }
-        //
-        {
-            QMutexLocker lock(&m_mutexWait);
-            if (strUrl.indexOf(m_strGUID) != -1)
-            {
-                emit checkFinished(m_strGUID, strList);
-            }
-            else
-            {
-                needRecheck();
-            }
-        }
-        reply->deleteLater();
-        return;
-    }
-    Q_EMIT checkFinished(QString(), QStringList());
-    reply->deleteLater();
-}
-
-void CWizDocumentStatusCheckThread::run()
-{
-    //
-    int idleCounter = 0;
-    while (1)
-    {
-        //////
-        {
-            QMutexLocker lock(&m_mutexWait);
-            if (!m_needRecheck)
-            {
-//                m_wait.wait(&m_mutexWait);
-            }
-            else
-            {
-                m_needRecheck = false;
-            }
-            //
-            if (m_stop)
-                return;
-
-            m_strCurKbGUID = m_strKbGUID;
-            m_strCurGUID = m_strGUID;
-        }
-
-        //
-        if (!m_timer)
-        {
-            m_timer = new QTimer(0);
-            m_timer->setSingleShot(true);
-            m_timer->moveToThread(this);
-            connect(m_timer, SIGNAL(timeout()), SLOT(onTimeOut()));
-        }
-
-//        QTimer::singleShot(5000, this, SLOT(onTimeOut()));
-        //
-
-        if (idleCounter >= 60 || m_checkNow || m_stop)
-        {
-            m_checkNow = false;
-            idleCounter = 0;
-            if (m_stop)
-                return;
-
-            m_timer->start(5000);
-//            qDebug() << "after qtimer started.";
-//            qDebug() << "start to check document changed on server , guid : " << m_strCurGUID;
-//            bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
-//            qDebug() << "check finished, document changed : " << changed;
-//            emit checkDocumentChangedFinished(m_strCurGUID, changed);
-
-//            qDebug() << "start to check document edit status";
-//            checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
-
-//            m_timer->stop();
-        }
-        else
-        {
-            sleep(1);
-            idleCounter ++;
-        }
-    }
-}
-
-
-void CWizDocumentStatusCheckThread::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
-{
-    m_mutexWait.lock();
-    m_strKbGUID = strKbGUID;
-    m_strGUID = strGUID;
-    m_wait.wakeAll();
-    m_mutexWait.unlock();
-}
-
-bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
-{
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
-    WIZDOCUMENTDATA doc;
-    if (!db.DocumentFromGUID(strGUID, doc))
-        return false;
-
-    if (doc.nVersion == -1)
-    {
-        return !db.CanEditDocument(doc);
-    }
-
-    WIZUSERINFO userInfo = Token::info();
-    if (db.IsGroup())
-    {
-        WIZGROUPDATA group;
-        if (!CWizDatabaseManager::instance()->db().GetGroupData(strKbGUID, group))
-            return false;
-        userInfo.strKbGUID = group.strGroupGUID;
-        userInfo.strDatabaseServer = group.strDatabaseServer;
-        if (userInfo.strDatabaseServer.isEmpty())
-        {
-            userInfo.strDatabaseServer = CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
-        }
-    }
-    CWizKMDatabaseServer server(userInfo, NULL);
-    WIZOBJECTVERSION versionServer;
-    if (!server.wiz_getVersion(versionServer))
-        return false;
-
-    if (versionServer.nDocumentVersion <= db.GetObjectVersion("document"))
-        return false;
-
-    int nPart = 0;
-    nPart |= WIZKM_XMKRPC_DOCUMENT_PART_INFO;
-    WIZDOCUMENTDATAEX docOnServer;
-    if (!server.document_getData(strGUID, nPart, docOnServer))
-        return false;
-
-    return docOnServer.nVersion > doc.nVersion;
-}
-
-bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
-{
-    QString strRequestUrl = WizFormatString4("%1/get?obj_id=%2/%3&t=%4",
-                                             WizKMGetDocumentEditStatusURL(),
-                                             strKbGUID,
-                                             strGUID,
-                                             ::WizIntToStr(WizGetTickCount()));
-
-    downloadData(strRequestUrl);
-    return true;
-}
-*/
-
 
 WizDocumentStatusChecker::WizDocumentStatusChecker(QObject* parent)
     : m_timeOutTimer(0)
@@ -698,17 +481,19 @@ bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
         return false;
     }
 
-    rapidjson::Document d;
-    d.Parse<0>(reply->readAll().constData());
-    if (d.IsArray())
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(reply->readAll().constData(), d))
+        return false;
+
+    if (d.isArray())
     {
         QStringList strList;
-        QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-        QTextDecoder* encoder = codec->makeDecoder();
-        for (rapidjson::SizeType i = 0; i < d.Size(); i++)
+        //
+        for (Json::ArrayIndex i = 0; i < d.size(); i++)
         {
-            const rapidjson::Value& u = d[i];
-            strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
+            const Json::Value& u = d[i];
+            strList.append(QString::fromStdString(u.asString()));
         }
         //
         {

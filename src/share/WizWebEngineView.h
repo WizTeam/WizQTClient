@@ -22,6 +22,7 @@ protected:
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
     virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
     virtual QWebEnginePage *createWindow(WebWindowType type);
+    virtual void triggerAction(WebAction action, bool checked = false);
 Q_SIGNALS:
     void linkClicked(QUrl url, QWebEnginePage::NavigationType type, bool isMainFrame, WizWebEnginePage* page);
     void openLinkInNewWindow(QUrl url);

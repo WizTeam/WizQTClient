@@ -10,12 +10,13 @@
 #include <QString>
 #include <QDebug>
 #include <QUrl>
+#include <QMutexLocker>
 
 #include "WizToken.h"
 #include "WizKMServer.h"
 #include "WizDef.h"
 #include "share/WizEventLoop.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 /*
  * %1: product, use wiz
@@ -69,6 +70,7 @@ static QString LocalLanguage = QLocale::system().name();
 QString WizCommonApiEntry::m_server = QString();
 QMap<QString, QString> WizCommonApiEntry::m_cacheMap = QMap<QString, QString>();
 QMap<QString, QString> WizCommonApiEntry::m_mapkUrl = QMap<QString, QString>();
+QMutex WizCommonApiEntry::m_mutex(QMutex::Recursive);
 
 
 QString _requestUrl(const QString& strUrl)
@@ -160,6 +162,21 @@ QString WizCommonApiEntry::asServerUrl()
     return strAsUrl;
 }
 
+QString WizCommonApiEntry::newAsServerUrl()
+{
+    QString key = "account_server_url";
+    QString strAsUrl = getUrlByCommand(key);
+    //
+    if (!strAsUrl.startsWith("http"))
+    {
+        qCritical() << "request url by command error. command : sync_https,  return : " << strAsUrl;
+        strAsUrl.clear();
+    }
+
+    return strAsUrl;
+}
+
+
 QString WizCommonApiEntry::messageServerUrl()
 {    
     return getUrlByCommand(WIZNOTE_API_COMMAND_MESSAGE_SERVER);
@@ -180,6 +197,18 @@ QString WizCommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 
     return strUrl;
 }
+
+QString WizCommonApiEntry::searchUrl()
+{
+    QString strUrl = asServerUrl();
+    if (strUrl.isEmpty())
+        return QString();
+
+    strUrl.append("/a/kb/search");
+
+    return strUrl;
+}
+
 
 QString WizCommonApiEntry::avatarUploadUrl()
 {
@@ -330,6 +359,8 @@ QString WizCommonApiEntry::groupUsersUrl(const QString& strToken, const QString&
 
 QString WizCommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
+    QMutexLocker locker(&m_mutex);
+    //
     if (strToken.isEmpty())
     {
         qCritical() << "request kb url by empty token";
@@ -402,6 +433,8 @@ QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
 
 void WizCommonApiEntry::getEndPoints()
 {
+    QMutexLocker locker(&m_mutex);
+    //
     QString urls = requestUrl("endpoints");
 #ifdef QT_DEBUG
     qDebug() << "get end points : " << urls;
@@ -409,24 +442,17 @@ void WizCommonApiEntry::getEndPoints()
     if (urls.isEmpty() || !urls.contains("http"))
         return;
 
-    rapidjson::Document d;
-    d.Parse<0>(urls.toUtf8().constData());
-
-    if (d.HasParseError())
-    {
-        qWarning() << "parse endpoints data error : " << d.GetParseError();
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(urls.toUtf8().constData(), d))
         return;
-    }
+    //
+    Json::Value::Members keys = d.getMemberNames();
 
-    for(rapidjson::Document::ConstMemberIterator iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
+    for(auto keyStr : keys)
     {
-        if (!(iter->name).IsString() || !(iter->value).IsString())
-        {
-            continue;
-        }
-
-        QString key = (iter->name).GetString();
-        QString url = (iter->value).GetString();
+        QString key = QString::fromStdString(keyStr);
+        QString url = QString::fromStdString(d[keyStr].asString());
 #ifdef QT_DEBUG
         qDebug() << "key: " << key << " url : " << url;
 #endif
@@ -436,11 +462,15 @@ void WizCommonApiEntry::getEndPoints()
 
 void WizCommonApiEntry::updateUrlCache(const QString& strCommand, const QString& url)
 {
+    QMutexLocker locker(&m_mutex);
+    //
     m_cacheMap.insert(strCommand, url);
 }
 
 QString WizCommonApiEntry::getUrlFromCache(const QString& strCommand)
 {
+    QMutexLocker locker(&m_mutex);
+    //
     if (m_cacheMap.isEmpty())
     {
         getEndPoints();

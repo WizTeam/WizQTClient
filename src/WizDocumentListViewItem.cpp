@@ -181,6 +181,7 @@ void WizDocumentListViewDocumentItem::updateInfoList()
 
     if (m_data.nType == TypeGroupDocument) {
         QString strAuthor = db.getDocumentOwnerAlias(m_data.doc);
+        m_strAuthor = strAuthor;
 //        strAuthor += strAuthor.isEmpty() ? "" : " ";
 
         switch (m_nSortingType) {
@@ -472,6 +473,9 @@ void WizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionV
         case WizDocumentListView::TypeThumbnail:
             drawPrivateSummaryView_impl(p, vopt);
             return;
+        case WizDocumentListView::TypeSearchResult:
+            drawPrivateSummaryView_impl(p, vopt);
+            return;
         case WizDocumentListView::TypeTwoLine:
             drawPrivateTwoLineView_impl(p, vopt);
             return;
@@ -487,6 +491,9 @@ void WizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionV
     {
         switch (nViewType) {
         case WizDocumentListView::TypeThumbnail:
+            drawGroupSummaryView_impl(p, vopt);
+            return;
+        case WizDocumentListView::TypeSearchResult:
             drawGroupSummaryView_impl(p, vopt);
             return;
         case WizDocumentListView::TypeTwoLine:
@@ -532,22 +539,49 @@ void WizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, c
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
+    //
+    WizDocumentListView* view = qobject_cast<WizDocumentListView*>(listWidget());
+    Q_ASSERT(view);
+    bool searchResult = view->isSearchResult();
 
-    WIZABSTRACT thumb;
-    WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
-
+    QString title;
+    QString text;
+    //
     QPixmap pmt;
-    if (!thumb.image.isNull()) {
-        pmt = QPixmap::fromImage(thumb.image);
-    }
-
+    //
+    QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
     rcd.setTop(rcd.top() + nTextTopMargin);
-    int nType = badgeType(true);
-    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text,
-                                              bFocused, bSelected, pmt);
+    //
+    WIZABSTRACT thumb;
+    if (searchResult) {
+        //
+        title = m_data.doc.strHighlightTitle;
+        text = m_data.doc.strHighlightText;
+        //
+        if (title.isEmpty()) {
+            title = m_data.doc.strTitle;
+        }
+        //
+        QString info = m_strAuthor + " " + m_data.doc.tCreated.toHumanFriendlyString() + " (" + documentLocation() + ")";
+        //
+        Utils::WizStyleHelper::drawListViewItemSearchResult(p, rcd, title, info,
+                                          text, bFocused, bSelected);
+        //
+    } else {
+        WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
+        if (!thumb.image.isNull()) {
+            pmt = QPixmap::fromImage(thumb.image);
+        }
+        //
+        title = m_data.doc.strTitle;
+        text = thumb.text;
+        //
+        int nType = badgeType(true);
+        Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, title, m_data.infoList,
+                                                   needDrawDocumentLocation() ? documentLocation() : "", text,
+                                                  bFocused, bSelected, pmt);
+    }
 }
 
 const int nAvatarRightMargin = 8;
@@ -555,22 +589,46 @@ void WizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, con
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
+    //
+    WizDocumentListView* view = qobject_cast<WizDocumentListView*>(listWidget());
+    Q_ASSERT(view);
+    bool searchResult = view->isSearchResult();
 
-    WIZABSTRACT thumb;
-    WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
-
+    QString title;
+    QString text;
+    //
+    QPixmap pmt;
+    //
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
-
+    //
     QPixmap pmAvatar;
     WizAvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
     rcAvatar = Utils::WizStyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
     rcd.setTop(rcd.top() + nTextTopMargin);
+    //
+    if (searchResult)
+    {
+        title = m_data.doc.strHighlightTitle;
+        text = m_data.doc.strHighlightText;
+        //
+        QString info = m_strAuthor + " " + m_data.doc.tCreated.toHumanFriendlyString() + " (" + documentLocation() + ")";
+        //
+        Utils::WizStyleHelper::drawListViewItemSearchResult(p, rcd, title, info,
+                                          text, bFocused, bSelected);
+    }
+    else
+    {
+        WIZABSTRACT thumb;
+        WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
-    int nType = badgeType(true);
-    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
+        int nType = badgeType(true);
+        Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+                                                  needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
+
+    }
+
 }
 
 void WizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
@@ -624,14 +682,17 @@ void WizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOp
     WizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     bool isRetina = WizIsHighPixel();
     strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin());
+    //
+    bool attachModified = false;
+    /*  //影响显示效率
     CWizDocumentAttachmentDataArray arrayAttachment;
     db.getDocumentAttachments(m_data.doc.strGUID, arrayAttachment);
-    bool attachModified = false;
     for (WIZDOCUMENTATTACHMENTDATAEX attachment : arrayAttachment)
     {
         if (db.isAttachmentModified(attachment.strGUID))
             attachModified = true;        
     }
+    */
     if (db.isDocumentModified(m_data.doc.strGUID) || attachModified)
     {
         strIconPath += isRetina ? "document_needUpload@2x.png" : "document_needUpload.png";

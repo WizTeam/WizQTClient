@@ -44,7 +44,7 @@ class WizKMSyncThread : public QThread
     Q_OBJECT
 
 public:
-    WizKMSyncThread(WizDatabase& db, QObject* parent = 0);
+    WizKMSyncThread(WizDatabase& db, bool quickOnly, QObject* parent = 0);
     ~WizKMSyncThread();
     void startSyncAll(bool bBackground = true);
     bool isBackground() const;
@@ -63,7 +63,7 @@ public slots:
     void quickDownloadMesages();
 
 public:
-    static void quickSyncKb(const QString& kbGuid); //thread safe
+    static void setQuickThread(WizKMSyncThread* thread);
     static bool isBusy();
     static void waitUntilIdleAndPause();
     static void setPause(bool pause);
@@ -91,6 +91,7 @@ private:
     int m_nFullSyncSecondsInterval;
     bool m_bBusy;
     bool m_bPause;
+    bool m_quickOnly;
 
     //
     QMutex m_mutex;

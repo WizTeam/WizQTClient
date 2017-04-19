@@ -1,14 +1,28 @@
 ﻿#include "WizKMServer.h"
 #include "WizApiEntry.h"
 #include "WizToken.h"
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
+#include "share/jsoncpp/json/json.h"
+#include "share/WizZip.h"
+#include "share/WizRequest.h"
+
+#include "share/jsoncpp/json/json.h"
+#include "share/WizEventLoop.h"
+#include "share/WizRequest.h"
+#include "share/WizThreads.h"
+
+#include "utils/WizMisc.h"
+
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
+
+#include "WizMainWindow.h"
+
+#include "utils/WizPathResolve.h"
+
+#include <QHttpPart>
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
-
-
 
 WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strUrl, QObject* parent)
     : WizXmlRpcServerBase(strUrl, parent)
@@ -165,33 +179,19 @@ bool WizKMAccountsServer::getAdminBizCert(const QString& strToken, const QString
     return true;
 }
 
-inline void AddJsonMemeber(rapidjson::Document& doc, rapidjson::Document::AllocatorType& allocator, const QString& name, const QString& str)
-{
-    rapidjson::Value n(name.toUtf8().constData(), allocator);
-    rapidjson::Value v(str.toUtf8().constData(), allocator);
-
-    doc.AddMember(n, v, allocator);
-}
 
 bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+    Json::Value doc;
     //
-    AddJsonMemeber(doc, allocator, "n", strN);
-    AddJsonMemeber(doc, allocator, "e", stre);
-    AddJsonMemeber(doc, allocator, "d", strd);
-    AddJsonMemeber(doc, allocator, "hint", strHint);
+    doc["n"] = strN.toStdString();
+    doc["e"] = stre.toStdString();
+    doc["d"] = strd.toStdString();
+    doc["hint"] = strHint.toStdString();
     //
-    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
-    rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
-    //
-    doc.Accept(writer);
-    //
-    QByteArray ba = buffer.GetString();
-    //
-    QString json = QString::fromUtf8(ba);
+    Json::FastWriter writer;
+    std::string ret = writer.write(doc);
+    QString json = QString::fromStdString(ret);
     //
     QString key = WizFormatString1("BizCert/%1", strBizGuid);
     //
@@ -209,14 +209,16 @@ bool WizKMAccountsServer::getUserBizCert(const QString& strBizGuid, QString& str
     if (version == -1)
         return false;
     //
-    rapidjson::Document d;
-    d.Parse<0>(json.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(json.toUtf8().constData(), d))
+        return false;
     //
     try {
-        strN = QString::fromUtf8(d.FindMember("n")->value.GetString());
-        stre = QString::fromUtf8(d.FindMember("e")->value.GetString());
-        strd = QString::fromUtf8(d.FindMember("d")->value.GetString());
-        strHint = QString::fromUtf8(d.FindMember("hint")->value.GetString());
+        strN = QString::fromStdString(d["n"].asString());
+        stre = QString::fromStdString(d["e"].asString());
+        strd = QString::fromStdString(d["d"].asString());
+        strHint = QString::fromStdString(d["hint"].asString());
     }
     catch (...) {
         return false;
@@ -622,16 +624,6 @@ bool WizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int6
     return TRUE;
 }
 
-QString getStringFromRapidValue(const rapidjson::Value& u, const QString& memberName)
-{
-    if (!u.HasMember(memberName.toUtf8().constData()))
-        return QString();
-
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QTextDecoder* encoder = codec->makeDecoder();
-    return encoder->toUnicode(u[memberName.toUtf8().constData()].GetString(), u[memberName.toUtf8().constData()].GetStringLength());
-}
-
 bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
@@ -641,10 +633,12 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
     if (!get(strUrl, strResult))
         return false;
 
-    rapidjson::Document d;
-    d.Parse<0>(strResult.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(strResult.toUtf8().constData(), d))
+        return false;
 
-    if (d.HasParseError() || !d.HasMember("result")) {
+    if (!d.isMember("result")) {
         qDebug() << "Error occured when try to parse json of messages";
         qDebug() << strResult;
         return false;
@@ -652,36 +646,36 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
 
 //    qDebug() << "url : " << strUrl << " result : " << strResult;
 
-    const rapidjson::Value& users = d["result"];
-    for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
-        const rapidjson::Value& u = users[i];
-        if (!u.IsObject()) {
+    const Json::Value& users = d["result"];
+    for (Json::ArrayIndex i = 0; i < users.size(); i++) {
+        const Json::Value& u = users[i];
+        if (!u.isObject()) {
             qDebug() << "Error occured when parse json of messages";
             return false;
         }
 
         WIZUSERMESSAGEDATA data;
-        data.nMessageID = (__int64)u["id"].GetInt64();
-        data.strBizGUID = getStringFromRapidValue(u, "biz_guid");
-        data.strKbGUID = getStringFromRapidValue(u, "kb_guid");
-        data.strDocumentGUID = getStringFromRapidValue(u, "document_guid");
-        data.strSenderGUID = getStringFromRapidValue(u, "sender_guid");
-        data.strSenderID = getStringFromRapidValue(u, "sender_id");
-        data.strReceiverGUID = getStringFromRapidValue(u, "receiver_guid");
-        data.strReceiverID = getStringFromRapidValue(u, "receiver_id");
-        data.strMessageText = getStringFromRapidValue(u, "message_body");
-        data.strSender = getStringFromRapidValue(u, "sender_alias");
-        data.strReceiver = getStringFromRapidValue(u, "receiver_alias");
-        data.strSender = getStringFromRapidValue(u, "sender_alias");
-        data.strTitle = getStringFromRapidValue(u, "title");
-        data.strNote = getStringFromRapidValue(u, "note");
+        data.nMessageID = (__int64)u["id"].asInt64();
+        data.strBizGUID = QString::fromStdString(u["biz_guid"].asString());
+        data.strKbGUID = QString::fromStdString(u["kb_guid"].asString());
+        data.strDocumentGUID = QString::fromStdString(u["document_guid"].asString());
+        data.strSenderGUID = QString::fromStdString(u["sender_guid"].asString());
+        data.strSenderID = QString::fromStdString(u["sender_id"].asString());
+        data.strReceiverGUID = QString::fromStdString(u["receiver_guid"].asString());
+        data.strReceiverID = QString::fromStdString(u["receiver_id"].asString());
+        data.strMessageText = QString::fromStdString(u["message_body"].asString());
+        data.strSender = QString::fromStdString(u["sender_alias"].asString());
+        data.strReceiver = QString::fromStdString(u["receiver_alias"].asString());
+        data.strSender = QString::fromStdString(u["sender_alias"].asString());
+        data.strTitle = QString::fromStdString(u["title"].asString());
+        data.strNote = QString::fromStdString(u["note"].asString());
         //
-        data.nMessageType = u["message_type"].GetInt();
-        data.nReadStatus = u["read_status"].GetInt();
-        data.nDeletedStatus = u["delete_status"].GetInt();
-        data.nVersion = (__int64)u["version"].GetInt64();
+        data.nMessageType = u["message_type"].asInt();
+        data.nReadStatus = u["read_status"].asInt();
+        data.nDeletedStatus = u["delete_status"].asInt();
+        data.nVersion = (__int64)u["version"].asInt64();
         //
-        time_t dateCreated = __int64(u["dt_created"].GetInt64()) / 1000;
+        time_t dateCreated = __int64(u["dt_created"].asInt64()) / 1000;
         data.tCreated = WizOleDateTime(dateCreated);
 
         arrayMessage.push_back(data);
@@ -702,6 +696,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
     , m_userInfo(kbInfo)
 {
+    //m_userInfo.strKbServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
@@ -713,6 +708,34 @@ void WizKMDatabaseServer::onXmlRpcError()
 const WIZKBINFO& WizKMDatabaseServer::kbInfo()
 {
     return m_kbInfo;
+}
+
+bool WizKMDatabaseServer::isGroup() const
+{
+    Q_ASSERT(!WizToken::info().strKbGUID.isEmpty());
+    //
+    return WizToken::info().strKbGUID != m_userInfo.strKbGUID;
+}
+
+bool WizKMDatabaseServer::isUseNewSync() const
+{
+#ifndef QT_DEBUG
+    if (WizMainWindow::instance()->userSettings().serverType() != WizServer) {
+        //
+        if (WizMainWindow::instance()->userSettings().enterpriseServerIP().indexOf("sandbox.wiz.cn") == -1) {
+            return false;
+        }
+    }
+#endif
+    //
+    int syncType = WizToken::info().syncType;
+    if (syncType == 100)
+        return true;
+    //
+    if (isGroup())
+        return false;
+    //
+    return syncType == 1;
 }
 
 void WizKMDatabaseServer::setKBInfo(const WIZKBINFO& info)
@@ -797,15 +820,204 @@ bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValu
     return WizKMXmlRpcServerBase::setValue("kb", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
 }
 
-bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret)
+bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
 {
-    if (!data_download(ret.strGUID, "document", ret.arrayData, ret.strTitle))
+    if (!data_downloadOld(strDocumentGUID, "document", ret.arrayData, ret.strTitle))
     {
         TOLOG1("Failed to download attachment data: %1", ret.strTitle);
-        return FALSE;
+        return false;
     }
     //
-    return TRUE;
+    return true;
+}
+
+
+bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
+{
+    QString url = m_userInfo.strKbServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1&token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+#ifdef QT_DEBUG
+    qDebug() << url;
+#endif
+    //
+    Json::Value doc;
+    if (!WizRequest::execStandardJsonRequest(url, doc))
+    {
+        TOLOG1("Failed to download document data: %1", ret.strTitle);
+        return false;
+    }
+    //
+    Json::Value urlValue = doc["url"];
+    if (!urlValue.isNull())
+    {
+        //encrypted note
+        if (!::WizURLDownloadToData(urlValue.asString().c_str(), ret.arrayData))
+        {
+            TOLOG1("Failed to download document data: %1", ret.strTitle);
+            return false;
+        }
+        //
+        return true;
+    }
+    //
+    QString html = QString::fromUtf8(doc["html"].asString().c_str());
+    if (html.isEmpty())
+        return false;
+    //
+    Json::Value resourcesObj = doc["resources"];
+    //
+    struct RESDATA : public WIZZIPENTRYDATA
+    {
+        QString url;
+    };
+
+    //
+    std::vector<RESDATA> serverResources;
+    if (resourcesObj.isArray())
+    {
+        int resourceCount = resourcesObj.size();
+        for (int i = 0; i < resourceCount; i++)
+        {
+            Json::Value resObj = resourcesObj[i];
+            RESDATA data;
+            data.name = QString::fromUtf8(resObj["name"].asString().c_str());
+            data.url = QString::fromUtf8(resObj["url"].asString().c_str());
+            data.size = resObj["size"].asInt64();
+            data.time = QDateTime::fromTime_t(resObj["time"].asInt64() / 1000);
+            serverResources.push_back(data);
+        }
+    }
+    //
+    WizTempFileGuard tempFile;
+    WizZipFile newZip;
+    if (!newZip.open(tempFile.fileName()))
+    {
+        TOLOG1("Failed to create temp file: %1", tempFile.fileName());
+        return false;
+    }
+    //
+    QByteArray htmlData;
+    WizSaveUnicodeTextToData(htmlData, html, true);
+    if (!newZip.compressFile(htmlData, "index.html"))
+    {
+        TOLOG("Failed to add index.html to zip file");
+        return false;
+    }
+    //
+    WizUnzipFile oldZip;
+    bool hasOldZip = false;
+    if (WizPathFileExists(oldFileName))
+    {
+        if (!oldZip.open(oldFileName))
+        {
+            TOLOG1("Failed to open old file: %1", oldFileName);
+        }
+        else
+        {
+            hasOldZip = true;
+        }
+    }
+    //
+    for (intptr_t i = serverResources.size() - 1; i >= 0; i--)
+    {
+        auto res = serverResources[i];
+        QString resName = "index_files/" + res.name;
+        if (hasOldZip)
+        {
+            int index = oldZip.fileNameToIndex(resName);
+            if (-1 != index)
+            {
+                QByteArray data;
+                if (oldZip.extractFile(index, data))
+                {
+                    if (newZip.compressFile(data, resName))
+                    {
+                        serverResources.erase(serverResources.begin() + i);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+    //
+    QMutex mutex;
+    //
+    int totalWaitForDownload = (int)serverResources.size();
+    int totalDownloaded = 0;
+    int totalFailed = 0;
+    //
+    for (auto res : serverResources)
+    {
+        QString resName = "index_files/" + res.name;
+        //
+#ifdef QT_DEBUG
+        qDebug() << res.url;
+#endif
+        ::WizExecuteOnThread(WIZ_THREAD_DOWNLOAD_RESOURCES, [=, &mutex, &totalFailed, &totalDownloaded, &newZip] {
+            //
+            QByteArray data;
+            qDebug() << "downloading " << resName;
+            bool ret = WizURLDownloadToData(res.url, data);
+            qDebug() << "downloaded " << resName;
+            //
+            QMutexLocker locker(&mutex);
+            if (!ret)
+            {
+                TOLOG1("Failed to download res: %1", res.url);
+                totalFailed++;
+                return;
+            }
+            //
+            if (!newZip.compressFile(data, resName))
+            {
+                TOLOG("Failed to add data to zip file");
+                totalFailed++;
+                return;
+                //
+            }
+            //
+            totalDownloaded++;
+
+        });
+    }
+    //
+    if (totalWaitForDownload > 0)
+    {
+        while (true)
+        {
+            if (totalWaitForDownload == totalDownloaded + totalFailed)
+            {
+                if (totalFailed == 0)
+                    break;
+                //
+                return false;
+            }
+            //
+            QThread::msleep(300);
+        }
+    }
+    //
+    if (!newZip.close())
+    {
+        TOLOG("Failed to close zip file");
+        return false;
+    }
+    //
+    if (!WizLoadDataFromFile(tempFile.fileName(), ret.arrayData))
+    {
+        TOLOG1("Failed to load data from file: %1", tempFile.fileName());
+        return false;
+    }
+    //
+    return true;
+}
+
+bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
+{
+    if (isUseNewSync()) {
+        return document_downloadDataNew(strDocumentGUID, ret, fileName);
+    } else {
+        return document_downloadDataOld(strDocumentGUID, ret, fileName);
+    }
 }
 //
 
@@ -851,22 +1063,37 @@ struct CWizKMDocumentPostDataParam
 };
 
 
-bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    ATLASSERT(!ret.arrayData.isEmpty());
+    ATLASSERT(ret.arrayData.isEmpty());
     if (!ret.arrayData.isEmpty())
     {
         TOLOG("fault error: ret.arrayData is not null!");
         return FALSE;
     }
     //
-    if (!data_download(strAttachmentGUID, "attachment", ret.arrayData, ret.strName))
+    if (!data_downloadOld(strAttachmentGUID, "attachment", ret.arrayData, ret.strName))
     {
         TOLOG1("Failed to download attachment data: %1", ret.strName);
         return FALSE;
     }
     //
     return TRUE;
+}
+
+bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+{
+    QString url = m_userInfo.strKbServer + "/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    return WizURLDownloadToData(url, ret.arrayData);
+}
+
+bool WizKMDatabaseServer::attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+{
+    if (isUseNewSync()) {
+        return attachment_downloadDataNew(strDocumentGUID, strAttachmentGUID, ret);
+    } else {
+        return attachment_downloadDataOld(strDocumentGUID, strAttachmentGUID, ret);
+    }
 }
 
 struct CWizKMAttachmentPostDataParam
@@ -1012,7 +1239,7 @@ bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
 }
 
 
-bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
+bool WizKMDatabaseServer::data_downloadOld(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
 {
     stream.clear();
     //
@@ -1099,7 +1326,7 @@ bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
 
 //////////////////////////////////////////////////////////////////////////////////////
 //
-bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
+bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
     if (!data.arrayData.isEmpty() && data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
@@ -1140,8 +1367,478 @@ bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool 
     return TRUE;
 }
 
+//
+struct WIZRESOURCEDATA
+{
+    QString name;
+    QByteArray data;
+};
 
-bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion)
+bool uploadResources(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const std::vector<WIZRESOURCEDATA>& files, bool isLast, Json::Value& res)
+{
+    QString objType = "resource";
+    //
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    //
+    QHttpPart keyPart;
+    keyPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"key\""));
+    keyPart.setBody(key.toUtf8());
+
+    QHttpPart kbGuidPart;
+    kbGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"kbGuid\""));
+    kbGuidPart.setBody(kbGuid.toUtf8());
+
+    QHttpPart docGuidPart;
+    docGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"docGuid\""));
+    docGuidPart.setBody(docGuid.toUtf8());
+
+    QHttpPart objTypePart;
+    objTypePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"objType\""));
+    objTypePart.setBody(objType.toUtf8());
+
+    QHttpPart isLastPart;
+    isLastPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"isLast\""));
+    isLastPart.setBody(isLast ? "1" : "0");
+
+    multiPart->append(keyPart);
+    multiPart->append(kbGuidPart);
+    multiPart->append(docGuidPart);
+    multiPart->append(objTypePart);
+    multiPart->append(isLastPart);
+    //
+    for (auto file: files)
+    {
+        QHttpPart filePart;
+        QString filePartHeader = QString("form-data; name=\"data\"; filename=\"%1\"").arg(file.name);
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(filePartHeader));
+        filePart.setBody(file.data);
+        multiPart->append(filePart);
+    }
+    //
+    QNetworkRequest request(url);
+
+    QNetworkAccessManager networkManager;
+    QNetworkReply* reply = networkManager.post(request, multiPart);
+    multiPart->setParent(reply); // delete the multiPart with the reply
+    //
+    WizAutoTimeOutEventLoop loop(reply);
+    loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+    loop.exec();
+    //
+    if (loop.error() != QNetworkReply::NoError)
+    {
+        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+        return false;
+    }
+    //
+    QByteArray resData = loop.result();
+    //
+    WIZSTANDARDRESULT ret = WizRequest::isSucceededStandardJsonRequest(resData);
+    if (!ret)
+    {
+        //
+        qDebug() << ret.returnMessage;
+        return false;
+    }
+    //
+    return true;
+}
+
+
+bool uploadObject(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const QString& objType, const QString& objId, const QByteArray& data, bool isLast, Json::Value& res)
+{
+    int partSize = 1024 * 1024; //1M
+    int partCount = (data.length() + partSize - 1) / partSize;
+    for (int i = 0; i < partCount; i++)
+    {
+        QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+        //
+        QHttpPart keyPart;
+        keyPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"key\""));
+        keyPart.setBody(key.toUtf8());
+
+        QHttpPart kbGuidPart;
+        kbGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"kbGuid\""));
+        kbGuidPart.setBody(kbGuid.toUtf8());
+
+        QHttpPart docGuidPart;
+        docGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"docGuid\""));
+        docGuidPart.setBody(docGuid.toUtf8());
+
+        QHttpPart objIdPart;
+        objIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"objId\""));
+        objIdPart.setBody(objId.toUtf8());
+
+        QHttpPart objTypePart;
+        objTypePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"objType\""));
+        objTypePart.setBody(objType.toUtf8());
+
+        QHttpPart indexPart;
+        indexPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"partIndex\""));
+        indexPart.setBody(WizIntToStr(i).toUtf8());
+
+        QHttpPart countPart;
+        countPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"partCount\""));
+        countPart.setBody(WizIntToStr(partCount).toUtf8());
+
+        QHttpPart isLastPart;
+        isLastPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"isLast\""));
+        isLastPart.setBody(isLast ? "1" : "0");
+
+        QHttpPart filePart;
+        QString filePartHeader = QString("form-data; name=\"data\"; filename=\"%1\"").arg(objId);
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(filePartHeader));
+        //
+        int extra = 0;
+        int partEnd = i * partSize + partSize;
+        if (partEnd > data.length()) {
+            extra = partEnd - data.length();
+        }
+        QByteArray partData = data.mid(i * partSize, partSize - extra);
+        filePart.setBody(partData);
+        //
+        multiPart->append(keyPart);
+        multiPart->append(kbGuidPart);
+        multiPart->append(docGuidPart);
+        multiPart->append(objIdPart);
+        multiPart->append(objTypePart);
+        multiPart->append(indexPart);
+        multiPart->append(countPart);
+        multiPart->append(isLastPart);
+        multiPart->append(filePart);
+        //
+        QNetworkRequest request(url);
+
+        QNetworkAccessManager networkManager;
+        QNetworkReply* reply = networkManager.post(request, multiPart);
+        multiPart->setParent(reply); // delete the multiPart with the reply
+        //
+        WizAutoTimeOutEventLoop loop(reply);
+        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+        loop.exec();
+        //
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+            return false;
+        }
+        //
+        QByteArray resData = loop.result();
+        //
+        try {
+            Json::Value partRes;
+            WIZSTANDARDRESULT ret = WizRequest::isSucceededStandardJsonRequest(resData, partRes);
+            if (!ret)
+            {
+                qDebug() << "Can't upload note data, ret code=" << ret.returnCode << ", message=" << ret.returnMessage;
+                return false;
+            }
+            //
+            if (i == partCount - 1)
+            {
+                res = partRes;
+                return true;
+            }
+            //
+            continue;
+        }
+        catch (std::exception& err)
+        {
+            qDebug() << "josn error: " << err.what();
+            return false;
+        }
+    }
+    //
+    qDebug() << "Should not come here";
+    return false;
+}
+
+
+bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
+{
+    QString url_main = m_userInfo.strKbServer + "/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url_data = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    //
+    Json::Value att;
+    att["kbGuid"] = m_userInfo.strKbGUID.toStdString();
+    att["docGuid"] = data.strDocumentGUID.toStdString();
+    att["attGuid"] = data.strGUID.toStdString();
+    att["dataMd5"] = data.strDataMD5.toStdString();
+    att["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
+    att["name"] = data.strName.toStdString();
+    att["url"] = data.strURL.toStdString();
+    att["withData"] = withData;
+    //
+    if (withData)
+    {
+        att["dataSize"] = data.arrayData.size();
+    }
+    //
+    Json::Value ret;
+    if (!WizRequest::execStandardJsonRequest(url_main, "POST", att, ret))
+    {
+        qDebug() << "Failed to upload note";
+        return false;
+    }
+    //
+    long long newVersion = -1;
+    //
+    if (withData)
+    {
+        QString key = QString::fromUtf8(ret["key"].asString().c_str());
+        Json::Value res;
+        if (!uploadObject(url_data, key, m_userInfo.strKbGUID, data.strDocumentGUID, "attachment", data.strGUID, data.arrayData, true, res))
+        {
+            qDebug() << "Failed to upload attachment data";
+            return false;
+        }
+        newVersion = res["version"].asInt64();
+    }
+    //
+    if (newVersion == -1)
+    {
+        newVersion = ret["version"].asInt64();
+    }
+    //
+    nServerVersion = newVersion;
+    return true;
+}
+
+
+bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp, bool withData, __int64& nServerVersion)
+{
+    WIZDOCUMENTDATAEX data = dataTemp;
+    //
+    QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url_res = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    //
+    if (withData && data.arrayData.length() > 2)
+    {
+        if (data.arrayData[0] == 'P' && data.arrayData[1] == 'K')
+        {
+            if (data.nProtected != 0)
+            {
+                TOLOG("note is not encrypted, but protected is 1");
+                data.nProtected = 0;
+            }
+        }
+        else
+        {
+            if (data.nProtected != 1)
+            {
+                TOLOG("note is encrypted, but protected is 0");
+                data.nProtected = 1;
+            }
+        }
+    }
+    //
+    CString tags;
+    ::WizStringArrayToText(data.arrayTagGUID, tags, "*");
+    //
+    Json::Value doc;
+    doc["kbGuid"] = m_userInfo.strKbGUID.toStdString();
+    doc["docGuid"] = data.strGUID.toStdString();
+    doc["title"] = data.strTitle.toStdString();
+    doc["dataMd5"] = data.strDataMD5.toStdString();
+    doc["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
+    doc["category"] = data.strLocation.toStdString();
+    doc["owner"] = data.strOwner.toStdString();
+    doc["protected"] = (int)data.nProtected;
+    doc["readCount"] = (int)data.nReadCount;
+    doc["attachmentCount"] = (int)data.nAttachmentCount;
+    doc["type"] = data.strType.toStdString();
+    doc["fileType"] = data.strFileType.toStdString();
+    doc["created"] = data.tCreated.toTime_t() * (long long)1000;
+    doc["accessed"] = data.tAccessed.toTime_t() * (long long)1000;
+    doc["url"] = data.strURL.toStdString();
+    doc["styleGuid"] = data.strStyleGUID.toStdString();
+    doc["seo"] = data.strSEO.toStdString();
+    doc["author"] = data.strAuthor.toStdString();
+    doc["keywords"] = data.strKeywords.toStdString();
+    doc["tags"] = tags.toStdString();
+    doc["withData"] = withData;
+    //
+    std::vector<WIZZIPENTRYDATA> allLocalResources;
+    WizUnzipFile zip;
+    if (withData && !data.nProtected)
+    {
+        if (!zip.open(data.arrayData))
+        {
+            qDebug() << "Can't open document data";
+            return false;
+        }
+        //
+        QString html;
+        if (!zip.readMainHtmlAndResources(html, allLocalResources))
+        {
+            qDebug() << "Can't load html and resources";
+            return false;
+        }
+        //
+        doc["html"] = html.toStdString();
+        //
+        Json::Value res(Json::arrayValue);
+        for (auto data : allLocalResources)
+        {
+            Json::Value elemObj;
+            elemObj["name"] = data.name.toStdString();
+            elemObj["time"] = (long long)data.time.toTime_t() * 1000;
+            elemObj["size"] = (long long)data.size;
+            res.append(elemObj);
+        }
+        //
+        doc["resources"] = res;
+    }
+
+    //
+    Json::Value ret;
+    if (!WizRequest::execStandardJsonRequest(url_main, "POST", doc, ret))
+    {
+        qDebug() << "Failed to upload note";
+        return false;
+    }
+    //
+    long long newVersion = -1;
+    //
+    if (withData)
+    {
+        QString key = QString::fromUtf8(ret["key"].asString().c_str());
+        if (data.nProtected)
+        {
+            Json::Value res;
+            if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "document", data.strGUID, data.arrayData, true, res))
+            {
+                qDebug() << "Failed to upload note res";
+                return false;
+            }
+            newVersion = res["version"].asInt64();
+        }
+        else
+        {
+            Json::Value resourcesWaitForUpload = ret["resources"];
+            size_t resCount = resourcesWaitForUpload.size();
+            //
+            if (resCount > 0)
+            {
+                //
+                std::map<QString, WIZZIPENTRYDATA> localResources;
+                for (auto entry : allLocalResources)
+                {
+                    localResources[entry.name] = entry;
+                }
+                //
+                std::vector<WIZZIPENTRYDATA> resLess300K;
+                std::vector<WIZZIPENTRYDATA> resLarge;
+                //
+                for (int i = 0; i < resCount; i++)
+                {
+                    QString resName = QString::fromUtf8(resourcesWaitForUpload[i].asString().c_str());
+                    WIZZIPENTRYDATA entry = localResources[resName];
+                    if (entry.size < 300 * 1024)
+                    {
+                        resLess300K.push_back(entry);
+                    }
+                    else
+                    {
+                        resLarge.push_back(entry);
+                    }
+                }
+                //
+                bool hasLarge = !resLarge.empty();
+                //
+                while (!resLess300K.empty())
+                {
+                    int size = 0;
+                    std::vector<WIZRESOURCEDATA> uploads;
+                    while (!resLess300K.empty())
+                    {
+                        int count = resLess300K.size();
+                        WIZZIPENTRYDATA last = resLess300K[count - 1];
+                        if (size + last.size > 1024 * 1024)
+                            break;
+                        //
+                        resLess300K.pop_back();
+                        size += last.size;
+                        //
+                        QByteArray resData;
+                        if (!zip.extractFile("index_files/" + last.name, resData))
+                        {
+                            qDebug() << "Can't extract resource from zip file";
+                            return false;
+                        }
+                        WIZRESOURCEDATA data;
+                        data.name = last.name;
+                        data.data = resData;
+                        //
+                        uploads.push_back(data);
+                    }
+                    //
+                    bool isLast = resLess300K.empty() && !hasLarge;
+                    //
+                    Json::Value res;
+                    if (!uploadResources(url_res, key, m_userInfo.strKbGUID, data.strGUID, uploads, isLast, res))
+                    {
+                        qDebug() << "Failed to upload note res";
+                        return false;
+                    }
+                    //
+                    if (isLast)
+                    {
+                        newVersion = res["version"].asInt64();
+                    }
+                }
+                //
+                while (!resLarge.empty())
+                {
+                    int count = resLarge.size();
+                    WIZZIPENTRYDATA last = resLarge[count - 1];
+                    resLarge.pop_back();
+                    //
+                    QByteArray resData;
+                    if (!zip.extractFile("index_files/" + last.name, resData))
+                    {
+                        qDebug() << "Can't extract resource from zip file";
+                        return false;
+                    }
+                    //
+                    bool isLast = resLarge.empty();
+                    //
+                    Json::Value res;
+                    if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
+                    {
+                        qDebug() << "Failed to upload note res";
+                        return false;
+                    }
+                    //
+                    if (isLast)
+                    {
+                        newVersion = res["version"].asInt64();
+                    }
+                }
+            }
+        }
+    }
+    //
+    if (newVersion == -1)
+    {
+        newVersion = ret["version"].asInt64();
+    }
+    //
+    nServerVersion = newVersion;
+    return true;
+}
+
+bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
+{
+    if (isUseNewSync()) {
+        return document_postDataNew(data, bWithDocumentData, nServerVersion);
+    } else {
+        return document_postDataOld(data, bWithDocumentData, nServerVersion);
+    }
+}
+
+
+bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
     if (data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
@@ -1172,6 +1869,15 @@ bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data,
     }
     //
     return TRUE;
+}
+
+bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
+{
+    if (isUseNewSync()) {
+        return attachment_postDataNew(data, withData, nServerVersion);
+    } else {
+        return attachment_postDataOld(data, withData, nServerVersion);
+    }
 }
 
 
@@ -1248,33 +1954,3 @@ bool WizKMDatabaseServer::category_getAll(QString& str)
     return TRUE;
 }
 
-QByteArray WizKMDatabaseServer::downloadDocumentData(const QString& strDocumentGUID)
-{
-    WIZDOCUMENTDATAEX ret;
-    if (!document_downloadData(strDocumentGUID, ret))
-    {
-        TOLOG1("Failed to download note data: %1", strDocumentGUID);
-        return QByteArray();
-    }
-    //
-    if (ret.arrayData.isEmpty())
-        return QByteArray();
-    //
-    return ret.arrayData;
-}
-//
-
-QByteArray WizKMDatabaseServer::downloadAttachmentData(const QString& strAttachmentGUID)
-{
-    WIZDOCUMENTATTACHMENTDATAEX ret;
-    if (!attachment_downloadData(strAttachmentGUID, ret))
-    {
-        TOLOG1("Failed to download attachment data: %1", strAttachmentGUID);
-        return QByteArray();
-    }
-    //
-    if (ret.arrayData.isEmpty())
-        return QByteArray();
-    //
-    return ret.arrayData;
-}

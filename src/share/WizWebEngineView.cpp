@@ -7,6 +7,12 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <QDesktopServices>
+#include <QClipboard>
+#ifdef Q_OS_MAC
+#include "mac/WizMacHelper.h"
+#include <QTimer>
+#include <QMimeData>
+#endif
 
 class WizInvisibleWebEngineView : public QWebEngineView
 {
@@ -81,6 +87,43 @@ QWebEnginePage *WizWebEnginePage::createWindow(WebWindowType type)
     return WizInvisibleWebEngineView::create(this);
 }
 
+void WizWebEnginePage::triggerAction(WizWebEnginePage::WebAction action, bool checked /*= false*/)
+{
+    QWebEnginePage::triggerAction(action, checked);
+    //
+    if (action == Copy)
+    {
+#ifdef Q_OS_MAC
+        //fix
+        //从webengine复制的文字，粘贴到mac的备忘录的时候，中文会乱码。
+        //webengine复制到剪贴板的纯文字有bug，编码有问题。因此延迟等到webengine处理完成后再重新粘贴纯文本
+        //避免这个错误
+        //
+        //
+        QTimer::singleShot(500, [=]{
+            //
+            QClipboard* clipboard = QApplication::clipboard();
+            const QMimeData *mimeData = clipboard->mimeData();
+            QMimeData* newData = new QMimeData();
+            for (auto format : mimeData->formats()) {
+                //
+                if (format == "text/html") {
+                    //
+                    QByteArray htmlData = mimeData->data(format);
+                    QString html = QString::fromUtf8(htmlData);
+                    html = "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\">" + html;
+                    newData->setHtml(html);
+                    //
+                } else {
+                    newData->setData(format, mimeData->data(format));
+                }
+            }
+            //
+            clipboard->setMimeData(newData);
+        });
+#endif
+    }
+}
 
 WizWebEngineView::WizWebEngineView(QWidget* parent)
     : QWebEngineView(parent)

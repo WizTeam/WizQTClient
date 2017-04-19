@@ -78,8 +78,7 @@ set(wiznote_SOURCES
     share/WizZiwReader.cpp
     html/WizHtmlReader.cpp
     html/WizHtmlCollector.cpp    
-    share/WizClucene.cpp
-    share/WizSearchIndexer.cpp
+    share/WizSearch.cpp
     widgets/WizScrollBar.cpp
     sync/WizToken.cpp
     sync/WizApiEntry.cpp
@@ -131,6 +130,9 @@ set(wiznote_SOURCES
     share/WizWebEngineView.cpp
     widgets/WizTableSelector.cpp
     widgets/WizUserServiceExprDialog.cpp
+
+    share/jsoncpp/jsoncpp.cpp
+    share/WizRequest.cpp
 
     WizCategoryView.cpp
     WizCategoryViewItem.cpp
@@ -235,8 +237,7 @@ set(wiznote_HEADERS
     sync/WizAsyncApi.h
     sync/WizAvatarUploader.h
     share/WizSyncableDatabase.h
-    share/WizClucene.h
-    share/WizSearchIndexer.h
+    share/WizSearch.h
     widgets/WizAboutDialog.h
     widgets/WizSegmentedButton.h
     widgets/WizUserInfoWidget.h
@@ -254,6 +255,10 @@ set(wiznote_HEADERS
     share/WizShadowWindow.h
     share/WizShadowEffect.h
     widgets/WizTableSelector.h
+
+    share/jsoncpp/json/json.h
+    share/jsoncpp/json/json-forwards.h
+    share/WizRequest.h
 
     WizDef.h
     WizActions.h
@@ -505,10 +510,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/lib
-    ${CMAKE_SOURCE_DIR}/lib/clucene/src/core
-    ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
     ${CMAKE_SOURCE_DIR}/lib/openssl/include
-    ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
     )
 
 if (APPLE)
@@ -531,8 +533,6 @@ if(UNIX)
 			target_link_libraries(${PROJECT_NAME}
 				quazip
 				cryptlib
-				clucene-core-static
-				clucene-shared-static
 				Qt5::WebEngine
 				Qt5::WebEngineWidgets
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
@@ -543,8 +543,6 @@ if(UNIX)
 			target_link_libraries(${PROJECT_NAME}
 				quazip
 				cryptlib
-				clucene-core-static
-				clucene-shared-static
 				Qt5::WebEngine
 				Qt5::WebEngineWidgets
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
@@ -554,11 +552,10 @@ if(UNIX)
 		endif(APPSTORE_BUILD)
 	else(APPLE) #linux
 		target_link_libraries(${PROJECT_NAME}
-			X11
+                        -lpthread
+                        X11
 			quazip
 			cryptlib
-			clucene-core-static
-			clucene-shared-static
 			Qt5::WebEngine
 			Qt5::WebEngineWidgets
 			${CMAKE_DL_LIBS}
@@ -568,8 +565,6 @@ else(NOT UNIX)
 	target_link_libraries(${PROJECT_NAME}
 		quazip
 		cryptlib
-		clucene-core-static
-		clucene-shared-static
 		Qt5::WebEngine
 		Qt5::WebEngineWidgets
 		${CMAKE_DL_LIBS}

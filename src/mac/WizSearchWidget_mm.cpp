@@ -15,11 +15,14 @@
 #include <QMouseEvent>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QDesktopServices>
+
 #include "utils/WizStyleHelper.h"
 #include "share/WizThreads.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
 #include "share/WizSettings.h"
+#include "sync/WizApiEntry.h"
 #include "WizPositionDelegate.h"
 
 
@@ -66,6 +69,8 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     , m_popupWgtWidth(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH)
     , m_usable(true)
     , m_searcher(new WizSuggestionSeacher(this))
+    , m_editing(false)
+    , m_focused(false)
 {
     m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);
@@ -103,25 +108,26 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_treeWgt->setItemDelegate(suggestionDelegate);
 
 
-    QPushButton* button = new QPushButton(m_popupWgt);
-    button->setFocusPolicy(Qt::NoFocus);
-    button->setFocusProxy(m_popupWgt);
-    button->setText(tr("Advanced Search"));
-    button->setStyleSheet("QPushButton { background-color:#FFFFFF; border-width: 1px; \
+    QPushButton* advancedSearchButton = new QPushButton(m_popupWgt);
+    advancedSearchButton->setFocusPolicy(Qt::NoFocus);
+    advancedSearchButton->setFocusProxy(m_popupWgt);
+    advancedSearchButton->setText(tr("Advanced Search"));
+    advancedSearchButton->setStyleSheet("QPushButton { background-color:#FFFFFF; border-width: 1px; \
                           padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
                           border-radius: 2px; border-bottom-color:#E0E0E0; }");
 
-    connect(button, SIGNAL(clicked(bool)), parent, SLOT(on_advanced_buttonClicked()));
+    connect(advancedSearchButton, SIGNAL(clicked(bool)), this, SLOT(on_advanced_buttonClicked()));
 
     QWidget* buttonContainer = new QWidget(m_popupWgt);
-    buttonContainer->setFixedHeight(35);
+    buttonContainer->setFixedHeight(40);
     buttonContainer->setStyleSheet("background-color:#F7F7F7; border-top:1px solid #E7E7E7;");
     QHBoxLayout* buttonLayout = new QHBoxLayout(buttonContainer);
-    buttonLayout->setContentsMargins(8, 6, 0, 6);
+    buttonLayout->setContentsMargins(8, 8, 8, 8);
     buttonLayout->setSpacing(0);
     buttonContainer->setLayout(buttonLayout);
-    buttonLayout->addWidget(button);
     buttonLayout->addStretch(0);
+    buttonLayout->addWidget(advancedSearchButton);
+
 
     m_infoWgt = new QWidget(m_popupWgt);
     m_infoWgt->setFixedHeight(135);
@@ -152,7 +158,10 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_timer->setSingleShot(true);
     m_timer->setInterval(200);
     connect(m_timer, SIGNAL(timeout()), SLOT(autoSuggest()));
-    connect(m_editor, SIGNAL(textEdited(QString)), m_timer, SLOT(start()));
+    connect(m_editor, SIGNAL(textEdited(QString)), this, SLOT(textChanged(QString)));
+    connect(m_editor, SIGNAL(textFocused(bool)), this, SLOT(textFocused(bool)));
+    connect(m_editor, SIGNAL(textStartEditing()), this, SLOT(startEditing()));
+    connect(m_editor, SIGNAL(textStopEditing()), this, SLOT(stopEditing()));
 
     WizPositionDelegate& delegate = WizPositionDelegate::instance();
     delegate.addListener(m_popupWgt);
@@ -331,25 +340,103 @@ void searchTitleFromDB(WizDatabase& db, const QString& title, QStringList& sugge
     }
 }
 
+void WizSuggestCompletionon::updatePlaceHolder()
+{
+    if (!m_focused)
+    {
+        m_editor->setSearchPlaceHolder(QObject::tr("Search"));
+        return;
+    }
+    //
+    QString name;
+    if (m_strCurrentKbGuid.isEmpty())
+    {
+        name = QObject::tr("Personal Notes");
+    }
+    else
+    {
+        WizDatabaseManager* manager = WizDatabaseManager::instance();
+        WizDatabase& db = manager->db(m_strCurrentKbGuid);
+        name = db.name();
+        if (name.isEmpty())
+        {
+            name = QObject::tr("Personal Notes");
+        }
+    }
+    //
+    QString placeHolder = QString(QObject::tr("Search in [%1]")).arg(name);
+    m_editor->setSearchPlaceHolder(placeHolder);
+}
+
+void WizSuggestCompletionon::textChanged(QString text)
+{
+    m_timer->start();
+    //
+    if (text.isEmpty())
+    {
+        //updatePlaceHolder();
+        //
+        //临时禁止搜索建议，因为搜索建议会遮住输入法选择框：by wsj//
+        //searchTitleFromDB(db, inputText, suggestions);
+    }
+}
+
+void WizSuggestCompletionon::textFocused(bool focused)
+{
+    m_focused = focused;
+    //
+    updatePlaceHolder();
+}
+
+/*
+ * 因为popup widget会把ime输入框隐藏掉，因此暂时隐藏搜索建议
+ * */
+
+void WizSuggestCompletionon::startEditing()
+{
+    m_editing = true;
+    m_popupWgt->hide();
+}
+
+void WizSuggestCompletionon::stopEditing()
+{
+    m_editing = false;
+}
+
 void WizSuggestCompletionon::autoSuggest()
 {
-    if (!m_editor->isEditing() || !m_usable)
+    if (!m_focused || !m_usable)
         return;
 
     QString inputedText = m_editor->currentText();
 
-    if (inputedText.isEmpty())
+    if (inputedText.isEmpty() && !m_editing)
     {
+        m_popupWgt->show();
         QStringList recentSearches = m_settings->getRecentSearches(true);
         m_treeWgt->setHeaderLabel(tr("Recent Searches"));
         showCompletion(recentSearches, true);
+        //
+        //updatePlaceHolder();
     }
     else
     {
+        m_popupWgt->hide();
+        /*
         WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
-            m_searcher->searchSuggestion(inputedText);
+            m_searcher->searchSuggestion(m_strCurrentKbGuid, inputedText);
         });
+        */
     }
+}
+
+void WizSuggestCompletionon::on_advanced_buttonClicked()
+{
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
+    strUrl += "&site=www";
+    strUrl += "&name=advanced_search.html";
+
+    QDesktopServices::openUrl(QUrl(strUrl));
 }
 
 void WizSuggestCompletionon::resetContainerSize(int width, int height)
@@ -394,23 +481,14 @@ WizSuggestionSeacher::WizSuggestionSeacher(QObject* parent)
 {
 }
 
-void WizSuggestionSeacher::searchSuggestion(const QString& inputText)
+void WizSuggestionSeacher::searchSuggestion(const QString& kbGuid, const QString& inputText)
 {
     QStringList suggestions;
     WizDatabaseManager* manager = WizDatabaseManager::instance();
 
-    WizDatabase& db = manager->db();
+    WizDatabase& db = manager->db(kbGuid);
     searchTitleFromDB(db, inputText, suggestions);
-
-    for (int i = 0; i < manager->count(); i++)
-    {
-        if (suggestions.count() >= 5)
-            break;
-
-        WizDatabase& db = manager->at(i);
-        searchTitleFromDB(db, inputText, suggestions);
-    }
-
+    //
     emit searchFinished(suggestions, false);
 }
 

@@ -694,6 +694,17 @@ bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString&
     return true;
 }
 
+void wizMacSetClipboardText(const QString& strText)
+{
+    NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+    if (!pasteboard)
+        return;
+    //
+    [pasteboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+    [pasteboard setString:WizToNSString(strText) forType:NSStringPboardType];
+}
+
+
 
 
 #ifdef UsePLCrashReporter

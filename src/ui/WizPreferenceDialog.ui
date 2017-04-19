@@ -133,63 +133,6 @@
           <string>Sync Method</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelSyncInterval">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Sync time interval:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="comboSyncInterval">
-            <property name="minimumSize">
-             <size>
-              <width>170</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>170</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="modelColumn">
-             <number>0</number>
-            </property>
-            <item>
-             <property name="text">
-              <string>5 minutes</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>15 minutes</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>30 minutes</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>1 hour</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Manual</string>
-             </property>
-            </item>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="labelSyncMethod">
             <property name="sizePolicy">
@@ -244,17 +187,24 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelSyncGroupMethod">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="comboDownloadAttachments">
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
+             </size>
             </property>
-            <property name="text">
-             <string>Group sync method:</string>
-            </property>
+            <item>
+             <property name="text">
+              <string>Only download attachments title</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download all attachments</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="2" column="1">
@@ -298,6 +248,50 @@
             </item>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboSyncInterval">
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="modelColumn">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>5 minutes</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>15 minutes</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>30 minutes</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 hour</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Manual</string>
+             </property>
+            </item>
+           </widget>
+          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
@@ -305,24 +299,47 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="comboDownloadAttachments">
-            <property name="maximumSize">
-             <size>
-              <width>170</width>
-              <height>16777215</height>
-             </size>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelSyncInterval">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <item>
-             <property name="text">
-              <string>Only download attachments title</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Download all attachments</string>
-             </property>
-            </item>
+            <property name="text">
+             <string>Sync time interval:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelSyncGroupMethod">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Group sync method:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="useNewSync">
+            <property name="text">
+             <string>Use the new sync.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="2">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>The new sync uses incremental sync, upload and download notes speed is improved significantly</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -418,60 +435,6 @@
           <size>
            <width>20</width>
            <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabSearch">
-      <attribute name="title">
-       <string>Search</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_11">
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>Search settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <widget class="QCheckBox" name="checkBoxSearchEncryNote">
-            <property name="text">
-             <string>Search encrypted note</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Password of encrypted note : </string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditNotePassword">
-              <property name="echoMode">
-               <enum>QLineEdit::Password</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>59</height>
           </size>
          </property>
         </spacer>

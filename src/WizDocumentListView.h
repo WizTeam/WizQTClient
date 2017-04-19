@@ -45,16 +45,15 @@ public:
     enum ViewType {
         TypeThumbnail,
         TypeTwoLine,
-        TypeOneLine
+        TypeOneLine,
+        TypeSearchResult
     };
 
 public:
     explicit WizDocumentListView(WizExplorerApp& app, QWidget *parent = 0);
     virtual ~WizDocumentListView();
 
-    int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
-    QSize itemSizeFromViewType(WizDocumentListView::ViewType type);
 
     void setLeadInfoState(int state);
 
@@ -81,11 +80,13 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void keyReleaseEvent(QKeyEvent* event);
     virtual void wheelEvent(QWheelEvent* event);
+    virtual void paintEvent(QPaintEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dragMoveEvent(QDragMoveEvent *event);
     virtual void dropEvent(QDropEvent * event);
+
 
 private:
     WizExplorerApp& m_app;
@@ -97,6 +98,7 @@ private:
     WizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
     int m_nLeadInfoState;
+    bool m_searchResult;
 
     QMenu* m_menuDocument;
     WizTagListWidget* m_tagList;
@@ -122,6 +124,9 @@ private:
     bool m_bSortDocumentsAfterAdded;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
+    //
+    QPixmap m_emptyFolder;
+    QPixmap m_emptySearch;
 
     QAction* findAction(const QString& strName);
 
@@ -133,11 +138,15 @@ private:
     bool isDocumentsWithDeleted(const CWizDocumentDataArray& arrayDocument);
 
 public:
-    void setDocuments(const CWizDocumentDataArray& arrayDocument);
+    void setDocuments(const CWizDocumentDataArray& arrayDocument, bool searchResult = false);
     void appendDocuments(const CWizDocumentDataArray& arrayDocument);
+    void appendDocumentsNoSort(const CWizDocumentDataArray& arrayDocument);
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
+    //
+    bool isSearchResult() const { return m_searchResult; }
+    ViewType viewType() const { if (m_searchResult) return TypeSearchResult; return m_nViewType; }
 
 public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
@@ -164,6 +173,7 @@ public Q_SLOTS:
     void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
+    void on_documentUploaded(const QString& kbGuid, const QString& docGuid);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
     void on_documentAccessDate_changed(const WIZDOCUMENTDATA& document);
     void on_documentReadCount_changed(const WIZDOCUMENTDATA& document);
@@ -229,8 +239,8 @@ private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);
     void setEncryptDocumentActionEnable(bool enable);
     //    
-    int addDocument(const WIZDOCUMENTDATA& data, bool sort);
-    void addDocument(const WIZDOCUMENTDATA &doc);
+    int addDocument(const WIZDOCUMENTDATAEX& data, bool sort);
+    void addDocument(const WIZDOCUMENTDATAEX &doc);
 
     bool acceptDocumentChange(const WIZDOCUMENTDATA &document);
 

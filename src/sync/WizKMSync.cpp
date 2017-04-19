@@ -113,8 +113,7 @@ void WizKMSyncEvents::onEndKb(const QString& strKbGUID)
 #define DEFAULT_FULL_SYNC_SECONDS_INTERVAL 15 * 60
 #define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 1000
 
-static WizKMSyncThread* g_pSyncThread = NULL;
-WizKMSyncThread::WizKMSyncThread(WizDatabase& db, QObject* parent)
+WizKMSyncThread::WizKMSyncThread(WizDatabase& db, bool quickOnly, QObject* parent)
     : QThread(parent)
     , m_db(db)
     , m_bNeedSyncAll(false)
@@ -125,6 +124,7 @@ WizKMSyncThread::WizKMSyncThread(WizDatabase& db, QObject* parent)
     , m_bBusy(false)
     , m_bPause(false)
     , m_bNeedResetGroups(false)
+    , m_quickOnly(quickOnly)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
@@ -140,12 +140,9 @@ WizKMSyncThread::WizKMSyncThread(WizDatabase& db, QObject* parent)
     connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));
     connect(this, SIGNAL(stopTimer()), &m_timer, SLOT(stop()));
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
-    //
-    g_pSyncThread = this;
 }
 WizKMSyncThread::~WizKMSyncThread()
 {
-    g_pSyncThread = NULL;
 }
 
 void WizKMSyncThread::run()
@@ -270,6 +267,9 @@ void WizKMSyncThread::waitForDone()
 
 bool WizKMSyncThread::needSyncAll()
 {
+    if (m_quickOnly)
+        return false;
+    //
     if (m_bNeedSyncAll)
         return true;
 
@@ -448,6 +448,9 @@ bool WizKMSyncThread::needResetGroups()
 
 bool WizKMSyncThread::needDownloadMessage()
 {
+    if (m_quickOnly)
+        return false;
+    //
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
@@ -514,19 +517,19 @@ bool WizKMSyncThread::peekQuickSyncKb(QString& kbGuid)
     m_setQuickSyncKb.erase(m_setQuickSyncKb.begin());
     return true;
 }
-void WizKMSyncThread::quickSyncKb(const QString& kbGuid)
+
+static WizKMSyncThread* g_quickThread = NULL;
+void WizKMSyncThread::setQuickThread(WizKMSyncThread* thread)
 {
-    if (!g_pSyncThread)
-        return;
-    //
-    g_pSyncThread->addQuickSyncKb(kbGuid);
+    g_quickThread = thread;
 }
+
 bool WizKMSyncThread::isBusy()
 {
-    if (!g_pSyncThread)
+    if (!g_quickThread)
         return false;
-    //
-    return g_pSyncThread->m_bBusy;
+
+    return g_quickThread->m_bBusy;
 }
 
 void WizKMSyncThread::waitUntilIdleAndPause()
@@ -541,8 +544,8 @@ void WizKMSyncThread::waitUntilIdleAndPause()
 
 void WizKMSyncThread::setPause(bool pause)
 {
-    if (!g_pSyncThread)
+    if (!g_quickThread)
         return;
     //
-    g_pSyncThread->m_bPause = pause;
+    g_quickThread->m_bPause = pause;
 }

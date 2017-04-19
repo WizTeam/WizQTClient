@@ -46,6 +46,8 @@ public Q_SLOTS:
 
     void onButtonFontSelect_clicked();
     void onButtonFontSelect_confirmed();
+    //
+    void useNewSyncClicked(bool checked);
 
 private slots:
     void on_checkBox_stateChanged(int arg1);
@@ -56,8 +58,6 @@ private slots:
     void on_spinBox_left_valueChanged(double arg1);
     void on_spinBox_right_valueChanged(double arg1);
     void on_checkBoxSystemStyle_toggled(bool checked);
-    void on_checkBoxSearchEncryNote_toggled(bool checked);
-    void on_lineEditNotePassword_editingFinished();
     void on_pushButtonBackgroundColor_clicked();
     void on_pushButtonClearBackground_clicked();
 

@@ -366,7 +366,7 @@
 .markdown-body code, .markdown-body tt {
     margin: 0 2px;
     padding: 2px 4px;
-    white-space: normal;
+    white-space: pre-wrap;
     color: #c7254e;
     background-color: #f9f2f4;
     border-radius: 4px;
@@ -375,7 +375,6 @@
 .markdown-body pre code {
     margin: 0;
     padding: 0;
-    white-space: pre;
     word-wrap: break-word;
     max-width: 100%;
     border: none;

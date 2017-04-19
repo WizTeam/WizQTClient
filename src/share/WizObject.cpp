@@ -3,12 +3,13 @@
 #include "WizXmlRpc.h"
 #include "WizMisc.h"
 #include "utils/WizLogger.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
     , bEnableGroup(false)
+    , syncType(0)
 {
 }
 
@@ -17,6 +18,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strToken = info.strToken;
     strKbGUID = info.strKbGUID;
     strDatabaseServer = info.strDatabaseServer;
+    strKbServer = info.strKbServer;
     nMaxFileSize = info.nMaxFileSize;
     strChatUrl = info.strChatUrl;
     strDownloadUrl = info.strDownloadUrl;
@@ -39,6 +41,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
     tCreated = info.tCreated;
+    syncType = info.syncType;
 }
 
 
@@ -78,6 +81,10 @@ bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
     data.getInt("user_points", nUserPoints);
     data.getString("user_type", strUserType);
     data.getTime("vip_date", tVipExpried);
+    //
+    data.getStr("kb_server_url", strKbServer);
+    //
+    data.getInt("sync_type", syncType);
 
     return !strToken.isEmpty()
             && !strKbGUID.isEmpty()
@@ -107,6 +114,7 @@ WIZKBINFO::WIZKBINFO()
     nStorageUsage = 0;
     nTrafficLimit = 0;
     nTrafficUsage = 0;
+    nUploadSizeLimit = 30 * 1024 * 1024;
 }
 
 bool WIZKBINFO::loadFromXmlRpc(WizXmlRpcStructValue& data)
@@ -165,6 +173,7 @@ WIZOBJECTDATA::WIZOBJECTDATA()
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZOBJECTDATA& data)
 {
     strDisplayName = data.strDisplayName;
+    strDocumentGuid = data.strDocumentGuid;
     strObjectGUID = data.strObjectGUID;
     strKbGUID = data.strKbGUID;
     tTime = data.tTime;
@@ -175,6 +184,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZOBJECTDATA& data)
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
 {
     strDisplayName = data.strTitle;
+    strDocumentGuid = data.strGUID;
     strObjectGUID = data.strGUID;
     strKbGUID = data.strKbGUID;
     tTime = data.tDataModified;
@@ -184,6 +194,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     strDisplayName = data.strName;
+    strDocumentGuid = data.strDocumentGUID;
     strObjectGUID = data.strGUID;
     strKbGUID = data.strKbGUID;
     tTime = data.tDataModified;
@@ -484,6 +495,9 @@ WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator= (const WIZDOCUMENTDATAEX& right)
     arrayData = right.arrayData;
 
     bSkipped = right.bSkipped;
+    //
+    strHighlightTitle = right.strHighlightTitle;
+    strHighlightText = right.strHighlightText;
 
     return *this;
 }
@@ -783,20 +797,15 @@ bool WIZMESSAGEDATA::isAd()
     if (nMessageType != WIZ_USER_MSG_TYPE_SYSTEM || note.isEmpty())
         return false;
 
-    rapidjson::Document d;
-    d.Parse<0>(note.toUtf8().constData());
-
-    if (d.HasParseError())
-    {
-        qWarning() << "parse message note data error : " << d.GetParseError();
-    }
-
-    if (!d.HasMember("type"))
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(note.toUtf8().constData(), d))
         return false;
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QTextDecoder* encoder = codec->makeDecoder();
-    QString type = encoder->toUnicode(d["type"].GetString(), d["type"].GetStringLength());
+    if (!d.isMember("type"))
+        return false;
+
+    QString type = QString::fromStdString(d["type"].asString());
 
     return type == "ad";
 }

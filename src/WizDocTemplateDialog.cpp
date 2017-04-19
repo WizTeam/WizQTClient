@@ -11,7 +11,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizMisc.h"
 #include "share/WizMisc.h"
@@ -223,21 +223,23 @@ bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
     if (jsonData.isEmpty())
         return false;
 
-    rapidjson::Document d;
-    d.Parse(jsonData.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(jsonData.toUtf8().constData(), d))
+        return;
 
-    if (d.HasParseError() || !d.HasMember("result"))
+    if (!d.isMember("result"))
         return false;
 
-    const rapidjson::Value& templates = d.FindMember("result")->value;
-    for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
+    const Json::Value& templates = d["result"];
+    for(Json::ArrayIndex i = 0; i < templates.Size(); i++)
     {
-        const rapidjson::Value& templateObj = templates[i];
+        const Json::Value& templateObj = templates[i];
 
-        if (!templateObj.HasMember("templateId"))
+        if (!templateObj.isMember("templateId"))
             continue;
 
-        if (templateObj.FindMember("templateId")->value.GetInt() == tmplData.id)
+        if (templateObj["templateId"].asInt() == tmplData.id)
             return true;
     }
 
@@ -454,64 +456,66 @@ void WizDocTemplateDialog::checkUnfinishedTransation()
 
 void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmplMap)
 {
-    rapidjson::Document d;
-    d.Parse(ba.constData());
-    if (d.HasParseError() || !d.HasMember("templates"))
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(ba.constData(), d))
+        return;
+    if (!d.isMember("templates"))
         return;
 
     QString demoUrl;
-    if (d.HasMember("preview_link"))
+    if (d.isMember("preview_link"))
     {
         //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
-        demoUrl = d.FindMember("preview_link")->value.GetString();
+        demoUrl = QString::fromUtf8(d["preview_link"].asString().c_str());
     }
 
     QString thumbUrl;
-    if (d.HasMember("thumb_link"))
+    if (d.isMember("thumb_link"))
     {
-        thumbUrl = d.FindMember("thumb_link")->value.GetString();
+        thumbUrl = QString::fromUtf8(d["thumb_link"].asString().c_str());
     }
 
-    const rapidjson::Value& templates = d.FindMember("templates")->value;
-    for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
+    const Json::Value templates = d["templates"];
+    for(Json::ArrayIndex i = 0; i < templates.size(); i++)
     {
-        const rapidjson::Value& templateObj = templates[i];
+        const Json::Value& templateObj = templates[i];
 
         TemplateData data;
         data.strThumbUrl = thumbUrl;
         data.strDemoUrl = demoUrl;
         data.type = WizServerTemplate;
 
-        if (templateObj.HasMember("fileName"))
+        if (templateObj.isMember("fileName"))
         {
-            data.strFileName = templateObj.FindMember("fileName")->value.GetString();
+            data.strFileName = QString::fromStdString(templateObj["fileName"].asString());
             data.strThumbUrl.replace("{file_name}", data.strFileName);
             data.strDemoUrl.replace("{file_name}",data.strFileName);
             data.strFileName = Utils::WizPathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
         }
-        if (templateObj.HasMember("folder"))
+        if (templateObj.isMember("folder"))
         {
-            data.strFolder = templateObj.FindMember("folder")->value.GetString();
+            data.strFolder = QString::fromStdString(templateObj["folder"].asString());
         }
-        if (templateObj.HasMember("id"))
+        if (templateObj.isMember("id"))
         {
-            data.id = templateObj.FindMember("id")->value.GetInt();
+            data.id = templateObj["id"].asInt();
         }
-        if (templateObj.HasMember("name"))
+        if (templateObj.isMember("name"))
         {
-            data.strName = templateObj.FindMember("name")->value.GetString();
+            data.strName = QString::fromStdString(templateObj["name"].asString());
         }
-        if (templateObj.HasMember("title"))
+        if (templateObj.isMember("title"))
         {
-            data.strTitle = templateObj.FindMember("title")->value.GetString();
+            data.strTitle = QString::fromStdString(templateObj["title"].asString());
         }
-        if (templateObj.HasMember("version"))
+        if (templateObj.isMember("version"))
         {
-            data.strVersion = templateObj.FindMember("version")->value.GetString();
+            data.strVersion = QString::fromStdString(templateObj["version"].asString());
         }
-        if (templateObj.HasMember("isFree"))
+        if (templateObj.isMember("isFree"))
         {
-            data.isFree = templateObj.FindMember("isFree")->value.GetBool();
+            data.isFree = templateObj["isFree"].asBool();
         }        
 
         tmplMap.insert(data.id, data);

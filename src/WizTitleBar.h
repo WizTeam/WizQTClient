@@ -52,7 +52,7 @@ public:
     void setEditButtonEnabled(bool enable);
     void updateEditButton(WizEditorMode editorMode);
     void resetTitle(const QString& strTitle);
-    void moveTitileTextToPlaceHolder();
+    void clearAndSetPlaceHolderText(const QString& text);
     void clearPlaceHolderText();
 
     void startEditButtonAnimation();
@@ -74,7 +74,7 @@ public Q_SLOTS:
 
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
-    void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& note, bool bOk);
 
     void on_commentUrlAcquired(QString GUID, QString url);
     void on_commentCountAcquired(QString GUID, int count);

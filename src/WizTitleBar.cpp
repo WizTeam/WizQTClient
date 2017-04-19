@@ -8,7 +8,7 @@
 #include <QSplitter>
 #include <QList>
 #include <QLabel>
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 #include "widgets/WizTagBar.h"
 #include "WizTitleEdit.h"
@@ -159,8 +159,8 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1C").arg(getOptionKey()));
     m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)),
+            SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)));
 
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
@@ -427,9 +427,9 @@ void WizTitleBar::resetTitle(const QString& strTitle)
 
 }
 
-void WizTitleBar::moveTitileTextToPlaceHolder()
+void WizTitleBar::clearAndSetPlaceHolderText(const QString& text)
 {
-    m_editTitle->setPlaceholderText(m_editTitle->text());
+    m_editTitle->setPlaceholderText(text);
     m_editTitle->clear();
 }
 
@@ -625,15 +625,17 @@ void WizTitleBar::onInfoButtonClicked()
     //
     noteView()->wordCount([=](const QString& json){
         //
-        rapidjson::Document d;
-        d.Parse(json.toUtf8().constData());
+        Json::Value d;
+        Json::Reader reader;
+        if (!reader.parse(json.toUtf8().constData(), d))
+            return;
 
         try {
-            int nWords = d.FindMember("nWords")->value.GetInt();
-            int nChars = d.FindMember("nChars")->value.GetInt();
-            int nCharsWithSpace = d.FindMember("nCharsWithSpace")->value.GetInt();
-            int nNonAsianWords = d.FindMember("nNonAsianWords")->value.GetInt();
-            int nAsianChars = d.FindMember("nAsianChars")->value.GetInt();
+            int nWords = d["nWords"].asInt();
+            int nChars = d["nChars"].asInt();
+            int nCharsWithSpace = d["nCharsWithSpace"].asInt();
+            int nNonAsianWords = d["nNonAsianWords"].asInt();
+            int nAsianChars = d["nAsianChars"].asInt();
             //
             m_info->setWordCount(nWords, nChars, nCharsWithSpace, nNonAsianWords, nAsianChars);
 
@@ -713,7 +715,7 @@ void WizTitleBar::onCommentPageLoaded(bool ok)
     }
 }
 
-void WizTitleBar::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
+void WizTitleBar::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& note, bool bOk)
 {
     if (!bOk)
         return;    

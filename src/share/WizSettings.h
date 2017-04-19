@@ -198,6 +198,9 @@ public:
 
     void appendRecentSearch(const QString& search);
     QStringList getRecentSearches(bool reverseOrder = false);
+    //
+    void setLastAttachmentPath(const QString& path);
+    QString lastAttachmentPath() const;
 };
 
 #endif // WIZSETTINGS_H

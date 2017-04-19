@@ -58,6 +58,7 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
+    QString strKbServer;
 
     //NOTE: DEPRECATED
     int nMaxFileSize;
@@ -155,7 +156,8 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     // field: sign up date
     WizOleDateTime tCreated;
 
-
+    //
+    int syncType;
 
     QString strBackupDatabaseServer;
 };
@@ -186,7 +188,7 @@ struct WIZKBINFO
     //
     int getMaxFileSize() const
     {
-        return std::max<int>(30 * 1024 * 1024, nUploadSizeLimit);
+        return nUploadSizeLimit;
     }
 
     qint64 nStorageLimit;
@@ -393,6 +395,9 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     CWizStdStringArray arrayTagGUID;
     //
     QByteArray arrayData;
+    //
+    QString strHighlightTitle;
+    QString strHighlightText;
 
     bool bSkipped;
 };
@@ -410,7 +415,6 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     static QString versionName() { return "attachment_version"; }
     static QString objectName() { return "attachment"; }
 
-    QString strKbGUID;
     QString strGUID;
     QString strDocumentGUID;
     QString strName;
@@ -453,6 +457,7 @@ struct WIZOBJECTDATA : public WIZOBJECTBASE
 
     WizOleDateTime tTime;
     CString strDisplayName;
+    CString strDocumentGuid;
     CString strObjectGUID;
     WizObjectType eObjectType;
 

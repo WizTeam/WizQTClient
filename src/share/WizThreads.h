@@ -9,7 +9,8 @@
 #define WIZ_THREAD_DEFAULT			1
 #define WIZ_THREAD_NETWORK          2
 #define WIZ_THREAD_DOWNLOAD         3
-
+#define WIZ_THREAD_SEARCH         4
+#define WIZ_THREAD_DOWNLOAD_RESOURCES         5
 
 
 void WizQueuedThreadsInit();

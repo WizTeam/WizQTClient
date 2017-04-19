@@ -329,7 +329,7 @@ public:
     QString getThumbFileName() const;
     QString getDocumentsDataPath() const;
     QString getAttachmentsDataPath() const;
-    QString getDocumentFileName(const QString& strGUID) const;
+    virtual QString getDocumentFileName(const QString& strGUID) const;
     QString getAttachmentFileName(const QString& strGUID);
     QString getAvatarPath() const;
     QString getDefaultNoteLocation() const;

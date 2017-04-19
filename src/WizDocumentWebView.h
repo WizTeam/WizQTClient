@@ -314,9 +314,6 @@ public Q_SLOTS:
 
     void on_editorCommandExecuteLinkInsert_accepted();
 
-    void applySearchKeywordHighlight();
-    void clearSearchKeywordHighlight();
-
     void on_insertCodeHtml_requset(QString strOldHtml);
 
     /* editor API */
@@ -402,6 +399,8 @@ private:
 
     //
     void innerFindText(QString text, bool next, bool matchCase);
+    //
+    QString getHighlightKeywords();
     //
 //    bool shouldAddUserDefaultCSS();
 };

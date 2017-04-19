@@ -52,6 +52,10 @@ public:
     void focus();
 
     virtual QSize sizeHint() const;
+    //
+    void setCurrentKb(const QString& kbGuid) { m_strCurrentKbGuid = kbGuid; }
+    QString currentKb() const { return m_strCurrentKbGuid; }
+
 
 public Q_SLOTS:
     void on_search_returnPressed();
@@ -61,9 +65,9 @@ public Q_SLOTS:
 private:
     WizSearchEdit* m_editSearch;
     int m_widthHint;
+    QString m_strCurrentKbGuid;
 
 Q_SIGNALS:
-    void advancedSearchRequest();
     void addCustomSearchRequest();
     void doSearch(const QString& keywords);
 };

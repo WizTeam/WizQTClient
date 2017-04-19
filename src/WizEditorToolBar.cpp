@@ -35,6 +35,7 @@
 #include "widgets/WizTipsWidget.h"
 #include "WizMainWindow.h"
 #include "widgets/WizTableSelector.h"
+#include "share/jsoncpp/json/json.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
@@ -1398,34 +1399,34 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
 {
     Q_ASSERT(m_editor);
     //
-    rapidjson::Document d;
-    d.Parse(currentStyle.toUtf8().constData());
-    if (d.HasParseError())
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(currentStyle.toUtf8().constData(), d))
         return;
     //
-    CString strBlockFormat = QString::fromUtf8(d["blockFormat"].GetString());
-    CString strForeColor = QString::fromUtf8(d["foreColor"].GetString());
-    CString strBackColor = QString::fromUtf8(d["backColor"].GetString());
+    CString strBlockFormat = QString::fromStdString(d["blockFormat"].asString());
+    CString strForeColor = QString::fromStdString(d["foreColor"].asString());
+    CString strBackColor = QString::fromStdString(d["backColor"].asString());
     //
-    CString strFontName = QString::fromUtf8(d["fontName"].GetString());
-    CString strFontSize = QString::fromUtf8(d["fontSize"].GetString());
+    CString strFontName = QString::fromStdString(d["fontName"].asString());
+    CString strFontSize = QString::fromStdString(d["fontSize"].asString());
     //
-    bool subscript = QString::fromUtf8(d["subscript"].GetString()) == "1";
-    bool superscript = QString::fromUtf8(d["superscript"].GetString()) == "1";
+    bool subscript = QString::fromStdString(d["subscript"].asString()) == "1";
+    bool superscript = QString::fromStdString(d["superscript"].asString()) == "1";
     //
-    bool bold = QString::fromUtf8(d["bold"].GetString()) == "1";
-    bool italic = QString::fromUtf8(d["italic"].GetString()) == "1";
-    bool underline = QString::fromUtf8(d["underline"].GetString()) == "1";
-    bool strikeThrough = QString::fromUtf8(d["strikeThrough"].GetString()) == "1";
+    bool bold = QString::fromStdString(d["bold"].asString()) == "1";
+    bool italic = QString::fromStdString(d["italic"].asString()) == "1";
+    bool underline = QString::fromStdString(d["underline"].asString()) == "1";
+    bool strikeThrough = QString::fromStdString(d["strikeThrough"].asString()) == "1";
     //
-    bool justifyleft = QString::fromUtf8(d["justifyleft"].GetString()) == "1";
-    bool justifycenter = QString::fromUtf8(d["justifycenter"].GetString()) == "1";
-    bool justifyright = QString::fromUtf8(d["justifyright"].GetString()) == "1";
-    bool justifyfull = QString::fromUtf8(d["justifyfull"].GetString()) == "1";
+    bool justifyleft = QString::fromStdString(d["justifyleft"].asString()) == "1";
+    bool justifycenter = QString::fromStdString(d["justifycenter"].asString()) == "1";
+    bool justifyright = QString::fromStdString(d["justifyright"].asString()) == "1";
+    bool justifyfull = QString::fromStdString(d["justifyfull"].asString()) == "1";
     //
-    bool InsertOrderedList = QString::fromUtf8(d["InsertOrderedList"].GetString()) == "1";
-    bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].GetString()) == "1";
-    bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
+    bool InsertOrderedList = QString::fromStdString(d["InsertOrderedList"].asString()) == "1";
+    bool InsertUnorderedList = QString::fromStdString(d["InsertUnorderedList"].asString()) == "1";
+    bool canInsertTable = QString::fromStdString(d["canCreateTable"].asString()) == "1";
 
     //
     bool blockFormatSetted = false;

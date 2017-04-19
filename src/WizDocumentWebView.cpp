@@ -106,7 +106,7 @@ void WizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction,
         return;
     }
 
-    QWebEnginePage::triggerAction(typeAction, checked);
+    WizWebEnginePage::triggerAction(typeAction, checked);
 
     Q_EMIT actionTriggered(typeAction);
 }
@@ -160,7 +160,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
             SLOT(onDocumentSaved(const QString, const QString,bool)), Qt::QueuedConnection);
 
     // loading and saving thread
-    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
+    m_timerAutoSave.setInterval(1*60*1000); // 1 minutes
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
     //
     //
@@ -192,7 +192,7 @@ bool WizDocumentWebView::onPasteCommand()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-    if (!clip->image().isNull()) {
+    if (isEditing() && !clip->image().isNull()) {
         // save clipboard image to
         QString strImagePath = noteResourcesPath();
         CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
@@ -331,8 +331,6 @@ void WizDocumentWebView::focusInEvent(QFocusEvent *event)
     }
 
     QWebEngineView::focusInEvent(event);
-
-    applySearchKeywordHighlight();
 }
 
 void WizDocumentWebView::focusOutEvent(QFocusEvent *event)
@@ -919,6 +917,44 @@ QString WizDocumentWebView::getNoteType()
     return "common";
 }
 
+
+QString WizDocumentWebView::getHighlightKeywords()
+{
+    const WIZDOCUMENTDATAEX& doc = view()->note();
+    CWizStdStringArray texts;
+    texts.push_back(doc.strHighlightText);
+    texts.push_back(doc.strHighlightTitle);
+    //
+    std::set<QString> keywords;
+    for (auto it : texts)
+    {
+        QString text = it;
+        int begin = 0;
+        while (true) {
+            int start = text.indexOf("<em>",  begin);
+            if (start == -1)
+                break;
+            start += 4;
+            int end = text.indexOf("</em>", start);
+            if (end == -1)
+                break;
+            //
+            QString keyword = text.mid(start, end - start);
+            keywords.insert("'" + keyword + "'");
+            //
+            begin = end + 5;
+        }
+    }
+    //
+    CWizStdStringArray arr;
+    arr.assign(keywords.begin(), keywords.end());
+    //
+    CString ret;
+    ::WizStringArrayToText(arr, ret, ",");
+    return ret;
+}
+
+
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok)
@@ -930,7 +966,7 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     QString userGUID = m_dbMgr.db().getUserGuid();
     QString userAlias = m_dbMgr.db().getUserAlias();
     //
-    const WIZDOCUMENTDATA& doc = view()->note();
+    const WIZDOCUMENTDATAEX& doc = view()->note();
     bool ignoreTable = doc.strURL.startsWith("http");
     //
     QString noteType = getNoteType();
@@ -946,11 +982,23 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     }
     else
     {
-        strCode += "WizEditor.off();";
+
+        QString keywords = getHighlightKeywords();
+        if (keywords.isEmpty()) {
+            //
+            strCode += "WizEditor.off();";
+            //
+        } else {
+            strCode +=
+QString("WizEditor.off(null, function(){\n\
+    WizReader.highlight.on([%1]);\nconsole.log('highlight');\n\
+});").arg(keywords);
+        }
     }
     //
     page()->runJavaScript(strCode);
 }
+
 
 void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
@@ -1114,7 +1162,7 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
     //
     const WIZDOCUMENTDATA doc = data;
 
-    QString strScript = QString("WizReader.todo.closeDocument();");
+    QString strScript = QString("WizReader.closeDocument();");
     page()->runJavaScript(strScript, [=](const QVariant& vRet) {
         //
         QString strHtml = vRet.toString();
@@ -1133,30 +1181,6 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
         //
         callback(true);
     });
-}
-
-
-void WizDocumentWebView::applySearchKeywordHighlight()
-{
-    WizMainWindow* window = qobject_cast<WizMainWindow *>(m_app.mainWindow());
-    QString strKeyWords = window->searchKeywords();
-    if (!strKeyWords.isEmpty() && !hasFocus())
-    {
-        QStringList keyList = strKeyWords.split(getWizSearchSplitChar());
-        foreach (QString strText, keyList)
-        {
-            findText(strText);
-        }
-    }
-    else
-    {
-        findText("");
-    }
-}
-
-void WizDocumentWebView::clearSearchKeywordHighlight()
-{
-    findText("");
 }
 
 void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
@@ -1467,9 +1491,12 @@ void WizDocumentWebView::editorCommandExecuteLinkInsert()
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
     //
-    page()->runJavaScript("WizEditor.link.queryCurrentLink();", [=](const QVariant& vLink){
+    page()->runJavaScript("WizEditor.link.getCurrentLink();", [=](const QVariant& vLink){
         //
         QString strUrl = vLink.toString();
+        if (strUrl.isEmpty()) {
+            strUrl = "http://";
+        }
         //
         m_editorInsertLinkForm->setUrl(strUrl);
 
@@ -1485,19 +1512,26 @@ void WizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
 {
     // append http if not exist
     QString strUrl = m_editorInsertLinkForm->getUrl();
-    QUrl url(strUrl);
-    if (url.scheme().isEmpty())
-    {
-        strUrl = "http://" + strUrl;
+    if (strUrl.isEmpty() || strUrl == "http://") {
+        //
+        QString code = "WizEditor.link.removeSelectedLink();";
+        page()->runJavaScript(code);
+        //
+    } else {
+        QUrl url(strUrl);
+        if (url.scheme().isEmpty())
+        {
+            strUrl = "http://" + strUrl;
+        }
+        else
+        {
+            strUrl = url.toString();
+        }
+        //
+        QString code = QString("WizEditor.link.setCurrentLink('%1');").arg(strUrl);
+        //
+        page()->runJavaScript(code);
     }
-    else
-    {
-        strUrl = url.toString();
-    }
-    //
-    QString code = QString("WizEditor.link.setCurrentLink('%1');").arg(strUrl);
-    //
-    page()->runJavaScript(code);
 }
 
 void WizDocumentWebView::editorCommandExecuteLinkRemove()

@@ -617,7 +617,7 @@ private:
         return pool;
     }
 public:
-    static IWizThreadPool* getThreadPool(int threadID)
+    static IWizThreadPool* getThreadPool(int threadID, int threadCount = 1)
     {
         QMutex& cs = GetCriticalSection();
         QMutexLocker lock(&cs);
@@ -635,7 +635,7 @@ public:
             return pool;
         }
         //
-        IWizThreadPool* pool = ::WizCreateThreadPool(1);
+        IWizThreadPool* pool = ::WizCreateThreadPool(threadCount);
         threads[threadID] = pool;
         return pool;
     }
@@ -661,6 +661,8 @@ public:
 void WizQueuedThreadsInit()
 {
     CWizQueuedThreads::getThreadPool(WIZ_THREAD_MAIN);
+    CWizQueuedThreads::getThreadPool(WIZ_THREAD_DOWNLOAD_RESOURCES, 5);
+    CWizQueuedThreads::getThreadPool(WIZ_THREAD_NETWORK, 2);
 }
 
 void WizQueuedThreadAddAction(int threadID, IWizRunable* action)

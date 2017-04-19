@@ -5,7 +5,7 @@
 #include "utils/WizPathResolve.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 
 #define HideShareByEmail        "HideShareByEmail"
@@ -23,10 +23,10 @@
 #define LoginLogoPath              "LoginLogoPath"
 
 
-void getBoolValueFromJSON(const rapidjson::Document& d, const char* strMember, QSettings* settings)
+void getBoolValueFromJSON(const Json::Value& d, const char* strMember, QSettings* settings)
 {
-    if (d.HasMember(strMember)) {
-        bool b = d.FindMember(strMember)->value.GetBool();
+    if (d.isMember(strMember)) {
+        bool b = d[strMember].asBool();
         qDebug() << strMember << " : " << b;
         settings->setValue(strMember, b);
     }
@@ -51,8 +51,10 @@ void WizOEMSettings::updateOEMSettings(const QString& strUserAccountPath, const 
     QString strFile = strUserAccountPath + "oem.ini";
     QSettings settings(strFile, QSettings::IniFormat);
 
-    rapidjson::Document d;
-    d.Parse<0>(strOEMJSONData.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(strOEMJSONData.toUtf8().constData(), d))
+        return;
 
     getBoolValueFromJSON(d, HidePersonalGroup, &settings);
     getBoolValueFromJSON(d, HideShareByEmail, &settings);

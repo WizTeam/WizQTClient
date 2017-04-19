@@ -22,7 +22,7 @@ WizNoteCommentsPrivate::~WizNoteCommentsPrivate()
     g_comments = 0;
 }
 
-void WizNoteCommentsPrivate::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note)
+void WizNoteCommentsPrivate::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& note)
 {
     m_map.insert(view, note);
 
@@ -43,7 +43,7 @@ void WizNoteCommentsPrivate::onCommentsButtonClicked()
 
 void WizNoteCommentsPrivate::loadComments(const QString& strToken)
 {
-    QMap<WizDocumentView*, WIZDOCUMENTDATA>::const_iterator it;
+    QMap<WizDocumentView*, WIZDOCUMENTDATAEX>::const_iterator it;
     for (it = m_map.begin(); it != m_map.end(); it++) {
         qDebug() << WizCommonApiEntry::commentUrl(strToken, it.value().strKbGUID, it.value().strGUID);
     }

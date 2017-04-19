@@ -102,51 +102,5 @@ private:
     QString m_strCurKbGUID;
 };
 
-/*
-class CWizDocumentStatusCheckThread : public QThread
-{
-    Q_OBJECT
-public:
-    CWizDocumentStatusCheckThread(QObject* parent = 0);
-    ~CWizDocumentStatusCheckThread();
-    void checkEditStatus(const QString& strKbGUID,const QString& strGUID);
-    void downloadData(const QString& strUrl);
-    //
-    void stop() { m_stop = true; m_wait.wakeAll(); }
-    //
-    void waitForDone();
-
-public slots:
-    void needRecheck();
-    void onTimeOut();
-
-signals:
-    void checkTimeOut(QString strGUID);
-    void checkFinished(QString strGUID,QStringList editors);
-    void checkDocumentChangedFinished(const QString& strGUID, bool bChanged);
-
-protected:
-    virtual void run();
-
-private:
-    void setDocmentGUID(const QString& strKbGUID,const QString& strGUID);
-
-    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
-    bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
-
-private:
-    QString m_strKbGUID;
-    QString m_strGUID;
-    bool m_stop;
-    QMutex m_mutexWait;
-    QWaitCondition m_wait;
-    bool m_needRecheck;
-    bool m_checkNow;
-
-    QTimer* m_timer;
-    QString m_strCurGUID;
-    QString m_strCurKbGUID;
-};
-*/
 
 #endif // WIZDOCUMENTEDITSTATUS_H

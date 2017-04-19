@@ -4,6 +4,11 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
+#include <QBuffer>
+#include <QTextStream>
+#include <QDebug>
+
+#include "utils/WizMisc.h"
 
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
@@ -14,11 +19,16 @@ class JlCompress {
 public:
     static QuaZip* openWriteonlyZip(QString fileName);
     static QuaZip* openReadonlyZip(QString fileName);
+    static QuaZip* openReadonlyZip(QIODevice* device);
     static bool closeZip(QuaZip* pzip);
 
     static bool compressFile(QuaZip* zip, QString fileName, QString fileDest);
+    static bool compressFile(QuaZip* zip, const QByteArray& data, QString fileDest);
     static bool compressSubDir(QuaZip* parentZip, QString dir, QString parentDir, bool recursive = true);
     static bool extractFile(QuaZip* zip, QString fileName, QString fileDest);
+    //
+    static bool extractText(QuaZip* zip, QString fileName, QString& text);
+    static bool extractFile(QuaZip* zip, QString fileName, QByteArray& data);
 
     static bool removeFile(QStringList listFile);
 
@@ -38,14 +48,20 @@ public:
 
 static bool copyData(QIODevice &inFile, QIODevice &outFile)
 {
+    char* buf = new char[4096];
     while (!inFile.atEnd()) {
-        char buf[4096];
+        memset(buf, 0, 4096);
         qint64 readLen = inFile.read(buf, 4096);
-        if (readLen <= 0)
+        if (readLen <= 0) {
+            delete [] buf;
             return false;
-        if (outFile.write(buf, readLen) != readLen)
+        }
+        if (outFile.write(buf, readLen) != readLen) {
+            delete [] buf;
             return false;
+        }
     }
+    delete [] buf;
     return true;
 }
 
@@ -92,6 +108,41 @@ bool JlCompress::compressFile(QuaZip* zip, QString fileName, QString fileDest) {
 
     return true;
 }
+
+bool JlCompress::compressFile(QuaZip* zip, const QByteArray& data, QString fileDest) {
+    // zip: oggetto dove aggiungere il file
+    // fileName: nome del file reale
+    // fileDest: nome del file all'interno del file compresso
+
+    // Controllo l'apertura dello zip
+    if (!zip) return false;
+    if (zip->getMode()!=QuaZip::mdCreate &&
+        zip->getMode()!=QuaZip::mdAppend &&
+        zip->getMode()!=QuaZip::mdAdd) return false;
+
+    // Apro il file originale
+    QBuffer inFile;
+    inFile.setData(data);
+    if(!inFile.open(QIODevice::ReadOnly)) return false;
+
+    // Apro il file risulato
+    QuaZipFile outFile(zip);
+    if(!outFile.open(QIODevice::WriteOnly, QuaZipNewInfo(fileDest))) return false;
+
+    // Copio i dati
+    if (!copyData(inFile, outFile) || outFile.getZipError()!=UNZ_OK) {
+        return false;
+    }
+
+    // Chiudo i file
+    outFile.close();
+    if (outFile.getZipError()!=UNZ_OK) return false;
+    inFile.close();
+    //
+    return true;
+
+}
+
 
 /**OK
  * Comprime la cartella dir nel file fileCompressed, se recursive e true allora
@@ -187,7 +238,19 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
     // Apro il file risultato
     QFile outFile;
     outFile.setFileName(fileDest);
-    if(!outFile.open(QIODevice::WriteOnly)) return false;
+    if(!outFile.open(QIODevice::WriteOnly)) {
+
+        outFile.setPermissions(QFile::ReadOwner
+                               | QFile::WriteOwner
+                               | QFile::ReadUser
+                               | QFile::WriteUser
+                               | QFile::ReadGroup
+                               | QFile::ReadOther
+                               );
+        //
+        if (!outFile.open(QIODevice::WriteOnly))
+            return false;
+    }
 
     // Copio i dati
     if (!copyData(inFile, outFile) || inFile.getZipError()!=UNZ_OK) {
@@ -205,6 +268,82 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
 
     return true;
 }
+
+bool JlCompress::extractText(QuaZip* zip, QString fileName, QString& text)
+{
+    // zip: oggetto dove aggiungere il file
+    // filename: nome del file reale
+    // fileincompress: nome del file all'interno del file compresso
+
+    // Controllo l'apertura dello zip
+    if (!zip) return false;
+    if (zip->getMode()!=QuaZip::mdUnzip) return false;
+
+    // Apro il file compresso
+    zip->setCurrentFile(fileName);
+    QuaZipFile inFile(zip);
+    if(!inFile.open(QIODevice::ReadOnly) || inFile.getZipError()!=UNZ_OK) return false;
+
+    // Apro il file risultato
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    if (!buffer.open(QIODevice::WriteOnly))
+        return false;
+    // Copio i dati
+    if (!copyData(inFile, buffer) || inFile.getZipError()!=UNZ_OK) {
+        return false;
+    }
+
+    // Chiudo i file
+    inFile.close();
+    if (inFile.getZipError()!=UNZ_OK) {
+        return false;
+    }
+    //
+    buffer.close();
+    //
+    QTextStream stream(buffer.data());
+    text = stream.readAll();
+    //
+    return true;
+}
+
+bool JlCompress::extractFile(QuaZip* zip, QString fileName, QByteArray& data)
+{
+    // zip: oggetto dove aggiungere il file
+    // filename: nome del file reale
+    // fileincompress: nome del file all'interno del file compresso
+
+    // Controllo l'apertura dello zip
+    if (!zip) return false;
+    if (zip->getMode()!=QuaZip::mdUnzip) return false;
+
+    // Apro il file compresso
+    zip->setCurrentFile(fileName);
+    QuaZipFile inFile(zip);
+    if(!inFile.open(QIODevice::ReadOnly) || inFile.getZipError()!=UNZ_OK) return false;
+
+    // Apro il file risultato
+    QBuffer buffer(&data);
+    if (!buffer.open(QIODevice::WriteOnly))
+        return false;
+    // Copio i dati
+    if (!copyData(inFile, buffer) || inFile.getZipError()!=UNZ_OK) {
+        return false;
+    }
+
+    // Chiudo i file
+    inFile.close();
+    if (inFile.getZipError()!=UNZ_OK) {
+        return false;
+    }
+    //
+    buffer.close();
+    //
+    return true;
+}
+
+
 
 /**
  * Rimuove i file il cui nome e specificato all'interno di listFile.
@@ -240,12 +379,23 @@ QuaZip* JlCompress::openReadonlyZip(QString fileCompressed)
     QuaZip* zip  = new QuaZip(QFileInfo(fileCompressed).absoluteFilePath());
     if(!zip->open(QuaZip::mdUnzip)) {
         delete zip;
-        QFile::remove(fileCompressed);
         return NULL;
     }
     //
     return zip;
 }
+
+QuaZip* JlCompress::openReadonlyZip(QIODevice* device)
+{
+    QuaZip* zip  = new QuaZip(device);
+    if(!zip->open(QuaZip::mdUnzip)) {
+        delete zip;
+        return NULL;
+    }
+    //
+    return zip;
+}
+
 
 bool JlCompress::closeZip(QuaZip* pzip)
 {
@@ -586,6 +736,14 @@ bool WizZipFile::compressFile(const CString& strFileName, const CString& strName
     return JlCompress::compressFile(m_zip, strFileName, strNameInZip);
 }
 
+bool WizZipFile::compressFile(const QByteArray& data, const CString& strNameInZip)
+{
+    if (!m_zip)
+        return false;
+    //
+    return JlCompress::compressFile(m_zip, data, strNameInZip);
+}
+
 bool WizZipFile::close()
 {
     if (!m_zip)
@@ -616,6 +774,23 @@ bool WizUnzipFile::open(const CString& strFileName)
     close();
     //
     m_zip = ::JlCompress::openReadonlyZip(strFileName);
+    if (m_zip)
+    {
+        m_names = m_zip->getFileNameList();
+    }
+    //
+    return m_zip ? true : false;
+}
+
+bool WizUnzipFile::open(const QByteArray &data)
+{
+    close();
+    //
+    m_buffer.setData(data);
+    if (!m_buffer.open(QIODevice::ReadOnly))
+        return false;
+    //
+    m_zip = JlCompress::openReadonlyZip(&m_buffer);
     if (m_zip)
     {
         m_names = m_zip->getFileNameList();
@@ -668,6 +843,26 @@ bool WizUnzipFile::extractFile(const CString& strNameInZip, const CString& strFi
     //
     return JlCompress::extractFile(m_zip, strNameInZip, strFileName);
 }
+
+bool WizUnzipFile::extractFile(const CString& strNameInZip, QByteArray& data)
+{
+    if (!m_zip)
+        return false;
+    //
+    return JlCompress::extractFile(m_zip, strNameInZip, data);
+}
+
+bool WizUnzipFile::extractFile(int index, QByteArray& data)
+{
+    if (!m_zip)
+        return false;
+    //
+    QString fileName = m_names[index];
+    //
+    return JlCompress::extractFile(m_zip, fileName, data);
+}
+
+
 bool WizUnzipFile::extractAll(const CString& strDestPath)
 {
     if (!m_zip)
@@ -685,9 +880,78 @@ bool WizUnzipFile::extractAll(const CString& strDestPath)
     return succeeded > 0;
 }
 
+bool WizUnzipFile::readResources(CWizStdStringArray& resources)
+{
+    for (int i = 0; i < m_names.count(); i++) {
+        //
+        QString name = m_names[i];
+        if (name.toLower() == "index.html")
+            continue;
+        //
+        name = Utils::WizMisc::extractFileName(name);
+        //
+        resources.push_back(name);
+    }
+    //
+    return true;
+}
+
+bool WizUnzipFile::readMainHtmlAndResources(QString& html, CWizStdStringArray& resources)
+{
+    //
+    if (!JlCompress::extractText(m_zip, "index.html", html))
+    {
+        qDebug() << "can't extract index.html";
+        return false;
+    }
+    //
+    for (int i = 0; i < m_names.count(); i++) {
+        //
+        QString name = m_names[i];
+        if (name.toLower() == "index.html")
+            continue;
+        //
+        name = Utils::WizMisc::extractFileName(name);
+        //
+        resources.push_back(name);
+    }
+    //
+    return true;
+}
+
+bool WizUnzipFile::readMainHtmlAndResources(QString& html, std::vector<WIZZIPENTRYDATA>& resources)
+{
+    if (!JlCompress::extractText(m_zip, "index.html", html))
+    {
+        qDebug() << "can't extract index.html";
+        return false;
+    }
+    //
+    QList<QuaZipFileInfo> infos = m_zip->getFileInfoList();
+    for (auto info : infos)
+    {
+        if (info.name.toLower() == "index.html")
+            continue;
+        //
+        WIZZIPENTRYDATA data;
+        data.name = Utils::WizMisc::extractFileName(info.name);
+        data.time = info.dateTime;
+        data.size = info.uncompressedSize;
+        resources.push_back(data);
+    }
+    //
+    return true;
+}
+
+
 
 bool WizUnzipFile::close()
 {
+    if (m_buffer.isOpen())
+    {
+        m_buffer.close();
+    }
+    //
     if (!m_zip)
         return false;
     //

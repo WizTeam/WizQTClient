@@ -29,9 +29,16 @@ public:
     WizSearchView();
     void clear();
     void clearFocus();
+    bool hasFocus();
     void focus();
+    void onFocused(bool focused);
     void setText(const QString& text);
     QString currentText();
+    //
+    void setCurrentKb(const QString& kbGuid);
+    QString currentKb() const { return m_strCurrentKbGuid; }
+    //
+    void setSearchPlaceHolder(const QString& placeHolder);
 
     void setUserSettings(WizUserSettings* settings);
 
@@ -52,18 +59,21 @@ public:
 public Q_SLOTS:
     void on_search_editFinished(const QString& strText);
     void on_search_textChanged(const QString& strText);
+    void on_search_textChanging();
     void setFocus();
     void clearSearchFocus();
-    void on_advanced_buttonClicked();
 
 Q_SIGNALS:
     void doSearch(const QString& keywords);
     void textEdited(const QString& text);
-    void advancedSearchRequest();
+    void textStartEditing();
+    void textStopEditing();
+    void textFocused(bool focused);
 
 private:
     WizSuggestCompletionon* m_completer;
     QSize m_sizeHint;
+    QString m_strCurrentKbGuid;
 };
 
 class WizSuggestiongList : public QTreeWidget
@@ -84,7 +94,7 @@ class WizSuggestionSeacher : public QObject
 public:
     WizSuggestionSeacher(QObject* parent = 0);
 
-    void searchSuggestion(const QString& inputText);
+    void searchSuggestion(const QString& kbGuid, const QString& inputText);
 
 signals:
     void searchFinished(const QStringList &choices, bool isRecentSearches);
@@ -99,6 +109,7 @@ public:
     ~WizSuggestCompletionon();
 
     void setUserSettings(WizUserSettings* settings);
+    void setCurrentKb(const QString& kbGuid) { m_strCurrentKbGuid = kbGuid; updatePlaceHolder(); }
 
     bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_OVERRIDE;
 
@@ -107,6 +118,7 @@ public:
     void hide();
     void selectSuggestItem(bool up);
     QString getCurrentText();
+    void updatePlaceHolder();
 
     void setPopupOffset(int popupWgtWidth, const QSize& offset);
 
@@ -116,6 +128,11 @@ public slots:
     void doneCompletion();
     void preventSuggest();
     void autoSuggest();
+    void textChanged(QString text);
+    void textFocused(bool focused);
+    void startEditing();
+    void stopEditing();
+    void on_advanced_buttonClicked();
 
 private:
     void resetContainerSize(int width, int height);
@@ -129,6 +146,9 @@ private:
     QSize m_popupOffset;
     int m_popupWgtWidth;
     bool m_usable;
+    QString m_strCurrentKbGuid;
+    bool m_editing;
+    bool m_focused;
 
     WizSuggestionSeacher* m_searcher;
 

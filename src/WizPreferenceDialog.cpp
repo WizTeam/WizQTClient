@@ -4,13 +4,21 @@
 #include <QMessageBox>
 #include <QFontDialog>
 #include <QColorDialog>
+#include <QTimer>
 
 #include "share/WizGlobal.h"
 #include "utils/WizPathResolve.h"
 #include "share/WizMessageBox.h"
 #include "share/WizDatabaseManager.h"
+#include "share/WizThreads.h"
+#include "share/WizRequest.h"
+
 #include "WizMainWindow.h"
 #include "WizProxyDialog.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
+
+#include "widgets/WizExecutingActionDialog.h"
 
 
 WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
@@ -172,16 +180,18 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
 
-    bool searchEncryptedNote = m_app.userSettings().searchEncryptedNote();
-    ui->checkBoxSearchEncryNote->setChecked(searchEncryptedNote);
-    ui->lineEditNotePassword->setEnabled(searchEncryptedNote);
-    ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
-
     QString strColor = m_app.userSettings().editorBackgroundColor();
     updateEditorBackgroundColor(strColor);
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
+    //
+    connect(ui->useNewSync, SIGNAL(clicked(bool)), SLOT(useNewSyncClicked(bool)));
+    ui->useNewSync->setChecked(WizToken::info().syncType == 1);
+    if (ui->useNewSync->isChecked())
+    {
+        ui->useNewSync->setEnabled(false);
+    }
 }
 
 void WizPreferenceWindow::showPrintMarginPage()
@@ -400,42 +410,6 @@ void WizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
     WizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."));
 }
 
-void WizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
-{
-    m_app.userSettings().setSearchEncryptedNote(checked);
-    if (!checked)
-    {
-        ui->lineEditNotePassword->blockSignals(true);
-        ui->lineEditNotePassword->clear();
-        ui->lineEditNotePassword->blockSignals(false);
-        m_app.userSettings().setEncryptedNotePassword("");
-
-//        QMessageBox msg;
-//        msg.setIcon(QMessageBox::Information);
-//        msg.setWindowTitle(tr("Cancel search encrypted note"));
-//        msg.addButton(QMessageBox::Ok);
-//        msg.addButton(QMessageBox::Cancel);
-//        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
-//                       "Do you want to rebuild full text search?"));
-
-        QMessageBox::StandardButton clickedButton = WizMessageBox::warning(this, tr("Cancel search encrypted note"),
-                                                                                tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
-                                                                                 "Do you want to rebuild full text search?") ,QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
-
-        if (QMessageBox::Ok == clickedButton)
-        {
-            WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
-            Q_ASSERT(mainWindow);
-            mainWindow->rebuildFTS();
-        }
-    }
-    ui->lineEditNotePassword->setEnabled(checked);
-}
-
-void WizPreferenceWindow::on_lineEditNotePassword_editingFinished()
-{
-    m_app.userSettings().setEncryptedNotePassword(ui->lineEditNotePassword->text());
-}
 
 void WizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
 {
@@ -499,3 +473,55 @@ void WizPreferenceWindow::on_tabWidget_currentChanged(int index)
 //        resize(width(), 290);
 //    }
 }
+
+void WizPreferenceWindow::useNewSyncClicked(bool checked)
+{
+    if (checked)
+    {
+        QString message = tr("Before checking, you need to know:\n\nDon't support returning old sync mode;\nWhen used, other client must be updated to the latest version, or can't log in.\n\nDo you want to use?");
+        if (QMessageBox::Yes != WizMessageBox::question(this, message))
+        {
+            ui->useNewSync->setChecked(false);
+            return;
+        }
+
+        //
+        WizExecutingActionDialog::executeAction(tr("Change user settings..."), WIZ_THREAD_NETWORK, [=] {
+            //
+            bool ret = false;
+            QString errorMessage = tr("Network error");
+            //
+            QString asUrl = WizCommonApiEntry::newAsServerUrl();
+            if (!asUrl.isEmpty())
+            {
+                QString url = asUrl + "/as/user/settings/sync_type/1?token=" + WizToken::token();
+                //
+                WIZSTANDARDRESULT result = WizRequest::execStandardJsonRequest(url, "PUT");
+                if (result)  {
+                    ret = true;
+                } else {
+                    errorMessage = result.returnMessage;
+                }
+            }
+            //
+            ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+                //
+                QTimer::singleShot(300, [=]{
+                    if (ret) {
+                        ui->useNewSync->setEnabled(false);
+                        WizMessageBox::information(this, tr("Succeeded to change user settings, please restart WizNote."));
+                    } else {
+                        WizMessageBox::warning(this, tr("Failed to change user settings:\n\n %1").arg(errorMessage));
+                        ui->useNewSync->setChecked(false);
+                    }
+                });
+                //
+
+            });
+            //
+
+        });
+    }
+
+}
+

@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QApplication>
+#include <QTimer>
 
 #ifdef USECOCOATOOLBAR
 
@@ -174,6 +175,7 @@
     //
     self->m_isEditing = YES;    
 
+    m_pSearchWidget->onFocused(true);
     m_pSearchWidget->on_search_textChanged("");
 
     return YES;
@@ -183,11 +185,21 @@
 {
      self->m_isEditing = YES;
      [super textDidBeginEditing:aNotification];
+     m_pSearchWidget->on_search_textChanging();
+}
+
+- (void) changePlaceHolderString:(NSString*)text;
+{
+    [self setPlaceholderString:text];
+    NSString* currentSearchStringValue = self.stringValue;
+    self.stringValue = @"-";
+    self.stringValue = currentSearchStringValue;
 }
 
 - (void)textDidEndEditing:(NSNotification *)aNotification
 {
     NSDictionary* dict = [aNotification userInfo];
+    //
     NSUInteger textMove = [[dict objectForKey: @"NSTextMovement"] unsignedIntegerValue];
     if (textMove == NSReturnTextMovement) {
         m_pSearchWidget->on_search_editFinished(WizToQString([self stringValue]));
@@ -197,7 +209,18 @@
 
     self->m_isEditing = NO;
     //
+    QString search = QObject::tr("Search");
+    [self changePlaceHolderString:WizToNSString(search)];
+    //[self setPlaceholderString:WizToNSString(search)];
+    //
+    QTimer::singleShot(300, [=]{
+        if (!m_pSearchWidget->hasFocus()) {
+            m_pSearchWidget->onFocused(false);
+        }
+    });
+    //
     [super textDidEndEditing:aNotification];
+    //
 }
 - (void)textDidChange:(NSNotification *)aNotification
 {        
@@ -250,10 +273,29 @@ void WizSearchView::clearFocus()
     [pSearchField.window makeFirstResponder:nil];
 }
 
+bool WizSearchView::hasFocus()
+{
+    WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
+    //
+    NSResponder *firstResponder = [[NSApp keyWindow] firstResponder];
+    if (firstResponder
+            && [firstResponder isKindOfClass:[NSText class]]
+            && [(id)firstResponder delegate] == pSearchField)
+    {
+        return true;
+    }
+    return false;
+}
+
 void WizSearchView::focus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
-//    [pSearchField.window makeFirstResponder:pSearchField];
+    [pSearchField.window makeFirstResponder:pSearchField];
+}
+
+void WizSearchView::onFocused(bool focused)
+{
+    emit textFocused(focused);
 }
 
 void WizSearchView::setText(const QString& text)
@@ -269,6 +311,20 @@ QString WizSearchView::currentText()
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     NSString* nstring = [pSearchField stringValue];
     return WizToQString(nstring);
+}
+
+void WizSearchView::setCurrentKb(const QString &kbGuid)
+{
+    m_strCurrentKbGuid = kbGuid;
+    //
+    m_completer->setCurrentKb(kbGuid);
+}
+
+void WizSearchView::setSearchPlaceHolder(const QString& placeHolder)
+{
+    WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
+    [pSearchField changePlaceHolderString:WizToNSString(placeHolder)];
+    //[pSearchField setPlaceholderString:WizToNSString(placeHolder)];
 }
 
 void WizSearchView::setUserSettings(WizUserSettings* settings)
@@ -336,6 +392,8 @@ void WizSearchView::on_search_editFinished(const QString& strText)
 {
     emit doSearch(strText);
     oldSearchText = strText;
+    //
+    emit textStopEditing();
 }
 
 void WizSearchView::on_search_textChanged(const QString& strText)
@@ -347,6 +405,10 @@ void WizSearchView::on_search_textChanged(const QString& strText)
     }
 
     emit textEdited(strText);
+}
+void WizSearchView::on_search_textChanging()
+{
+    emit textStartEditing();
 }
 
 void WizSearchView::setFocus()
@@ -360,12 +422,5 @@ void WizSearchView::clearSearchFocus()
     [pSearchField.window makeFirstResponder:nil];
 }
 
-void WizSearchView::on_advanced_buttonClicked()
-{
-    clearSearchFocus();
-
-    emit advancedSearchRequest();
-    m_completer->hide();
-}
 
 #endif

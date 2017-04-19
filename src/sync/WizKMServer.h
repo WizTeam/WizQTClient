@@ -104,7 +104,7 @@ private:
 
 
 
-#define WIZKM_WEBAPI_VERSION		9
+#define WIZKM_WEBAPI_VERSION		10
 
 struct CWizKMBaseParam: public WizXmlRpcStructValue
 {
@@ -170,10 +170,27 @@ public:
 
     const WIZKBINFO& kbInfo();
     void setKBInfo(const WIZKBINFO& info);
+    //
+    bool isGroup() const;
+    bool isUseNewSync() const;
 
 protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
+private:
+    bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
+    bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
+    //
+    bool document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
+    bool document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
+    //
+    bool data_downloadOld(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName);
+    //
+    bool attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion);
+    bool attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion);
+
+    bool attachment_downloadDataOld(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
+    bool attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
 
 public:
     QString getToken() const { return m_userInfo.strToken; }
@@ -183,11 +200,11 @@ public:
     bool wiz_getInfo();
     bool wiz_getVersion(WIZOBJECTVERSION& version, bool bAuto = FALSE);
 
-    bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret);
-    bool attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
+    bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName);
+    bool attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
     //
     bool document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
-    bool attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion);
+    bool attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion);
     //
     bool document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     bool attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
@@ -198,15 +215,12 @@ public:
     bool tag_postList(std::deque<WIZTAGDATA>& arrayTag);
     bool style_postList(std::deque<WIZSTYLEDATA>& arrayStyle);
     bool deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
-    QByteArray downloadDocumentData(const QString& strDocumentGUID);
-    QByteArray downloadAttachmentData(const QString& strAttachmentGUID);
     //
     bool document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     bool document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc);
 
     bool category_getAll(QString& str);
 
-    bool data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName);
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName);
     //
     bool getValueVersion(const QString& strKey, __int64& nVersion);
@@ -346,25 +360,6 @@ protected:
         return TRUE;
     }
     //
-    /////////////////////////////////////////////////////////
-    ////下载对象数据/////////////////
-
-    template <class TData>
-    bool downloadObjectData(TData& data)
-    {
-        return TRUE;
-    }
-    template <class TData>
-    bool downloadObjectData(WIZDOCUMENTDATAEX& data)
-    {
-        return document_downloadData(data.strGUID, data);
-    }
-    template <class TData>
-    bool downloadObjectData(WIZDOCUMENTATTACHMENTDATAEX& data)
-    {
-        return attachment_downloadData(data.strGUID, data);
-    }
-
 
     /////////////////////////////////////////////
     //getList
@@ -475,7 +470,7 @@ public:
     template <class TData>
     bool postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool bWithData, __int64& nServerVersion)
     {
-        return attachment_postData(data, nServerVersion);
+        return attachment_postData(data, bWithData, nServerVersion);
     }
 public:
     //

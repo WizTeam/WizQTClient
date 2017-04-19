@@ -227,7 +227,7 @@ public:
     //bool GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument);
 
     bool getDocumentsGuidByLocation(const CString& strLocation, CWizStdStringArray& arrayGUID);
-
+    bool getDocumentsByTitle(const QString& title, CWizDocumentDataArray& arrayDocument);
 
     bool documentFromLocationAndName(const CString& strLocation, const CString& strName, WIZDOCUMENTDATA& data);
 

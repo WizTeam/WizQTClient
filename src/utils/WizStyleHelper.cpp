@@ -9,6 +9,7 @@
 #include <QTextLayout>
 #include <QDebug>
 #include <QApplication>
+#include <QTextDocument>
 
 #include "WizPathResolve.h"
 #include "../share/WizMisc.h"
@@ -421,6 +422,8 @@ int WizStyleHelper::listViewItemHeight(int nType)
 //        return fontHead(f) + fontNormal(f) + margin() * 5;
     case ListTypeThumb:
         return WizSmartScaleUI(122);
+    case ListTypeSearchResult:
+        return WizSmartScaleUI(160);
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
         return WizSmartScaleUI(20);
@@ -1175,6 +1178,58 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
             p->setClipRect(rc);
         }
     }
+}
+
+
+
+void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, const QString& title, const QString& info,
+                                  const QString& abs, bool bFocused, bool bSelected)
+{
+    QColor colorSummary = Utils::WizStyleHelper::listViewItemSummary(bSelected, bFocused);
+    QString summaryHtmlColor = "#" + ::WizColorToString(colorSummary);
+    //
+    QColor colorInfo = Utils::WizStyleHelper::listViewItemLocation(bSelected, bFocused);
+    QString infoHtmlColor = "#" + ::WizColorToString(colorInfo);
+
+    //
+    QString infoHtmlColorHtml = "<font color='" + infoHtmlColor + "'>";
+    QString infoHtmlColorHtmlEnd = "</font>";
+    //
+    QString summaryHtmlColorHtml = "<font color='" + summaryHtmlColor + "'>";
+    QString summaryHtmlColorHtmlEnd = "</font>";
+    //
+    QString title2 = "<div style='font-size:14px;line-height:130%'>" + title + "</div>";
+    //
+    QString info2 = infoHtmlColorHtml + info + infoHtmlColorHtmlEnd;
+    QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
+    //
+    QString other = "<div style='font-size:12px;line-height:140%'>" + info2  + "<br />" + abs2 + "</div>";
+
+    QString html = title2 + other;
+    //
+    html = html.replace("<em>", "<font color='red'>");
+    html = html.replace("</em>", "</font>");
+    //
+    QRect rcd = rc.adjusted(2, 0, 0, 0); //
+    //
+    QTextDocument* doc = new QTextDocument(NULL);
+    doc->setUndoRedoEnabled(false);
+    doc->setHtml(html);
+    doc->setTextWidth(rcd.width());
+    doc->setUseDesignMetrics(true);
+    ////doc->setDefaultTextOption ( QTextOption (Qt::AlignHCenter )  );
+    //// height from doc QTextDocument
+    //// http://fop-miniscribus.googlecode.com/svn/trunk/fop_miniscribus.1.0.0/src/floating_box/floatdiagram.cpp
+    //////setMaximumHeight(DocumentHighgtActual());
+
+    //
+    p->save();
+    p->translate(rcd.topLeft());
+    QRect rc2(0, 0, rcd.width(), rcd.height());
+    doc->drawContents(p, rc2);
+    p->restore();
+    //
+    doc->deleteLater();
 }
 
 

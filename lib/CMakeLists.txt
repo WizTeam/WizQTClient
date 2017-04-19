@@ -9,8 +9,6 @@ if(NOT ZLIB_FOUND)
 endif(NOT ZLIB_FOUND)
 
 add_subdirectory(cryptopp)
-add_subdirectory(clucene)
 add_subdirectory(quazip)
 #add_subdirectory(aggregation)
 #add_subdirectory(extensionsystem)
-add_subdirectory(rapidjson)

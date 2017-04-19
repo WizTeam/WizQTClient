@@ -6,7 +6,7 @@
 
 class QString;
 
-struct WIZDOCUMENTDATA;
+struct WIZDOCUMENTDATAEX;
 
 class WizDocumentView;
 
@@ -19,13 +19,13 @@ public:
     ~WizNoteCommentsPrivate();
 
 private:
-    QMap<WizDocumentView*, WIZDOCUMENTDATA> m_map;
+    QMap<WizDocumentView*, WIZDOCUMENTDATAEX> m_map;
 
     void loadComments(const QString& strToken);
 
 public Q_SLOTS:
     void onTokenAcquired(const QString& strToken);
-    void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note);
+    void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& note);
     void onCommentsButtonClicked();
 
 };

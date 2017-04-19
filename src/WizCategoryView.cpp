@@ -14,7 +14,7 @@
 #include "share/WizDrawTextHelper.h"
 #include "share/WizSettings.h"
 #include "share/WizDatabaseManager.h"
-#include "share/WizSearchIndexer.h"
+#include "share/WizSearch.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
 #include "share/WizMessageBox.h"
@@ -732,6 +732,19 @@ QString WizCategoryBaseView::selectedItemKbGUID()
     return QString();
 }
 
+QString WizCategoryBaseView::storedSelectedItemKbGuid()
+{
+    if (!m_selectedItem)
+        return QString();
+    //
+    WizCategoryViewItemBase* pItem = dynamic_cast<WizCategoryViewItemBase*>(m_selectedItem);
+    if (!pItem)
+        return QString();
+
+    return pItem->kbGUID();
+}
+
+
 void WizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
 {
     QList<QTreeWidgetItem*> items = selectedItems();
@@ -810,7 +823,12 @@ bool WizCategoryView::setCurrentIndex(const WIZDOCUMENTDATA& document)
 
 void WizCategoryBaseView::saveSelection()
 {
-    m_selectedItem = currentItem();
+    QTreeWidgetItem* item = currentItem();
+    if (item)
+    {
+        m_selectedItem = item;
+    }
+    //
     clearSelection();
 }
 
@@ -1381,11 +1399,6 @@ void WizCategoryView::initMenus()
     addAction(actionRemoveShortcut);
     connect(actionRemoveShortcut, SIGNAL(triggered()), SLOT(on_action_removeShortcut()));
 
-    QAction* actionAdvancedSearch = new QAction(tr("Advanced search"), this);
-    actionAdvancedSearch->setData(ActionAdvancedSearch);
-    addAction(actionAdvancedSearch);
-    connect(actionAdvancedSearch, SIGNAL(triggered()), SLOT(on_action_advancedSearch()));
-
     QAction* actionAddCustomSearch = new QAction(tr("Add custom search"), this);
     actionAddCustomSearch->setData(ActionAddCustomSearch);
     addAction(actionAddCustomSearch);
@@ -1408,8 +1421,6 @@ void WizCategoryView::initMenus()
 
     // custom search menu
     m_menuCustomSearch = std::make_shared<QMenu>();
-    m_menuCustomSearch->addAction(actionAdvancedSearch);
-    m_menuCustomSearch->addSeparator();
     m_menuCustomSearch->addAction(actionAddCustomSearch);
     m_menuCustomSearch->addAction(actionEditCustomSearch);
     m_menuCustomSearch->addAction(actionRemoveCustomSearch);
@@ -2745,17 +2756,6 @@ void WizCategoryView::on_action_addToShortcuts()
     }
 }
 
-void WizCategoryView::on_action_advancedSearch()
-{
-    ::WizGetAnalyzer().logAction("categoryMenuAdvancedSearch");
-    bool bSearchOnly = true;
-    WizAdvancedSearchDialog dlg(bSearchOnly);
-    if (dlg.exec() == QDialog::Accepted)
-    {
-        QString strParam = dlg.getParams();
-        advancedSearchByCustomParam(strParam);
-    }
-}
 
 void WizCategoryView::on_action_addCustomSearch()
 {
@@ -3083,7 +3083,7 @@ void WizCategoryView::createGroup()
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
     WizShowWebDialogWithToken(tr("Create Team for Free"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 void WizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
@@ -3092,7 +3092,7 @@ void WizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 void WizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
@@ -3101,7 +3101,7 @@ void WizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& 
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 void WizCategoryView::managePersonalGroup(const QString& groupGUID)
@@ -3110,7 +3110,7 @@ void WizCategoryView::managePersonalGroup(const QString& groupGUID)
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 void WizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
@@ -3119,7 +3119,7 @@ void WizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bi
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 void WizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
@@ -3209,7 +3209,7 @@ void WizCategoryView::viewBizInfo(const QString& bizGUID)
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View team info"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 void WizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
@@ -3223,7 +3223,7 @@ void WizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage team"), strUrl, window());
     //
-    WizMainWindow::instance()->sync()->setNeedResetGroups();
+    WizMainWindow::instance()->setNeedResetGroups();
 }
 
 

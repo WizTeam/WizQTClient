@@ -43,6 +43,7 @@ public:
         ListTypeThumb,
         ListTypeTwoLine,
         ListTypeOneLine,
+        ListTypeSearchResult,
         ListTypeSection
     };
 
@@ -120,6 +121,8 @@ public:
                                       const QString& title, const QStringList& lead, const QString& location,
                                       const QString& abs, bool bFocused, bool bSelected, QPixmap thumbPix = QPixmap());
 
+    static void drawListViewItemSearchResult(QPainter* p, const QRect& rc, const QString& title, const QString& info,
+                                      const QString& abs, bool bFocused, bool bSelected);
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 
     static QIcon listViewBadge(int type);

@@ -17,6 +17,7 @@
 #include "sync/WizApiEntry.h"
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"
+#include "share/jsoncpp/json/json.h"
 #include "WizMainWindow.h"
 #include "WizDatabase.h"
 #include "WizDatabaseManager.h"
@@ -225,16 +226,18 @@ void WizAnalyzer::postBlocked(IWizSyncableDatabase* db)
         return;
     }
 
-    rapidjson::Document d;
-    d.Parse<0>(loop.result().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(loop.result().constData(), d))
+        return;
 
-    if (!d.HasMember("return_code"))
+    if (!d.isMember("return_code"))
     {
         qDebug() << "[Analyzer]Can not get return code ";
         return;
     }
 
-    int returnCode = d.FindMember("return_code")->value.GetInt();
+    int returnCode = d["return_code"].asInt();
     if (returnCode != 200)
     {
         qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
@@ -268,73 +271,55 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 {
     QMutexLocker locker(&m_csPost);
 
-    rapidjson::Document dd;
-    dd.SetObject();
-    rapidjson::Document::AllocatorType& allocator = dd.GetAllocator();
+    Json::Value dd;
 
-    QByteArray baGuid = guid().toUtf8();
-    rapidjson::Value vGuid(baGuid.constData(), baGuid.size());
-    dd.AddMember("guid", vGuid, allocator);
+    dd["guid"] = guid().toStdString();
 
 #if QT_VERSION >= 0x050400
-    QByteArray baPlat = QSysInfo::prettyProductName().toUtf8();
-    rapidjson::Value vPlat(baPlat.constData(), baPlat.size());
-    dd.AddMember("platform", vPlat, allocator);
+    dd["platform"] = QSysInfo::prettyProductName().toStdString();
 #else
-    dd.AddMember("platform", "Linux", allocator);
+    dd["platform"] = "Linux";
 #endif
 
 
-    rapidjson::Value versionName(rapidjson::kStringType);
-    versionName.SetString(WIZ_CLIENT_VERSION);
-    dd.AddMember("versionName", versionName, allocator);
-
-    dd.AddMember("versionCode", Utils::WizMisc::getVersionCode(), allocator);
-
+    dd["versionName"] = WIZ_CLIENT_VERSION;
+    dd["versionCode"] = Utils::WizMisc::getVersionCode();
     //
     WizMainWindow *window = WizMainWindow::instance();
-    QByteArray baLocal = QLocale::system().name().toUtf8();
+    QString local = QLocale::system().name();
     if (window)
     {
-        baLocal = window->userSettings().locale().toUtf8();
+        local = window->userSettings().locale();
     }
-    rapidjson::Value locale(baLocal.constData(), baLocal.size());
-    dd.AddMember("locale", locale, allocator);
-
-//    //  only used for phone
-//    dd.AddMember("screenSize", 13, allocator);
+    dd["locale"] = local.toStdString();
 
 #ifdef Q_OS_MAC
-    dd.AddMember("deviceName", "MacOSX", allocator);
+    dd["deviceName"] = "MacOSX";
 #ifdef BUILD4APPSTORE
-    dd.AddMember("packageType", "AppStore", allocator);
+    dd["packageType"] = "AppStore";
 #else
-    dd.AddMember("packageType", "DMG", allocator);
+    dd["packageType"] = "DMG";
 #endif
 
 #else
-    dd.AddMember("deviceName", "Linux", allocator);
+    dd["deviceName"] = "Linux";
 #endif
 
-    rapidjson::Value isAnoymous(false);
-    dd.AddMember("isAnoymous", isAnoymous, allocator);
+    dd["isAnoymous"] = false;
 
     //
-    rapidjson::Value isBiz(db->hasBiz());
-    dd.AddMember("isBiz", isBiz, allocator);
+    dd["isBiz"] = db->hasBiz();
 
     int nUseDays = getUseDays().toInt();
-    dd.AddMember("useDays", nUseDays, allocator);
+    dd["useDays"] = nUseDays;
 
     int nInstallDays = getInstallDays().toInt();
-    dd.AddMember("installDays", nInstallDays, allocator);
+    dd["installDays"] = nInstallDays;
 
     QDateTime dtSignUp = QDateTime::fromString(db->meta("Account", "DateSignUp"));
     int signUpDays = dtSignUp.daysTo(QDateTime::currentDateTime());
-    dd.AddMember("signUpDays", signUpDays, allocator);
-
+    dd["signUpDays"] = signUpDays;
     //
-
     QMap<QString, QString> firstActionMap;
     for (int i = 0; i < 10; i++)
     {
@@ -356,11 +341,7 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     {
         QString key = it.key();
         QString value = it.value();
-        QByteArray baValue = value.toUtf8();
-        QByteArray baKey = key.toUtf8();
-        rapidjson::Value fistAction(baValue.constData(), allocator);
-        rapidjson::Value vKey(baKey.constData(), allocator);
-        dd.AddMember(vKey, fistAction, allocator);
+        dd[key.toUtf8().constData()] = value.toStdString();
     }
 
     QMutexLocker logLocker(&m_csLog);
@@ -368,8 +349,7 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     WizIniFileEx iniFile;
     iniFile.loadFromFile(m_strRecordFileName);
     //
-    rapidjson::Value actions(rapidjson::kObjectType);
-    actions.SetObject();
+    Json::Value actions;
     //
     QMap<QString, QString> actionMap;
     iniFile.getSection("Actions", actionMap);
@@ -379,17 +359,12 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     {
         QString key = it.key();
         QString value = it.value();
-        QByteArray baKey = key.toUtf8();
-        //
-        rapidjson::Value vValue(value.toInt());
-        rapidjson::Value vKey(baKey.constData(), allocator);
-        actions.AddMember(vKey, vValue, allocator);
+        actions[key.toUtf8().constData()] = value.toStdString();
     }
     //
-    dd.AddMember("actions", actions, allocator);
+    dd["actions"] = actions;
     //
-    rapidjson::Value durations(rapidjson::kObjectType);
-    durations.SetObject();
+    Json::Value durations;
     //
     QMap<QString, QString> seconds;
     iniFile.getSection("Durations", seconds);
@@ -406,27 +381,21 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
         if (sec == 0)
             continue;
 
-        rapidjson::Value elem(rapidjson::kObjectType);
-        elem.SetObject();
+        Json::Value elem;
 
-        elem.AddMember("totalTime", sec, allocator);
-        elem.AddMember("count", it.value().toInt(), allocator);
+        elem["totalTime"] = sec;
+        elem["count"] = it.value().toInt();
         //
-        QByteArray baKey = strKey.toUtf8();
-        //
-        rapidjson::Value vKey(baKey.constData(), allocator);
-        durations.AddMember(vKey, elem, allocator);
+        durations[strKey.toStdString()] = elem;
     }
     //
-    dd.AddMember("durations", durations, allocator);
+    dd["durations"] = durations;
     //
+    Json::FastWriter writer;
+    std::string ret = writer.write(dd);
 
-    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
-    rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
 
-    dd.Accept(writer);
-
-    return buffer.GetString();
+    return QString::fromStdString(ret).toUtf8();
 }
 
 

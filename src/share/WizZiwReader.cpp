@@ -39,11 +39,13 @@ bool WizZiwReader::loadZiwHeader(const QString& strFileName, WIZZIWHEADER& heade
 
     file.close();
 
-    if (!QString("ZIWR").compare(header.szSign, Qt::CaseSensitive) \
-            || !QString("ZIWA").compare(header.szSign, Qt::CaseSensitive)) {
-        TOLOG("Unknown encrypt type");
+    ZiwEncryptType type = ZiwUnknown;
+    if (0 == strncmp("ZIWR", header.szSign, WIZZIWFILE_SIGN_LENGTH))
+        type = ZiwR;
+    else if (0 == strncmp("ZIWA", header.szSign, WIZZIWFILE_SIGN_LENGTH))
+        type = ZiwA;
+    else
         return false;
-    }
 
     if (header.nVersion != 1) {
         TOLOG1("Unknown encrypt version: %1", WizIntToStr(header.nVersion));

@@ -52,7 +52,7 @@
 #include "share/WizUIHelper.h"
 #include "share/WizSettings.h"
 #include "share/WizAnimateAction.h"
-#include "share/WizSearchIndexer.h"
+#include "share/WizSearch.h"
 #include "share/WizObjectDataDownloader.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
@@ -98,7 +98,6 @@
 #include "WizPositionDelegate.h"
 #include "core/WizAccountManager.h"
 #include "share/WizWebEngineView.h"
-#include "rapidjson/document.h"
 #include "widgets/WizExecutingActionDialog.h"
 #include "widgets/WizUserServiceExprDialog.h"
 
@@ -116,8 +115,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_dbMgr(dbMgr)
     , m_progress(new WizProgressDialog(this))
     , m_settings(new WizUserSettings(dbMgr.db()))
-    , m_sync(new WizKMSyncThread(dbMgr.db(), this))
-    , m_searchIndexer(new WizSearchIndexer(m_dbMgr, this))
+    , m_syncQuick(new WizKMSyncThread(dbMgr.db(), true, this))
+    , m_syncFull(new WizKMSyncThread(dbMgr.db(), false, this))
     , m_searcher(new WizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
@@ -169,6 +168,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_bQuickDownloadMessageEnable(false)
 {
     WizGlobal::setMainWindow(this);
+    WizKMSyncThread::setQuickThread(m_syncQuick);
     //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -193,26 +193,28 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
 #endif
 
     // search and full text search
-    m_searchIndexer->start(QThread::IdlePriority);
     m_searcher->start(QThread::HighPriority);
 
     // syncing thread
-    m_sync->setFullSyncInterval(userSettings().syncInterval());
-    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
+    m_syncFull->setFullSyncInterval(userSettings().syncInterval());
+    connect(m_syncFull, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_syncFull, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
-    connect(m_sync, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
-    connect(m_sync, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    connect(m_syncFull, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
+    connect(m_syncFull, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
 
-    connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
+    connect(m_syncFull, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
-    connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
-    connect(m_sync, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
+    connect(m_syncFull, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
+    connect(m_syncFull, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
 
+    connect(m_syncQuick, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
+    connect(m_syncQuick, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    //
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
     {
-        QTimer::singleShot(15 * 1000, m_sync, SLOT(syncAfterStart()));
+        QTimer::singleShot(15 * 1000, m_syncFull, SLOT(syncAfterStart()));
     }
 
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
@@ -272,7 +274,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
 
     WizNoteComments::init();
     //
-    m_sync->start(QThread::IdlePriority);
+    m_syncFull->start(QThread::IdlePriority);
+    m_syncQuick->start(QThread::IdlePriority);
     //
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 
@@ -287,7 +290,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     if (dbMgr.db().hasBiz())
     {
         QTimer* syncMessageTimer = new QTimer(this);
-        connect(syncMessageTimer, SIGNAL(timeout()), m_sync, SLOT(quickDownloadMesages()));
+        connect(syncMessageTimer, SIGNAL(timeout()), m_syncFull, SLOT(quickDownloadMesages()));
         syncMessageTimer->setInterval(3 * 1000 * 60);
         syncMessageTimer->start(3 * 1000 * 60);
     }
@@ -374,13 +377,19 @@ void WizMainWindow::on_application_aboutToQuit()
 void WizMainWindow::cleanOnQuit()
 {
     WizObjectDownloaderHost::instance()->waitForDone();
+    WizKMSyncThread::setQuickThread(NULL);
     //
     m_category->saveExpandState();
     saveStatus();
     //
-    m_sync->waitForDone();
+    auto full = m_syncFull;
+    m_syncFull = NULL;
+    full->waitForDone();
     //
-    m_searchIndexer->waitForDone();
+    auto quick = m_syncQuick;
+    m_syncQuick = NULL;
+    quick->waitForDone();
+    //
     m_searcher->waitForDone();
     //
     m_doc->waitForDone();
@@ -397,11 +406,6 @@ WizSearcher*WizMainWindow::searcher()
     return m_searcher;
 }
 
-void WizMainWindow::rebuildFTS()
-{
-    m_searchIndexer->rebuild();
-}
-
 WizMainWindow*WizMainWindow::instance()
 {
     return windowInstance;
@@ -416,6 +420,16 @@ QNetworkDiskCache*WizMainWindow::webViewNetworkCache()
 WizDocumentView* WizMainWindow::docView()
 {
     return m_doc;
+}
+
+void WizMainWindow::trySaveCurrentNote(std::function<void(const QVariant &)> callback)
+{
+    if (m_doc->noteLoaded()) {
+        m_doc->web()->trySaveDocument(m_doc->note(), false, callback);
+        return;
+    }
+    //
+    callback(QVariant(true));
 }
 
 void WizMainWindow::closeEvent(QCloseEvent* event)
@@ -657,7 +671,7 @@ void WizMainWindow::on_TokenAcquired(const QString& strToken)
 
 void WizMainWindow::on_quickSync_request(const QString& strKbGUID)
 {
-    WizKMSyncThread::quickSyncKb(strKbGUID);
+    m_syncQuick->addQuickSyncKb(strKbGUID);
 }
 
 void WizMainWindow::setSystemTrayIconVisible(bool bVisible)
@@ -983,6 +997,10 @@ void WizMainWindow::initMenuBar()
     QAction* action = m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW);
     action->setCheckable(true);
     action->setData(WizDocumentListView::TypeThumbnail);
+    m_viewTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZCATEGORY_OPTION_SEARCHRESULTVIEW);
+    action->setCheckable(true);
+    action->setData(WizDocumentListView::TypeSearchResult);
     m_viewTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW);
     action->setCheckable(true);
@@ -1521,7 +1539,7 @@ void WizMainWindow::windowActived()
     if (!isBizUser || !m_bQuickDownloadMessageEnable)
         return;
 
-    m_sync->quickDownloadMesages();
+    m_syncFull->quickDownloadMesages();
     WizGetAnalyzer().logAction("bizUserQuickDownloadMessage");
 }
 
@@ -1794,8 +1812,6 @@ void WizMainWindow::initToolBar()
 #endif
     //
     connect(m_searchWidget, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-    connect(m_searchWidget, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
-//    connect(m_searchWidget, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
 }
 
 void WizMainWindow::initClient()
@@ -2161,13 +2177,13 @@ void WizMainWindow::init()
 
 void WizMainWindow::on_actionAutoSync_triggered()
 {
-    m_sync->startSyncAll();
+    m_syncFull->startSyncAll();
 }
 
 void WizMainWindow::on_actionSync_triggered()
 {
     WizGetAnalyzer().logAction("ToolBarSyncAll");
-
+    //
     if (m_animateSync->isPlaying())
     {
         on_actionConsole_triggered();
@@ -2237,7 +2253,8 @@ void WizMainWindow::on_syncDone_userVerified()
 {
 
     if (m_dbMgr.db().setPassword(m_userVerifyDialog->password())) {
-        m_sync->clearCurrentToken();
+        m_syncFull->clearCurrentToken();
+        m_syncQuick->clearCurrentToken();
         syncAllData();
     }
 }
@@ -2601,6 +2618,17 @@ void WizMainWindow::on_actionThumbnailView_triggered()
     }
 }
 
+void WizMainWindow::on_actionSearchResultView_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
+}
+
 void WizMainWindow::on_actionTwoLineView_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
@@ -2923,25 +2951,6 @@ void WizMainWindow::on_actionManual_triggered()
     WizGetAnalyzer().logAction("MenuBarManual");
 }
 
-void WizMainWindow::on_actionRebuildFTS_triggered()
-{
-    WizGetAnalyzer().logAction("rebuildFTS");
-
-    QMessageBox msg;
-    msg.setIcon(QMessageBox::Warning);
-    msg.setWindowTitle(tr("Rebuild full text search index"));
-    msg.addButton(QMessageBox::Ok);
-    msg.addButton(QMessageBox::Cancel);
-    msg.setText(tr("Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected."));
-
-    if (QMessageBox::Ok == msg.exec())
-    {
-        WizGetAnalyzer().logAction("rebuildFTSConfirm");
-
-        rebuildFTS();
-    }
-}
-
 void WizMainWindow::on_actionSearch_triggered()
 {
     m_searchWidget->focus();
@@ -2949,27 +2958,19 @@ void WizMainWindow::on_actionSearch_triggered()
     WizGetAnalyzer().logAction("MenuBarSearch");
 }
 
-void WizMainWindow::on_actionResetSearch_triggered()
+void WizMainWindow::resetSearchStatus()
 {
     quitSearchStatus();
     m_searchWidget->clear();
-    m_searchWidget->focus();
     m_category->restoreSelection();
-    m_doc->web()->applySearchKeywordHighlight();
+}
 
+void WizMainWindow::on_actionResetSearch_triggered()
+{
+    resetSearchStatus();
+    m_searchWidget->focus();
+    //
     WizGetAnalyzer().logAction("MenuBarResetSearch");
-}
-
-void WizMainWindow::on_actionAdvancedSearch_triggered()
-{
-    m_category->on_action_advancedSearch();
-    WizGetAnalyzer().logAction("MenuBarAdvancedSearch");
-}
-
-void WizMainWindow::on_actionAddCustomSearch_triggered()
-{
-    m_category->on_action_addCustomSearch();
-    WizGetAnalyzer().logAction("MenuBarAddCustomSearch");
 }
 
 void WizMainWindow::on_actionFindReplace_triggered()
@@ -3030,9 +3031,14 @@ void WizMainWindow::on_actionPrintMargin_triggered()
 
 void WizMainWindow::on_search_doSearch(const QString& keywords)
 {
+    m_category->saveSelection();
+    //
+    QString kbGuid = m_category->storedSelectedItemKbGuid();
+    m_searchWidget->setCurrentKb(kbGuid);
+    //
     m_strSearchKeywords = keywords;
     if (keywords.isEmpty()) {
-        on_actionResetSearch_triggered();
+        resetSearchStatus();
         return;
     }
     //
@@ -3042,30 +3048,34 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
         viewDocumentByWizKMURL(strUrl);
         return;
     }
-
-    m_category->saveSelection();
-    m_documents->clear();
     //
     m_noteListWidget->show();
     m_msgListWidget->hide();
     //
     m_settings->appendRecentSearch(keywords);
-    m_searcher->search(keywords, 500);
+    //m_searcher->search(keywords, 500);
     startSearchStatus();
+    //
+    QString key = keywords;
+    //
+    ::WizExecutingActionDialog::executeAction(tr("Searching..."), WIZ_THREAD_SEARCH, [=]{
+
+        CWizDocumentDataArray arrayDocument;
+        m_searcher->onlineSearch(kbGuid, key, arrayDocument);
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+
+            m_documents->clear();
+            m_documents->setDocuments(arrayDocument, true);
+            //
+        });
+    });
+    //
 }
 
 
 void WizMainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart, bool bEnd)
 {
-    if (bEnd) {
-        m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
-        m_doc->web()->applySearchKeywordHighlight();
-    }
-
-//    if (strKeywords != m_strSearchKeywords) {
-//        return;
-//    }
-
     if (bStart) {
         m_documents->setLeadInfoState(DocumentLeadInfo_SearchResult);
         m_documents->setDocuments(arrayDocument);
@@ -3197,7 +3207,7 @@ void WizMainWindow::on_category_itemSelectionChanged()
         {
             showMessageList(pItem);
             //
-            m_sync->quickDownloadMesages();
+            m_syncFull->quickDownloadMesages();
             WizGetAnalyzer().logAction("categoryMessageRootSelected");
         }
     }
@@ -3236,6 +3246,9 @@ void WizMainWindow::on_category_itemSelectionChanged()
         showDocumentList(category);
         break;
     }
+    //
+    QString kbGuid = m_category->selectedItemKbGUID();
+    m_searchWidget->setCurrentKb(kbGuid);
 }
 
 void WizMainWindow::on_documents_itemSelectionChanged()
@@ -3278,7 +3291,7 @@ void WizMainWindow::on_options_settingsChanged(WizOptionsType type)
         m_doc->settingsChanged();
         break;
     case wizoptionsSync:
-        m_sync->setFullSyncInterval(userSettings().syncInterval());
+        m_syncFull->setFullSyncInterval(userSettings().syncInterval());
         break;
     case wizoptionsFont:
     {
@@ -3364,7 +3377,7 @@ void WizMainWindow::resetPermission(const QString& strKbGUID, const QString& str
     }
 }
 
-void WizMainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
+void WizMainWindow::viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistory)
 {
     Q_ASSERT(!data.strGUID.isEmpty());
 
@@ -3585,7 +3598,7 @@ QString WizMainWindow::TranslateString(const QString& string)
 
 void WizMainWindow::syncAllData()
 {
-    m_sync->startSyncAll(false);
+    m_syncFull->startSyncAll(false);
     m_animateSync->startPlay();
 }
 
@@ -3598,7 +3611,8 @@ void WizMainWindow::reconnectServer()
         WizToken::setPasswd(m_settings->password());
     }
 
-    m_sync->clearCurrentToken();
+    m_syncFull->clearCurrentToken();
+    m_syncQuick->clearCurrentToken();
     connect(WizToken::instance(), SIGNAL(tokenAcquired(QString)),
             SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);
     WizToken::requestToken();
@@ -3852,7 +3866,6 @@ void WizMainWindow::quitSearchStatus()
         m_searchWidget->clear();
         m_searchWidget->clearFocus();
         m_strSearchKeywords.clear();
-        m_doc->web()->applySearchKeywordHighlight();
     }
 
     m_documents->setAcceptAllSearchItems(false);
@@ -3870,6 +3883,9 @@ void WizMainWindow::initVariableBeforCreateNote()
 
 bool WizMainWindow::needShowNewFeatureGuide()
 {
+    if (m_settings->serverType() == EnterpriseServer)
+        return false;
+    //
     QString strGuideVserion = m_settings->newFeatureGuideVersion();
     if (strGuideVserion.isEmpty())
         return true;
@@ -4157,7 +4173,21 @@ void WizMainWindow::viewCurrentNoteInSeparateWindow()
 
 void WizMainWindow::quickSyncKb(const QString& kbGuid)
 {
-    WizKMSyncThread::quickSyncKb(kbGuid);
+    if (!m_syncQuick)
+        return;
+    //
+    m_syncQuick->addQuickSyncKb(kbGuid);
 }
+
+void WizMainWindow::setNeedResetGroups()
+{
+    if (!m_syncQuick || !m_syncFull)
+        return;
+    //
+    m_syncQuick->setNeedResetGroups();
+    m_syncFull->setNeedResetGroups();
+}
+
+
 
 

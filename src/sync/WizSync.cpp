@@ -1,12 +1,12 @@
 ﻿#include "WizSync.h"
 #include "WizKMSync_p.h"
+#include "WizKMSync.h"
 
 #include <QString>
 
 #include "utils/WizPathResolve.h"
 #include "WizApiEntry.h"
 #include "WizAvatarHost.h"
-#include "rapidjson/document.h"
 
 #include "share/WizSyncableDatabase.h"
 #include "share/WizAnalyzer.h"
@@ -644,6 +644,24 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     //check data size
     if (!local.arrayData.isEmpty())
     {
+        int maxFileSize = server.getMaxFileSize();
+        if (maxFileSize == 1)
+        {
+            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
+            QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+            pEvents->setLastErrorMessage(error);
+            pEvents->onFreeServiceExpr();
+            return FALSE;
+        }
+        else if (maxFileSize == 2)
+        {
+            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+            QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
+            pEvents->setLastErrorMessage(error);
+            pEvents->onVipServiceExpr();
+            return FALSE;
+        }
+        //
         __int64 nDataSize = local.arrayData.size();
         if (nDataSize > server.getMaxFileSize())
         {
@@ -751,6 +769,24 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
     if (local.arrayData.isEmpty())
     {
         pEvents->onError(_TR("No attachment data"));
+        return FALSE;
+    }
+    //
+    int maxFileSize = server.getMaxFileSize();
+    if (maxFileSize == 1)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
+        QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+        pEvents->setLastErrorMessage(error);
+        pEvents->onFreeServiceExpr();
+        return FALSE;
+    }
+    else if (maxFileSize == 2)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+        QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
+        pEvents->setLastErrorMessage(error);
+        pEvents->onVipServiceExpr();
         return FALSE;
     }
     //
@@ -1023,20 +1059,41 @@ bool WizKMSync::downloadObjectData()
         m_pEvents->onStatus(strStatus);
         //
         QByteArray stream;
-        if (m_server.data_download(data.strObjectGUID, WIZOBJECTDATA::objectTypeToTypeString(data.eObjectType), stream, data.strDisplayName))
+        if (data.eObjectType == wizobjectDocument)
         {
-            if (m_pDatabase->updateObjectData(data.strDisplayName, data.strObjectGUID, WIZOBJECTDATA::objectTypeToTypeString(data.eObjectType), stream))
+            WIZDOCUMENTDATAEX ret;
+            ret.strGUID = data.strObjectGUID;
+            ret.strKbGUID = data.strKbGUID;
+            ret.strTitle = data.strDisplayName;
+            QString fileName = m_pDatabase->getDocumentFileName(ret.strGUID);
+            if (!m_server.document_downloadData(data.strObjectGUID, ret, fileName))
             {
-                succeeded++;
+                m_pEvents->onError(WizFormatString1("Cannot download note data from server: %1", data.strDisplayName));
+                return false;
             }
-            else
-            {
-                m_pEvents->onError(WizFormatString1("Cannot save object data to local: %1!", data.strDisplayName));
-            }
+            stream = ret.arrayData;
         }
         else
         {
-            m_pEvents->onError(WizFormatString1("Cannot download object data from server: %1", data.strDisplayName));
+            WIZDOCUMENTATTACHMENTDATAEX ret;
+            ret.strGUID = data.strObjectGUID;
+            ret.strKbGUID = data.strKbGUID;
+            ret.strName = data.strDisplayName;
+            if (!m_server.attachment_downloadData(data.strDocumentGuid, data.strObjectGUID, ret))
+            {
+                m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
+                return false;
+            }
+            stream = ret.arrayData;
+        }
+        //
+        if (m_pDatabase->updateObjectData(data.strDisplayName, data.strObjectGUID, WIZOBJECTDATA::objectTypeToTypeString(data.eObjectType), stream))
+        {
+            succeeded++;
+        }
+        else
+        {
+            m_pEvents->onError(WizFormatString1("Cannot save object data to local: %1!", data.strDisplayName));
         }
         //
         //
@@ -1084,6 +1141,72 @@ void DownloadAccountKeys(WizKMAccountsServer& server, IWizSyncableDatabase* pDat
         pDatabase->setAccountLocalValue(strKey, strServerValue, nServerVersion, FALSE);
     }
 }
+
+
+bool WizDownloadDocumentsByGuids(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server, CWizGroupDataArray& arrayGroup, IWizSyncableDatabase* pDatabase, const QString& kbGuid, const CWizStdStringArray& guids, CWizDocumentDataArray& arrayDocument)
+{
+    /*
+    ////////
+    ////准备群组信息////
+    */
+    std::map<QString, WIZGROUPDATA> mapGroup;
+    for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+        it != arrayGroup.end();
+        it++)
+    {
+        mapGroup[it->strGroupGUID] = *it;
+    }
+    //
+    /*
+    ////下载笔记////
+    */
+    QString strKbGUID = kbGuid;
+    const CWizStdStringArray& arrayDocumentGUID = guids;
+    //
+    WIZUSERINFO userInfo = server.m_userInfo;
+    //
+    if (kbGuid.isEmpty())
+    {
+        pDatabase = pDatabase->getPersonalDatabase();
+    }
+    else
+    {
+        WIZGROUPDATA group = mapGroup[strKbGUID];
+        if (group.strGroupGUID.isEmpty())
+            return false;
+        //
+        pDatabase = pDatabase->getGroupDatabase(group);
+        if (!pDatabase)
+        {
+            pEvents->onError(WizFormatString1("Cannot open group: %1", group.strGroupName));
+            return false;
+        }
+        //
+        if (!group.strDatabaseServer.isEmpty())
+        {
+            userInfo.strDatabaseServer = group.strDatabaseServer;
+        }
+        //
+        userInfo.strKbGUID = group.strGroupGUID;
+    }
+    //
+    WizKMDatabaseServer serverDB(userInfo, server.parent());
+    //
+    pEvents->onStatus(_TR("Query notes information"));
+    //
+    std::deque<WIZDOCUMENTDATAEX> arrayDocumentServer;
+    if (!serverDB.document_getListByGuids(arrayDocumentGUID, arrayDocumentServer))
+    {
+        pEvents->onError("Can download notes of messages");
+        return false;
+    }
+    //
+    pDatabase->onDownloadDocumentList(arrayDocumentServer);
+    arrayDocument = arrayDocumentServer;
+    return true;
+}
+
+
 
 bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server, IWizSyncableDatabase* pDatabase, const CWizGroupDataArray& arrayGroup)
 {
@@ -1662,4 +1785,27 @@ bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     ////下载消息////
     */
     return WizDownloadMessages(pEvents, server, pDatabase, arrayGroup);
+}
+
+bool WizDownloadDocumentsByGuids(const WIZUSERINFO& info,
+                                 IWizSyncableDatabase* pDatabase,
+                                 const QString& kbGuid,
+                                 const CWizStdStringArray& guids,
+                                 CWizDocumentDataArray& arrayDocument)
+{
+    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    server.setUserInfo(info);
+    /*
+    ////获得群组信息////
+    */
+    //
+    CWizGroupDataArray arrayGroup;
+    server.getGroupList(arrayGroup);
+    /*
+    ////下载消息////
+    */
+    //
+    WizKMSyncEvents events;
+
+    return WizDownloadDocumentsByGuids(&events, server, arrayGroup, pDatabase, kbGuid, guids, arrayDocument);
 }

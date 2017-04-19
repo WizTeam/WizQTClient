@@ -1,6 +1,6 @@
 ﻿#include "WizJSONServerBase.h"
 #include "share/WizEventLoop.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include <QDebug>
 
 WizJSONServerBase::WizJSONServerBase()
@@ -69,24 +69,26 @@ bool WizJSONServerBase::deleteResource(const QString& strUrl)
 bool WizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
                                                          int& returnCode, QString& returnMessage)
 {
-    rapidjson::Document d;
-    d.Parse<0>(strJSON.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(strJSON.toUtf8().constData(), d))
+        return false;
 
-    if (!d.HasMember("return_code"))
+    if (!d.isMember("return_code"))
     {
         qDebug() << "can not found return code from json data";
         return false;
     }
 
-    returnCode = d.FindMember("return_code")->value.GetInt();
+    returnCode = d["return_code"].asInt();
 
-    if (!d.HasMember("return_message"))
+    if (!d.isMember("return_message"))
     {
         qDebug() << "can not found return message from json data";
         return false;
     }
 
-    returnMessage = d.FindMember("return_message")->value.GetString();
+    returnMessage = QString::fromStdString(d["return_message"].asString());
 
     return true;
 }

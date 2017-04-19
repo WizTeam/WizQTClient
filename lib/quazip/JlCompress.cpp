@@ -158,13 +158,26 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
         return false;
 
     if (fileDest.endsWith('/') && QFileInfo(fileDest).isDir()) {
-        return QFile(fileDest).setPermissions(info.getPermissions());
+        return true;
+        //return QFile(fileDest).setPermissions(info.getPermissions());
     }
 
     // Apro il file risultato
     QFile outFile;
     outFile.setFileName(fileDest);
-    if(!outFile.open(QIODevice::WriteOnly)) return false;
+    if(!outFile.open(QIODevice::WriteOnly)) {
+        //
+        outFile.setPermissions(QFile::ReadOwner
+                               | QFile::WriteOwner
+                               | QFile::ReadUser
+                               | QFile::WriteUser
+                               | QFile::ReadGroup
+                               | QFile::ReadOther
+                               );
+        //
+        if (!outFile.open(QIODevice::WriteOnly))
+            return false;
+    }
 
     // Copio i dati
     if (!copyData(inFile, outFile) || inFile.getZipError()!=UNZ_OK) {
@@ -181,7 +194,9 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
         return false;
     }
 
-    return outFile.setPermissions(info.getPermissions());
+    //某些zip文件里面权限可能比较低，会导致出现问题
+    return true;
+    //return outFile.setPermissions(info.getPermissions());
 }
 
 /**

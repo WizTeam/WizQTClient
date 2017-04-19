@@ -21,7 +21,7 @@
 #include <QStateMachine>
 #include <QWebEngineView>
 
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "utils/WizStyleHelper.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizLogger.h"
@@ -217,11 +217,6 @@ WizLoginDialog::~WizLoginDialog()
     if (m_udpClient)
     {
         m_udpClient->deleteLater();
-    }
-    if (m_oemDownloader)
-    {
-        QObject::disconnect(m_oemDownloader, 0, 0, 0);
-        m_oemDownloader->deleteLater();
     }
 }
 
@@ -1403,20 +1398,22 @@ void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString
         return;
 
     m_wizBoxSearchingTimer.stop();
-    rapidjson::Document d;
-    d.Parse<0>(responseMessage.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(responseMessage.toUtf8().constData(), d))
+        return;
 
-    if (!d.HasMember("ip"))
+    if (!d.isMember("ip"))
     {
         TOLOG("no ip field");
         return;
     }
     //
-    if (d.FindMember("ip")->value.IsNull())
+    if (d["ip"].isNull())
         return;
 
-    QString ip = QString::fromUtf8(d.FindMember("ip")->value.GetString());
-    QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.GetString());
+    QString ip = QString::fromStdString(d["ip"].asString());
+    QString iptype = QString::fromStdString(d["iptype"].asString());
     if (ip.isEmpty())
     {
         TOLOG(CString(responseMessage));
@@ -1464,14 +1461,17 @@ bool WizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
     if (settings.isEmpty())
         return false;
     //
-    rapidjson::Document d;
-    d.Parse<0>(settings.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(settings.toUtf8().constData(), d))
+        return false;
 
-    if (d.HasMember("LogoConfig") && d.FindMember("LogoConfig")->value.HasMember("enable")
-            && d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
+    if (d.isMember("LogoConfig") && d["LogoConfig"].isMember("enable")
+            && d["LogoConfig"]["enable"].asBool())
     {
-        QString strUrl = d.FindMember("LogoConfig")->value.HasMember("common") ?
-                    d.FindMember("LogoConfig")->value.FindMember("common")->value.GetString() : "";
+        QString strUrl = QString::fromUtf8(d["LogoConfig"].isMember("common") ?
+                    d["LogoConfig"]["common"].asString().c_str() : "");
+        //
         if (strUrl.isEmpty())
         {
             qDebug() << "Can not found logo path in oem settings";
@@ -1819,12 +1819,14 @@ void WizOEMDownloader::checkServerLicence(const QString& licence)
         return;
     }
     //
-    rapidjson::Document d;
-    d.Parse<0>(settings.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(settings.toUtf8().constData(), d))
+        return;
 
-    if (d.HasMember("licence"))
+    if (d.isMember("licence"))
     {
-        QString newLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
+        QString newLicence = QString::fromStdString(d["licence"].asString());
 
         QString strOldLicence = licence;
         // check wheather licence changed

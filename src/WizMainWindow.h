@@ -40,7 +40,6 @@ class WizTemplatePurchaseDialog;
 
 class WizSearchView;
 class WizSearcher;
-class WizSearchIndexer;
 
 class QtSegmentControl;
 class WizObjectDownloaderHost;
@@ -108,12 +107,13 @@ public:
 
     WizSearcher* searcher();
     QString searchKeywords() const { return m_strSearchKeywords; }
-    void rebuildFTS();
 
     static WizMainWindow* instance();
 
     QNetworkDiskCache* webViewNetworkCache();
     WizDocumentView* docView();
+    //
+    void trySaveCurrentNote(std::function<void(const QVariant &)> callback);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event);
@@ -138,7 +138,8 @@ private:
     WizDatabaseManager& m_dbMgr;
     WizProgressDialog* m_progress;
     WizUserSettings* m_settings;
-    WizKMSyncThread* m_sync;
+    WizKMSyncThread* m_syncFull;
+    WizKMSyncThread* m_syncQuick;
     WizUserVerifyDialog* m_userVerifyDialog;
     WizConsoleDialog* m_console;
     WizUpgradeChecker* m_upgrade;
@@ -202,7 +203,6 @@ private:
     WizSearcher* m_searcher;
     QString m_strSearchKeywords;
 
-    WizSearchIndexer* m_searchIndexer;
     WizSearchView* m_searchWidget;
 
     WizMobileFileReceiver *m_mobileFileReceiver;    
@@ -238,7 +238,10 @@ public:
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
     WizDocumentView* documentView() const;
-    WizKMSyncThread* sync() const { return m_sync; }
+    WizKMSyncThread* fullSync() const { return m_syncFull; }
+    WizKMSyncThread* quickSync() const { return m_syncQuick; }
+    void quickSyncKb(const QString& kbGuid);
+    void setNeedResetGroups();
 
     WizActions* actions() const { return m_actions; }
 
@@ -248,10 +251,8 @@ public:
     WizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
-    void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  
+    void viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistory);
     //
-    static void quickSyncKb(const QString& kbGuid);
-
     void checkWizUpdate();
     void setSystemTrayIconVisible(bool bVisible);
     void setMobileFileReceiverEnable(bool bEnable);
@@ -278,14 +279,11 @@ public Q_SLOTS:
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionPreference_triggered();
-    void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
     void on_actionSupport_triggered();
     void on_actionManual_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
-    void on_actionAdvancedSearch_triggered();
-    void on_actionAddCustomSearch_triggered();
     void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
@@ -318,6 +316,7 @@ public Q_SLOTS:
     void on_actionCategoryBizGroups_triggered();
     void on_actionCategoryPersonalGroups_triggered();
     void on_actionThumbnailView_triggered();
+    void on_actionSearchResultView_triggered();
     void on_actionTwoLineView_triggered();
     void on_actionOneLineView_triggered();
     void on_actionSortByCreatedTime_triggered();
@@ -495,6 +494,7 @@ private:
     //
     void startSearchStatus();
     void quitSearchStatus();
+    void resetSearchStatus();
 
     //
     void initVariableBeforCreateNote();

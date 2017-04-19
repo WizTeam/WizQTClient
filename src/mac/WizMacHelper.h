@@ -44,6 +44,8 @@ void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
 bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString& strHtml);
 
+void wizMacSetClipboardText(const QString& strText);
+
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);
 QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath);

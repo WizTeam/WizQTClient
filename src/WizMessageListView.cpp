@@ -14,7 +14,7 @@
 #include <QApplication>
 #include <QTextCodec>
 
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 #include "utils/WizStyleHelper.h"
 #include "utils/WizMisc.h"
@@ -868,25 +868,26 @@ void WizMessageListView::on_itemSelectionChanged()
                 if (account.isPaidUser())
                     return;
             }
-            rapidjson::Document d;
-            d.Parse<0>(msgData.note.toUtf8().constData());
-
-            if (d.HasParseError() || !d.HasMember("link")) {
+            Json::Value d;
+            Json::Reader reader;
+            if (!reader.parse(msgData.note.toUtf8().constData(), d))
+                return;
+            if (!d.isMember("link")) {
                 qDebug() << "Error occured when try to parse json of messages : " << msgData.note;
                 return;
             }
 
-            QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-            QTextDecoder* encoder = codec->makeDecoder();
-            const rapidjson::Value& u = d["link"];
-            QString str = encoder->toUnicode(u.GetString(), u.GetStringLength());
+            const Json::Value& u = d["link"];
+            QString str = QString::fromStdString(u.asString());
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [str](){
                 QString link = str;
                 if (link.contains("{token}"))
                 {
                     link.replace("{token}", WizToken::token());
                 }
-                QDesktopServices::openUrl(link);
+                ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+                    QDesktopServices::openUrl(link);
+                });
             });
         }
     }
