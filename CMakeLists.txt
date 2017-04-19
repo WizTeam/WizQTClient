@@ -18,6 +18,19 @@ endif(APPLE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+set(CPACK_PACKAGE_VERSION "${WIZNOTE_VERSION}")
+set(CPACK_GENERATOR "RPM;DEB")
+set(CPACK_PACKAGE_NAME "wiznote")
+set(CPACK_PACKAGE_CONTACT "help@wiz.cn")
+set(CPACK_PACKAGE_RELEASE 1)
+set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "WizNote is a cross platform cloud based note-taking application.")
+set(CPACK_RPM_PACKAGE_LICENSE "GPLv3")
+set(CPACK_RPM_PACKAGE_GROUP "Application")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
+
+include(CPack)
+
 # rpath resolve.
 #set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)     // would cause wheelEvent problem on centos/fedora when compiled with qt5
 if(APPLE)
