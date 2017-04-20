@@ -695,6 +695,7 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
 WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent)
     : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
     , m_userInfo(kbInfo)
+    , m_bShouldUploadWithData(false)
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
 }
@@ -1607,6 +1608,8 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
 
 bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp, bool withData, __int64& nServerVersion)
 {
+    m_bShouldUploadWithData = false;
+    //
     WIZDOCUMENTDATAEX data = dataTemp;
     //
     QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
@@ -1692,8 +1695,13 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 
     //
     Json::Value ret;
-    if (!WizRequest::execStandardJsonRequest(url_main, "POST", doc, ret))
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url_main, "POST", doc, ret);
+    if (!jsonRet)
     {
+        if (jsonRet.externCode == "WizErrorUploadNoteData")
+        {
+            m_bShouldUploadWithData = true;
+        }
         qDebug() << "Failed to upload note";
         return false;
     }

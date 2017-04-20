@@ -174,9 +174,13 @@ public:
     bool isGroup() const;
     bool isUseNewSync() const;
 
+    //
+    bool shouldUploadWithData() { return m_bShouldUploadWithData; }
 protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
+    //
+    bool m_bShouldUploadWithData;
 private:
     bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
     bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);

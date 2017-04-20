@@ -7,9 +7,10 @@
 #include <QNetworkReply>
 
 #include "jsoncpp/json/json.h"
+#include "share/WizMisc.h"
 
 
-WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message)
+WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message, QString extCode)
     : returnCode(error)
 {
     switch (error) {
@@ -21,6 +22,8 @@ WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message)
     if (!message.isEmpty()) {
         returnMessage = message;
     }
+    //
+    externCode = extCode;
 }
 
 bool WizRequest::execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody)
@@ -133,16 +136,25 @@ WIZSTANDARDRESULT WizRequest::isSucceededStandardJsonRequest(Json::Value& res)
         if (returnCode.asInt() != 200)
         {
             Json::Value returnMessage = res["returnMessage"];
+            Json::Value externCodeValue = res["externCode"];
+            //
+            std::string externCode;
+            if (externCodeValue.isString()) {
+                externCode = externCodeValue.asString();
+            } else if (externCodeValue.isInt()) {
+                externCode = WizIntToStr(externCodeValue.asInt()).toUtf8().constData();
+            }
+            //
             qDebug() << "Can't upload note data, ret code=" << returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
-            return WIZSTANDARDRESULT(returnCode.asInt(), returnMessage.asString());
+            return WIZSTANDARDRESULT(returnCode.asInt(), returnMessage.asString(), externCode);
         }
         //
-        return WIZSTANDARDRESULT(200, QString("OK"));
+        return WIZSTANDARDRESULT(200, QString("OK"), QString());
     }
     catch (std::exception& err)
     {
         qDebug() << "josn error: " << err.what();
-        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::json, QString::fromUtf8(err.what()));
+        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::json, QString::fromUtf8(err.what()), "");
     }
 }
 

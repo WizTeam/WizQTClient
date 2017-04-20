@@ -617,7 +617,7 @@ void SaveServerError(const WIZKBINFO& kbInfo, const WizKMDatabaseServer& server,
 
 
 
-bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     QString strDisplayName;
 
@@ -734,6 +734,20 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     //
     return TRUE;
 }
+
+bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+{
+    bool ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
+    if (ret)
+        return true;
+    //
+    if (!server.shouldUploadWithData())
+        return false;
+    //
+    local.nDataChanged = 1;
+    return UploadDocument(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
+}
+
 
 bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
