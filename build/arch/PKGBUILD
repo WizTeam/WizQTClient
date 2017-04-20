@@ -12,7 +12,7 @@ install=wiznote.install
 #source=("$pkgname::git+https://github.com/WizTeam/WizQTClient.git#tag=v2.0.38") # Use git is too slow
 #md5sums=('SKIP')
 _wiznote_project_name="WizQTClient"
-source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.3.3_webengine.zip")
+source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.3.3.zip")
 md5sums=('85efa99e3e8d5d414402f16242494bb6')
 
 build() {
