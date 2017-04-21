@@ -25,6 +25,9 @@
 #define WIZKM_XMLRPC_ERROR_INVALID_PASSWORD		31002
 #define WIZKM_XMLRPC_ERROR_TOO_MANY_LOGINS		31004
 
+#define WIZKM_XMLRPC_ERROR_SYSTEM_ERROR         60000
+
+
 
 /* ------------------------- CWizXmlRpcValue ------------------------- */
 // Abstract base class for all XML-RPC return

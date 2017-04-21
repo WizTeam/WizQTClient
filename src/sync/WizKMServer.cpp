@@ -841,8 +841,13 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
 #endif
     //
     Json::Value doc;
-    if (!WizRequest::execStandardJsonRequest(url, doc))
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
+    if (!jsonRet)
     {
+        if (jsonRet.externCode == "WizErrorNotExistsInDb")
+        {
+
+        }
         TOLOG1("Failed to download document data: %1", ret.strTitle);
         return false;
     }

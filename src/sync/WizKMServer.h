@@ -118,6 +118,9 @@ struct CWizKMBaseParam: public WizXmlRpcStructValue
         addString("client_type", "linux");
 #endif
         addString("client_version", WIZ_CLIENT_VERSION);
+        //
+        QString LocalLanguage = QLocale::system().name();
+        addString("client_lang", LocalLanguage);
     }
     //
     void changeApiVersion(int nApiVersion)

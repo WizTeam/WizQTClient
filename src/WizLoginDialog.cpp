@@ -1145,6 +1145,10 @@ void WizLoginDialog::onTokenAcquired(const QString &strToken)
             {
                 ui->label_passwordError->setText(tr("Log in too many times in a short time, please try again later."));
             }
+            else if (WIZKM_XMLRPC_ERROR_SYSTEM_ERROR == nErrorCode)
+            {
+                ui->label_passwordError->setText(WizToken::lastErrorMessage());
+            }
             else
             {
                 ui->label_passwordError->setText(WizToken::lastErrorMessage());

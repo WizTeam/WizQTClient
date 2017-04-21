@@ -627,7 +627,8 @@ bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
 {
     return WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode ||
             WIZKM_XMLRPC_ERROR_INVALID_USER == nErrorCode ||
-            WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode;
+            WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode ||
+            WIZKM_XMLRPC_ERROR_SYSTEM_ERROR == nErrorCode;
 }
 
 void WizMainWindow::on_TokenAcquired(const QString& strToken)
@@ -653,18 +654,15 @@ void WizMainWindow::on_TokenAcquired(const QString& strToken)
             m_settings->setPassword("");
 
             qDebug() << "username or password error, need relogin.";
-            WizMessageBox::warning(this, tr("Info"), tr("Username / password error. Please login again."));
+            if (nErrorCode == WIZKM_XMLRPC_ERROR_SYSTEM_ERROR)
+            {
+                WizMessageBox::warning(this, tr("Info"), WizToken::lastErrorMessage());
+            }
+            else
+            {
+                WizMessageBox::warning(this, tr("Info"), tr("Username / password error. Please login again."));
+            }
             on_actionLogout_triggered();
-
-//            if (!m_userVerifyDialog)
-//            {
-//                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
-//                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
-//            }
-
-//            m_userVerifyDialog->exec();
-//            m_userVerifyDialog->deleteLater();
-//            m_userVerifyDialog = nullptr;
         }
     }
 }
