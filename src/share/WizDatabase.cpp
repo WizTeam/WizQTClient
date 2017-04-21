@@ -927,7 +927,8 @@ bool WizDatabase::updateObjectData(const QString& strDisplayName,
 }
 
 bool WizDatabase::initDocumentData(const QString& strGUID,
-                                    WIZDOCUMENTDATAEX& data)
+                                    WIZDOCUMENTDATAEX& data,
+                                   bool forceUploadData)
 {
     if (!documentFromGuid(strGUID, data)) {
         return false;
@@ -944,7 +945,7 @@ bool WizDatabase::initDocumentData(const QString& strGUID,
         }
     }
 
-    if (data.nDataChanged) {
+    if (data.nDataChanged || forceUploadData) {
         if (!loadDocumentZiwData(strGUID, data.arrayData)) {
             return false;
         }
@@ -1936,6 +1937,15 @@ void WizDatabase::setGroupTagsPosModified()
 bool WizDatabase::getAllNotesOwners(CWizStdStringArray& arrayOwners)
 {
     return getAllDocumentsOwners(arrayOwners);
+}
+//
+bool WizDatabase::deleteDocumentFromLocal(const QString& strDocumentGuid)
+{
+    WIZDOCUMENTDATA doc;
+    if (!documentFromGuid(strDocumentGuid, doc))
+        return false;
+    //
+    return deleteDocument(doc, false);
 }
 
 

@@ -193,7 +193,8 @@ public:
 
     // upload
     virtual bool initDocumentData(const QString& strGUID,
-                                  WIZDOCUMENTDATAEX& data);
+                                  WIZDOCUMENTDATAEX& data,
+                                  bool forceUploadData);
 
     virtual bool initAttachmentData(const QString& strGUID,
                                     WIZDOCUMENTATTACHMENTDATAEX& data);
@@ -309,6 +310,8 @@ public:
 
     //
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
+    //
+    virtual bool deleteDocumentFromLocal(const QString& strDocumentGuid);
 
 public:
     bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);

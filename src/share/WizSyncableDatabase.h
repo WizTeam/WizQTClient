@@ -57,7 +57,7 @@ struct IWizSyncableDatabase
     virtual bool getModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData) = 0;
     virtual bool getModifiedMessageList(CWizMessageDataArray& arrayData) = 0;
 
-    virtual bool initDocumentData(const QString& strGUID, WIZDOCUMENTDATAEX& data) = 0;
+    virtual bool initDocumentData(const QString& strGUID, WIZDOCUMENTDATAEX& data, bool forceUploadData) = 0;
     virtual bool initAttachmentData(const QString& strGUID, WIZDOCUMENTATTACHMENTDATAEX& data) = 0;
 
     virtual bool onUploadObject(const QString& strGUID, const QString& strObjectType) = 0;
@@ -144,6 +144,8 @@ struct IWizSyncableDatabase
     virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) = 0;
 
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners) = 0;
+    //
+    virtual bool deleteDocumentFromLocal(const QString& strDocumentGuid) = 0;
 };
 
 

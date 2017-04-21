@@ -4,6 +4,7 @@
 #include "WizXmlRpcServer.h"
 #include "WizJSONServerBase.h"
 #include "share/WizMessageBox.h"
+#include "share/WizRequest.h"
 #include "WizDef.h"
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
@@ -178,12 +179,13 @@ public:
     bool isUseNewSync() const;
 
     //
-    bool shouldUploadWithData() { return m_bShouldUploadWithData; }
+    void clearJsonResult() { m_lastJsonResult = WIZSTANDARDRESULT(200, QString(""), QString("")); }
+    WIZSTANDARDRESULT lastJsonResult() const { return m_lastJsonResult; }
 protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
     //
-    bool m_bShouldUploadWithData;
+    WIZSTANDARDRESULT m_lastJsonResult;
 private:
     bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
     bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);

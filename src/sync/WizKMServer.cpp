@@ -695,7 +695,7 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
 WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent)
     : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
     , m_userInfo(kbInfo)
-    , m_bShouldUploadWithData(false)
+    , m_lastJsonResult(200, QString(""), QString(""))
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
 }
@@ -842,12 +842,9 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
     //
     Json::Value doc;
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
+    m_lastJsonResult = jsonRet;
     if (!jsonRet)
     {
-        if (jsonRet.externCode == "WizErrorNotExistsInDb")
-        {
-
-        }
         TOLOG1("Failed to download document data: %1", ret.strTitle);
         return false;
     }
@@ -1613,8 +1610,6 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
 
 bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp, bool withData, __int64& nServerVersion)
 {
-    m_bShouldUploadWithData = false;
-    //
     WIZDOCUMENTDATAEX data = dataTemp;
     //
     QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
@@ -1701,12 +1696,9 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
     //
     Json::Value ret;
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url_main, "POST", doc, ret);
+    m_lastJsonResult = jsonRet;
     if (!jsonRet)
     {
-        if (jsonRet.externCode == "WizErrorUploadNoteData")
-        {
-            m_bShouldUploadWithData = true;
-        }
         qDebug() << "Failed to upload note";
         return false;
     }

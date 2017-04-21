@@ -12,6 +12,8 @@
 #include "share/WizAnalyzer.h"
 #include "share/WizEventLoop.h"
 
+#include "utils/WizMisc.h"
+
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
 
@@ -505,21 +507,13 @@ bool WizKMSync::uploadStyleList()
 }
 
 
-template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, TData& data, int part)
+
+bool InitDocumentData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data, bool forceUploadData)
 {
-    ATLASSERT(FALSE);
-    return FALSE;
+    return pDatabase->initDocumentData(strObjectGUID, data, forceUploadData);
 }
 
-template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data)
-{
-    return pDatabase->initDocumentData(strObjectGUID, data);
-}
-
-template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data)
+bool InitAttachmentData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data)
 {
     return pDatabase->initAttachmentData(strObjectGUID, data);
 }
@@ -617,7 +611,7 @@ void SaveServerError(const WIZKBINFO& kbInfo, const WizKMDatabaseServer& server,
 
 
 
-bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress, bool forceUploadData)
 {
     QString strDisplayName;
 
@@ -632,7 +626,7 @@ bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total,
         }
     }
     //
-    if (!InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local))
+    if (!InitDocumentData(pDatabase, local.strGUID, local, forceUploadData))
     {
         pEvents->onError(_TR("Cannot init object data!"));
         return FALSE;
@@ -702,7 +696,8 @@ bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total,
         {
             WIZDOCUMENTDATAEX local2 = local;
             local2.nDataChanged = 0;
-            InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local2);
+            bool forceUploadData = false;
+            InitDocumentData(pDatabase, local.strGUID, local2, forceUploadData);
             //
             WizOleDateTime tLocalModified2;
             tLocalModified2 = local2.tModified;
@@ -737,15 +732,24 @@ bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total,
 
 bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
-    bool ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
+    bool forceUploadData = false;
+    server.clearJsonResult();
+    bool ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
     if (ret)
         return true;
     //
-    if (!server.shouldUploadWithData())
-        return false;
+    if (server.lastJsonResult().externCode == "WizErrorUploadNoteData")
+    {
+        QString fileName = pDatabase->getDocumentFileName(local.strGUID);
+        if (WizPathFileExists(fileName) && Utils::WizMisc::getFileSize(fileName) > 0)
+        {
+            local.nDataChanged = 1;
+            forceUploadData = true;
+            return UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
+        }
+    }
     //
-    local.nDataChanged = 1;
-    return UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
+    return false;
 }
 
 
@@ -770,7 +774,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         }
     }
     //
-    if (!InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local))
+    if (!InitAttachmentData(pDatabase, local.strGUID, local))
     {
         pEvents->onError(_TR("Cannot init object data!"));
         return FALSE;
@@ -839,7 +843,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         if (-1 != nServerVersion)
         {
             WIZDOCUMENTATTACHMENTDATAEX local2 = local;
-            InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local2);
+            InitAttachmentData(pDatabase, local.strGUID, local2);
             //
             WizOleDateTime tLocalModified2;
             tLocalModified2 = local2.tDataModified;
@@ -1080,9 +1084,17 @@ bool WizKMSync::downloadObjectData()
             ret.strKbGUID = data.strKbGUID;
             ret.strTitle = data.strDisplayName;
             QString fileName = m_pDatabase->getDocumentFileName(ret.strGUID);
+            m_server.clearJsonResult();
             if (!m_server.document_downloadData(data.strObjectGUID, ret, fileName))
             {
-                m_pEvents->onError(WizFormatString1("Cannot download note data from server: %1", data.strDisplayName));
+                if (m_server.lastJsonResult().externCode == "WizErrorNotExistsInDb")
+                {
+                    m_pDatabase->deleteDocumentFromLocal(ret.strGUID);
+                }
+                else
+                {
+                    m_pEvents->onError(WizFormatString1("Cannot download note data from server: %1", data.strDisplayName));
+                }
                 return false;
             }
             stream = ret.arrayData;
