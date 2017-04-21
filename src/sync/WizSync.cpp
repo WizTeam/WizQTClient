@@ -745,7 +745,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         return false;
     //
     local.nDataChanged = 1;
-    return UploadDocument(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
+    return UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
 }
 
 
