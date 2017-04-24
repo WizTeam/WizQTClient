@@ -989,12 +989,13 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
             strCode += "WizEditor.off();";
             //
         } else {
-            strCode +=
-QString("WizEditor.off(null, function(){\n\
-    WizReader.highlight.on([%1]);\nconsole.log('highlight');\n\
-});").arg(keywords);
+            strCode += QString("WizEditor.off(null, function(){\n\
+                WizReader.highlight.on([%1]);\nconsole.log('highlight');\n\
+            });").arg(keywords);
         }
     }
+    //
+    qDebug() << strCode;
     //
     page()->runJavaScript(strCode);
 }

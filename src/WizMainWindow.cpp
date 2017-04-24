@@ -1957,7 +1957,7 @@ QWidget* WizMainWindow::createNoteListView()
 //    m_labelDocumentsCount->setMargin(5);
 //    layoutActions->addWidget(m_labelDocumentsCount);
 //    connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
-//    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
+    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
 
 
 //    //sortBtn->setStyleSheet("padding-top:10px;");

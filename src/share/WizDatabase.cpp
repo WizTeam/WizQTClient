@@ -154,10 +154,6 @@ void WizDocument::deleteToTrash()
 
 void WizDocument::deleteFromTrash()
 {
-    //NOTE: 在普通文件夹中删除笔记的时候，会把数据存放在deletedguid中，此处需要判断是否已将删除数据同步到
-    //服务器上，如果没有同步，则不能删除deletedguid中的数据
-    bool bWaitUpload = m_db.isObjectDeleted(m_data.strGUID);
-
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_db.getDocumentAttachments(m_data.strGUID, arrayAttachment);
 
@@ -167,18 +163,11 @@ void WizDocument::deleteFromTrash()
         ::WizDeleteFile(strFileName);
 
         m_db.deleteAttachment(*it, true, true);
-        if (!bWaitUpload) {
-            m_db.deleteDeletedGuid(it->strGUID);
-        }
     }
 
     if (!m_db.deleteDocument(m_data, true)) {
         TOLOG1("Failed to delete document: %1", m_data.strTitle);
         return;
-    }
-    if (!bWaitUpload) {
-        //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
-        m_db.deleteDeletedGuid(m_data.strGUID);
     }
 
     CString strZipFileName = m_db.getDocumentFileName(m_data.strGUID);
@@ -376,14 +365,7 @@ bool WizDocument::removeTag(const WIZTAGDATA& dataTag)
 
 void WizDocument::Delete()
 {
-    if (isInDeletedItemsFolder()) {
-//        return PermanentlyDelete();
-        return deleteFromTrash();
-    } else {
-//        return MoveTo(m_db.GetDeletedItemsFolder());
-        return deleteToTrash();
-    }
-
+    return deleteFromTrash();
 }
 
 
