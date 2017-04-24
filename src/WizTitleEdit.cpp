@@ -97,7 +97,7 @@ void WizTitleEdit::keyPressEvent(QKeyEvent* e)
 
 void WizTitleEdit::contextMenuEvent(QContextMenuEvent* e)
 {
-    //do nothing.
+    QLineEdit::contextMenuEvent(e);
 }
 
 void WizTitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
