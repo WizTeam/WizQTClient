@@ -403,6 +403,10 @@ void WizTitleBar::setEditorMode(WizEditorMode editorMode)
     {
         showInfoBar();
     }
+    else
+    {
+        showEditorBar();
+    }
 }
 
 void WizTitleBar::setEditButtonEnabled(bool enable)
