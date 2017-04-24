@@ -1935,6 +1935,7 @@ void WizDocumentWebView::isModified(std::function<void(bool modified)> callback)
 void WizDocumentWebView::setModified(bool b)
 {
     m_bContentsChanged = b;
+    page()->runJavaScript("WizEditor.setUnModified()");
 }
 
 void WizDocumentWebView::undo()
