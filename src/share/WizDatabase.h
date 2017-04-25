@@ -312,6 +312,7 @@ public:
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
     //
     virtual bool deleteDocumentFromLocal(const QString& strDocumentGuid);
+    virtual bool deleteAttachmentFromLocal(const QString& strAttachmentGuid);
 
 public:
     bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);

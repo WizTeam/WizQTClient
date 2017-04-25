@@ -747,6 +747,11 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
             forceUploadData = true;
             return UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
         }
+        else
+        {
+            ////本地没有数据，服务器也没有数据////
+            pDatabase->deleteDocumentFromLocal(local.strGUID);
+        }
     }
     //
     return false;
@@ -1105,9 +1110,17 @@ bool WizKMSync::downloadObjectData()
             ret.strGUID = data.strObjectGUID;
             ret.strKbGUID = data.strKbGUID;
             ret.strName = data.strDisplayName;
+            m_server.clearJsonResult();
             if (!m_server.attachment_downloadData(data.strDocumentGuid, data.strObjectGUID, ret))
             {
-                m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
+                if (m_server.lastJsonResult().externCode == "WizErrorNotExistsInDb")
+                {
+                    m_pDatabase->deleteAttachmentFromLocal(data.strObjectGUID);
+                }
+                else
+                {
+                    m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
+                }
                 return false;
             }
             stream = ret.arrayData;

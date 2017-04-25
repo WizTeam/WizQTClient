@@ -1930,7 +1930,14 @@ bool WizDatabase::deleteDocumentFromLocal(const QString& strDocumentGuid)
     return deleteDocument(doc, false);
 }
 
-
+bool WizDatabase::deleteAttachmentFromLocal(const QString& strAttachmentGuid)
+{
+    WIZDOCUMENTATTACHMENTDATA att;
+    if (!attachmentFromGuid(strAttachmentGuid, att))
+        return false;
+    //
+    return deleteAttachment(att, false, true, true);
+}
 
 /* ---------------------------------------------------------------------- */
 

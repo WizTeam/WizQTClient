@@ -146,6 +146,7 @@ struct IWizSyncableDatabase
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners) = 0;
     //
     virtual bool deleteDocumentFromLocal(const QString& strDocumentGuid) = 0;
+    virtual bool deleteAttachmentFromLocal(const QString& strAttachmentGuid) = 0;
 };
 
 
