@@ -945,6 +945,10 @@ bool WizDatabase::initAttachmentData(const QString& strGUID,
     if (!loadCompressedAttachmentData(strGUID, data.arrayData)) {
         return false;
     }
+    //
+    if (data.strDataMD5.isEmpty()) {
+        data.strDataMD5 = ::WizMd5StringNoSpaceJava(data.arrayData);
+    }
 
     return true;
 }
