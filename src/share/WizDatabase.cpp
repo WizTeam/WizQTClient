@@ -936,6 +936,16 @@ bool WizDatabase::initDocumentData(const QString& strGUID,
     return true;
 }
 
+bool WizDatabase::modifyAttachmentDataMd5(const QString& strGUID, const QString& md5)
+{
+    QString sql = QString("update %1 set ATTACHMENT_DATA_MD5='%2' where ATTACHMENT_GUID='%3'")
+            .arg(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT)
+            .arg(md5)
+            .arg(strGUID);
+    //
+    return execSQL(sql);
+}
+
 bool WizDatabase::initAttachmentData(const QString& strGUID,
                                       WIZDOCUMENTATTACHMENTDATAEX& data)
 {
@@ -948,6 +958,7 @@ bool WizDatabase::initAttachmentData(const QString& strGUID,
     //
     if (data.strDataMD5.isEmpty()) {
         data.strDataMD5 = ::WizMd5StringNoSpaceJava(data.arrayData);
+        modifyAttachmentDataMd5(strGUID, data.strDataMD5);
     }
 
     return true;

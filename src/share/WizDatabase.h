@@ -428,6 +428,8 @@ public:
                                       QByteArray& arrayData);
     bool saveCompressedAttachmentData(const CString& strGUID,
                                       const QByteArray& arrayData);
+    bool modifyAttachmentDataMd5(const QString& strGUID, const QString& md5);
+
 
     static CString getRootLocation(const CString& strLocation);
     static CString getLocationName(const CString& strLocation);
