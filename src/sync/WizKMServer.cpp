@@ -1667,6 +1667,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
     {
         if (!zip.open(data.arrayData))
         {
+            TOLOG(_T("Can't open document data!"));
             qDebug() << "Can't open document data";
             return false;
         }
@@ -1674,6 +1675,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
         QString html;
         if (!zip.readMainHtmlAndResources(html, allLocalResources))
         {
+            TOLOG(_T("Can't load html and resources!"));
             qDebug() << "Can't load html and resources";
             return false;
         }
@@ -1768,6 +1770,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
                         QByteArray resData;
                         if (!zip.extractFile("index_files/" + last.name, resData))
                         {
+                            TOLOG(_T("Can't extract resource from zip file!"));
                             qDebug() << "Can't extract resource from zip file";
                             return false;
                         }

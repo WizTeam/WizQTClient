@@ -629,6 +629,7 @@ bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total,
     if (!InitDocumentData(pDatabase, local.strGUID, local, forceUploadData))
     {
         pEvents->onError(_TR("Cannot init object data!"));
+        TOLOG(_T("Cannot init object data!"));
         return FALSE;
     }
     //
