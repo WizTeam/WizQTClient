@@ -181,11 +181,14 @@ public:
     //
     void clearJsonResult() { m_lastJsonResult = WIZSTANDARDRESULT(200, QString(""), QString("")); }
     WIZSTANDARDRESULT lastJsonResult() const { return m_lastJsonResult; }
+    void clearLocalError() { m_strLastLocalError.clear(); }
+    QString lastLocalError() const { return m_strLastLocalError; }
 protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
     //
     WIZSTANDARDRESULT m_lastJsonResult;
+    QString m_strLastLocalError;
 private:
     bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
     bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);

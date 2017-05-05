@@ -735,6 +735,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
 {
     bool forceUploadData = false;
     server.clearJsonResult();
+    server.clearLocalError();
     bool ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
     if (ret)
         return true;
@@ -746,7 +747,15 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         {
             local.nDataChanged = 1;
             forceUploadData = true;
-            return UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
+            ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
+            if (ret)
+                return true;
+            //
+            if (server.lastLocalError() == "WizErrorInvalidZip")
+            {
+                ////无效的zip文件////
+                pDatabase->deleteDocumentFromLocal(local.strGUID);
+            }
         }
         else
         {

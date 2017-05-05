@@ -1610,6 +1610,8 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
 
 bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp, bool withData, __int64& nServerVersion)
 {
+    m_strLastLocalError.clear();
+    //
     WIZDOCUMENTDATAEX data = dataTemp;
     //
     QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
@@ -1667,6 +1669,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
     {
         if (!zip.open(data.arrayData))
         {
+            m_strLastLocalError = "WizErrorInvalidZip";
             TOLOG(_T("Can't open document data!"));
             qDebug() << "Can't open document data";
             return false;
@@ -1675,6 +1678,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
         QString html;
         if (!zip.readMainHtmlAndResources(html, allLocalResources))
         {
+            m_strLastLocalError = "WizErrorInvalidZip";
             TOLOG(_T("Can't load html and resources!"));
             qDebug() << "Can't load html and resources";
             return false;
@@ -1770,6 +1774,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
                         QByteArray resData;
                         if (!zip.extractFile("index_files/" + last.name, resData))
                         {
+                            m_strLastLocalError = "WizErrorInvalidZip";
                             TOLOG(_T("Can't extract resource from zip file!"));
                             qDebug() << "Can't extract resource from zip file";
                             return false;
@@ -1805,6 +1810,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
                     QByteArray resData;
                     if (!zip.extractFile("index_files/" + last.name, resData))
                     {
+                        m_strLastLocalError = "WizErrorInvalidZip";
                         qDebug() << "Can't extract resource from zip file";
                         return false;
                     }
