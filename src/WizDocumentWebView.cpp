@@ -192,22 +192,27 @@ bool WizDocumentWebView::onPasteCommand()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-    if (isEditing() && !clip->image().isNull()) {
-        // save clipboard image to
-        QString strImagePath = noteResourcesPath();
-        CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
-        if (!clip->image().save(strFileName)) {
-            TOLOG("ERROR: Can't save clipboard image to file");
-            return false;
-        }
+    if (isEditing())
+    {
+        if (!clip->image().isNull())
+        {
+            // save clipboard image to
+            QString strImagePath = noteResourcesPath();
+            CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
+            if (!clip->image().save(strFileName)) {
+                TOLOG("ERROR: Can't save clipboard image to file");
+                return false;
+            }
 
-        QString strHtml;
-        if (!WizImage2Html(strFileName, strHtml, strImagePath))
-            return false;
+            QString strHtml;
+            if (!WizImage2Html(strFileName, strHtml, strImagePath))
+                return false;
+            //
+            editorCommandExecuteInsertHtml(strHtml, true);
+            //
+            return true;
+        }
         //
-        editorCommandExecuteInsertHtml(strHtml, true);
-        //
-        return true;
     }
     //
     return false;

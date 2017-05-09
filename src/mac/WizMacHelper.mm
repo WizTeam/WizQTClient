@@ -705,6 +705,39 @@ void wizMacSetClipboardText(const QString& strText)
 }
 
 
+void wizMacGetClipboardHtml(const QString& html, QString& url)
+{
+    NSArray* arr = [[NSPasteboard generalPasteboard] types];
+    for (int i = 0; i < arr.count; i++)
+    {
+        NSString* type = arr[i];
+        NSLog(@"%@", type);
+    }
+    //
+    NSString* WEB_ARCHIVE = @"Apple Web Archive pasteboard type";
+    if ([[[NSPasteboard generalPasteboard] types] containsObject:WEB_ARCHIVE]) {
+        NSData* archiveData = [[NSPasteboard generalPasteboard] dataForType:WEB_ARCHIVE];
+        if (archiveData)
+        {
+            NSError* error = nil;
+            id webArchive = [NSPropertyListSerialization propertyListWithData:archiveData options:NSPropertyListImmutable format:NULL error:&error];
+            if (error) {
+                return;
+            }
+            NSArray *subItems = [NSArray arrayWithArray:[webArchive objectForKey:@"WebSubresources"]];
+            NSPredicate *iPredicate = [NSPredicate predicateWithFormat:@"WebResourceMIMEType like 'image*'"];
+            NSArray *imagesArray = [subItems filteredArrayUsingPredicate:iPredicate];
+            for (int i=0; i<[imagesArray count]; i++) {
+                NSDictionary *sItem = [NSDictionary dictionaryWithDictionary:[imagesArray objectAtIndex:i]];
+                //NSImage *sImage = [NSImage imageWithData:[sItem valueForKey:@"WebResourceData"]];
+                // handle images
+            }
+        }
+    }
+    //
+    //TODO: not finished
+
+}
 
 
 #ifdef UsePLCrashReporter

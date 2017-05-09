@@ -16,6 +16,7 @@ set(wiznote_SOURCES_MAC
     mac/rmstore/RMStoreAppReceiptVerificator.mm
     mac/WizNotificationCenter.mm
     widgets/WizIAPDialog.cpp
+    mac/DTWebArchive.m
 )
 
 set(wiznote_HEADERS_MAC
@@ -31,6 +32,7 @@ set(wiznote_HEADERS_MAC
     mac/rmstore/RMStoreAppReceiptVerificator.h
     mac/WizNotificationCenter.h
     widgets/WizIAPDialog.h
+    mac/DTWebArchive.h
 )
 
 
