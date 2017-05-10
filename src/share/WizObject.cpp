@@ -861,8 +861,8 @@ bool WIZDOCUMENTPARAMDATA::fromJson(const Json::Value& value)
         //
         //strKbGuid = QString::fromStdString(value["kbGuid"].asString());
         strDocumentGuid = QString::fromStdString(value["docGuid"].asString());
-        strParamName = QString::fromStdString(value["name"].asString());
-        strParamValue = QString::fromStdString(value["value"].asString());
+        strName = QString::fromStdString(value["name"].asString());
+        strValue = QString::fromStdString(value["value"].asString());
         nVersion = value["version"].asInt64();
 
     } catch (Json::Exception& e) {
@@ -871,7 +871,7 @@ bool WIZDOCUMENTPARAMDATA::fromJson(const Json::Value& value)
     }
     //
     return !strDocumentGuid.isEmpty()
-            && !strParamName.isEmpty()
+            && !strName.isEmpty()
             && nVersion >= 0;
 }
 
@@ -879,8 +879,8 @@ bool WIZDOCUMENTPARAMDATA::toJson(QString kbGuid, Json::Value& value)
 {
     value["kbGuid"] = kbGuid.toStdString();
     value["docGuid"] = strDocumentGuid.toStdString();
-    value["name"] = strParamName.toStdString();
-    value["value"] = strParamValue.toStdString();
+    value["name"] = strName.toStdString();
+    value["value"] = strValue.toStdString();
     //
     return true;
 }

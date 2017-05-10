@@ -424,6 +424,33 @@ bool WizIndexBase::sqlToDeletedGuidDataArray(const CString& strSQL, CWizDeletedG
     }
 }
 
+bool WizIndexBase::sqlToDocumentParamDataArray(const CString& strSQL,
+                            CWizDocumentParamDataArray& arrayParam)
+{
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            WIZDOCUMENTPARAMDATA data;
+            data.strKbGUID = kbGUID();
+            data.strDocumentGuid = query.getStringField(0);
+            data.strName = query.getStringField(1);
+            data.strValue = query.getStringField(2);
+            data.nVersion = query.getInt64Field(3);
+
+            arrayParam.push_back(data);
+            query.nextRow();
+        }
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return logSQLException(e, strSQL);
+    }
+}
+
+
 bool WizIndexBase::sqlToStringArray(const CString& strSQL, int nFieldIndex, CWizStdStringArray& arrayString)
 {
     try
@@ -1310,8 +1337,8 @@ bool WizIndexBase::updateDocumentParam(const WIZDOCUMENTPARAMDATA& data)
     CString sql;
     sql.format(strFormat,
                STR2SQL(data.strDocumentGuid).utf16(),
-               STR2SQL(data.strParamName.toUpper()).utf16(),
-               STR2SQL(data.strParamValue).utf16(),
+               STR2SQL(data.strName.toUpper()).utf16(),
+               STR2SQL(data.strValue).utf16(),
                WizInt64ToStr(data.nVersion).utf16()
                );
     //

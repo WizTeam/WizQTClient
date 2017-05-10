@@ -388,6 +388,8 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
     //
     int nFlags;
     int nRate;
+    //
+    bool isAlwaysOnTop() const { return nFlags & wizDocumentAlwaysOnTop; }
 };
 
 struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
@@ -412,8 +414,8 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
 {
     QString strDocumentGuid;
-    QString strParamName;
-    QString strParamValue;
+    QString strName;
+    QString strValue;
     __int64 nVersion;
     //
     WIZDOCUMENTPARAMDATA();

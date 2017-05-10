@@ -29,6 +29,7 @@ protected:
     bool uploadStyleList();
     bool uploadDocumentList();
     bool uploadAttachmentList();
+    bool uploadParamList();
 
     bool uploadKeys();
     bool downloadKeys();

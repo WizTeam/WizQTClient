@@ -121,7 +121,12 @@ public:
     bool getStylesByTime(const WizOleDateTime& t, CWizStyleDataArray& arrayData);
 
     bool getModifiedStyles(CWizStyleDataArray& arrayData);
+    bool getModifiedParams(CWizDocumentParamDataArray& arrayData);
 
+    bool deleteDocumentParams(const QString& strDocumentGUID);
+    bool setDocumentParam(const QString& strDocumentGUID, const QString& strParamName, const QString& strParamValue);
+    bool setDocumentParams(const QString& strDocumentGUID, const CWizDocumentParamDataArray& arrayParam);
+    bool modifyDocumentParamVersion(const QString& strDocumentGUID, const QString& strParamName, __int64 version);
 
     /* Location(Folder) related operations */
     bool changeDocumentsLocation(const CString& strOldLocation, const CString& strNewLocation);

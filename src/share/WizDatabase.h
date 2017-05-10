@@ -159,6 +159,7 @@ public:
     virtual bool getModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
     virtual bool getModifiedTagList(CWizTagDataArray& arrayData);
     virtual bool getModifiedStyleList(CWizStyleDataArray& arrayData);
+    virtual bool getModifiedParamList(CWizDocumentParamDataArray& arrayData);
     virtual bool getModifiedDocumentList(CWizDocumentDataArray& arrayData);
     virtual bool getModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
     virtual bool getModifiedMessageList(CWizMessageDataArray& arrayData);
@@ -202,6 +203,8 @@ public:
 
     virtual bool onUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
+    virtual bool onUploadParam(const QString& strDocumentGuid, const QString& strName);
+
 
     // modify
     virtual bool modifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
@@ -387,6 +390,8 @@ public:
     bool updateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
     bool updateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     bool updateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
+    //
+    bool setDocumentFlags(const QString& strDocumentGuid, const QString& strFlags);
 
     bool updateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
                             const QString& strURL, int nFlags, bool notifyDataModify = true);

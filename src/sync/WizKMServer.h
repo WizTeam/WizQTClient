@@ -478,6 +478,11 @@ public:
     {
         return deleted_postList(arrayData);
     }
+    template <class TData>
+    bool postList(std::deque<WIZDOCUMENTPARAMDATA>& arrayData)
+    {
+        return param_postList(arrayData);
+    }
     //
     template <class TData>
     bool postData(TData& data, bool bWithData, __int64& nServerVersion)
@@ -535,6 +540,7 @@ enum WizKMSyncProgress
     syncUploadTagList,
     syncUploadStyleList,
     syncUploadDocumentList,
+    syncUploadParamList,
     syncUploadAttachmentList,
     syncDownloadTagList,
     syncDownloadStyleList,

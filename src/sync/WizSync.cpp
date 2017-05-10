@@ -27,6 +27,7 @@ void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
         2, //syncUploadTagList,
         2, //syncUploadStyleList,
         30, //syncUploadDocumentList,
+        1, //syncUploadParamList,
         10, //syncUploadAttachmentList,
         2, //syncDownloadTagList,
         2, //syncDownloadStyleList,
@@ -34,7 +35,7 @@ void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
         10, //syncDownloadFullDocumentList
         1, //syncDownloadParamList
         5, //syncDownloadAttachmentList,
-        25, //syncDownloadObjectData
+        24, //syncDownloadObjectData
     };
     //
     //
@@ -451,6 +452,25 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUME
     return pDatabase->getModifiedAttachmentList(arrayData);
 }
 
+template <class TData>
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTPARAMDATA>& arrayData)
+{
+    return pDatabase->getModifiedParamList(arrayData);
+}
+
+
+template <class TData>
+bool onUploadObject(IWizSyncableDatabase* pDatabase, const TData& data, const QString& strObjectType)
+{
+    return pDatabase->onUploadObject(data.strGUID, strObjectType);
+}
+
+template <class TData>
+bool onUploadObject(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTPARAMDATA& data, const QString& strObjectType)
+{
+    return pDatabase->onUploadParam(data.strDocumentGuid, data.strName);
+}
+
 
 template <class TData>
 bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, WizKMSyncProgress progress)
@@ -476,7 +496,7 @@ bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, I
         it != arrayData.end();
         it++)
     {
-        pDatabase->onUploadObject(it->strGUID, strObjectType);
+        onUploadObject<TData>(pDatabase, *it, strObjectType);
     }
     //
     return TRUE;
@@ -514,6 +534,16 @@ bool WizKMSync::uploadStyleList()
 }
 
 
+bool WizKMSync::uploadParamList()
+{
+    if (m_bGroup)
+    {
+        if (!m_pDatabase->isGroupAuthor())	//need author
+            return TRUE;
+    }
+    //
+    return UploadSimpleList<WIZDOCUMENTPARAMDATA>("param", m_pEvents, m_pDatabase, m_server, syncUploadParamList);
+}
 
 bool InitDocumentData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data, bool forceUploadData)
 {
@@ -1022,6 +1052,8 @@ bool WizKMSync::uploadAttachmentList()
     //
     return UploadList<WIZDOCUMENTATTACHMENTDATAEX, false>(m_server.kbInfo(), m_pEvents, m_pDatabase, m_server, "attachment", syncUploadAttachmentList);
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 bool WizKMSync::downloadDeletedList(__int64 nServerVersion)

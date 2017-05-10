@@ -679,6 +679,11 @@ bool WizDatabase::getModifiedStyleList(CWizStyleDataArray& arrayData)
     return getModifiedStyles(arrayData);
 }
 
+bool WizDatabase::getModifiedParamList(CWizDocumentParamDataArray& arrayData)
+{
+    return getModifiedParams(arrayData);
+}
+
 bool WizDatabase::getModifiedDocumentList(CWizDocumentDataArray& arrayData)
 {
     CWizDocumentDataArray docList;
@@ -983,6 +988,11 @@ bool WizDatabase::onUploadObject(const QString& strGUID,
     } else {
         return modifyObjectVersion(strGUID, strObjectType, 0);
     }
+}
+
+bool WizDatabase::onUploadParam(const QString& strDocumentGuid, const QString& strName)
+{
+    return modifyDocumentParamVersion(strDocumentGuid, strName, 0);
 }
 
 bool WizDatabase::modifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
@@ -3132,6 +3142,12 @@ bool WizDatabase::updateAttachments(const CWizDocumentAttachmentDataArray& array
     emit attachmentsUpdated();
 
     return !bHasError;
+}
+
+
+bool WizDatabase::setDocumentFlags(const QString& strDocumentGuid, const QString& strFlags)
+{
+    return setDocumentParam(strDocumentGuid, TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS, strFlags);
 }
 
 void removeUnusedImages(const QString& mainHtml, const QString& strResourcePath)

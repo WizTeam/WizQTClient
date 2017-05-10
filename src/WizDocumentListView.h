@@ -136,6 +136,7 @@ private:
     bool isDocumentsAllCanDelete(const CWizDocumentDataArray& arrayDocument);
     bool isDocumentsWithGroupDocument(const CWizDocumentDataArray& arrayDocument);
     bool isDocumentsWithDeleted(const CWizDocumentDataArray& arrayDocument);
+    bool isDocumentsAlwaysOnTop(const CWizDocumentDataArray& arrayDocument);
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument, bool searchResult = false);
@@ -194,6 +195,7 @@ public Q_SLOTS:
     void on_action_deleteDocument();
     void on_action_encryptDocument();
     void on_action_cancelEncryption();
+    void on_action_alwaysOnTop();
     void on_action_addToShortcuts();
 
     void on_action_moveDocument();

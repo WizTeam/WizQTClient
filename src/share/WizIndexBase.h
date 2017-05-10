@@ -183,6 +183,9 @@ protected:
     bool sqlToDocumentDataArray(const CString& strSQL,
                                 CWizDocumentDataArray& arrayDocument);
 
+    bool sqlToDocumentParamDataArray(const CString& strSQL,
+                                CWizDocumentParamDataArray& arrayParam);
+
     bool sqlToDocumentAttachmentDataArray(const CString& strSQL,
                                           CWizDocumentAttachmentDataArray& arrayAttachment);
 

@@ -1820,11 +1820,67 @@ bool WizIndex::getModifiedStyles(CWizStyleDataArray& arrayData)
 	return sqlToStyleDataArray(strSQL, arrayData);
 }
 
+bool WizIndex::getModifiedParams(CWizDocumentParamDataArray& arrayData)
+{
+    CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT_PARAM, FIELD_LIST_WIZ_DOCUMENT_PARAM);
+    return sqlToDocumentParamDataArray(strSQL, arrayData);
+}
+
+
 bool WizIndex::getModifiedDocuments(CWizDocumentDataArray& arrayData)
 {
 	CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
     return sqlToDocumentDataArray(strSQL, arrayData);
 }
+
+
+bool WizIndex::deleteDocumentParams(const QString& strDocumentGUID)
+{
+    CString strSQL = WizFormatString2("update %1 set PARAM_VALUE=null, WIZ_VERSION=-1 where DOCUMENT_GUID='%2'",
+                                      TABLE_NAME_WIZ_DOCUMENT_PARAM,
+                                      strDocumentGUID);
+    if (!execSQL(strSQL))
+        return false;
+
+    return true;
+}
+
+bool WizIndex::setDocumentParam(const QString& strDocumentGUID, const QString& strParamName, const QString& strParamValue)
+{
+    WIZDOCUMENTPARAMDATA data;
+    data.strKbGUID = kbGUID();
+    data.strDocumentGuid = strDocumentGUID;
+    data.strName = strParamName;
+    data.strValue = strParamValue;
+    data.nVersion = -1;
+    //
+    return updateDocumentParam(data);
+}
+
+bool WizIndex::setDocumentParams(const QString& strDocumentGuid, const CWizDocumentParamDataArray& arrayParam)
+{
+    deleteDocumentParams(strDocumentGuid);
+
+    CWizDocumentParamDataArray::const_iterator it;
+    for (it = arrayParam.begin(); it != arrayParam.end(); it++) {
+        if (!setDocumentParam(strDocumentGuid, it->strName, it->strValue)) {
+            TOLOG2("Failed to set document param: %1=%2", it->strName, it->strValue);
+        }
+    }
+    //
+    return true;
+}
+
+bool WizIndex::modifyDocumentParamVersion(const QString& strDocumentGUID, const QString& strParamName, __int64 version)
+{
+    QString sql = WizFormatString4("update %1 set wiz_version=%2 where DOCUMENT_GUID='%3' and PARAM_NAME=%4",
+                                   TABLE_NAME_WIZ_DOCUMENT_PARAM,
+                                   WizInt64ToStr(version),
+                                   strDocumentGUID,
+                                   STR2SQL(strParamName));
+    return execSQL(sql);
+}
+
 
 CString WizIndex::getLocationArraySQLWhere(const CWizStdStringArray& arrayLocation)
 {
@@ -1835,20 +1891,20 @@ CString WizIndex::getLocationArraySQLWhere(const CWizStdStringArray& arrayLocati
             strWhere = WizFormatString1(" DOCUMENT_LOCATION like %1 ", STR2SQL(*it + "%"));
         } else {
             strWhere = strWhere + WizFormatString1(" or DOCUMENT_LOCATION like %1 ", STR2SQL(*it + "%"));
-		}
-	}
+        }
+    }
 
     return CString(" (") + strWhere + ")";
 }
 
 bool WizIndex::getModifiedDocuments(const CWizStdStringArray& arrayLocation, CWizDocumentDataArray& arrayData)
 {
-	if (arrayLocation.empty())
+    if (arrayLocation.empty())
         return true;
 
-	CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
+    CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
 
-	CString strWhere2 = getLocationArraySQLWhere(arrayLocation);
+    CString strWhere2 = getLocationArraySQLWhere(arrayLocation);
 
     strSQL = strSQL + " and " + strWhere2;
 
@@ -1857,19 +1913,19 @@ bool WizIndex::getModifiedDocuments(const CWizStdStringArray& arrayLocation, CWi
 
 bool WizIndex::getModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
 {
-	CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);
-	return sqlToDocumentAttachmentDataArray(strSQL, arrayData);
+    CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);
+    return sqlToDocumentAttachmentDataArray(strSQL, arrayData);
 }
 
 bool WizIndex::getModifiedAttachments(const CWizStdStringArray& arrayLocation, CWizDocumentAttachmentDataArray& arrayData)
 {
-	CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);
+    CString strSQL = formatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);
 
-	CString strWhere2 = getLocationArraySQLWhere(arrayLocation);
+    CString strWhere2 = getLocationArraySQLWhere(arrayLocation);
 
     strSQL = strSQL + WizFormatString1(" and DOCUMENT_GUID in (select DOCUMENT_GUID from WIZ_DOCUMENT where %1)", strWhere2);
 
-	return sqlToDocumentAttachmentDataArray(strSQL, arrayData);
+    return sqlToDocumentAttachmentDataArray(strSQL, arrayData);
 }
 
 bool WizIndex::objectExists(const QString& strGUID, const QString& strType, bool& bExists)
