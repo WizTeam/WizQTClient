@@ -22,6 +22,7 @@ protected:
     bool downloadStyleList(__int64 nServerVersion);
     bool downloadDocumentList(__int64 nServerVersion);
     bool downloadAttachmentList(__int64 nServerVersion);
+    bool downloadParamList(__int64 nServerVersion);
 
     bool uploadDeletedList();
     bool uploadTagList();
@@ -152,6 +153,11 @@ private:
     bool onDownloadList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
     {
         return m_pDatabase->onDownloadAttachmentList(arrayData);
+    }
+    template <class TData>
+    bool onDownloadList(const std::deque<WIZDOCUMENTPARAMDATA>& arrayData)
+    {
+        return m_pDatabase->onDownloadParamList(arrayData);
     }
 };
 

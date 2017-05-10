@@ -785,6 +785,8 @@ struct WIZOBJECTVERSION_XMLRPC : public WIZOBJECTVERSION
             && data.getInt64("attachment_version", nAttachmentVersion)
             && data.getInt64("deleted_version", nDeletedGUIDVersion);
         //
+        data.getInt64("param_version", nParamVersion);
+        //
         return bRet;
     }
 };
@@ -1966,5 +1968,101 @@ bool WizKMDatabaseServer::category_getAll(QString& str)
     }
     //
     return TRUE;
+}
+
+
+
+template <class TData>
+bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
+{
+    const WIZUSERINFOBASE userInfo = server.userInfo();
+    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1count=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    url = url.arg(nStartVersion).arg(nCountPerPage);
+    //
+    Json::Value doc;
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
+    if (!jsonRet)
+    {
+        TOLOG1("Failed to call %1", url);
+        return false;
+    }
+    //
+    Json::Value result = doc["result"];
+    if (!result || result.isNull())
+    {
+        TOLOG1("No result while calling %1", url);
+        return false;
+    }
+    if (!result.isArray())
+    {
+        TOLOG1("Result is not an array while calling %1", url);
+        return false;
+    }
+    //
+    for (int i = 0; i < result.size(); i++)
+    {
+        Json::Value elem = result[i];
+        TData data;
+        if (!data.fromJson(elem))
+        {
+            TOLOG2("Failed to convert from json %1 while calling %2", QString::fromStdString(elem.toStyledString()), url);
+            return false;
+        }
+        //
+        arrayRet.push_back(data);
+    }
+    //
+    return true;
+}
+
+
+
+template <class TData>
+bool postJsonList(WizKMDatabaseServer& server, QString urlPath, std::deque<TData>& arrayData)
+{
+    const WIZUSERINFOBASE userInfo = server.userInfo();
+    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    //
+    Json::Value doc(Json::arrayValue);
+    //
+    int index = 0;
+    for (auto elem : arrayData)
+    {
+        Json::Value v;
+        if (!elem.toJson(userInfo.strKbGUID, v))
+        {
+            TOLOG1("Failed to convert data to json while calling %1", url);
+            return false;
+        }
+        //
+        doc[index] = v;
+        index++;
+    }
+    //
+    Json::Value ret;
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, "POST", doc, ret);
+    if (!jsonRet)
+    {
+        TOLOG1("Failed to call %1", url);
+        return false;
+    }
+    //
+    return true;
+}
+
+
+
+bool WizKMDatabaseServer::param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
+{
+    QString urlPath = "/ks/param/getlist";
+    //
+    return getJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
+}
+
+bool WizKMDatabaseServer::param_postList(std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
+{
+    QString urlPath = "/ks/param/putlist";
+    //
+    return postJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, arrayRet);
 }
 

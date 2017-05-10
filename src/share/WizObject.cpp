@@ -462,6 +462,8 @@ WIZDOCUMENTDATA::WIZDOCUMENTDATA()
     , nIndexed(0)
     , nInfoChanged(1)
     , nDataChanged(1)
+    , nFlags(0)
+    , nRate(0)
 {
 }
 
@@ -843,4 +845,42 @@ bool WIZUSERMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue &data)
     data.getStr("title", strTitle);
     data.getStr("note", strNote);
     return 	TRUE;
+}
+
+//---------------------------------------------------------
+
+WIZDOCUMENTPARAMDATA::WIZDOCUMENTPARAMDATA()
+    : nVersion(-1)
+{
+
+}
+
+bool WIZDOCUMENTPARAMDATA::fromJson(const Json::Value& value)
+{
+    try {
+        //
+        //strKbGuid = QString::fromStdString(value["kbGuid"].asString());
+        strDocumentGuid = QString::fromStdString(value["docGuid"].asString());
+        strParamName = QString::fromStdString(value["name"].asString());
+        strParamValue = QString::fromStdString(value["value"].asString());
+        nVersion = value["version"].asInt64();
+
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
+    return !strDocumentGuid.isEmpty()
+            && !strParamName.isEmpty()
+            && nVersion >= 0;
+}
+
+bool WIZDOCUMENTPARAMDATA::toJson(QString kbGuid, Json::Value& value)
+{
+    value["kbGuid"] = kbGuid.toStdString();
+    value["docGuid"] = strDocumentGuid.toStdString();
+    value["name"] = strParamName.toStdString();
+    value["value"] = strParamValue.toStdString();
+    //
+    return true;
 }

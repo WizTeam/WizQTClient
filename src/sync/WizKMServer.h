@@ -153,6 +153,7 @@ struct WIZOBJECTVERSION
     __int64 nStyleVersion;
     __int64 nAttachmentVersion;
     __int64 nDeletedGUIDVersion;
+    __int64 nParamVersion;
     //
     WIZOBJECTVERSION()
     {
@@ -161,6 +162,7 @@ struct WIZOBJECTVERSION
         nStyleVersion = -1;
         nAttachmentVersion = -1;
         nDeletedGUIDVersion = -1;
+        nParamVersion = -1;
     }
 };
 
@@ -174,6 +176,7 @@ public:
 
     const WIZKBINFO& kbInfo();
     void setKBInfo(const WIZKBINFO& info);
+    const WIZUSERINFOBASE& userInfo() const { return m_userInfo; }
     //
     bool isGroup() const;
     bool isUseNewSync() const;
@@ -223,6 +226,9 @@ public:
     bool tag_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZTAGDATA>& arrayRet);
     bool style_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZSTYLEDATA>& arrayRet);
     bool deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet);
+    //
+    bool param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet);
+    bool param_postList(std::deque<WIZDOCUMENTPARAMDATA>& arrayRet);
 
     bool tag_postList(std::deque<WIZTAGDATA>& arrayTag);
     bool style_postList(std::deque<WIZSTYLEDATA>& arrayStyle);
@@ -435,6 +441,12 @@ public:
     {
         return attachment_getList(nCountPerPage, nVersion, arrayRet);
     }
+    template <class TData>
+    bool getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
+    {
+        return param_getList(nCountPerPage, nVersion, arrayRet);
+    }
+
     ///////////////////////////////////////////////////////
     ////下载列表//////////////
     //
@@ -528,6 +540,7 @@ enum WizKMSyncProgress
     syncDownloadStyleList,
     syncDownloadSimpleDocumentList,
     syncDownloadFullDocumentList,
+    syncDownloadParamList,
     syncDownloadAttachmentList,
     syncDownloadObjectData
 };

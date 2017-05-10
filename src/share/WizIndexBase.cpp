@@ -160,6 +160,10 @@ bool WizIndexBase::updateTableStructure(int oldVersion)
         exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
     }
     //
+    if (oldVersion < 5) {
+        exec("ALTER TABLE 'WIZ_DOCUMENT_PARAM' ADD 'WIZ_VERSION' int default -1;");
+    }
+    //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
 }
@@ -441,10 +445,59 @@ bool WizIndexBase::sqlToStringArray(const CString& strSQL, int nFieldIndex, CWiz
 }
 
 
+bool WizIndexBase::initDocumentExFields(CWizDocumentDataArray& arrayDocument, const CWizStdStringArray& arrayGUID, const std::map<QString, int>& mapDocumentIndex)
+{
+    CString strDocumentGUIDs;
+    ::WizStringArrayToText(arrayGUID, strDocumentGUIDs, _T("\',\'"));
+    //
+    CString strParamSQL = WizFormatString1(_T("select DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE from WIZ_DOCUMENT_PARAM where (PARAM_NAME='DOCUMENT_FLAGS' or PARAM_NAME='RATE' or PARAM_NAME='SYSTEM_TAGS') and DOCUMENT_GUID in('%1')"), strDocumentGUIDs);
+    //
+    CppSQLite3Query queryParam = m_db.execQuery(strParamSQL);
+    //
+    while (!queryParam.eof())
+    {
+        CString strGUID = queryParam.getStringField(0);
+        CString strParamName = queryParam.getStringField(1);
+        //
+        std::map<QString, int>::const_iterator it = mapDocumentIndex.find(strGUID);
+        ATLASSERT(it != mapDocumentIndex.end());
+        if (it != mapDocumentIndex.end())
+        {
+            int index = it->second;
+            ATLASSERT(index >= 0 && index < int(arrayDocument.size()));
+            if (index >= 0 && index < int(arrayDocument.size()))
+            {
+                WIZDOCUMENTDATA& data = arrayDocument[index];
+                ATLASSERT(strGUID == data.strGUID);
+                if (strGUID == data.strGUID)
+                {
+                    if (strParamName == _T("DOCUMENT_FLAGS"))
+                    {
+                        int nFlags = queryParam.getIntField(2);
+                        data.nFlags = nFlags;
+                    }
+                    else if (strParamName == _T("RATE"))
+                    {
+                        int nRate = queryParam.getIntField(2);
+                        data.nRate = nRate;
+                    }
+                }
+            }
+        }
+        //
+        queryParam.nextRow();
+    }
+    //
+    return true;
+}
+
 bool WizIndexBase::sqlToDocumentDataArray(const CString& strSQL, CWizDocumentDataArray& arrayDocument)
 {
     try
     {
+        CWizStdStringArray arrayGUID;
+        std::map<QString, int> mapDocumentIndex;
+        //
         CppSQLite3Query query = m_db.execQuery(strSQL);
         while (!query.eof())
         {
@@ -474,10 +527,20 @@ bool WizIndexBase::sqlToDocumentDataArray(const CString& strSQL, CWizDocumentDat
             data.nVersion = query.getInt64Field(documentVersion);
             data.nInfoChanged = query.getIntField(documentINFO_CHANGED);
             data.nDataChanged = query.getIntField(documentDATA_CHANGED);
-
+            //
+            arrayGUID.push_back(data.strGUID);
             arrayDocument.push_back(data);
+            //
+            mapDocumentIndex[data.strGUID] = int(arrayDocument.size() - 1);
+            //
             query.nextRow();
         }
+        //
+        if (!arrayDocument.empty())
+        {
+            initDocumentExFields(arrayDocument, arrayGUID, mapDocumentIndex);
+        }
+        //
         return true;
     }
     catch (const CppSQLite3Exception& e)
@@ -1238,6 +1301,26 @@ bool WizIndexBase::deleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 
     return true;
 }
+
+bool WizIndexBase::updateDocumentParam(const WIZDOCUMENTPARAMDATA& data)
+{
+    QString strFormat = "replace into %1 (%2) values (%3)";
+    strFormat = strFormat.arg(TABLE_NAME_WIZ_DOCUMENT_PARAM, FIELD_LIST_WIZ_DOCUMENT_PARAM, PARAM_LIST_WIZ_DOCUMENT_PARAM);
+    //
+    CString sql;
+    sql.format(strFormat,
+               STR2SQL(data.strDocumentGuid).utf16(),
+               STR2SQL(data.strParamName.toUpper()).utf16(),
+               STR2SQL(data.strParamValue).utf16(),
+               WizInt64ToStr(data.nVersion).utf16()
+               );
+    //
+    if (!execSQL(sql))
+        return false;
+    //
+    return true;
+}
+
 
 bool WizIndexBase::getAllTags(CWizTagDataArray& arrayTag)
 {

@@ -6,6 +6,10 @@
 #include <QMap>
 #include "WizQtHelper.h"
 
+namespace Json {
+class Value;
+}
+
 const UINT WIZ_USERGROUP_ADMIN = 0;
 const UINT WIZ_USERGROUP_SUPER = 10;
 const UINT WIZ_USERGROUP_EDITOR = 50;
@@ -381,6 +385,9 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
 
     // field: local data modified
     long nDataChanged;
+    //
+    int nFlags;
+    int nRate;
 };
 
 struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
@@ -402,6 +409,19 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     bool bSkipped;
 };
 
+struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
+{
+    QString strDocumentGuid;
+    QString strParamName;
+    QString strParamValue;
+    __int64 nVersion;
+    //
+    WIZDOCUMENTPARAMDATA();
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value);
+};
+
+typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;
 
 struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
 {

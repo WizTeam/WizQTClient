@@ -790,7 +790,7 @@ bool WizDatabase::onDownloadAttachmentList(const CWizDocumentAttachmentDataArray
 
     return updateAttachments(arrayAttach);
 }
-bool WizDatabase::onDownloadMessages(const CWizUserMessageDataArray& arrayData)
+bool WizDatabase::onDownloadMessageList(const CWizUserMessageDataArray& arrayData)
 {
     CWizMessageDataArray arrayMsg;
 
@@ -802,6 +802,17 @@ bool WizDatabase::onDownloadMessages(const CWizUserMessageDataArray& arrayData)
 
     return updateMessages(arrayMsg);
 }
+
+bool WizDatabase::onDownloadParamList(const CWizDocumentParamDataArray& arrayData)
+{
+    for (auto param : arrayData) {
+        if (!updateDocumentParam(param))
+            return false;
+    }
+    //
+    return true;
+}
+
 
 bool WizDatabase::onDownloadDocument(const WIZDOCUMENTDATAEX& data)
 {

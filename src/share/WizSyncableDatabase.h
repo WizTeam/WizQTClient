@@ -17,6 +17,9 @@ struct IWizSyncableDatabase
     virtual bool onDownloadStyleList(const CWizStyleDataArray& arrayData) = 0;
     virtual bool onDownloadDocumentList(const CWizDocumentDataArray& arrayData) = 0;
     virtual bool onDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData) = 0;
+    virtual bool onDownloadMessageList(const CWizUserMessageDataArray& arrayMessage) = 0;
+    virtual bool onDownloadParamList(const CWizDocumentParamDataArray& arrayData) = 0;
+
     virtual QString getDocumentFileName(const QString& strGUID) const = 0;
 
     virtual qint64 getObjectLocalVersion(const QString& strObjectGUID,
@@ -123,7 +126,6 @@ struct IWizSyncableDatabase
     virtual bool getBizData(const QString& bizGUID, WIZBIZDATA& biz) = 0;
 
     //virtual CComPtr<IWizDocument> GetDocumentByGUID(const QString& strDocumentGUID) = 0;
-    virtual bool onDownloadMessages(const CWizUserMessageDataArray& arrayMessage) = 0;
 
     virtual void clearLastSyncError() = 0;
     virtual QString getLastSyncErrorMessage() = 0;

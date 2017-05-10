@@ -99,7 +99,8 @@ private:
     QString m_strFileName;
     QString m_strKbGUID;
     bool m_bUpdating;
-
+private:
+    bool initDocumentExFields(CWizDocumentDataArray& arrayDocument, const CWizStdStringArray& arrayGUID, const std::map<QString, int>& mapDocumentIndex);
 protected:
     bool logSQLException(const CppSQLite3Exception& e, const CString& strSQL);
 
@@ -190,6 +191,7 @@ protected:
 
     bool sqlToBizUserDataArray(const QString& strSQL,
                                CWizBizUserDataArray& arrayUser);
+    //
 
 public:
     bool createMessageEx(const WIZMESSAGEDATA& data);
@@ -215,6 +217,8 @@ public:
     bool createAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data);
     bool modifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data);
     bool deleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data);
+    //
+    bool updateDocumentParam(const WIZDOCUMENTPARAMDATA& data);
 
 Q_SIGNALS:
     void tagCreated(const WIZTAGDATA& tag);
@@ -434,8 +438,8 @@ ATTACHMENT_DATA_MD5=%s, WIZ_VERSION=%s"
 
 /* ------------------------ WIZ_DOCUMENT_PARAM ------------------------ */
 #define TABLE_NAME_WIZ_DOCUMENT_PARAM   "WIZ_DOCUMENT_PARAM"
-#define FIELD_LIST_WIZ_DOCUMENT_PARAM   "DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE"
-#define PARAM_LIST_WIZ_DOCUMENT_PARAM   "%s, %s, %s"
+#define FIELD_LIST_WIZ_DOCUMENT_PARAM   "DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE, WIZ_VERSION"
+#define PARAM_LIST_WIZ_DOCUMENT_PARAM   "%s, %s, %s, %s"
 #define FIELD_LIST_WIZ_DOCUMENT_PARAM_MODIFY    "PARAM_VALUE=%s"
 #define TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS  "DOCUMENT_FLAGS"
 

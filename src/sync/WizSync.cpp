@@ -32,8 +32,9 @@ void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
         2, //syncDownloadStyleList,
         5, //syncDownloadSimpleDocumentList,
         10, //syncDownloadFullDocumentList
+        1, //syncDownloadParamList
         5, //syncDownloadAttachmentList,
-        26, //syncDownloadObjectData
+        25, //syncDownloadObjectData
     };
     //
     //
@@ -245,6 +246,12 @@ bool WizKMSync::syncCore()
     //
     if (m_pEvents->isStop())
         return FALSE;
+    //
+    m_pEvents->onStatus(QObject::tr("Download param list"));
+    if (!downloadParamList(versionServer.nParamVersion))
+    {
+        m_pEvents->onError(QObject::tr("Cannot download param list!"));
+    }
     //
     m_pEvents->onStatus(QObject::tr("Download attachments list"));
     if (!downloadAttachmentList(versionServer.nAttachmentVersion))
@@ -1045,6 +1052,12 @@ bool WizKMSync::downloadAttachmentList(__int64 nServerVersion)
 }
 
 
+bool WizKMSync::downloadParamList(__int64 nServerVersion)
+{
+    return downloadList<WIZDOCUMENTPARAMDATA>(nServerVersion, "param", syncDownloadParamList);
+}
+
+
 bool WizCompareObjectByTypeAndTime(const WIZOBJECTDATA& data1, const WIZOBJECTDATA& data2)
 {
     if (data1.eObjectType != data2.eObjectType)
@@ -1340,7 +1353,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
     //
     __int64 nNewVersion = WizKMSync::getObjectsVersion<WIZUSERMESSAGEDATA>(nOldVersion, arrayMessage);
     //
-    pDatabase->onDownloadMessages(arrayMessage);
+    pDatabase->onDownloadMessageList(arrayMessage);
     pDatabase->setObjectVersion("Messages", nNewVersion);
 
     for (WIZUSERMESSAGEDATA it : arrayMessage)
