@@ -796,6 +796,20 @@ bool CppSQLite3DB::tableExists(const CString& strTable)
 	return (nRet > 0);
 }
 
+bool CppSQLite3DB::columnExists(const CString& strTable, const CString& strColumn)
+{
+    try
+    {
+        CString strSQL = WizFormatString1("select * from %1 limit 0, 1", strTable);
+        CppSQLite3Query query = execQuery(strSQL);
+        return query.fieldIndex(strColumn) != -1;
+    }
+    catch (const CppSQLite3Exception& )
+    {
+        return false;
+    }
+}
+
 int CppSQLite3DB::execDML(const CString& strSQL)
 {
 	checkDB();

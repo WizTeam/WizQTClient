@@ -697,7 +697,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     , m_userInfo(kbInfo)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
-    //m_userInfo.strKbServer = "http://localhost:4001";
+    m_userInfo.strKbServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
@@ -1976,7 +1976,7 @@ template <class TData>
 bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
 {
     const WIZUSERINFOBASE userInfo = server.userInfo();
-    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1count=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1&size=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
     url = url.arg(nStartVersion).arg(nCountPerPage);
     //
     Json::Value doc;
@@ -2054,14 +2054,14 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, std::deque<TData
 
 bool WizKMDatabaseServer::param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
 {
-    QString urlPath = "/ks/param/getlist";
+    QString urlPath = "/ks/param/download";
     //
     return getJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 
 bool WizKMDatabaseServer::param_postList(std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
 {
-    QString urlPath = "/ks/param/putlist";
+    QString urlPath = "/ks/param/upload";
     //
     return postJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, arrayRet);
 }

@@ -31,22 +31,23 @@ bool WizIndexBase::open(const CString& strFileName)
 
     try {
         m_db.open(strFileName);
+        //
+        for (int i = 0; i < TABLE_COUNT; i++) {
+            if (!checkTable(g_arrayTableName[i]))
+                return false;
+        }
         // upgrade table structure if table structure have been changed
         if (m_db.tableExists(TABLE_NAME_WIZ_META)) {
             int nVersion = getTableStructureVersion().toInt();
             if (nVersion < QString(WIZ_TABLE_STRUCTURE_VERSION).toInt()) {
                 updateTableStructure(nVersion);
+                setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
             }
         }
     } catch (const CppSQLite3Exception& e) {
         return logSQLException(e, "open database");
     }
 
-    for (int i = 0; i < TABLE_COUNT; i++) {
-        if (!checkTable(g_arrayTableName[i]))
-            return false;
-    }
-    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
 
     return true;
 }
@@ -143,28 +144,41 @@ bool WizIndexBase::updateTableStructure(int oldVersion)
 {
     qDebug() << "table structure version : " << oldVersion << "  update to version " << WIZ_TABLE_STRUCTURE_VERSION;
     if (oldVersion < 1) {
-        exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
+        if (!m_db.columnExists("WIZ_TAG", "TAG_POS")) {
+            exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
+        }
     }
     //
     if (oldVersion < 2) {
-        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
-        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
+        if (!m_db.columnExists("WIZ_MESSAGE", "DELETE_STATUS")) {
+            exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
+        }
+        if (!m_db.columnExists("WIZ_MESSAGE", "LOCAL_CHANGED")) {
+            exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
+        }
     }
 
     if (oldVersion < 3) {
-        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
+        if (!m_db.columnExists("WIZ_MESSAGE", "MESSAGE_NOTE")) {
+            exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
+        }
     }
     //
     if (oldVersion < 4) {
-        exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
-        exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
+        if (!m_db.columnExists("WIZ_DOCUMENT", "INFO_CHANGED")) {
+            exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
+        }
+        if (!m_db.columnExists("WIZ_DOCUMENT", "DATA_CHANGED")) {
+            exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
+        }
     }
     //
     if (oldVersion < 5) {
-        exec("ALTER TABLE 'WIZ_DOCUMENT_PARAM' ADD 'WIZ_VERSION' int default -1;");
+        if (!m_db.columnExists("WIZ_DOCUMENT_PARAM", "WIZ_VERSION")) {
+            exec("ALTER TABLE 'WIZ_DOCUMENT_PARAM' ADD 'WIZ_VERSION' int default -1;");
+        }
     }
     //
-    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
 }
 

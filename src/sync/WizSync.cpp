@@ -177,6 +177,16 @@ bool WizKMSync::syncCore()
         return FALSE;
     }
     //
+    if (m_pEvents->isStop())
+        return FALSE;
+    //
+    if (!uploadParamList()) {
+        m_pEvents->onError(QObject::tr("Cannot upload params!"));
+    }
+    //
+    if (m_pEvents->isStop())
+        return FALSE;
+    //
     //上传完笔记之后再上传文件夹等设置
     m_pEvents->onStatus(QObject::tr("Sync settings"));
     uploadKeys();

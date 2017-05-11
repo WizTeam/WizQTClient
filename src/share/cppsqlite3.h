@@ -183,6 +183,7 @@ public:
     void close();
 
     bool tableExists(const CString& strTable);
+    bool columnExists(const CString& strTable, const CString& strColumn);
 
     int execDML(const CString& strSQL);
 

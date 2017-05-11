@@ -74,6 +74,7 @@ bool WizDocumentListViewDocumentItem::isContainsAttachment() const
 int WizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
 {
     int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInSummary : DocTypeEncrytedInTitle) : DocTypeNormal;
+    nType = m_data.doc.isAlwaysOnTop() ? (DocTypeAlwaysOnTop | nType) : nType;
     nType = isContainsAttachment() ? (DocTypeContainsAttachment | nType) : nType;
     return nType;
 }
@@ -363,6 +364,9 @@ bool WizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) c
 
     if (other.type() == WizDocumentListType_Section)
     {
+        if(document().isAlwaysOnTop())
+            return true;
+
         const WizDocumentListViewSectionItem* secItem = dynamic_cast<const WizDocumentListViewSectionItem*>(&other);
         return compareWithSectionItem(secItem);
     }
@@ -371,6 +375,18 @@ bool WizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) c
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
 
 
+    if (pOther->m_data.doc.isAlwaysOnTop() || m_data.doc.isAlwaysOnTop())
+    {
+        if (pOther->m_data.doc.isAlwaysOnTop() && m_data.doc.isAlwaysOnTop())
+        {
+        }
+        else
+        {
+            bool bTop = m_data.doc.isAlwaysOnTop();
+            return bTop;
+        }
+    }
+    //
     switch (m_nSortingType) {
     case SortingByCreatedTime:
         // default compare use create time     //There is a bug in Qt sort. if two items have same time, use title to sort.
@@ -763,6 +779,9 @@ bool WizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) con
     if (other.type() == WizDocumentListType_Document)
     {
         const WizDocumentListViewDocumentItem* docItem = dynamic_cast<const WizDocumentListViewDocumentItem*>(&other);
+        if(docItem->document().isAlwaysOnTop())
+            return false;
+
         return compareWithDocumentItem(docItem);
     }
     else
