@@ -276,8 +276,8 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
 {
     WIZSTYLEDATA();
 
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-    virtual bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
 
     bool equalForSync(const WIZSTYLEDATA& data) const;
     static CString versionName() { return CString("style_version"); }
@@ -420,7 +420,7 @@ struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
     //
     WIZDOCUMENTPARAMDATA();
     bool fromJson(const Json::Value& value);
-    bool toJson(QString kbGuid, Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
 };
 
 typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;

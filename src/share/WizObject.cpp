@@ -333,35 +333,46 @@ bool WIZSTYLEDATA::equalForSync(const WIZSTYLEDATA& data) const
             && nFlagIndex == data.nFlagIndex;
 }
 
-bool WIZSTYLEDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
-{
-    data.getStr("style_description", strDescription);
 
-    return data.getStr("style_guid", strGUID)
-        && data.getStr("style_name", strName)
-        && data.getColor("style_textcolor", crTextColor)
-        && data.getColor("style_backcolor", crBackColor)
-        && data.getBool("style_text_bold", bTextBold)
-        && data.getInt("style_flagindex", nFlagIndex)
-        && data.getTime("dt_info_modified", tModified)
-        && data.getInt64("version", nVersion);
+bool WIZSTYLEDATA::fromJson(const Json::Value& value)
+{
+    try {
+        //
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
+        strGUID = QString::fromStdString(value["styleGuid"].asString());
+        strName = QString::fromStdString(value["name"].asString());
+        crTextColor = WizStringToColor(QString::fromStdString(value["textColor"].asString()));
+        crBackColor = WizStringToColor(QString::fromStdString(value["backColor"].asString()));
+        bTextBold = value["textBold"].asInt() == 1;
+        nFlagIndex = value["flagIndex"].asInt();
+        tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
+        nVersion = value["version"].asInt64();
+
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
+    return !strGUID.isEmpty()
+            && !strName.isEmpty()
+            && nVersion >= 0;
 }
 
-bool WIZSTYLEDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
+bool WIZSTYLEDATA::toJson(QString kbGuid, Json::Value& value) const
 {
-    data.addString("style_description", strDescription);;
-
-    data.addString("style_guid", strGUID);
-    data.addString("style_name", strName);
-    data.addColor("style_textcolor", crTextColor);
-    data.addColor("style_backcolor", crBackColor);
-    data.addBool("style_text_bold", bTextBold);
-    data.addInt("style_flagindex", nFlagIndex);
-    data.addTime("dt_info_modified", tModified);
-    data.addInt64("version", nVersion);;
-
-    return TRUE;
+    value["kbGuid"] = kbGuid.toStdString();
+    value["styleGuid"] = strGUID.toStdString();
+    value["name"] = strName.toStdString();
+    value["textColor"] = ::WizColorToString(crTextColor).toStdString();
+    value["backColor"] = ::WizColorToString(crBackColor).toStdString();
+    value["textBold"] = bTextBold ? 1 : 0;
+    value["flagIndex"] = nFlagIndex;
+    value["modified"] = tModified.toTime_t() * 1000;
+    value["created"] = tModified.toTime_t() * 1000;
+    //
+    return true;
 }
+
 
 bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw()
 {
@@ -875,7 +886,7 @@ bool WIZDOCUMENTPARAMDATA::fromJson(const Json::Value& value)
             && nVersion >= 0;
 }
 
-bool WIZDOCUMENTPARAMDATA::toJson(QString kbGuid, Json::Value& value)
+bool WIZDOCUMENTPARAMDATA::toJson(QString kbGuid, Json::Value& value) const
 {
     value["kbGuid"] = kbGuid.toStdString();
     value["docGuid"] = strDocumentGuid.toStdString();

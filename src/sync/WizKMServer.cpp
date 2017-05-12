@@ -1934,11 +1934,6 @@ bool WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nVersion, std::
     return getList<WIZTAGDATA, WIZTAGDATA>("tag.getList", nCountPerPage, nVersion, arrayRet);
 }
 
-bool WizKMDatabaseServer::style_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZSTYLEDATA>& arrayRet)
-{
-    return getList<WIZSTYLEDATA, WIZSTYLEDATA>("style.getList", nCountPerPage, nVersion, arrayRet);
-}
-
 
 bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
@@ -1947,10 +1942,6 @@ bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, s
 bool WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
 {
     return postList<WIZTAGDATA, WIZTAGDATA>("tag.postList", "tags", arrayTag);
-}
-bool WizKMDatabaseServer::style_postList(std::deque<WIZSTYLEDATA>& arrayStyle)
-{
-    return postList<WIZSTYLEDATA, WIZSTYLEDATA>("style.postList", "styles", arrayStyle);
 }
 bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
 {
@@ -2018,7 +2009,7 @@ bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage
 
 
 template <class TData>
-bool postJsonList(WizKMDatabaseServer& server, QString urlPath, std::deque<TData>& arrayData)
+bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque<TData>& arrayData)
 {
     const WIZUSERINFOBASE userInfo = server.userInfo();
     QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
@@ -2052,6 +2043,20 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, std::deque<TData
 
 
 
+bool WizKMDatabaseServer::style_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZSTYLEDATA>& arrayRet)
+{
+    QString urlPath = "/ks/style/download";
+    //
+    return getJsonList<WIZSTYLEDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
+}
+
+bool WizKMDatabaseServer::style_postList(const std::deque<WIZSTYLEDATA>& arrayStyle)
+{
+    QString urlPath = "/ks/style/upload";
+    //
+    return postJsonList<WIZSTYLEDATA>(*this, urlPath, arrayStyle);
+}
+
 bool WizKMDatabaseServer::param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
 {
     QString urlPath = "/ks/param/download";
@@ -2059,10 +2064,10 @@ bool WizKMDatabaseServer::param_getList(int nCountPerPage, __int64 nStartVersion
     return getJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 
-bool WizKMDatabaseServer::param_postList(std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
+bool WizKMDatabaseServer::param_postList(const std::deque<WIZDOCUMENTPARAMDATA>& arrayParam)
 {
     QString urlPath = "/ks/param/upload";
     //
-    return postJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, arrayRet);
+    return postJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, arrayParam);
 }
 
