@@ -1967,7 +1967,7 @@ template <class TData>
 bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
 {
     const WIZUSERINFOBASE userInfo = server.userInfo();
-    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1&size=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1&count=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
     url = url.arg(nStartVersion).arg(nCountPerPage);
     //
     Json::Value doc;
