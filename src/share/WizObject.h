@@ -282,12 +282,13 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
     bool equalForSync(const WIZSTYLEDATA& data) const;
     static CString versionName() { return CString("style_version"); }
     static CString objectName() { return CString("style"); }
+    bool valid();
 
     CString strGUID;
     CString strName;
     CString strDescription;
-    COLORREF crTextColor;
-    COLORREF crBackColor;
+    QColor crTextColor;
+    QColor crBackColor;
     bool bTextBold;
     int nFlagIndex;
     WizOleDateTime tModified;

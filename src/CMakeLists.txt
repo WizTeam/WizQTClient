@@ -197,6 +197,7 @@ set(wiznote_SOURCES
     WizPositionDelegate.cpp
     main.cpp
     WizInitBizCertDialog.cpp
+    share/WizDocumentStyle.cpp
 )
 
 set(wiznote_HEADERS
@@ -363,6 +364,7 @@ set(wiznote_HEADERS
     share/WizThreads.h
     share/WizThreads_p.h
     WizInitBizCertDialog.h
+    share/WizDocumentStyle.h
 )
 
 set(wiznote_FORMS
