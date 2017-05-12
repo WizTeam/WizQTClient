@@ -30,6 +30,8 @@ public:
     int getLastErrorCode() const;
     QString getLastErrorMessage() const;
     //
+    void setLastError(int code, QString message) { m_nLastErrorCode = code; m_strLastErrorMessage = message; }
+    //
     virtual void onXmlRpcError() {}
 protected:
     BOOL getReturnValueInStringMap(const QString& strMethodName, std::map<QString, QString>& mapRet, const QString& strName, QString& strValue);
