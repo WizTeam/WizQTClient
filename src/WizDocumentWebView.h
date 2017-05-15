@@ -355,7 +355,7 @@ public Q_SLOTS:
     void editorCommandExecuteInsertDate();
     void editorCommandExecuteInsertTime();
     void editorCommandExecuteRemoveFormat();
-    void editorCommandExecuteFormatMatch();
+    void editorCommandExecuteFormatPainter();
     void editorCommandExecuteInsertHorizontal();
     void editorCommandExecuteInsertCheckList();
     void editorCommandExecuteInsertImage();

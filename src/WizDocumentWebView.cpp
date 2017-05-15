@@ -1846,9 +1846,11 @@ void WizDocumentWebView::editorCommandExecuteRemoveFormat()
     editorCommandExecuteCommand("removeFormat");
 }
 
-
-void WizDocumentWebView::editorCommandExecuteFormatMatch()
+void WizDocumentWebView::editorCommandExecuteFormatPainter()
 {
+    WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
+    analyzer.logAction("formatPainter");
+    editorCommandExecuteCommand("formatPainter");
 }
 
 void WizDocumentWebView::editorCommandExecuteInsertCode()

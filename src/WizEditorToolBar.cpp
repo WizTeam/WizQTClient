@@ -1046,13 +1046,14 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     connect(m_comboFontSize, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontSize_indexChanged(const QString&)));
 
-    m_btnFormatMatch = new CWizToolButton(this);
-    m_btnFormatMatch->setIcon(::WizLoadSkinIcon(skin, "actionFormatMatch"));
-    //m_btnFormatMatch->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatMatch")).size());
-    m_btnFormatMatch->setToolTip(tr("Format Match"));
-    m_btnFormatMatch->setPosition(CWizToolButton::left);
-    connect(m_btnFormatMatch, SIGNAL(clicked()), SLOT(on_btnFormatMatch_clicked()));
-
+    m_btnFormatPainter = new CWizToolButton(this);
+    m_btnFormatPainter->setIcon(::WizLoadSkinIcon(skin, "formatter"));
+    //m_btnFormatPainter->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
+    m_btnFormatPainter->setToolTip(tr("Format Painter"));
+    m_btnFormatPainter->setCheckable(true);
+    m_btnFormatPainter->setPosition(CWizToolButton::left);
+    connect(m_btnFormatPainter, SIGNAL(clicked()), SLOT(on_btnFormatPainter_clicked()));
+    //
     m_btnRemoveFormat = new CWizToolButton(this);
     m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat"));
     //m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
@@ -1349,10 +1350,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     QWidget*  moveableButtonContainer4 = createMoveAbleWidget(this);
     QHBoxLayout* moveableLayout4 = qobject_cast<QHBoxLayout*>(moveableButtonContainer4->layout());
     //
-    //not support in wizeditor
-    m_btnFormatMatch->setVisible(false);
-    //moveableLayout4->addWidget(m_btnFormatMatch);
-    //
+    moveableLayout4->addWidget(m_btnFormatPainter);
     moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
     moveableLayout4->addWidget(m_btnRemoveFormat);
     moveableLayout4->addSpacing(12);
@@ -2427,11 +2425,12 @@ void WizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
     setFontPointSize(strSize);
 }
 
-void WizEditorToolBar::on_btnFormatMatch_clicked()
+void WizEditorToolBar::on_btnFormatPainter_clicked()
 {
-    WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatMatch");
+    WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
     if (m_editor) {
-        m_editor->editorCommandExecuteFormatMatch();
+        m_btnFormatPainter->setChecked(m_btnFormatPainter->isChecked());
+        m_editor->editorCommandExecuteRemoveFormat();
     }
 }
 

@@ -44,7 +44,7 @@ private:
     CWizToolComboBox* m_comboFontSize;
     CWizToolButtonColor* m_btnForeColor;
     CWizToolButtonColor* m_btnBackColor;
-    CWizToolButton* m_btnFormatMatch;
+    CWizToolButton* m_btnFormatPainter;
     CWizToolButton* m_btnRemoveFormat;
     CWizToolButton* m_btnBold;
     CWizToolButton* m_btnItalic;
@@ -120,7 +120,7 @@ protected Q_SLOTS:
     void on_comboParagraph_indexChanged(int index);
     void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
-    void on_btnFormatMatch_clicked();
+    void on_btnFormatPainter_clicked();
     void on_btnRemoveFormat_clicked();
     void on_btnForeColor_clicked();
     void on_btnBackColor_clicked();

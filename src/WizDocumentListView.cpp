@@ -323,6 +323,12 @@ void WizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDocu
 
 int WizDocumentListView::addDocument(const WIZDOCUMENTDATAEX& doc, bool sort)
 {
+    int oldPosition = 0;
+    if (QScrollBar* scrollBar = verticalScrollBar())
+    {
+        oldPosition = scrollBar->value();
+    }
+    //
     addDocument(doc);
 #ifdef QT_DEBUG
     qDebug() << "add document: " << doc.strTitle;
@@ -351,11 +357,16 @@ int WizDocumentListView::addDocument(const WIZDOCUMENTDATAEX& doc, bool sort)
                 sortItems();
                 m_bSortDocumentsAfterAdded = false;
                 //
+                if (QScrollBar* scrollBar = verticalScrollBar())
+                {
+                    scrollBar->setValue(oldPosition);
+                }
                 //
                 QList<QListWidgetItem*> ls = selectedItems();
                 if (!ls.empty())
                 {
-                    scrollToItem(ls[0], EnsureVisible);
+                    QListWidgetItem* item = ls[0];
+                    scrollToItem(item, EnsureVisible);
                 }
             }
 
