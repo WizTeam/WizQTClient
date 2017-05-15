@@ -120,12 +120,12 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_shareMenu->addAction(WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL, this, SLOT(onEmailActionClicked()));
 //    m_shareBtn->setMenu(shareMenu);
 
-//    m_historyBtn = new CellButton(CellButton::ImageOnly, this);
-//    m_historyBtn->setFixedHeight(nTitleHeight);
-//    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+5");
-//    m_historyBtn->setShortcut(QKeySequence::fromString(historyShortcut));
-//    m_historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history (Alt + 5)"));
-//    connect(m_historyBtn, SIGNAL(clicked()), SLOT(onHistoryButtonClicked()));
+    WizCellButton* historyBtn = new WizCellButton(WizCellButton::ImageOnly, this);
+    historyBtn->setFixedHeight(nTitleHeight);
+    QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+5");
+    historyBtn->setShortcut(QKeySequence::fromString(historyShortcut));
+    historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history (Alt + 5)"));
+    connect(historyBtn, SIGNAL(clicked()), SLOT(onHistoryButtonClicked()));
 
 //    m_emailBtn = new CellButton(CellButton::ImageOnly, this);
 //    m_emailBtn->setFixedHeight(nTitleHeight);
@@ -172,7 +172,7 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_separateBtn);
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_shareBtn);
-//    layoutInfo2->addWidget(m_historyBtn);
+    layoutInfo2->addWidget(historyBtn);
 //    layoutInfo2->addWidget(m_emailBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_attachBtn);

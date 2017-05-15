@@ -56,6 +56,8 @@ WIZSTYLEDATA WizDocumentStyle::getStyle(QString styleGuid)
 {
     if (styleGuid.isEmpty())
         return WIZSTYLEDATA();
-    return m_data->getStyle(styleGuid);
+    return WIZSTYLEDATA();
+    //暂时不开启样式功能
+    //return m_data->getStyle(styleGuid);
 }
 
