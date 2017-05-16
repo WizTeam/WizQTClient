@@ -475,7 +475,22 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
     p->restore();
 }
 
-class CWizToolButton : public QToolButton
+
+WizDblclickableToolButton::WizDblclickableToolButton(QWidget *parent)
+    : QToolButton(parent)
+{
+
+}
+
+void WizDblclickableToolButton::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    QToolButton::mouseDoubleClickEvent(event);
+    //
+    emit dblClicked();
+}
+
+
+class CWizToolButton : public WizDblclickableToolButton
 {
 public:
     enum Position {
@@ -486,7 +501,7 @@ public:
     };
 
     CWizToolButton(QWidget* parent = 0)
-        : QToolButton(parent)
+        : WizDblclickableToolButton(parent)
         , m_colorHoverBorder("#c8dae8")
         , m_colorHoverFill("#e8f0f3")
         , m_colorSunkenBorder("#0072c4")
@@ -519,14 +534,14 @@ public:
 protected:
     virtual void leaveEvent(QEvent* event)
     {
-        QToolButton::leaveEvent(event);
+        WizDblclickableToolButton::leaveEvent(event);
 
         update();
     }
 
     virtual void enterEvent(QEvent* event)
     {
-        QToolButton::enterEvent(event);
+        WizDblclickableToolButton::enterEvent(event);
 
         update();
     }
@@ -542,8 +557,9 @@ protected:
         }
 #endif
         //
-        QToolButton::mouseReleaseEvent(ev);
+        WizDblclickableToolButton::mouseReleaseEvent(ev);
     }
+
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -1053,6 +1069,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnFormatPainter->setCheckable(true);
     m_btnFormatPainter->setPosition(CWizToolButton::left);
     connect(m_btnFormatPainter, SIGNAL(clicked()), SLOT(on_btnFormatPainter_clicked()));
+    connect(m_btnFormatPainter, SIGNAL(dblClicked()), SLOT(on_btnFormatPainter_dblClicked()));
     //
     m_btnRemoveFormat = new CWizToolButton(this);
     m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat"));
@@ -1424,7 +1441,11 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     //
     bool InsertOrderedList = QString::fromStdString(d["InsertOrderedList"].asString()) == "1";
     bool InsertUnorderedList = QString::fromStdString(d["InsertUnorderedList"].asString()) == "1";
+    //
     bool canInsertTable = QString::fromStdString(d["canCreateTable"].asString()) == "1";
+    bool canCreateCode = QString::fromStdString(d["canCreateCode"].asString()) == "1";
+    bool canCreateTodo = QString::fromStdString(d["canCreateTodo"].asString()) == "1";
+    int formatPainterStatus = QString::fromStdString(d["formatPainterStatus"].asString()).toInt();
 
     //
     bool blockFormatSetted = false;
@@ -1473,7 +1494,11 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     m_btnOrderedList->setChecked(InsertOrderedList);
     m_btnUnorderedList->setChecked(InsertUnorderedList);
 
-    //m_btnTable->setEnabled(canInsertTable);
+    m_btnTable->setEnabled(canInsertTable);
+    m_btnInsertCode->setEnabled(canCreateCode);
+    m_btnCheckList->setEnabled(canCreateTodo);
+    m_btnFormatPainter->setEnabled(formatPainterStatus != 0);
+    m_btnFormatPainter->setChecked(formatPainterStatus == 2);
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
@@ -2429,10 +2454,19 @@ void WizEditorToolBar::on_btnFormatPainter_clicked()
 {
     WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
     if (m_editor) {
-        m_btnFormatPainter->setChecked(m_btnFormatPainter->isChecked());
-        m_editor->editorCommandExecuteRemoveFormat();
+        m_btnFormatPainter->setChecked(true);
+        m_editor->editorCommandExecuteFormatPainter(false);
     }
 }
+void WizEditorToolBar::on_btnFormatPainter_dblClicked()
+{
+    WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
+    if (m_editor) {
+        m_btnFormatPainter->setChecked(true);
+        m_editor->editorCommandExecuteFormatPainter(true);
+    }
+}
+
 
 void WizEditorToolBar::on_btnRemoveFormat_clicked()
 {
@@ -2663,3 +2697,4 @@ void WizEditorToolBar::on_editor_copyImageLink_triggered()
     QClipboard* clip = QApplication::clipboard();
     clip->setText(m_strImageSrc);
 }
+

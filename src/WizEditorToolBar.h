@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QTimer>
 #include <functional>
+#include <QToolButton>
 
 class QFontDialog;
 class QString;
@@ -18,6 +19,19 @@ class CWizToolComboBox;
 class CWizToolComboBoxFont;
 class WizExplorerApp;
 class WizTipsWidget;
+
+
+class WizDblclickableToolButton : public QToolButton
+{
+    Q_OBJECT
+
+public:
+    explicit WizDblclickableToolButton(QWidget *parent = Q_NULLPTR);
+protected:
+    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+Q_SIGNALS:
+    void dblClicked();
+};
 
 
 class WizEditorToolBar : public QWidget
@@ -121,6 +135,7 @@ protected Q_SLOTS:
     void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatPainter_clicked();
+    void on_btnFormatPainter_dblClicked();
     void on_btnRemoveFormat_clicked();
     void on_btnForeColor_clicked();
     void on_btnBackColor_clicked();
