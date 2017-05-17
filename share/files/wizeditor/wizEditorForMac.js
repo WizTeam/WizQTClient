@@ -7854,7 +7854,7 @@ var ENV = {
                 underscore: '{dependencyUrl}/underscore.js'
             },
             init: function () {
-                var dependencyUrl = ENV.options.dependencyUrl;
+                var dependencyUrl = ENV.options.dependencyUrl.replace(/\\/g, '/');
 
                 _filter(ENV.dependency.files.css);
                 _filter(ENV.dependency.files.cursor);
@@ -13448,11 +13448,13 @@ domUtils.moveOutFromTableContainer = function (container) {
             return;
         }
 
-        var childList, dom, i,
+        var childList, dom, target, i,
             before = false;
         childList = _container.childNodes;
+        target = mainDom;
         for (i = childList.length - 1; i >= 0; i--) {
             dom = childList[i];
+            // 遍历 chlidren 时，在 table 之前 before 为 true；在 table 之后 before 为 false
             if (dom.nodeType === 1 &&
                 (domUtils.hasClass(dom, CONST.CLASS.TABLE_BODY) || domUtils.isTag(dom, ['table', CONST.TAG.TMP_TAG]))) {
                 if (domUtils.hasClass(dom, CONST.CLASS.TABLE_BODY) || domUtils.isTag(dom, 'table')) {
@@ -13460,13 +13462,16 @@ domUtils.moveOutFromTableContainer = function (container) {
                 }
                 continue;
             }
-            domUtils.before(dom, mainDom, !before);
+            domUtils.before(dom, target, !before);
+            // 往前放的时候， 必须每次更换 target，否则 DOM 顺序会错误
+            if (before) {
+                target = dom;
+            }
         }
 
-        if (mainDom.childNodes.length == 0) {
-            // 如果 table 容器内清空，则删除 容器的 样式 & class
-            domUtils.removeClass(mainDom, CONST.CLASS.TABLE_CONTAINER);
-            domUtils.attr(mainDom, {style: ''});
+        if (_container.childNodes.length == 0) {
+            // 如果 table 容器内清空，则删除 容器
+            mainDom.parentNode.removeChild(mainDom);
         }
     }
 };
@@ -15094,7 +15099,7 @@ function getStyle (start) {
         target.tagList.push({name: tagName, enabled: true});
     }
 
-    // console.log(target);
+    console.log(target);
 }
 
 function analyseStyle (obj, styleList, result) {
@@ -15203,11 +15208,10 @@ var formatPainterCore = {
         getStyle(start, startOffset);
 
         _event.bind();
-
         wizStyle.insertStyle({
             id: CONST.ID.FORMAT_PAINTER_STYLE,
             name: CONST.NAME.TMP_STYLE
-        }, 'body {cursor:url(' + ENV.dependency.files.cursor.formatPainter + '), auto;}');
+        }, 'body {cursor:url("' + ENV.dependency.files.cursor.formatPainter + '"), auto;}');
         return 2;
     },
     off: function () {
@@ -15221,8 +15225,8 @@ var formatPainterCore = {
         return 1;
     },
     status: function () {
-        if (ENV.client.type.isPhone || ENV.client.type.isPad) {
-            // 手机、Pad 禁止使用 格式刷
+        if (ENV.readonly || ENV.client.type.isPhone || ENV.client.type.isPad) {
+            // 阅读模式下所有客户端 以及 编辑模式下手机、Pad 禁止使用 格式刷
             return 0;
         }
 
@@ -20743,6 +20747,22 @@ var _event = {
             // 保证自动修正 cell 后，还能正常显示光标，所以不再判断 zone.table
             // var zone = tableZone.getZone();
             // if (check.tableContainer && zone.table !== check.tableContainer.querySelector('table')) {
+            var range = rangeUtils.getRange(), tableContainer;
+            if (range && !range.collapsed) {
+                tableContainer = tableUtils.getContainer(range.startContainer);
+                if (tableContainer) {
+                    // 避免拖拽文字进入 tableContainer 边缘
+                    domUtils.moveOutFromTableContainer(tableContainer);
+                }
+                // table container 在 <p> 内时， 拖拽多行文本到 容器末尾，
+                // 会导致部分文本在新的 container 内
+                tableContainer = tableUtils.getContainer(range.endContainer);
+                if (tableContainer) {
+                    // 避免拖拽文字进入 tableContainer 边缘
+                    domUtils.moveOutFromTableContainer(tableContainer);
+                }
+            }
+
             if (check.tableContainer) {
                 //如果光标定位在 table & table container 之间，则定位到 table 内第一个 td
                 cell = check.tableContainer.querySelectorAll('td');
