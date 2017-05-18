@@ -2022,7 +2022,7 @@ var ENV = require('./common/env'),
 
 var WizEditor = {
     version: '1.1',
-    // clearWizDom: function(){},
+    clearWizDom: function(){},
     /**
      * 初始化 修订编辑
      * @param options
@@ -2719,7 +2719,7 @@ var ENV = require('../common/env'),
 (function () {
     var modifyNodeStyle = domUtils.modifyNodeStyle;
     //针对 修订特殊处理 image
-    domUtils.modifyNodeStyle = function (item, style, attr) {
+    domUtils.modifyNodeStyle = function (item, style, attr, isLast) {
         var p;
         if (item.nodeType == 1 &&
             attr && attr[CONST.ATTR.SPAN_DELETE] && domUtils.isTag(item, 'img')) {
@@ -2741,7 +2741,7 @@ var ENV = require('../common/env'),
         } else if (attr && attr[CONST.ATTR.SPAN_DELETE] && amendUtils.getWizDeleteParent(item)) {
             return item;
         } else {
-            return modifyNodeStyle(item, style, attr);
+            return modifyNodeStyle(item, style, attr, isLast);
         }
     };
     var addDomForGetDomList = domUtils.addDomForGetDomList;
@@ -6354,8 +6354,9 @@ var CSS = {
     '}' +
     '.cm-tab-wrap-hack:after { content: ""; }' +
     'span.CodeMirror-selectedtext { background: none; }' +
-    '.CodeMirror-activeline-background, .CodeMirror-selected {visibility:hidden;}' +
-    '.CodeMirror-focused .CodeMirror-activeline-background, .CodeMirror-focused .CodeMirror-selected {visibility:visible;}',
+    '.CodeMirror-activeline-background, .CodeMirror-selected {visibility:hidden;transition: visibility 0ms 100ms;}' +
+    '.CodeMirror-focused .CodeMirror-activeline-background, .CodeMirror-focused .CodeMirror-selected {visibility:visible;}' +
+    '',
     theme: {
         'base16-dark': '.cm-s-base16-dark.CodeMirror { background: #151515; color: #e0e0e0; }' +
         '.cm-s-base16-dark div.CodeMirror-selected { background: #303030; }' +
@@ -6590,7 +6591,7 @@ var ENV = require('../common/env'),
 var ModeOptions = [];
 var ThemeOptions = [];
 
-(function() {
+(function () {
     var key;
     for (key in CONST.CODE_MIRROR.MODE) {
         if (CONST.CODE_MIRROR.MODE.hasOwnProperty(key)) {
@@ -6721,6 +6722,17 @@ var codeUtils = {
         }
         return container;
     },
+    focusToFirst: function(cm) {
+        cm.focus();
+        cm.setCursor({line: 0, ch: 0});
+    },
+    focusToLast: function(cm) {
+        cm.focus();
+        cm.setCursor({
+            line: cm.lastLine(),
+            ch: cm.getLineHandle(cm.lastLine()).text.length
+        });
+    },
     getContainer: function (target) {
         return domUtils.getParentByClass(target, CONST.CLASS.CODE_CONTAINER, true);
     },
@@ -6837,12 +6849,9 @@ var codeUtils = {
                     // 找到 container 后，设置对应光标位置
                     cm.focus();
                     if (direct.x > 0 || direct.y > 0) {
-                        cm.setCursor({line: 0, ch: 0});
+                        codeUtils.focusToFirst(cm);
                     } else {
-                        cm.setCursor({
-                            line: cm.lastLine(),
-                            ch: cm.getLineHandle(cm.lastLine()).text.length
-                        });
+                        codeUtils.focusToLast(cm);
                     }
                 }
             }
@@ -6924,13 +6933,8 @@ var codeUtils = {
             lineWrapping: (ENV.client.type.isPhone || ENV.client.type.isPad),
             lineNumbers: true,
             matchBrackets: true,
-            mode: CONST.CODE_MIRROR.MODE[mode]
-        };
-        if (ENV.readonly) {
-            options.readOnly = true;
-            options.styleActiveLine = false;
-        } else {
-            options.extraKeys = {
+            mode: CONST.CODE_MIRROR.MODE[mode],
+            extraKeys: {
                 Tab: function (cm) {
                     var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
                     cm.replaceSelection(spaces);
@@ -6950,7 +6954,12 @@ var codeUtils = {
                 'Cmd-Y': function () {
                     historyUtils.redo();
                 }
-            };
+            }
+        };
+        if (ENV.readonly) {
+            options.readOnly = true;
+            options.styleActiveLine = false;
+        } else {
             options.styleActiveLine = true;
         }
 
@@ -6985,6 +6994,7 @@ var codeUtils = {
                 head = range.head,
                 newCur;
             var curCursorPos = [anchor.line, anchor.ch, head.line, head.ch].join('.');
+            var codeContainer, cm;
             // 选中区间时，不处理光标
             if (obj.origin === "+move" &&
                 anchor.line == head.line && anchor.ch == head.ch &&
@@ -6994,13 +7004,31 @@ var codeUtils = {
                     while (newCur && !domUtils.isTag(newCur, 'br') && domUtils.isEmptyDom(newCur)) {
                         newCur = domUtils.getPreviousNode(newCur);
                     }
-                    rangeUtils.setRange(newCur, domUtils.getEndOffset(newCur));
+                    if (newCur) {
+                        codeContainer = codeUtils.getContainer(newCur);
+                        if (codeContainer) {
+                            cm = codeContainer.codeMirror;
+                            codeUtils.focusToLast(cm);
+                        } else {
+                            ENV.doc.body.setAttribute('contenteditable', true);
+                            rangeUtils.setRange(newCur, domUtils.getEndOffset(newCur));
+                        }
+                    }
                 } else if (cursorDirect === 1) {
                     newCur = domUtils.getNextNode(container);
                     while (newCur && !domUtils.isTag(newCur, 'br') && domUtils.isEmptyDom(newCur)) {
                         newCur = domUtils.getNextNode(newCur);
                     }
-                    rangeUtils.setRange(newCur, 0);
+                    if (newCur) {
+                        codeContainer = codeUtils.getContainer(newCur);
+                        if (codeContainer) {
+                            cm = codeContainer.codeMirror;
+                            codeUtils.focusToFirst(cm);
+                        } else {
+                            ENV.doc.body.setAttribute('contenteditable', true);
+                            rangeUtils.setRange(newCur, 0);
+                        }
+                    }
                 }
             }
 
@@ -7019,19 +7047,22 @@ var codeUtils = {
             }
         });
 
-        if (!ENV.readonly) {
-            cm.on('focus', function (cm, obj) {
+        cm.on('focus', function (cm, obj) {
+            if (!ENV.readonly) {
                 // Chrome 49 内核 body contenteditable = true 时，
                 // codeMirror 内的 focus 方法会导致页面跳跃，
                 // 导致 横向滚动条移动时 页面纵向滚动条会快速移动到光标位置
                 // 因此 必须 利用 focus 、blur 事件调整 body 的 contenteditable
                 ENV.doc.body.setAttribute('contenteditable', false);
-
-            });
-            cm.on('blur', function (cm, obj) {
+            }
+        });
+        cm.on('blur', function (cm, obj) {
+            if (!ENV.readonly) {
                 ENV.doc.body.setAttribute('contenteditable', true);
-            });
+            }
+        });
 
+        if (!ENV.readonly) {
             // 在 cm 生成时生成 codeTools
             codeUtils.initTools(container);
         }
@@ -8224,8 +8255,11 @@ var historyUtils = {
 
         prevHistoryObj = historyUtils.stackIndex > 0 ? historyUtils.stack[historyUtils.stackIndex - 1] : null;
         if (prevHistoryObj &&
-            prevHistoryObj.nextChange.type == CONST.HISTORY.TYPE.CODE_MIRROR) {
+            prevHistoryObj.nextChange.type == CONST.HISTORY.TYPE.CODE_MIRROR &&
+            historyObj.nextChange.type == CONST.HISTORY.TYPE.CODE_MIRROR) {
             // CodeMirror 的 History
+
+            // console.log('history  ---- code mirror');
 
             prevCmContainerId = prevHistoryObj.cmContainerId;
             cmContainerId = prevHistoryObj.nextChange.cmContainerId;
@@ -8267,6 +8301,8 @@ var historyUtils = {
 
         } else {
             // 普通正文编辑 的 History
+            // console.log('history  ---- html');
+
             historyObj.type = CONST.HISTORY.TYPE.COMMON;
 
             canSave = {add: true, replace: false, direct: 0};
@@ -8313,6 +8349,8 @@ var historyUtils = {
         // } else {
         //     console.log('stack.length = ' + historyUtils.stack.length + ', index: ' + historyUtils.stackIndex);
         }
+
+        // console.log(historyUtils.stack);
     },
     restoreCodeMirror: function (restoreType, historyObj) {
         if (!historyUtils.enable || !historyObj) {
@@ -11776,7 +11814,7 @@ var domUtils = {
         if (startDom == endDom && startOffset != endOffset) {
             isText = (startDom.nodeType == 3);
             if (isText && !startDom.parentNode.getAttribute(CONST.ATTR.SPAN_DELETE)) {
-                startDom = noSplit ? startDom : domUtils.splitRangeText(startDom, startOffset, endOffset);
+                startDom = noSplit ? startDom : domUtils.splitRangeText(startDom, startOffset, endOffset, false);
                 endDom = startDom;
                 changeStart = true;
                 changeEnd = true;
@@ -11789,14 +11827,14 @@ var domUtils = {
             }
         } else if (startDom !== endDom) {
             if (startDom.nodeType == 3 && !startDom.parentNode.getAttribute(CONST.ATTR.SPAN_DELETE)) {
-                startDom = noSplit ? startDom : domUtils.splitRangeText(startDom, startOffset, null);
+                startDom = noSplit ? startDom : domUtils.splitRangeText(startDom, startOffset, null, false);
                 changeStart = true;
             } else if (startDom.nodeType == 1 && startDom.childNodes.length > 0 && startOffset < startDom.childNodes.length) {
                 startDom = startDom.childNodes[startOffset];
                 changeStart = true;
             }
             if (endDom.nodeType == 3 && endOffset > 0 && !endDom.parentNode.getAttribute(CONST.ATTR.SPAN_DELETE)) {
-                endDom = noSplit ? endDom : domUtils.splitRangeText(endDom, 0, endOffset);
+                endDom = noSplit ? endDom : domUtils.splitRangeText(endDom, 0, endOffset, true);
                 changeEnd = true;
             } else if (!domUtils.isSelfClosingTag(endDom) && endDom.nodeType == 1 && endOffset > 0) {
                 endDom = domUtils.getLastDeepChild(endDom.childNodes[endOffset - 1]);
@@ -12953,9 +12991,10 @@ var domUtils = {
      * @param node
      * @param start
      * @param end
+     * @param isLast
      * @returns {*}
      */
-    splitRangeText: function (node, start, end) {
+    splitRangeText: function (node, start, end, isLast) {
         if (!domUtils.isUsableTextNode(node)) {
             return node;
         }
@@ -12968,7 +13007,11 @@ var domUtils = {
             //the range is all text in this node
             // td,th 必须特殊处理，否则会导致 td 被添加 修订样式
             if (p.childNodes.length > 1 || domUtils.isTag(p, ['td', 'th'])) {
-                p.insertBefore(s, node);
+                if (isLast) {
+                    p.insertBefore(s, node);
+                } else {
+                    p.insertBefore(s, node.nextSibling);
+                }
                 s.appendChild(node);
             } else {
                 //if textNode is the only child node, return its parent node.
@@ -13309,7 +13352,7 @@ domUtils.modifyChildNodesStyle = function (dom, style, attr) {
         }
     }
 };
-domUtils.modifyNodeStyle = function (item, style, attr) {
+domUtils.modifyNodeStyle = function (item, style, attr, isLast) {
     if (item.nodeType == 1) {
         if (domUtils.isSelfClosingTag(item)) {
             domUtils.modifyStyle(item, style, attr);
@@ -13318,7 +13361,7 @@ domUtils.modifyNodeStyle = function (item, style, attr) {
         }
 
     } else if (domUtils.isUsableTextNode(item)) {
-        item = domUtils.splitRangeText(item, null, null);
+        item = domUtils.splitRangeText(item, null, null, isLast);
         domUtils.modifyStyle(item, style, attr);
     }
     return item;
@@ -13336,7 +13379,7 @@ domUtils.modifyNodesStyle = function (domList, style, attr) {
     var i, j, item;
     for (i = 0, j = domList.length; i < j; i++) {
         item = domList[i];
-        domList[i] = domUtils.modifyNodeStyle(item, style, attr);
+        domList[i] = domUtils.modifyNodeStyle(item, style, attr, i === j - 1);
     }
 };
 /**
@@ -14030,7 +14073,7 @@ function readyForInsert() {
     } else if (startDom.nodeType == 3 &&
         startOffset > 0 && startOffset < startDom.nodeValue.length) {
         //处于 textNode 的中间
-        result.target = domUtils.splitRangeText(startDom, startOffset, null);
+        result.target = domUtils.splitRangeText(startDom, startOffset, null, false);
         result.parent = result.target.parentNode;
     } else if (startDom.nodeType == 1 &&
         startOffset > 0 && startOffset < startDom.childNodes.length) {
@@ -14622,7 +14665,7 @@ function pasteFromClipBoard(e) {
                 if (range.startContainer.nodeType === 3 &&
                     range.startOffset > 0 && range.startOffset < range.startContainer.nodeValue.length) {
                     //如果不符合预处理的条件，并且还处于 TextNode 中间时，需要拆分
-                    target = domUtils.splitRangeText(range.startContainer, range.startOffset, range.startOffset);
+                    target = domUtils.splitRangeText(range.startContainer, range.startOffset, range.startOffset, false);
                     tmpTarget = target;
                     insertBefore = false;
                 } else {
@@ -15261,6 +15304,10 @@ function analyseStyle (obj, styleList, result) {
     for (i = styleList.length - 1; i >= 0; i--) {
         name = styleList[i];
         style = obj.style[name];
+        // 需要考虑 <font color="red"> 的情况
+        if (!style && name === 'color' && domUtils.isTag(obj, 'font')) {
+            style = obj.getAttribute(name);
+        }
         if (style) {
             styleList.splice(i, 1);
             result[name] = style;
