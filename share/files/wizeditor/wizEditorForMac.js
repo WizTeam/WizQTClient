@@ -2017,7 +2017,8 @@ var ENV = require('./common/env'),
     imgUtils = require('./imgUtils/imgUtils'),
     nightModeUtils = require('./nightMode/nightModeUtils'),
     editor = require('./editor/base'),
-    editorEvent = require('./editor/editorEvent');
+    editorEvent = require('./editor/editorEvent'),
+    commandExtend = require('./editor/commandExtend');
 
 var WizEditor = {
     version: '1.1',
@@ -2128,7 +2129,8 @@ var WizEditor = {
         return rangeUtils.backupCaret();
     },
     execCommand: function() {
-        return domUtils.execCommand.apply(this, arguments);
+        historyUtils.saveSnap(false);
+        return commandExtend.execCommand.apply(this, arguments);
     },
     /**
      * 在编辑时，查找指定文本
@@ -2348,8 +2350,8 @@ var WizEditor = {
         insertCode: codeCore.insertCode,
     },
     formatPainter: {
-        on: function() {
-            return formatPainterCore.on();
+        on: function(keep) {
+            return formatPainterCore.on(keep);
         },
         off: function() {
             formatPainterCore.off();
@@ -2461,7 +2463,7 @@ function initAmendAcceptOptions(options) {
 window.WizEditor = WizEditor;
 
 module.exports = WizEditor;
-},{"./amend/amend":7,"./codeUtils/codeCore":14,"./common/base64":17,"./common/const":18,"./common/env":20,"./common/historyUtils":21,"./common/wizStyle":25,"./domUtils/domExtend":29,"./editor/base":31,"./editor/editorEvent":32,"./formatPainterUtils/formatPainterCore":34,"./imgUtils/imgUtils":39,"./linkUtils/linkUtils":40,"./nightMode/nightModeUtils":44,"./rangeUtils/rangeExtend":46,"./tableUtils/tableCore":49,"./todoUtils/todoCore":53}],6:[function(require,module,exports){
+},{"./amend/amend":7,"./codeUtils/codeCore":14,"./common/base64":17,"./common/const":18,"./common/env":20,"./common/historyUtils":21,"./common/wizStyle":25,"./domUtils/domExtend":29,"./editor/base":31,"./editor/commandExtend":32,"./editor/editorEvent":33,"./formatPainterUtils/formatPainterCore":35,"./imgUtils/imgUtils":40,"./linkUtils/linkUtils":41,"./nightMode/nightModeUtils":45,"./rangeUtils/rangeExtend":47,"./tableUtils/tableCore":50,"./todoUtils/todoCore":54}],6:[function(require,module,exports){
 var ENV = require('./common/env'),
     CONST = require('./common/const'),
     utils = require('./common/utils'),
@@ -2691,7 +2693,7 @@ var WizReader = {
 window.WizReader = WizReader;
 
 module.exports = WizReader;
-},{"./amend/amendInfo":8,"./amend/amendUser":9,"./common/base64":17,"./common/const":18,"./common/env":20,"./common/utils":24,"./common/wizStyle":25,"./highlightUtils/highlightUtils":35,"./imgUtils/imgUtils":39,"./markdown/markdownRender":43,"./nightMode/nightModeUtils":44,"./reader/base":47,"./todoUtils/todoCore":53}],7:[function(require,module,exports){
+},{"./amend/amendInfo":8,"./amend/amendUser":9,"./common/base64":17,"./common/const":18,"./common/env":20,"./common/utils":24,"./common/wizStyle":25,"./highlightUtils/highlightUtils":36,"./imgUtils/imgUtils":40,"./markdown/markdownRender":44,"./nightMode/nightModeUtils":45,"./reader/base":48,"./todoUtils/todoCore":54}],7:[function(require,module,exports){
 /**
  * 修订功能 专用工具包
  */
@@ -3681,7 +3683,7 @@ function h6Patch() {
         return !!p;
     }
 }
-},{"../blockUtils/blockUtils":13,"../codeUtils/codeCore":14,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/lang":22,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"../tableUtils/tableCore":49,"../tableUtils/tableUtils":51,"../todoUtils/todoCore":53,"./amendInfo":8,"./amendUser":9,"./amendUtils/amendExtend":11}],8:[function(require,module,exports){
+},{"../blockUtils/blockUtils":13,"../codeUtils/codeCore":14,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/lang":22,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"../tableUtils/tableCore":50,"../tableUtils/tableUtils":52,"../todoUtils/todoCore":54,"./amendInfo":8,"./amendUser":9,"./amendUtils/amendExtend":11}],8:[function(require,module,exports){
 /**
  * 修订信息显示图层 相关对象
  */
@@ -4828,7 +4830,7 @@ var amendUtils = {
 };
 
 module.exports = amendUtils;
-},{"../../common/const":18,"../../common/env":20,"../../common/utils":24,"../../domUtils/domBase":28,"../../rangeUtils/rangeBase":45}],11:[function(require,module,exports){
+},{"../../common/const":18,"../../common/env":20,"../../common/utils":24,"../../domUtils/domBase":28,"../../rangeUtils/rangeBase":46}],11:[function(require,module,exports){
 /**
  * amend 中通用的基本方法集合（扩展操作）
  *
@@ -4838,6 +4840,7 @@ var ENV = require('../../common/env'),
     CONST = require('../../common/const'),
     utils = require('../../common/utils'),
     domUtils = require('../../domUtils/domExtend'),
+    commandExtend = require('../../editor/commandExtend'),
     rangeUtils = require('../../rangeUtils/rangeExtend'),
     amendUser = require('./../amendUser'),
     amendUtils = require('./amendBase');
@@ -5369,7 +5372,7 @@ amendUtils.splitAmendDomByRange = function (fixed) {
         startImg, endImg;
 
     if (!sel.isCollapsed) {
-        domUtils.execCommand('delete');
+        commandExtend.execCommand('delete');
         range = sel.getRangeAt(0);
         endDom = range.endContainer;
         endOffset = range.endOffset;
@@ -5589,7 +5592,7 @@ amendUtils.splitWizDomWithTextNode = function (endDom, endOffset) {
     }
     while (!!tmpParent && !domUtils.isBody(tmpParent)) {
         lastSplit = tmpParent;
-        domUtils.splitDom(tmpParent, tmpDom);
+        domUtils.splitDomBeforeSub(tmpParent, tmpDom);
         if (tmpParent && tmpParent.nodeType === 1 &&
             (tmpParent.getAttribute(CONST.ATTR.SPAN_DELETE) ||
             tmpParent.getAttribute(CONST.ATTR.SPAN_INSERT))) {
@@ -5662,7 +5665,7 @@ amendUtils.wizAmendSave = function (domList) {
 };
 
 module.exports = amendUtils;
-},{"../../common/const":18,"../../common/env":20,"../../common/utils":24,"../../domUtils/domExtend":29,"../../rangeUtils/rangeExtend":46,"./../amendUser":9,"./amendBase":10}],12:[function(require,module,exports){
+},{"../../common/const":18,"../../common/env":20,"../../common/utils":24,"../../domUtils/domExtend":29,"../../editor/commandExtend":32,"../../rangeUtils/rangeExtend":47,"./../amendUser":9,"./amendBase":10}],12:[function(require,module,exports){
 /**
  * 块级元素区域（Table & CodeMirror） 操作核心包 core
  * 1、处理 Table & CodeMirror 横向滚动条
@@ -5914,7 +5917,7 @@ var blockCore = {
 };
 
 module.exports = blockCore;
-},{"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../domUtils/domExtend":29,"../tableUtils/tableUtils":51,"./blockUtils":13}],13:[function(require,module,exports){
+},{"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../domUtils/domExtend":29,"../tableUtils/tableUtils":52,"./blockUtils":13}],13:[function(require,module,exports){
 /**
  * wiz 模块区域（表格、代码）操作的基本方法集合
  */
@@ -5922,6 +5925,7 @@ var ENV = require('../common/env'),
     CONST = require('../common/const'),
     utils = require('../common/utils'),
     domUtils = require('../domUtils/domExtend'),
+    commandExtend = require('../editor/commandExtend'),
     tableZone = require('../tableUtils/tableZone'),
     rangeUtils = require('../rangeUtils/rangeExtend');
 
@@ -6041,7 +6045,7 @@ var blockUtils = {
                 curBlock = curDom;
             } else if (!curBlock || !domUtils.isEmptyDom(curBlock)) {
                 // 如果光标位置非空，先插入 段落
-                domUtils.execCommand('insertparagraph');
+                commandExtend.execCommand('insertparagraph');
                 range = rangeUtils.getRange();
                 curDom = range.startContainer;
                 curBlock = domUtils.getBlockParent(curDom, true);
@@ -6082,7 +6086,7 @@ var blockUtils = {
 };
 
 module.exports = blockUtils;
-},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"../tableUtils/tableZone":52}],14:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47,"../tableUtils/tableZone":53}],14:[function(require,module,exports){
 /**
  * 代码区域操作核心包 core
  */
@@ -6225,7 +6229,7 @@ var codeCore = {
 };
 
 module.exports = codeCore;
-},{"../blockUtils/blockUtils":13,"../common/const":18,"../common/dependLoader":19,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"./codeStyle":15,"./codeUtils":16}],15:[function(require,module,exports){
+},{"../blockUtils/blockUtils":13,"../common/const":18,"../common/dependLoader":19,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./codeStyle":15,"./codeUtils":16}],15:[function(require,module,exports){
 /**
  * codeMirror 相关样式处理
  */
@@ -6349,7 +6353,9 @@ var CSS = {
     '  .CodeMirror div.CodeMirror-cursors {visibility: hidden;}' +
     '}' +
     '.cm-tab-wrap-hack:after { content: ""; }' +
-    'span.CodeMirror-selectedtext { background: none; }',
+    'span.CodeMirror-selectedtext { background: none; }' +
+    '.CodeMirror-activeline-background, .CodeMirror-selected {visibility:hidden;}' +
+    '.CodeMirror-focused .CodeMirror-activeline-background, .CodeMirror-focused .CodeMirror-selected {visibility:visible;}',
     theme: {
         'base16-dark': '.cm-s-base16-dark.CodeMirror { background: #151515; color: #e0e0e0; }' +
         '.cm-s-base16-dark div.CodeMirror-selected { background: #303030; }' +
@@ -7150,7 +7156,7 @@ var codeUtils = {
 
 module.exports = codeUtils;
 
-},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../domUtils/domExtend":29,"../domUtils/selectPlugin":30,"../rangeUtils/rangeExtend":46,"./codeStyle":15}],17:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../domUtils/domExtend":29,"../domUtils/selectPlugin":30,"../rangeUtils/rangeExtend":47,"./codeStyle":15}],17:[function(require,module,exports){
 /*
  * $Id: base64.js,v 2.15 2014/04/05 12:58:57 dankogai Exp dankogai $
  *  https://github.com/dankogai/js-base64
@@ -8537,7 +8543,7 @@ function saveCmDocList() {
 }
 
 module.exports = historyUtils;
-},{"./../domUtils/domExtend":29,"./../rangeUtils/rangeExtend":46,"./const":18,"./env":20,"./utils":24}],22:[function(require,module,exports){
+},{"./../domUtils/domExtend":29,"./../rangeUtils/rangeExtend":47,"./const":18,"./env":20,"./utils":24}],22:[function(require,module,exports){
 /**
  * Created by ZQG on 2015/3/11.
  */
@@ -11628,15 +11634,6 @@ var domUtils = {
         }
     },
     /**
-     * 封装 execCommand 方法，用于 编辑器内部事件触发
-     * @returns {*}
-     */
-    execCommand: function () {
-        var result = ENV.doc.execCommand.apply(ENV.doc, arguments);
-        ENV.event.call(CONST.EVENT.ON_EXEC_COMMAND);
-        return result;
-    },
-    /**
      * 设置 焦点
      */
     focus: function () {
@@ -12722,6 +12719,35 @@ var domUtils = {
         return html.replace(reg, '');
     },
     /**
+     * 将 dom 剥壳
+     * @param dom
+     */
+    peelDom: function (dom, checkFun) {
+        if (!dom || dom.nodeType === 3) {
+            return;
+        }
+        var result = {
+            start: null,
+            end: null
+        };
+        var childNodes, child, i;
+        childNodes = dom.childNodes;
+        for (i = childNodes.length - 1; i >= 0; i--) {
+            child = childNodes[i];
+            if (!checkFun || checkFun(child)) {
+                domUtils.after(child, dom);
+                if (!result.start) {
+                    result.start = child;
+                    result.end = child;
+                } else {
+                    result.end = child;
+                }
+            }
+        }
+        dom.parentNode.removeChild(dom);
+        return result;
+    },
+    /**
      * 从 dom 中清除指定 tag 标签，但保留 innerHTML
      * @param tag
      * @returns {void|*|XML|string}
@@ -12967,35 +12993,6 @@ var domUtils = {
             node.nodeValue = v.substring(0, start);
         }
         return s;
-    },
-    /**
-     * 将 dom 剥壳
-     * @param dom
-     */
-    stripDom: function (dom, checkFun) {
-        if (!dom || dom.nodeType === 3) {
-            return;
-        }
-        var result = {
-            start: null,
-            end: null
-        };
-        var childNodes, child, i;
-        childNodes = dom.childNodes;
-        for (i = childNodes.length - 1; i >= 0; i--) {
-            child = childNodes[i];
-            if (!checkFun || checkFun(child)) {
-                domUtils.after(child, dom);
-                if (!result.start) {
-                    result.start = child;
-                    result.end = child;
-                } else {
-                    result.end = child;
-                }
-            }
-        }
-        dom.parentNode.removeChild(dom);
-        return result;
     }
 };
 
@@ -13499,11 +13496,11 @@ domUtils.removeEmptyParent = function (pDom) {
 };
 
 /**
- * 将 mainDom 以子节点 subDom 为分割点 分割为两个 mainDom（用于 修订处理）
+ * 将 mainDom 以子节点 subDom 之前为分割点 分割为两个 mainDom（用于 修订处理）
  * @param mainDom
  * @param subDom
  */
-domUtils.splitDom = function (mainDom, subDom) {
+domUtils.splitDomBeforeSub = function (mainDom, subDom) {
     if (!mainDom || !subDom) {
         return mainDom;
     }
@@ -13551,19 +13548,17 @@ domUtils.splitDom = function (mainDom, subDom) {
 };
 
 /**
- * 将 mainDom 以子节点 subDom 前后为分割点，把 subDom 独立于 前后 元素独立拆分成 3 段，并且保持 Dom 结构
+ * 将 mainDom 以子节点 subDom 之后为分割点 分割为两个 mainDom（用于 修订处理）
  * @param mainDom
  * @param subDom
  */
-domUtils.splitDomSingle = function (mainDom, subDom) {
-    // 拆分 subDom 前面的内容
-    var mainP = domUtils.splitDom(mainDom, subDom);
+domUtils.splitDomAfterSub = function (mainDom, subDom) {
     var tmpP, next;
 
     // 拆分 subDom 后面的内容
     if (!subDom.nextSibling) {
         tmpP = subDom.parentNode;
-        while (tmpP && tmpP != mainP) {
+        while (tmpP && tmpP != mainDom) {
             // if (tmpP.getAttribute(CONST.ATTR.SPAN) !== CONST.ATTR.SPAN) {
             if (domUtils.isBlockDom(tmpP)) {
                 break;
@@ -13578,8 +13573,21 @@ domUtils.splitDomSingle = function (mainDom, subDom) {
         next = subDom.nextSibling;
     }
     if (next) {
-        domUtils.splitDom(mainP, next);
+        domUtils.splitDomBeforeSub(mainDom, next);
     }
+    return mainDom;
+};
+
+/**
+ * 将 mainDom 以子节点 subDom 前后为分割点，把 subDom 独立于 前后 元素独立拆分成 3 段，并且保持 Dom 结构
+ * @param mainDom
+ * @param subDom
+ */
+domUtils.splitDomSingle = function (mainDom, subDom) {
+    // 拆分 subDom 前面的内容
+    var mainP = domUtils.splitDomBeforeSub(mainDom, subDom);
+    mainP = domUtils.splitDomAfterSub(mainP, subDom);
+    return mainP;
 };
 module.exports = domUtils;
 },{"./../common/const":18,"./../common/env":20,"./domBase":28}],30:[function(require,module,exports){
@@ -13753,6 +13761,7 @@ var ENV = require('../common/env'),
     codeCore = require('../codeUtils/codeCore'),
     domUtils = require('../domUtils/domExtend'),
     selectPlugin = require('../domUtils/selectPlugin'),
+    commandExtend = require('../editor/commandExtend'),
     formatPainterCore = require('../formatPainterUtils/formatPainterCore'),
     imgCore = require('../imgUtils/imgCore'),
     rangeUtils = require('../rangeUtils/rangeExtend'),
@@ -13923,7 +13932,7 @@ var editor = {
                 span = null;
                 txt = null;
             }
-            domUtils.execCommand('insertHTML', false, to);
+            commandExtend.execCommand('insertHTML', false, to);
         }
 
         // 查找下一个
@@ -14109,7 +14118,147 @@ function afterInsert(lastNode) {
 }
 
 module.exports = editor;
-},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../blockUtils/blockCore":12,"../codeUtils/codeCore":14,"../common/const":18,"../common/dependLoader":19,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../common/wizStyle":25,"../domUtils/domExtend":29,"../domUtils/selectPlugin":30,"../formatPainterUtils/formatPainterCore":34,"../imgUtils/imgCore":37,"../rangeUtils/rangeExtend":46,"../tableUtils/tableCore":49,"../tableUtils/tableUtils":51,"../tableUtils/tableZone":52,"../todoUtils/todoCore":53,"./editorEvent":32,"./tabKey":33}],32:[function(require,module,exports){
+},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../blockUtils/blockCore":12,"../codeUtils/codeCore":14,"../common/const":18,"../common/dependLoader":19,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../common/wizStyle":25,"../domUtils/domExtend":29,"../domUtils/selectPlugin":30,"../editor/commandExtend":32,"../formatPainterUtils/formatPainterCore":35,"../imgUtils/imgCore":38,"../rangeUtils/rangeExtend":47,"../tableUtils/tableCore":50,"../tableUtils/tableUtils":52,"../tableUtils/tableZone":53,"../todoUtils/todoCore":54,"./editorEvent":33,"./tabKey":34}],32:[function(require,module,exports){
+/**
+ * 代码区域操作核心包 core
+ */
+var ENV = require('../common/env'),
+    CONST = require('../common/const'),
+    historyUtils = require('../common/historyUtils'),
+    domUtils = require('../domUtils/domExtend'),
+    rangeUtils = require('../rangeUtils/rangeExtend');
+
+/**
+ * pC & mac 客户端 使用的 Chrome 版本 49 对于操作 subscript superscript 有 bug 必须修正
+ * 如果 sub 或 sup 内的 dom 有 <span> <b> 等标签就会导致无法取消 sub sup
+ */
+function patchExecForSubAndSup (command) {
+    if (patchQueryForSubAndSup(command)) {
+        // 格式刷目标第一个元素是目标元素 则清理 sub || sup
+        commandExtend.clearSubSup();
+        return false;
+    } else {
+        // 设置 sub || sup
+        return ENV.doc.execCommand(command, false);
+    }
+}
+
+/**
+ * pC & mac 客户端 使用的 Chrome 版本 49 对于操作 subscript superscript 有 bug 必须修正
+ * 如果 sub 或 sup 内的 dom 有 <span> <b> 等标签就会导致永远得到 false
+ */
+function patchQueryForSubAndSup(command) {
+    var tagName = command === 'subscript' ? 'sub' : 'sup';
+    // 设置 sub || sup
+    var range = rangeUtils.getRange();
+    var start;
+    if (range) {
+        start = rangeUtils.getRangeDom(range.startContainer, range.startOffset);
+        start = start.container;
+        start = domUtils.getFirstDeepChild(start);
+        start = domUtils.getParentByTagName(start, tagName, true);
+    }
+    return !!start;
+}
+
+
+var commandExtend = {
+    clearSubSup: function () {
+        var domList = rangeUtils.getRangeDomList({
+            noSplit: false
+        });
+        var i, dom, p;
+        var range, span;
+        var start, end;
+        if (!domList || domList.list.length === 0) {
+            range = rangeUtils.getRange();
+            if (range && range.collapsed) {
+                span = domUtils.createSpan();
+                span.innerHTML = CONST.FILL_CHAR + CONST.FILL_CHAR;
+                range.insertNode(span);
+                p = domUtils.getParentByTagName(span, ['sub', 'sup'], true);
+                if (p) {
+                    p = domUtils.splitDomSingle(p, span);
+                    domUtils.peelDom(p);
+                    rangeUtils.setRange(span, 1);
+                } else {
+                    span.parentNode.removeChild(span);
+                }
+            }
+            return;
+        }
+
+        var firstP = domUtils.getParentByTagName(domList.list[0], ['sub', 'sup'], true);
+        // 只有一个 dom
+        if (domList.list.length === 1) {
+            p = domUtils.splitDomSingle(firstP, domList.list[0]);
+            if (p) {
+                start = p.firstChild;
+                end = p.lastChild;
+                domUtils.peelDom(p);
+                rangeUtils.setRange(start, 0, end, domUtils.getEndOffset(end));
+            }
+            return;
+        }
+
+        // 必须要在 剥离 sub sup 之前先让选择范围最前、最后进行分割
+        if (firstP) {
+            domUtils.splitDomBeforeSub(firstP, domList.list[0]);
+        }
+        var lastP = domUtils.getParentByTagName(domList.list[domList.list.length - 1], ['sub', 'sup'], true);
+        if (lastP) {
+            domUtils.splitDomAfterSub(lastP, domList.list[domList.list.length - 1]);
+        }
+
+        for (i = 0; i < domList.list.length; i++) {
+            dom = domList.list[i];
+            p = domUtils.getParentByTagName(dom, ['sub', 'sup'], true);
+            if (i===0) {
+                start = dom;
+            } else if (i === domList.list.length - 1) {
+                end = dom;
+            }
+            if (p) {
+                if (i===0) {
+                    start = p.firstChild;
+                } else if (i === domList.list.length - 1) {
+                    end = p.lastChild;
+                }
+                domUtils.peelDom(p);
+                rangeUtils.setRange(start, 0, end, domUtils.getEndOffset(end));
+            }
+        }
+    },
+    /**
+     * 封装 execCommand 方法，用于 编辑器内部事件触发
+     * @returns {*}
+     */
+    execCommand: function () {
+        var result;
+        if (/subscript|superscript/i.test(arguments[0])) {
+            result = patchExecForSubAndSup(arguments[0]);
+        } else {
+            result = ENV.doc.execCommand.apply(ENV.doc, arguments);
+        }
+
+        ENV.event.call(CONST.EVENT.ON_EXEC_COMMAND);
+        return result;
+    },
+    queryCommandState: function (command) {
+        var result;
+        if (/subscript|superscript/i.test(command)) {
+            result = patchQueryForSubAndSup(command);
+        } else {
+            result = ENV.doc.queryCommandState(command);
+        }
+        return result;
+    }
+
+};
+
+module.exports = commandExtend;
+
+},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47}],33:[function(require,module,exports){
 /**
  * editor 使用的基本事件处理
  */
@@ -14129,7 +14278,8 @@ var ENV = require('../common/env'),
     todoUtils = require('../todoUtils/todoUtils'),
     amend = require('../amend/amend'),
     amendUser = require('../amend/amendUser'),
-    amendUtils = require('../amend/amendUtils/amendExtend');
+    amendUtils = require('../amend/amendUtils/amendExtend'),
+    commandExtend = require('./commandExtend');
 
 var EditorEventType = {
     SelectionChange: 'selectionchange'
@@ -14309,7 +14459,7 @@ function _getCaretStyle() {
     EditorEvent.triggerListener(EditorEventType.SelectionChange, [result]);
 
     function queryCommand(command) {
-        return ENV.doc.queryCommandState(command) ? "1" : "0";
+        return commandExtend.queryCommandState(command) ? "1" : "0";
     }
 }
 
@@ -14920,20 +15070,21 @@ var handler = {
 };
 
 module.exports = EditorEvent;
-},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/lang":22,"../common/utils":24,"../domUtils/domBase":28,"../formatPainterUtils/formatPainterCore":34,"../rangeUtils/rangeExtend":46,"../tableUtils/tableCore":49,"../tableUtils/tableUtils":51,"../tableUtils/tableZone":52,"../todoUtils/todoUtils":56}],33:[function(require,module,exports){
+},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/lang":22,"../common/utils":24,"../domUtils/domBase":28,"../formatPainterUtils/formatPainterCore":35,"../rangeUtils/rangeExtend":47,"../tableUtils/tableCore":50,"../tableUtils/tableUtils":52,"../tableUtils/tableZone":53,"../todoUtils/todoUtils":57,"./commandExtend":32}],34:[function(require,module,exports){
 /**
  * tab 键操作处理
  */
 var ENV = require('../common/env'),
-CONST = require('../common/const'),
-utils = require('../common/utils'),
-domUtils = require('../domUtils/domExtend'),
-rangeUtils = require('../rangeUtils/rangeExtend'),
-historyUtils = require('../common/historyUtils');
+    CONST = require('../common/const'),
+    utils = require('../common/utils'),
+    domUtils = require('../domUtils/domExtend'),
+    commandExtend = require('../editor/commandExtend'),
+    rangeUtils = require('../rangeUtils/rangeExtend'),
+    historyUtils = require('../common/historyUtils');
 
 var tabHtml = '&nbsp; &nbsp;&nbsp;';
 
-function processTab(prev) {
+function processTab (prev) {
     var range = rangeUtils.getRange();
     if (!range) {
         return;
@@ -14941,7 +15092,7 @@ function processTab(prev) {
 
     if (prev) {
         historyUtils.saveSnap(false);
-        domUtils.execCommand("outdent");
+        commandExtend.execCommand("outdent");
         return true;
     }
 
@@ -14957,11 +15108,11 @@ function processTab(prev) {
         return false;
     } else if (!range.collapsed || isListStart || isListDom) {
         historyUtils.saveSnap(false);
-        domUtils.execCommand("indent");
+        commandExtend.execCommand("indent");
         return true;
     } else if (dom.nodeType === 3 || domUtils.getParentByTagName(dom, ['a', 'b', 'body', 'div', 'font', 'html', 'i', 'p', 'span', 'strong', 'u'])) {
         historyUtils.saveSnap(false);
-        domUtils.execCommand("insertHTML", false, tabHtml);
+        commandExtend.execCommand("insertHTML", false, tabHtml);
         return true;
     }
     //
@@ -14969,15 +15120,15 @@ function processTab(prev) {
 }
 
 var _event = {
-    bind: function() {
+    bind: function () {
         _event.unbind();
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
     },
-    unbind: function() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
     },
     handler: {
-        onKeyDown: function(e) {
+        onKeyDown: function (e) {
             var keyCode = e.keyCode || e.which;
             if (keyCode !== 9) {
                 return;
@@ -14991,19 +15142,19 @@ var _event = {
 };
 
 var tabKey = {
-    init: function(html) {
+    init: function (html) {
         tabHtml = html;
     },
-    on: function() {
+    on: function () {
         _event.bind();
     },
-    off: function() {
+    off: function () {
         _event.unbind();
     }
 };
 
 module.exports = tabKey;
-},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46}],34:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47}],35:[function(require,module,exports){
 /**
  * 代码区域操作核心包 core
  */
@@ -15012,6 +15163,7 @@ var ENV = require('../common/env'),
     wizStyle = require('../common/wizStyle'),
     historyUtils = require('../common/historyUtils'),
     domUtils = require('../domUtils/domExtend'),
+    commandExtend = require('../editor/commandExtend'),
     rangeUtils = require('../rangeUtils/rangeExtend'),
     codeUtils = require('../codeUtils/codeUtils'),
     tableCore = require('../tableUtils/tableCore'),
@@ -15038,6 +15190,7 @@ var FormatCommand = {
     'text-align-right': 'JustifyRight'
 };
 
+var keepFormat = false;
 var target;
 
 function init () {
@@ -15046,6 +15199,7 @@ function init () {
         tagList: []
     }
 }
+
 function getStyle (start) {
     var styleList = FormatStyleList.concat(), styleResult = {};
     var tagList = FormatTagList.concat(), tagMap = {}, tagName;
@@ -15099,7 +15253,7 @@ function getStyle (start) {
         target.tagList.push({name: tagName, enabled: true});
     }
 
-    console.log(target);
+    // console.log(target);
 }
 
 function analyseStyle (obj, styleList, result) {
@@ -15118,20 +15272,22 @@ function analyseStyle (obj, styleList, result) {
 var _event = {
     bind: function () {
         _event.unbind();
+        ENV.event.add(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
         ENV.event.add(CONST.EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
 
     },
     unbind: function () {
+        ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
 
     },
     handler: {
-        // onKeyUp: function (e) {
-        //     var keyCode = e.keyCode || e.which;
-        //     if (e.metaKey && keyCode === 13) {
-        //         formatPainterCore.on();
-        //     }
-        // },
+        onKeyDown: function (e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode === 27) {
+                formatPainterCore.off();
+            }
+        },
         onMouseUp: function () {
             if (!target.style) {
                 return;
@@ -15145,8 +15301,9 @@ var _event = {
                 delete target.tagList['text-align-left'];
                 delete target.tagList['text-align-right'];
             }
-            // 必须先清理 subscript & superscript；因为修改样式会导致 range 改变
-            var i, tag, commandName, commandState, blockName = 'div';
+            // 必须先执行 execCommand；因为修改样式会导致 range 改变
+            var i, tag, commandName, commandState,
+                blockName = 'div', subSupName = '';
             for (i = 0; i < target.tagList.length; i++) {
                 tag = target.tagList[i];
                 commandName = FormatCommand[tag.name];
@@ -15156,30 +15313,47 @@ var _event = {
                     }
                     continue;
                 }
-
-                commandState = ENV.doc.queryCommandState(commandName);
+                if (/sub|sup/i.test(tag.name)) {
+                    if (tag.enabled) {
+                        subSupName = commandName;
+                    }
+                    continue;
+                }
+                commandState = commandExtend.queryCommandState(commandName);
                 if (tag.enabled && !commandState) {
-                    domUtils.execCommand(commandName, false);
+                    commandExtend.execCommand(commandName, false);
                 } else if (!tag.enabled && commandState) {
-                    domUtils.execCommand(commandName, false);
+                    commandExtend.execCommand(commandName, false);
                 } else if (!tag.enabled && !commandState) {
                     // 避免被选中的区域内有部分内容 commandState 为 true
-                    domUtils.execCommand(commandName, false);
-                    domUtils.execCommand(commandName, false);
+                    commandExtend.execCommand(commandName, false);
+                    commandExtend.execCommand(commandName, false);
                 }
             }
+            // 处理 h1 - h6
             commandName = FormatCommand[blockName];
-            domUtils.execCommand(commandName, false, blockName);
+            commandExtend.execCommand(commandName, false, blockName);
+
+            // 处理 sub & sup
+            if (!subSupName) {
+                // 清理 sub & sup
+                commandExtend.clearSubSup();
+            } else {
+                commandExtend.execCommand(subSupName, false);
+            }
 
             if (!tableCore.modifySelectionDom(target.style, null)) {
                 // 处理普通文本样式
                 rangeUtils.modifySelectionDom(target.style, null);
             }
 
-            formatPainterCore.init();
+            if (!keepFormat) {
+                formatPainterCore.init();
+            }
         }
     }
 };
+
 
 var formatPainterCore = {
     init: function () {
@@ -15187,8 +15361,9 @@ var formatPainterCore = {
         // // todo 为便于测试，临时添加快捷键
         // ENV.event.add(CONST.EVENT.ON_KEY_UP, _event.handler.onKeyUp);
     },
-    on: function () {
+    on: function (keep) {
         init();
+        keepFormat = !!keep;
 
         if (formatPainterCore.status() === 0) {
             return 0;
@@ -15248,7 +15423,7 @@ var formatPainterCore = {
 };
 
 module.exports = formatPainterCore;
-},{"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/wizStyle":25,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"../tableUtils/tableCore":49,"../tableUtils/tableZone":52}],35:[function(require,module,exports){
+},{"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/wizStyle":25,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47,"../tableUtils/tableCore":50,"../tableUtils/tableZone":53}],36:[function(require,module,exports){
 /**
  * 超链接操作基本方法集合
  */
@@ -15443,7 +15618,7 @@ var highlightUtils = {
 };
 
 module.exports = highlightUtils;
-},{"./../common/const":18,"./../common/env":20,"./../domUtils/domExtend":29,"./../rangeUtils/rangeExtend":46}],36:[function(require,module,exports){
+},{"./../common/const":18,"./../common/env":20,"./../domUtils/domExtend":29,"./../rangeUtils/rangeExtend":47}],37:[function(require,module,exports){
 /**
  * 点击 Img 操作
  */
@@ -15548,7 +15723,7 @@ var imgClick = {
 module.exports = imgClick;
 
 
-},{"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29,"./imgUtils":39}],37:[function(require,module,exports){
+},{"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29,"./imgUtils":40}],38:[function(require,module,exports){
 /**
  * img 组件注册
  */
@@ -15577,7 +15752,7 @@ var imgCore = {
 
 module.exports = imgCore;
 
-},{"./../common/env":20,"./imgClick":36,"./imgResize":38}],38:[function(require,module,exports){
+},{"./../common/env":20,"./imgClick":37,"./imgResize":39}],39:[function(require,module,exports){
 /**
  * img Resize 工具
  */
@@ -16095,7 +16270,7 @@ var imgResize = {
 module.exports = imgResize;
 
 
-},{"../rangeUtils/rangeExtend":46,"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29}],39:[function(require,module,exports){
+},{"../rangeUtils/rangeExtend":47,"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29}],40:[function(require,module,exports){
 /**
  * img 操作基本方法集合
  */
@@ -16237,7 +16412,7 @@ function imgFilter(img, onlyLocal) {
 
 module.exports = imgUtils;
 
-},{"./../common/const":18,"./../common/env":20,"./../domUtils/domBase":28}],40:[function(require,module,exports){
+},{"./../common/const":18,"./../common/env":20,"./../domUtils/domBase":28}],41:[function(require,module,exports){
 /**
  * 超链接操作基本方法集合
  */
@@ -16245,6 +16420,7 @@ var ENV = require('../common/env'),
     CONST = require('../common/const'),
     historyUtils = require('../common/historyUtils'),
     domUtils = require('../domUtils/domExtend'),
+    commandExtend = require('../editor/commandExtend'),
     rangeUtils = require('../rangeUtils/rangeExtend');
 
 var _event = {
@@ -16367,7 +16543,7 @@ var linkUtils = {
     removeSelectedLink: function () {
         fixARange();
         historyUtils.saveSnap(false);
-        domUtils.execCommand("unlink", false, false);
+        commandExtend.execCommand("unlink", false, false);
     },
     setCurrentLink: function (url) {
         if (!url) {
@@ -16375,7 +16551,7 @@ var linkUtils = {
         }
         fixARange();
         historyUtils.saveSnap(false);
-        domUtils.execCommand("createLink", false, url);
+        commandExtend.execCommand("createLink", false, url);
     }
 };
 
@@ -16425,7 +16601,7 @@ function getA(target, offset) {
 
 module.exports = linkUtils;
 
-},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46}],41:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47}],42:[function(require,module,exports){
 "use strict";
 var Markdown;
 
@@ -18096,7 +18272,7 @@ else
 })();
 
 module.exports = Markdown;
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var Markdown = {};
 
 (function () {
@@ -19012,7 +19188,7 @@ var Markdown = {};
 
 module.exports  = Markdown.Extra;
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * markdown & mathjax 渲染处理
  */
@@ -19500,7 +19676,7 @@ var Render = {
 module.exports = MarkdownRender;
 
 
-},{"../common/dependLoader":19,"../common/env":20,"../common/scriptLoader":23,"../common/utils":24,"../common/xss":27,"./Markdown.Converter":41,"./Markdown.Extra":42}],44:[function(require,module,exports){
+},{"../common/dependLoader":19,"../common/env":20,"../common/scriptLoader":23,"../common/utils":24,"../common/xss":27,"./Markdown.Converter":42,"./Markdown.Extra":43}],45:[function(require,module,exports){
 /**
  * 夜间模式的基本方法集合
  */
@@ -19628,7 +19804,7 @@ function addKeyToMap(key, map) {
 }
 
 module.exports = nightModeUtils;
-},{"../common/const":18,"../common/env":20,"../common/wizStyle":25,"../domUtils/domBase":28}],45:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/wizStyle":25,"../domUtils/domBase":28}],46:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
@@ -20060,7 +20236,7 @@ var rangeUtils = {
 };
 
 module.exports = rangeUtils;
-},{"./../common/base64":17,"./../common/const":18,"./../common/env":20,"./../domUtils/domBase":28}],46:[function(require,module,exports){
+},{"./../common/base64":17,"./../common/const":18,"./../common/env":20,"./../domUtils/domBase":28}],47:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
@@ -20242,7 +20418,7 @@ rangeUtils.modifySelectionDom = function (style, attr) {
 };
 
 module.exports = rangeUtils;
-},{"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29,"./rangeBase":45}],47:[function(require,module,exports){
+},{"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29,"./rangeBase":46}],48:[function(require,module,exports){
 /**
  * 阅读器 基础工具包
  */
@@ -20328,7 +20504,7 @@ function setDomReadOnly(tag, readonly) {
 
 module.exports = reader;
 
-},{"../blockUtils/blockCore":12,"../codeUtils/codeCore":14,"../common/const":18,"../common/env":20,"../common/wizStyle":25,"../domUtils/domExtend":29,"../imgUtils/imgCore":37,"../tableUtils/tableCore":49,"../todoUtils/todoCore":53,"./readerEvent":48}],48:[function(require,module,exports){
+},{"../blockUtils/blockCore":12,"../codeUtils/codeCore":14,"../common/const":18,"../common/env":20,"../common/wizStyle":25,"../domUtils/domExtend":29,"../imgUtils/imgCore":38,"../tableUtils/tableCore":50,"../todoUtils/todoCore":54,"./readerEvent":49}],49:[function(require,module,exports){
 /**
  * editor 使用的基本事件处理
  */
@@ -20379,7 +20555,7 @@ var handler = {
 };
 
 module.exports = ReaderEvent;
-},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../imgUtils/imgUtils":39}],49:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../imgUtils/imgUtils":40}],50:[function(require,module,exports){
 /**
  * 表格操作核心包 core
  */
@@ -20975,7 +21151,7 @@ var tableCore = {
 };
 
 module.exports = tableCore;
-},{"../blockUtils/blockUtils":13,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"./tableMenu":50,"./tableUtils":51,"./tableZone":52}],50:[function(require,module,exports){
+},{"../blockUtils/blockUtils":13,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./tableMenu":51,"./tableUtils":52,"./tableZone":53}],51:[function(require,module,exports){
 /*
  表格菜单 控制
  */
@@ -21487,7 +21663,7 @@ var tableMenu = {
 };
 
 module.exports = tableMenu;
-},{"../common/const":18,"../common/env":20,"../common/lang":22,"../domUtils/domExtend":29,"./tableUtils":51,"./tableZone":52}],51:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/lang":22,"../domUtils/domExtend":29,"./tableUtils":52,"./tableZone":53}],52:[function(require,module,exports){
 /**
  * 表格操作的基本方法集合
  */
@@ -22752,7 +22928,7 @@ var tableUtils = {
 };
 
 module.exports = tableUtils;
-},{"../rangeUtils/rangeExtend":46,"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29}],52:[function(require,module,exports){
+},{"../rangeUtils/rangeExtend":47,"./../common/const":18,"./../common/env":20,"./../common/utils":24,"./../domUtils/domExtend":29}],53:[function(require,module,exports){
 /*
  表格选择区域 控制
  */
@@ -23636,7 +23812,7 @@ var tableZone = {
 
 module.exports = tableZone;
 
-},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"./tableUtils":51}],53:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./tableUtils":52}],54:[function(require,module,exports){
 /**
  * todolist 操作核心包 core
  */
@@ -24163,7 +24339,7 @@ var todoCore = {
 
 module.exports = todoCore;
 
-},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"./todoRouteForClient":54,"./todoStyle":55,"./todoUtils":56}],54:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./todoRouteForClient":55,"./todoStyle":56,"./todoUtils":57}],55:[function(require,module,exports){
 /**
  * todolist 客户端适配接口
  */
@@ -24524,7 +24700,7 @@ var todoClientRoute = {
 };
 
 module.exports = todoClientRoute;
-},{"../common/base64":17,"../common/env":20}],55:[function(require,module,exports){
+},{"../common/base64":17,"../common/env":20}],56:[function(require,module,exports){
 /**
  * todoList 相关样式处理
  */
@@ -24635,7 +24811,7 @@ var todoStyle = {
 
 module.exports = todoStyle;
 
-},{"../common/const":18,"../common/env":20,"../common/wizStyle":25,"../domUtils/domBase":28}],56:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/wizStyle":25,"../domUtils/domBase":28}],57:[function(require,module,exports){
 /**
  * todolist 基本工具包
  */
@@ -24837,13 +25013,13 @@ var todoUtils = {
         if (isBlock && domUtils.isEmptyDom(dom)) {
             //为保证 样式 正常传递， 不能随便 removeChild
             if (dom.children.length > 0) {
-                domUtils.stripDom(dom);
+                domUtils.peelDom(dom);
             } else {
                 dom.parentNode.removeChild(dom);
                 return true;
             }
         } else if (isBlock || isTodoTag) {
-            domUtils.stripDom(dom);
+            domUtils.peelDom(dom);
         }
         return false;
     },
@@ -24911,7 +25087,7 @@ var todoUtils = {
         return _container;
     },
     deleteMain: function (main) {
-        return domUtils.stripDom(main, function (dom) {
+        return domUtils.peelDom(main, function (dom) {
             return (!todoUtils.isMain(dom) && !todoUtils.isCheckbox(dom))
         });
     },
@@ -25409,13 +25585,13 @@ var todoUtils = {
             var areaStart = domUtils.getPrevBlock(rangeList.startDom);
             var areaEnd = domUtils.getNextBlock(rangeList.startDom);
             if (areaEnd && areaEnd !== start) {
-                domUtils.splitDom(start, areaEnd);
+                domUtils.splitDomBeforeSub(start, areaEnd);
                 if (domUtils.isTag(areaEnd, 'br')) {
                     areaEnd.parentNode.removeChild(areaEnd);
                 }
             }
             if (areaStart && areaStart !== start) {
-                start = domUtils.splitDom(start, areaStart);
+                start = domUtils.splitDomBeforeSub(start, areaStart);
                 if (domUtils.isTag(areaStart, 'br')) {
                     areaStart.parentNode.removeChild(areaStart);
                 } else {
@@ -25687,7 +25863,7 @@ var todoUtils = {
 
 module.exports = todoUtils;
 
-},{"../common/base64":17,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/lang":22,"../common/wizStyle":25,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":46,"./todoStyle":55}],57:[function(require,module,exports){
+},{"../common/base64":17,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/lang":22,"../common/wizStyle":25,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./todoStyle":56}],58:[function(require,module,exports){
 var ENV = require('./common/env'),
     WizEditor = require('./WizEditor'),
     WizReader = require('./WizReader'),
@@ -25707,4 +25883,4 @@ WizEditor.init = function (options) {
 
 
 module.exports = WizEditor;
-},{"./WizEditor":5,"./WizReader":6,"./common/env":20,"./todoUtils/todoRouteForClient":54}]},{},[57]);
+},{"./WizEditor":5,"./WizReader":6,"./common/env":20,"./todoUtils/todoRouteForClient":55}]},{},[58]);
