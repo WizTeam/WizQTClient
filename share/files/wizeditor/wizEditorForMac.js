@@ -2223,6 +2223,8 @@ var WizEditor = {
      * @param attr
      */
     modifySelectionDom: function (style, attr) {
+        console.log('modifySelectionDom: ');
+        console.log(style);
         editor.modifySelectionDom(style, attr);
     },
     /**
@@ -13019,18 +13021,19 @@ var domUtils = {
             }
         } else if (start === 0) {
             //the range is [0, n] (n<length)
-            p.insertBefore(s, node);
             s.textContent = v.substring(start, end);
+            p.insertBefore(s, node);
             node.nodeValue = v.substring(end);
+
         } else if (!end || end === node.nodeValue.length) {
-            p.insertBefore(s, node.nextSibling);
             s.textContent = v.substring(start);
+            p.insertBefore(s, node.nextSibling);
             node.nodeValue = v.substring(0, start);
         } else {
             //the range is [m, n] (m>0 && n<length)
             t = ENV.doc.createTextNode(v.substring(end));
-            p.insertBefore(s, node.nextSibling);
             s.textContent = v.substring(start, end);
+            p.insertBefore(s, node.nextSibling);
             p.insertBefore(t, s.nextSibling);
             //必须要先添加文字，最后删除多余文字，否则，如果先删除后边文字，会导致滚动条跳动
             node.nodeValue = v.substring(0, start);
@@ -14207,13 +14210,13 @@ function patchQueryForSubAndSup(command) {
 
 var commandExtend = {
     clearSubSup: function () {
-        var domList = rangeUtils.getRangeDomList({
+        var rangeResult = rangeUtils.getRangeDomList({
             noSplit: false
         });
         var i, dom, p;
         var range, span;
         var start, end;
-        if (!domList || domList.list.length === 0) {
+        if (!rangeResult || rangeResult.list.length === 0) {
             range = rangeUtils.getRange();
             if (range && range.collapsed) {
                 span = domUtils.createSpan();
@@ -14231,10 +14234,10 @@ var commandExtend = {
             return;
         }
 
-        var firstP = domUtils.getParentByTagName(domList.list[0], ['sub', 'sup'], true);
+        var firstP = domUtils.getParentByTagName(rangeResult.list[0], ['sub', 'sup'], true);
         // 只有一个 dom
-        if (domList.list.length === 1) {
-            p = domUtils.splitDomSingle(firstP, domList.list[0]);
+        if (rangeResult.list.length === 1) {
+            p = domUtils.splitDomSingle(firstP, rangeResult.list[0]);
             if (p) {
                 start = p.firstChild;
                 end = p.lastChild;
@@ -14246,30 +14249,37 @@ var commandExtend = {
 
         // 必须要在 剥离 sub sup 之前先让选择范围最前、最后进行分割
         if (firstP) {
-            domUtils.splitDomBeforeSub(firstP, domList.list[0]);
+            domUtils.splitDomBeforeSub(firstP, rangeResult.list[0]);
         }
-        var lastP = domUtils.getParentByTagName(domList.list[domList.list.length - 1], ['sub', 'sup'], true);
+        var lastP = domUtils.getParentByTagName(rangeResult.list[rangeResult.list.length - 1], ['sub', 'sup'], true);
         if (lastP) {
-            domUtils.splitDomAfterSub(lastP, domList.list[domList.list.length - 1]);
+            domUtils.splitDomAfterSub(lastP, rangeResult.list[rangeResult.list.length - 1]);
         }
 
-        for (i = 0; i < domList.list.length; i++) {
-            dom = domList.list[i];
+        var isPeelSub = false;
+        for (i = 0; i < rangeResult.list.length; i++) {
+            dom = rangeResult.list[i];
             p = domUtils.getParentByTagName(dom, ['sub', 'sup'], true);
             if (i===0) {
                 start = dom;
-            } else if (i === domList.list.length - 1) {
+            } else if (i === rangeResult.list.length - 1) {
                 end = dom;
             }
             if (p) {
                 if (i===0) {
                     start = p.firstChild;
-                } else if (i === domList.list.length - 1) {
+                } else if (i === rangeResult.list.length - 1) {
                     end = p.lastChild;
                 }
                 domUtils.peelDom(p);
-                rangeUtils.setRange(start, 0, end, domUtils.getEndOffset(end));
+                isPeelSub = true;
             }
+        }
+        // 操作后必须修正 Range
+        if (isPeelSub) {
+            rangeUtils.setRange(start, 0, end, domUtils.getEndOffset(end));
+        } else {
+            rangeUtils.fixRange(rangeResult);
         }
     },
     /**
@@ -15215,7 +15225,9 @@ var ENV = require('../common/env'),
 var FormatStyleList = ['background', 'background-color', 'color',
     'font-family', 'font-size', 'font-weight', 'font-style',
     'text-decoration', 'text-align'];
-var FormatTagList = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sub', 'sup', 'b', 'i', 'u'];
+var FormatTitleList = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+var FormatSubSupList = ['sub', 'sup'];
+var FormatFontList = ['b', 'i', 'u', 'strike'];
 var FormatCommand = {
     'b': 'bold',
     'div': 'formatBlock',
@@ -15226,6 +15238,7 @@ var FormatCommand = {
     'h5': 'formatBlock',
     'h6': 'formatBlock',
     'i': 'italic',
+    'strike': 'strikeThrough',
     'sub': 'subscript',
     'sup': 'superscript',
     'u': 'underline',
@@ -15243,9 +15256,18 @@ function init () {
     }
 }
 
+function checkBlockTag(tagName) {
+    return tagName.charAt(0) === 'h' || tagName === 'div';
+}
+function checkSubSupTag(tagName) {
+    return /sub|sup/i.test(tagName);
+}
+
 function getStyle (start) {
     var styleList = FormatStyleList.concat(), styleResult = {};
-    var tagList = FormatTagList.concat(), tagMap = {}, tagName;
+    var tagList = FormatTitleList.concat(FormatSubSupList, FormatFontList);
+    var tagMap = {}, tagName, tagObj;
+    var hasTitle = false, hasSubSup = false;
     var obj = start, i;
 
     // 逐级查找 style 属性
@@ -15268,14 +15290,34 @@ function getStyle (start) {
         obj = domUtils.getParentByTagName(obj, tagList, true);
         if (obj) {
             tagName = obj.tagName.toLowerCase();
-            target.tagList.push({name: tagName, enabled: true});
+            tagObj = {name: tagName, enabled: true};
+            if (checkBlockTag(tagName)) {
+                // 标题必须第一个处理，所以永远要写到首位
+                target.tagList.splice(0, 0, tagObj);
+                hasTitle = true;
+            } else if (checkSubSupTag(tagName)) {
+                target.tagList.push(tagObj);
+                hasSubSup = true;
+            } else {
+                target.tagList.push(tagObj);
+            }
             tagMap[tagName] = 1;
-
             obj = obj.parentNode;
         }
     }
+    if (!hasTitle) {
+        target.tagList.splice(0, 0, {name: 'div', enabled: true});
+    }
+    if (!hasSubSup) {
+        target.tagList.push({name: 'sub', enabled: false});
+    }
     for (i = 0; i < tagList.length; i++) {
         tagName = tagList[i];
+        if (checkBlockTag(tagName) || checkSubSupTag(tagName)) {
+            // 所有不存在的标题 都不写入 tagList
+            // sub & sup 不重复写入 tagList
+            continue;
+        }
         if (!tagMap[tagName]) {
             target.tagList.push({name: tagName, enabled: false});
         }
@@ -15295,8 +15337,7 @@ function getStyle (start) {
         delete target.style['text-align'];
         target.tagList.push({name: tagName, enabled: true});
     }
-
-    // console.log(target);
+    console.log(target);
 }
 
 function analyseStyle (obj, styleList, result) {
@@ -15349,20 +15390,22 @@ var _event = {
                 delete target.tagList['text-align-right'];
             }
             // 必须先执行 execCommand；因为修改样式会导致 range 改变
-            var i, tag, commandName, commandState,
-                blockName = 'div', subSupName = '';
+            var i, tag, commandName, commandState;
             for (i = 0; i < target.tagList.length; i++) {
                 tag = target.tagList[i];
                 commandName = FormatCommand[tag.name];
-                if (tag.name.charAt(0) === 'h') {
-                    if (tag.enabled) {
-                        blockName = tag.name;
-                    }
+                if (checkBlockTag(tag.name)) {
+                    // 处理 段落 参数与其他不同
+                    commandExtend.execCommand(commandName, false, tag.name);
                     continue;
                 }
-                if (/sub|sup/i.test(tag.name)) {
+                if (checkSubSupTag(tag.name)) {
+                    // 处理 sub sup
                     if (tag.enabled) {
-                        subSupName = commandName;
+                        commandExtend.execCommand(commandName, false);
+                    } else {
+                        // 清理 sub & sup
+                        commandExtend.clearSubSup();
                     }
                     continue;
                 }
@@ -15371,22 +15414,14 @@ var _event = {
                     commandExtend.execCommand(commandName, false);
                 } else if (!tag.enabled && commandState) {
                     commandExtend.execCommand(commandName, false);
-                } else if (!tag.enabled && !commandState) {
+                } else {
                     // 避免被选中的区域内有部分内容 commandState 为 true
+                    // 浏览器表现不一致
+                    // 例如 <b>...</b><span>...</span><b>...</b> 这范围内 得到的 commandState 有的为 true 有的为 false
+                    // 保险起见，只要 目标与希望结果一致时，都需要执行两次
                     commandExtend.execCommand(commandName, false);
                     commandExtend.execCommand(commandName, false);
                 }
-            }
-            // 处理 h1 - h6
-            commandName = FormatCommand[blockName];
-            commandExtend.execCommand(commandName, false, blockName);
-
-            // 处理 sub & sup
-            if (!subSupName) {
-                // 清理 sub & sup
-                commandExtend.clearSubSup();
-            } else {
-                commandExtend.execCommand(subSupName, false);
             }
 
             if (!tableCore.modifySelectionDom(target.style, null)) {
@@ -19502,7 +19537,8 @@ var Render = {
         });
 
         $('h1,h2,h3,h4,h5,h6', Render.Document.body).each(function (index, item) {
-            var id = 'wiz_toc_' + index;
+            var text = (item.textContent || item.innerText).replace(/\(\)<> '"/g, '');
+            var id = text;
             var n = parseInt(item.tagName.charAt(1));
             var $item = $(item);
             $item.attr('id', id);
@@ -20431,6 +20467,14 @@ rangeUtils.modifyRangeStyle = function (style, attr) {
     rangeUtils.modifyDomsStyle(rangeList, style, attr,
         [rangeResult.startDomBak, rangeResult.endDomBak]);
 
+    rangeUtils.fixRange(rangeResult);
+
+};
+/**
+ * 获取 RangeDomList 后修正 Range
+ * @param rangeResult
+ */
+rangeUtils.fixRange = function (rangeResult) {
     //reset the selection's range
     //自闭合标签 需要特殊处理
     var isStartBak = !rangeResult.startDom.parentNode,
