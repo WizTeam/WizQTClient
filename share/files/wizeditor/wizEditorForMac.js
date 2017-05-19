@@ -11343,6 +11343,8 @@ var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
     utils = require('./../common/utils');
 
+var pt2px = 0;
+
 var domUtils = {
     /**
      * 添加 class name
@@ -11443,13 +11445,20 @@ var domUtils = {
      * @param isSingle 是否只处理 dom 本身（false : 会自动处理其行级元素父节点）
      */
     clearStyle: function (dom, styleKey, isSingle) {
-        dom.style[styleKey] = '';
+        removeStyle(dom, styleKey);
         if (isSingle) {
             return;
         }
         while (dom && !domUtils.isBlockDom(dom)) {
-            dom.style[styleKey] = '';
+            removeStyle(dom, styleKey);
             dom = dom.parentNode;
+        }
+
+        function removeStyle(_dom, _styleKey) {
+            _dom.style[styleKey] = '';
+            if (domUtils.isTag(_dom, 'font') && _styleKey === 'color') {
+                _dom.removeAttribute('color');
+            }
         }
     },
     /**
@@ -11662,13 +11671,35 @@ var domUtils = {
         }
 
         function getRem(fontSize) {
+            var size = parseInt(fontSize, 10);
+            if (!/pt|px/i.test(fontSize)) {
+                return isNaN(size) ? null : size + 'rem';
+            }
+
+            if (!pt2px) {
+                (function() {
+                    var span = document.createElement('span');
+                    span.style.visibility = 'hidden';
+                    span.style.position = 'absolute';
+                    span.style.top = 0;
+                    span.style.left = 0;
+                    span.style.fontSize = '12pt';
+                    ENV.doc.body.appendChild(span);
+                    pt2px = window.getComputedStyle(span).fontSize;
+                    pt2px = parseInt(pt2px, 10)/12;
+                    ENV.doc.body.removeChild(span);
+                })();
+            }
+
             var s = ENV.win.getComputedStyle(ENV.doc.body),
-                rSize = parseInt(s.fontSize, 10),
-                size = parseInt(fontSize, 10);
-            if (isNaN(rSize) || isNaN(size) || rSize == 0) {
+                rootSize = parseInt(s.fontSize, 10);
+            if (isNaN(rootSize) || isNaN(size) || rootSize == 0) {
                 return null;
             }
-            return (Math.round((size / rSize) * 1000)) / 1000 + 'rem';
+            if (/pt/i.test(fontSize)) {
+                size = size * pt2px;
+            }
+            return (Math.round((size / rootSize) * 1000)) / 1000 + 'rem';
         }
     },
     /**
@@ -17613,7 +17644,7 @@ else
              )
              /g
              */
-            var whole_list = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+            var whole_list = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]*?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
             var list_type;
             if (g_list_level) {
                 text = text.replace(whole_list, function (wholeMatch, m1, m2) {
@@ -17737,7 +17768,7 @@ else
             //2015-10-22 wiz: 修改 list 的支持规则， 同级的 无序列表 和 有序列表 不会自动处理为 父子关系， 而是生成平级的两个列表；
             //var marker = _listItemMarkers[list_type];
             //var re = new RegExp("(^[ \\t]*)(" + marker + ")[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1(" + marker + ")[ \\t]+))", "gm");
-            var re = new RegExp("(^[ \\t]*)([*+-]|\\d+[.])[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1([*+-]|\\d+[.])[ \\t]+))", "gm");
+            var re = new RegExp("(^[ \\t]*)([*+-]|\\d+[.])[ \\t]+([^\\r]*?(\\n+))(?=(~0|\\1([*+-]|\\d+[.])[ \\t]+))", "gm");
             var last_item_had_a_double_newline = false;
             list_str = list_str.replace(re,
                 function (wholeMatch, m1, m2, m3) {
