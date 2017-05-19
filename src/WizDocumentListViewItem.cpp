@@ -17,6 +17,8 @@
 #include "sync/WizAvatarHost.h"
 #include "utils/WizStyleHelper.h"
 
+#include "share/WizDocumentStyle.h"
+
 
 WizDocumentListViewDocumentItem::WizDocumentListViewDocumentItem(WizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
@@ -569,6 +571,8 @@ void WizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, c
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
     rcd.setTop(rcd.top() + nTextTopMargin);
     //
+    WIZSTYLEDATA style = WizDocumentStyle::instance().getStyle(document().strStyleGUID);
+    //
     WIZABSTRACT thumb;
     if (searchResult) {
         //
@@ -582,7 +586,7 @@ void WizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, c
         QString info = m_strAuthor + " " + m_data.doc.tCreated.toHumanFriendlyString() + " (" + documentLocation() + ")";
         //
         Utils::WizStyleHelper::drawListViewItemSearchResult(p, rcd, title, info,
-                                          text, bFocused, bSelected);
+                                          text, bFocused, bSelected, style.crTextColor);
         //
     } else {
         WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
@@ -596,7 +600,7 @@ void WizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, c
         int nType = badgeType(true);
         Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, title, m_data.infoList,
                                                    needDrawDocumentLocation() ? documentLocation() : "", text,
-                                                  bFocused, bSelected, pmt);
+                                                  bFocused, bSelected, pmt, style.crTextColor);
     }
 }
 
@@ -649,6 +653,8 @@ void WizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, con
 
 void WizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
+    WIZSTYLEDATA style = WizDocumentStyle::instance().getStyle(document().strStyleGUID);
+    //
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
@@ -657,7 +663,7 @@ void WizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, c
 
     int nType = badgeType();
     Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
+                                              needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected, QPixmap(), style.crTextColor);
 }
 
 void WizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
@@ -681,13 +687,15 @@ void WizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, con
 
 void WizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItem* vopt) const
 {
+    WIZSTYLEDATA style = WizDocumentStyle::instance().getStyle(document().strStyleGUID);
+    //
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = badgeType();
-    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected);
+    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected, QPixmap(), style.crTextColor);
 }
 
 void WizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
@@ -757,8 +765,16 @@ QRect WizDocumentListViewDocumentItem::drawItemBackground(QPainter* p, const QRe
     {
         return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeUnread, useFullLineSeperator);
     }
-
-    return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeNone, useFullLineSeperator);
+    //
+    WIZSTYLEDATA style = WizDocumentStyle::instance().getStyle(document().strStyleGUID);
+    if (style.valid())
+    {
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeCustom, useFullLineSeperator, style.crBackColor);
+    }
+    else
+    {
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeNone, useFullLineSeperator);
+    }
 }
 
 

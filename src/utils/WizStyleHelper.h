@@ -51,7 +51,8 @@ public:
         ListBGTypeNone,
         ListBGTypeActive,
         ListBGTypeHalfActive,
-        ListBGTypeUnread
+        ListBGTypeUnread,
+        ListBGTypeCustom
     };
 
     static void initPainterByDevice(QPainter* p);
@@ -116,13 +117,13 @@ public:
     static QColor listViewMultiLineFirstLine(bool bSelected);
     static QColor listViewMultiLineOtherLine(bool bSelected);
 
-    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine = true);
+    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine = true, QColor color = QColor());
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QStringList& lead, const QString& location,
-                                      const QString& abs, bool bFocused, bool bSelected, QPixmap thumbPix = QPixmap());
+                                      const QString& abs, bool bFocused, bool bSelected, QPixmap thumbPix = QPixmap(), QColor textColor = QColor());
 
     static void drawListViewItemSearchResult(QPainter* p, const QRect& rc, const QString& title, const QString& info,
-                                      const QString& abs, bool bFocused, bool bSelected);
+                                      const QString& abs, bool bFocused, bool bSelected, QColor textColor = QColor());
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 
     static QIcon listViewBadge(int type);
@@ -135,7 +136,7 @@ public:
     static void drawListViewItemSeperator(QPainter* p, const QRect& rc);
     static void drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
     static void drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType, bool useFullSeperatorLine);
-    static void drawListViewItemBackground(QPainter* p, const QRect& rc, ListViewBGType bgType);
+    static void drawListViewItemBackground(QPainter* p, const QRect& rc, ListViewBGType bgType, QColor color = QColor());
     static QRect drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm);
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect);
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType, bool bFocus, bool bSelect);

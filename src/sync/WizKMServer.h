@@ -22,6 +22,8 @@ public:
     bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    //
+    void setLastError(const WIZSTANDARDRESULT& ret) { WizXmlRpcServerBase::setLastError(ret.returnCode, ret.returnMessage); }
 };
 
 
@@ -32,7 +34,7 @@ public:
     virtual ~WizKMAccountsServer(void);
 
     virtual void onXmlRpcError();
-
+    //
 protected:
     bool m_bLogin;
     bool m_bAutoLogout;

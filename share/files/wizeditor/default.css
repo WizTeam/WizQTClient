@@ -1,11 +1,11 @@
-html, body {
+﻿html, body {
     font-size: 15px;
 }
 
 body {
     font-family: Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;
     line-height: 1.6;
-    margin: 0;
+    margin: 0 auto;
     padding: 20px 15px;
     padding: 1.33rem 1rem;
 }
@@ -18,18 +18,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-    font-size: 21px;
-    font-size: 1.4rem;
+    font-size: 24px;
+    font-size: 1.6rem;
 }
 
 h2 {
-    font-size: 20px;
-    font-size: 1.33rem;
+    font-size: 19.5px;
+    font-size: 1.3rem;
 }
 
 h3 {
-    font-size: 18px;
-    font-size: 1.2rem;
+    font-size: 17.25px;
+    font-size: 1.15rem;
 }
 
 h4 {
@@ -96,52 +96,6 @@ td, th {
     box-sizing: border-box;
 }
 
-@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {
-    html, body {
-        font-size: 17px;
-    }
-
-    body {
-        line-height: 1.7;
-        padding: 0.75rem 0.9375rem;
-        color: #353c47;
-    }
-
-    h1 {
-        font-size: 2.125rem;
-    }
-
-    h2 {
-        font-size: 1.875rem;
-    }
-
-    h3 {
-        font-size: 1.625rem;
-    }
-
-    h4 {
-        font-size: 1.375rem;
-    }
-
-    h5 {
-        font-size: 1.125rem;
-    }
-
-    h6 {
-        color: inherit;
-    }
-
-    ul, ol {
-        padding-left: 2.5rem;
-    }
-
-    blockquote {
-        padding: 0 0.9375rem;
-    }
-}
-
-html, body {
-    /*default-font-family*/
-    /*default-font-size*/
-    /*default-background-color*/
+.wiz-hide {
+    display: none !important;
 }

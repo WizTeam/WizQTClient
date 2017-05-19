@@ -847,6 +847,7 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
     m_lastJsonResult = jsonRet;
     if (!jsonRet)
     {
+        setLastError(jsonRet);
         TOLOG1("Failed to download document data: %1", ret.strTitle);
         return false;
     }
@@ -1379,7 +1380,7 @@ struct WIZRESOURCEDATA
     QByteArray data;
 };
 
-bool uploadResources(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const std::vector<WIZRESOURCEDATA>& files, bool isLast, Json::Value& res)
+bool uploadResources(WizKMDatabaseServer& server, const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const std::vector<WIZRESOURCEDATA>& files, bool isLast, Json::Value& res)
 {
     QString objType = "resource";
     //
@@ -1441,6 +1442,7 @@ bool uploadResources(const QString& url, const QString& key, const QString& kbGu
     WIZSTANDARDRESULT ret = WizRequest::isSucceededStandardJsonRequest(resData);
     if (!ret)
     {
+        server.setLastError(ret);
         //
         qDebug() << ret.returnMessage;
         return false;
@@ -1450,7 +1452,7 @@ bool uploadResources(const QString& url, const QString& key, const QString& kbGu
 }
 
 
-bool uploadObject(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const QString& objType, const QString& objId, const QByteArray& data, bool isLast, Json::Value& res)
+bool uploadObject(WizKMDatabaseServer& server, const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const QString& objType, const QString& objId, const QByteArray& data, bool isLast, Json::Value& res)
 {
     int partSize = 1024 * 1024; //1M
     int partCount = (data.length() + partSize - 1) / partSize;
@@ -1535,6 +1537,7 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
             WIZSTANDARDRESULT ret = WizRequest::isSucceededStandardJsonRequest(resData, partRes);
             if (!ret)
             {
+                server.setLastError(ret);
                 qDebug() << "Can't upload note data, ret code=" << ret.returnCode << ", message=" << ret.returnMessage;
                 return false;
             }
@@ -1580,8 +1583,10 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
     }
     //
     Json::Value ret;
-    if (!WizRequest::execStandardJsonRequest(url_main, "POST", att, ret))
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url_main, "POST", att, ret);
+    if (!jsonRet)
     {
+        setLastError(jsonRet);
         qDebug() << "Failed to upload note";
         return false;
     }
@@ -1592,7 +1597,7 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
     {
         QString key = QString::fromUtf8(ret["key"].asString().c_str());
         Json::Value res;
-        if (!uploadObject(url_data, key, m_userInfo.strKbGUID, data.strDocumentGUID, "attachment", data.strGUID, data.arrayData, true, res))
+        if (!uploadObject(*this, url_data, key, m_userInfo.strKbGUID, data.strDocumentGUID, "attachment", data.strGUID, data.arrayData, true, res))
         {
             qDebug() << "Failed to upload attachment data";
             return false;
@@ -1707,6 +1712,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
     m_lastJsonResult = jsonRet;
     if (!jsonRet)
     {
+        setLastError(jsonRet);
         qDebug() << "Failed to upload note";
         return false;
     }
@@ -1719,7 +1725,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
         if (data.nProtected)
         {
             Json::Value res;
-            if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "document", data.strGUID, data.arrayData, true, res))
+            if (!uploadObject(*this, url_res, key, m_userInfo.strKbGUID, data.strGUID, "document", data.strGUID, data.arrayData, true, res))
             {
                 qDebug() << "Failed to upload note res";
                 return false;
@@ -1791,7 +1797,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
                     bool isLast = resLess300K.empty() && !hasLarge;
                     //
                     Json::Value res;
-                    if (!uploadResources(url_res, key, m_userInfo.strKbGUID, data.strGUID, uploads, isLast, res))
+                    if (!uploadResources(*this, url_res, key, m_userInfo.strKbGUID, data.strGUID, uploads, isLast, res))
                     {
                         qDebug() << "Failed to upload note res";
                         return false;
@@ -1820,7 +1826,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
                     bool isLast = resLarge.empty();
                     //
                     Json::Value res;
-                    if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
+                    if (!uploadObject(*this, url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
                     {
                         qDebug() << "Failed to upload note res";
                         return false;
@@ -1974,6 +1980,7 @@ bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
     if (!jsonRet)
     {
+        server.setLastError(jsonRet);
         TOLOG1("Failed to call %1", url);
         return false;
     }
@@ -2034,6 +2041,7 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, "POST", doc, ret);
     if (!jsonRet)
     {
+        server.setLastError(jsonRet);
         TOLOG1("Failed to call %1", url);
         return false;
     }

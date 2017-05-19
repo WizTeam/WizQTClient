@@ -369,8 +369,8 @@ bool WizIndexBase::sqlToStyleDataArray(const CString& strSQL, CWizStyleDataArray
             data.strGUID = query.getStringField(styleSTYLE_GUID);
             data.strName = query.getStringField(styleSTYLE_NAME);
             data.strDescription = query.getStringField(styleSTYLE_DESCRIPTION);
-            data.crTextColor = query.getColorField(styleSTYLE_TEXT_COLOR);
-            data.crBackColor = query.getColorField(styleSTYLE_BACK_COLOR);
+            data.crTextColor = query.getColorField2(styleSTYLE_TEXT_COLOR);
+            data.crBackColor = query.getColorField2(styleSTYLE_BACK_COLOR);
             data.bTextBold = query.getBoolField(styleSTYLE_TEXT_BOLD);
             data.nFlagIndex = query.getIntField(styleSTYLE_FLAG_INDEX);
             data.tModified = query.getTimeField(styleDT_MODIFIED);

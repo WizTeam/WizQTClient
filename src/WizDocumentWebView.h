@@ -242,8 +242,8 @@ public:
 private:
     void loadDocumentInWeb(WizEditorMode editorMode);
     //
-    void getAllEditorScriptAndStypeFileName(QStringList& arrayFile);
-    void insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles);
+    void getAllEditorScriptAndStypeFileName(std::map<QString, QString>& arrayFile);
+    void insertScriptAndStyleCore(QString& strHtml, const std::map<QString, QString>& files);
     //
     void tryResetTitle();
     bool onPasteCommand();
@@ -355,7 +355,7 @@ public Q_SLOTS:
     void editorCommandExecuteInsertDate();
     void editorCommandExecuteInsertTime();
     void editorCommandExecuteRemoveFormat();
-    void editorCommandExecuteFormatMatch();
+    void editorCommandExecuteFormatPainter(bool multi);
     void editorCommandExecuteInsertHorizontal();
     void editorCommandExecuteInsertCheckList();
     void editorCommandExecuteInsertImage();

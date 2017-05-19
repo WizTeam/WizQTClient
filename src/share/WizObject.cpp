@@ -322,6 +322,11 @@ WIZSTYLEDATA::WIZSTYLEDATA()
     nVersion = -1;
 }
 
+bool WIZSTYLEDATA::valid()
+{
+    return !strName.isEmpty();
+}
+
 bool WIZSTYLEDATA::equalForSync(const WIZSTYLEDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
@@ -341,9 +346,9 @@ bool WIZSTYLEDATA::fromJson(const Json::Value& value)
         strKbGUID = QString::fromStdString(value["kbGuid"].asString());
         strGUID = QString::fromStdString(value["styleGuid"].asString());
         strName = QString::fromStdString(value["name"].asString());
-        crTextColor = WizStringToColor(QString::fromStdString(value["textColor"].asString()));
-        crBackColor = WizStringToColor(QString::fromStdString(value["backColor"].asString()));
-        bTextBold = value["textBold"].asInt() == 1;
+        crTextColor = WizStringToColor2(QString::fromStdString(value["textColor"].asString()));
+        crBackColor = WizStringToColor2(QString::fromStdString(value["backColor"].asString()));
+        bTextBold = value["textBold"].asBool();
         nFlagIndex = value["flagIndex"].asInt();
         tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
         nVersion = value["version"].asInt64();
@@ -365,10 +370,9 @@ bool WIZSTYLEDATA::toJson(QString kbGuid, Json::Value& value) const
     value["name"] = strName.toStdString();
     value["textColor"] = ::WizColorToString(crTextColor).toStdString();
     value["backColor"] = ::WizColorToString(crBackColor).toStdString();
-    value["textBold"] = bTextBold ? 1 : 0;
+    value["textBold"] = bTextBold ? true : false;
     value["flagIndex"] = nFlagIndex;
     value["modified"] = tModified.toTime_t() * 1000;
-    value["created"] = tModified.toTime_t() * 1000;
     //
     return true;
 }
@@ -534,7 +538,7 @@ bool WIZDOCUMENTDATAEX::loadFromXmlRpc(WizXmlRpcStructValue& data)
     data.getString("document_type", strType);
     data.getString("document_owner", strOwner);
     data.getString("document_filetype", strFileType);
-    data.getString("document_styleguid", strStyleGUID);
+    data.getString("style_guid", strStyleGUID);
     data.getInt("document_protect", nProtected);
     data.getInt("document_attachment_count", nAttachmentCount);
 

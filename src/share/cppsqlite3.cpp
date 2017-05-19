@@ -326,12 +326,29 @@ COLORREF CppSQLite3Query::getColorField(int nField, COLORREF crNullValue /*= 0*/
 		return WizStringToColor(str);
 	}
 }
-COLORREF CppSQLite3Query::getColorField(const CString& szField, COLORREF crNullValue /*= 0*/)
+QColor CppSQLite3Query::getColorField2(const CString& szField, QColor crNullValue /*= 0*/)
 {
 	int nField = fieldIndex(szField);
-	return getColorField(nField, crNullValue);
+    return getColorField2(nField, crNullValue);
 }
 
+QColor CppSQLite3Query::getColorField2(int nField, QColor crNullValue /*= 0*/)
+{
+    CString str = getStringField(nField);
+    if (str.isEmpty())
+    {
+        return crNullValue;
+    }
+    else
+    {
+        return WizStringToColor2(str);
+    }
+}
+COLORREF CppSQLite3Query::getColorField(const CString& szField, COLORREF crNullValue /*= 0*/)
+{
+    int nField = fieldIndex(szField);
+    return getColorField(nField, crNullValue);
+}
 
 CString CppSQLite3Query::getStringField(int nField, const CString& szNullValue/*=""*/)
 {
