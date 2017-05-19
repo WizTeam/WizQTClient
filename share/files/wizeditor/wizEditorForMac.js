@@ -2022,7 +2022,7 @@ var ENV = require('./common/env'),
 
 var WizEditor = {
     version: '1.1',
-    clearWizDom: function(){},
+    // clearWizDom: function(){},
     /**
      * 初始化 修订编辑
      * @param options
@@ -2223,8 +2223,6 @@ var WizEditor = {
      * @param attr
      */
     modifySelectionDom: function (style, attr) {
-        console.log('modifySelectionDom: ');
-        console.log(style);
         editor.modifySelectionDom(style, attr);
     },
     /**
@@ -13630,6 +13628,11 @@ domUtils.splitDomAfterSub = function (mainDom, subDom) {
  * @param subDom
  */
 domUtils.splitDomSingle = function (mainDom, subDom) {
+    if (mainDom && subDom && mainDom.nodeType === 1 &&
+        subDom == mainDom.firstChild && mainDom.childNodes.length === 1) {
+        return mainDom;
+    }
+
     // 拆分 subDom 前面的内容
     var mainP = domUtils.splitDomBeforeSub(mainDom, subDom);
     mainP = domUtils.splitDomAfterSub(mainP, subDom);
@@ -15337,7 +15340,8 @@ function getStyle (start) {
         delete target.style['text-align'];
         target.tagList.push({name: tagName, enabled: true});
     }
-    console.log(target);
+
+    // console.log(target);
 }
 
 function analyseStyle (obj, styleList, result) {
