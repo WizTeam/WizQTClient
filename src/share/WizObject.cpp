@@ -310,6 +310,8 @@ bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
     value["parentTagGuid"] = strParentGUID.toStdString();
     value["name"] = strName.toStdString();
     value["modified"] = tModified.toTime_t() * 1000;
+    //
+    return true;
 }
 
 bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw()
