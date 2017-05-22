@@ -225,16 +225,17 @@ public:
     //
     bool document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     bool attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
-    bool tag_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZTAGDATA>& arrayRet);
-    bool deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet);
+    //
+    bool tag_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZTAGDATA>& arrayRet);
+    bool tag_postList(std::deque<WIZTAGDATA>& arrayTag);
     //
     bool style_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZSTYLEDATA>& arrayRet);
     bool style_postList(const std::deque<WIZSTYLEDATA>& arrayStyle);
     //
     bool param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet);
     bool param_postList(const std::deque<WIZDOCUMENTPARAMDATA>& arrayParam);
-
-    bool tag_postList(std::deque<WIZTAGDATA>& arrayTag);
+    //
+    bool deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet);
     bool deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
     //
     bool document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);

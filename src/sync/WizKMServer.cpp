@@ -1935,19 +1935,11 @@ bool WizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nVersion
     return getList<WIZDOCUMENTATTACHMENTDATAEX, WIZDOCUMENTATTACHMENTDATAEX>("attachment.getList", nCountPerPage, nVersion, arrayRet);
 }
 
-bool WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZTAGDATA>& arrayRet)
-{
-    return getList<WIZTAGDATA, WIZTAGDATA>("tag.getList", nCountPerPage, nVersion, arrayRet);
-}
 
 
 bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
     return getList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.getList", nCountPerPage, nVersion, arrayRet);
-}
-bool WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
-{
-    return postList<WIZTAGDATA, WIZTAGDATA>("tag.postList", "tags", arrayTag);
 }
 bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
 {
@@ -2049,6 +2041,20 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque
     return true;
 }
 
+
+bool WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZTAGDATA>& arrayRet)
+{
+    QString urlPath = "/ks/tag/download";
+    //
+    return getJsonList<WIZTAGDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
+}
+
+bool WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
+{
+    QString urlPath = "/ks/tag/upload";
+    //
+    return postJsonList<WIZTAGDATA>(*this, urlPath, arrayTag);
+}
 
 
 bool WizKMDatabaseServer::style_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZSTYLEDATA>& arrayRet)

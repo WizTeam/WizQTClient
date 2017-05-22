@@ -249,6 +249,9 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     WIZTAGDATA(const WIZTAGDATA& data);
     virtual ~WIZTAGDATA();
 
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
+
     CString strGUID;
     CString strParentGUID;
     CString strName;
@@ -260,8 +263,6 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
 
     BOOL equalForSync(const WIZTAGDATA& data) const;
-    virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
-    virtual BOOL saveToXmlRpc(WizXmlRpcStructValue& data) const;
 
     static CString versionName() { return CString("tag_version"); }
     static CString objectName() { return CString("tag"); }

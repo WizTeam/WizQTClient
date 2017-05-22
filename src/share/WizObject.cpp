@@ -282,26 +282,34 @@ BOOL WIZTAGDATA::equalForSync(const WIZTAGDATA& data) const
         && strParentGUID == data.strParentGUID;
 }
 
-BOOL WIZTAGDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZTAGDATA::fromJson(const Json::Value& value)
 {
-    return data.getStr("tag_guid", strGUID)
-            && data.getStr("tag_group_guid", strParentGUID)
-            && data.getStr("tag_name", strName)
-            && data.getStr("tag_description", strDescription)
-            && data.getTime("dt_info_modified", tModified)
-            && data.getInt64("version", nVersion);
+    try {
+        //
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
+        strGUID = QString::fromStdString(value["tagGuid"].asString());
+        strParentGUID = QString::fromStdString(value["parentTagGuid"].asString());
+        strName = QString::fromStdString(value["name"].asString());
+        tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
+        nVersion = value["version"].asInt64();
+
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
+    return !strGUID.isEmpty()
+            && !strName.isEmpty()
+            && nVersion >= 0;
 }
 
-BOOL WIZTAGDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
+bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
 {
-    data.addString("tag_guid", strGUID);
-    data.addString("tag_group_guid", strParentGUID);
-    data.addString("tag_name", strName);
-    data.addString("tag_description", strDescription);
-    data.addTime("dt_info_modified", tModified);
-    data.addInt64("version", nVersion);
-
-    return TRUE;
+    //value["kbGuid"] = kbGuid.toStdString();
+    value["tagGuid"] = strGUID.toStdString();
+    value["parentTagGuid"] = strParentGUID.toStdString();
+    value["name"] = strName.toStdString();
+    value["modified"] = tModified.toTime_t() * 1000;
 }
 
 bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw()
