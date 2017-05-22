@@ -1946,21 +1946,6 @@ bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& array
     return postList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.postList", "deleteds", arrayDeletedGUID);
 }
 
-bool WizKMDatabaseServer::category_getAll(QString& str)
-{
-    CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-    //
-    if (!call("category.getAll", "categories", str, &param))
-    {
-        TOLOG("category.getList failure!");
-        return FALSE;
-    }
-    //
-    return TRUE;
-}
-
-
-
 template <class TData>
 bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
 {
