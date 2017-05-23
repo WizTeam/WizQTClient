@@ -14,7 +14,8 @@ struct WIZSTANDARDRESULT
     {
         network = -1,
         json = -2,
-        server = -3
+        server = -3,
+        format = -4
     };
 
     //
@@ -34,6 +35,8 @@ struct WIZSTANDARDRESULT
     }
     //
     WIZSTANDARDRESULT(ERRORTYPE error, QString message = "", QString extCode = "");
+    //
+    static WIZSTANDARDRESULT noError() { return WIZSTANDARDRESULT(int(200), QString("OK"), QString("")); }
     //
     operator bool () {
         return returnCode == 200;
@@ -56,3 +59,5 @@ public:
     static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url, Json::Value& res);
     static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url);
 };
+
+

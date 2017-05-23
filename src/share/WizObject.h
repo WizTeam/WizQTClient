@@ -188,27 +188,32 @@ struct WIZUSERCERT
 struct WIZKBINFO
 {
     WIZKBINFO();
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    //
+    bool fromJson(const Json::Value& value);
+    //
+    __int64 nDocumentVersion;
+    __int64 nTagVersion;
+    __int64 nStyleVersion;
+    __int64 nAttachmentVersion;
+    __int64 nDeletedGUIDVersion;
+    __int64 nParamVersion;
+    //
+    qint64 nStorageLimit;
+    qint64 nStorageUsage;
+    //
+    qint64 nTrafficLimit;
+    qint64 nTrafficUsage;
+    //
+    qint64 nUploadSizeLimit;
+    //
+    qint64 nNotesCount;
+    qint64 nNotesCountLimit;
     //
     int getMaxFileSize() const
     {
         return nUploadSizeLimit;
     }
-
-    qint64 nStorageLimit;
-    qint64 nStorageUsage;
-    QString strStorageLimit;
-    QString strStorageUsage;
-
-    qint64 nUploadSizeLimit;
-    QString strUploadSizeLimitString;
-    qint64 nNotesCount;
-    qint64 nNotesCountLimit;
-
-    qint64 nTrafficLimit;
-    qint64 nTrafficUsage;
-    QString strTrafficLimit;
-    QString strTrafficUsage;
+    //
 };
 
 

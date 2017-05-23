@@ -21,6 +21,39 @@
 
 #include <QHttpPart>
 
+
+
+template <class TData>
+static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url, TData& data)
+{
+    Json::Value res;
+    WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, res);
+    if (!ret)
+        return ret;
+    //
+    Json::Value result = res["result"];
+    if (result.isNull())
+    {
+        qDebug() << "invalid json format: no result";
+        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+    }
+    //
+    if (!result.isObject())
+    {
+        qDebug() << "invalid json format: result is not an object";
+        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+    }
+    //
+    bool parseRet = data.fromJson(result);
+    if (!parseRet)
+    {
+        qDebug() << "invalid json format: failed to convert result to object data";
+        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+    }
+    //
+    return WIZSTANDARDRESULT::noError();
+}
+
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
 
@@ -760,55 +793,20 @@ int WizKMDatabaseServer::getCountPerPage()
 }
 
 //
-bool WizKMDatabaseServer::wiz_getInfo()
+bool WizKMDatabaseServer::kb_getInfo()
 {
-    CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
+    QString url = m_userInfo.strKbServer + "/ks/kb/info/" + m_userInfo.strKbGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
     //
-    if (!call("wiz.getInfo", m_kbInfo, &param))
+    WIZSTANDARDRESULT jsonRet = execStandardJsonRequest<WIZKBINFO>(url, m_kbInfo);
+    if (!jsonRet)
     {
-        TOLOG("getInfo failure!");
-        return FALSE;
+        setLastError(jsonRet);
+        TOLOG1("Failed to call %1", url);
+        return false;
     }
     //
-    return TRUE;
+    return true;
 }
-
-struct WIZOBJECTVERSION_XMLRPC : public WIZOBJECTVERSION
-{
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data)
-    {
-        QString strType;
-        //
-        bool bRet = data.getInt64("document_version", nDocumentVersion)
-            && data.getInt64("tag_version", nTagVersion)
-            && data.getInt64("style_version", nStyleVersion)
-            && data.getInt64("attachment_version", nAttachmentVersion)
-            && data.getInt64("deleted_version", nDeletedGUIDVersion);
-        //
-        data.getInt64("param_version", nParamVersion);
-        //
-        return bRet;
-    }
-};
-
-bool WizKMDatabaseServer::wiz_getVersion(WIZOBJECTVERSION& version, bool bAuto)
-{
-    CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-    //
-    param.addBool("auto", bAuto);
-    //
-    WIZOBJECTVERSION_XMLRPC wrap;
-    if (!call("wiz.getVersion", wrap, &param))
-    {
-        TOLOG("GetVersion failure!");
-        return FALSE;
-    }
-    //
-    version = wrap;
-    //
-    return TRUE;
-}
-//
 
 bool WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {

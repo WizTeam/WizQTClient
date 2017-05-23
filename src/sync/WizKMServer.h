@@ -148,26 +148,6 @@ struct CWizKMTokenOnlyParam : public CWizKMBaseParam
 };
 
 
-struct WIZOBJECTVERSION
-{
-    __int64 nDocumentVersion;
-    __int64 nTagVersion;
-    __int64 nStyleVersion;
-    __int64 nAttachmentVersion;
-    __int64 nDeletedGUIDVersion;
-    __int64 nParamVersion;
-    //
-    WIZOBJECTVERSION()
-    {
-        nDocumentVersion = -1;
-        nTagVersion = -1;
-        nStyleVersion = -1;
-        nAttachmentVersion = -1;
-        nDeletedGUIDVersion = -1;
-        nParamVersion = -1;
-    }
-};
-
 class WizKMDatabaseServer: public WizKMXmlRpcServerBase
 {
     Q_OBJECT
@@ -214,9 +194,8 @@ public:
     QString getKbGuid() const { return m_userInfo.strKbGUID; }
     int getMaxFileSize() const { return m_kbInfo.getMaxFileSize(); }
 
-    bool wiz_getInfo();
-    bool wiz_getVersion(WIZOBJECTVERSION& version, bool bAuto = FALSE);
-
+    bool kb_getInfo();
+    //
     bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName);
     bool attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
     //

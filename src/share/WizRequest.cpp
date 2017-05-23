@@ -17,6 +17,7 @@ WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message, QString e
     case network: returnMessage = QObject::tr("Network error"); break;
     case json: returnMessage = QObject::tr("Response is not an valid json"); break;
     case server: returnMessage = QObject::tr("Server error"); break;
+    case format: returnMessage = QObject::tr("Json format error"); break;
     }
     //
     if (!message.isEmpty()) {
