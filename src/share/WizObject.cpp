@@ -139,11 +139,11 @@ bool WIZKBINFO::fromJson(const Json::Value& value)
         nNotesCount = value["noteCount"].asInt64();
         nNotesCountLimit = value["noteCountLimit"].asInt64();
         //
-        nDocumentVersion = value["documentVersion"].asInt64();
-        nTagVersion = value["documentVersion"].asInt64();
-        nStyleVersion = value["documentVersion"].asInt64();
-        nAttachmentVersion = value["documentVersion"].asInt64();
-        nDeletedGUIDVersion = value["documentVersion"].asInt64();
+        nDocumentVersion = value["docVersion"].asInt64();
+        nTagVersion = value["tagVersion"].asInt64();
+        nStyleVersion = value["styleVersion"].asInt64();
+        nAttachmentVersion = value["attVersion"].asInt64();
+        nDeletedGUIDVersion = value["deletedVersion"].asInt64();
         nParamVersion = value["paramVersion"].asInt64();
         //
     } catch (Json::Exception& e) {
