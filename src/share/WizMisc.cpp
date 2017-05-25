@@ -2968,7 +2968,7 @@ bool WizURLDownloadToData(const QString& url, QByteArray& data)
         //
         reply = netCtrl.get(request);
         WizAutoTimeOutEventLoop loop(reply);
-        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+        loop.setTimeoutWaitSeconds(60 * 60);
         loop.exec();
 
         if (loop.error() != QNetworkReply::NoError)
