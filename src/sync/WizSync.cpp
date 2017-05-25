@@ -105,31 +105,26 @@ bool WizKMSync::syncCore()
     m_pEvents->onStatus(QObject::tr("Query server infomation"));
     if (!m_bGroup)
     {
-        if (m_server.wiz_getInfo())
+        if (m_server.kb_getInfo())
         {
             m_pDatabase->setKbInfo("", m_server.kbInfo());
         }
     }
     else
     {
-        if (m_server.wiz_getInfo())
+        if (m_server.kb_getInfo())
         {
             m_pDatabase->setKbInfo(m_info.strKbGUID, m_server.kbInfo());
         }
     }
     //
-    WIZOBJECTVERSION versionServer;
-    if (!m_server.wiz_getVersion(versionServer))
-    {
-        m_pEvents->onError(QObject::tr("Cannot get version information!"));
-        return FALSE;
-    }
-    //
     if (m_pEvents->isStop())
         return FALSE;
     //
+    WIZKBINFO info = m_server.kbInfo();
+    //
     m_pEvents->onStatus(QObject::tr("Query deleted objects list"));
-    if (!downloadDeletedList(versionServer.nDeletedGUIDVersion))
+    if (!downloadDeletedList(info.nDeletedGUIDVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download deleted objects list!"));
         return FALSE;
@@ -212,7 +207,7 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download tags"));
-    if (!downloadTagList(versionServer.nTagVersion))
+    if (!downloadTagList(info.nTagVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download tags!"));
         return FALSE;
@@ -222,7 +217,7 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download styles"));
-    if (!downloadStyleList(versionServer.nStyleVersion))
+    if (!downloadStyleList(info.nStyleVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download styles!"));
         return FALSE;
@@ -232,7 +227,7 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download notes list"));
-    if (!downloadDocumentList(versionServer.nDocumentVersion))
+    if (!downloadDocumentList(info.nDocumentVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download notes list!"));
         return FALSE;
@@ -259,13 +254,13 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download param list"));
-    if (!downloadParamList(versionServer.nParamVersion))
+    if (!downloadParamList(info.nParamVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download param list!"));
     }
     //
     m_pEvents->onStatus(QObject::tr("Download attachments list"));
-    if (!downloadAttachmentList(versionServer.nAttachmentVersion))
+    if (!downloadAttachmentList(info.nAttachmentVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download attachments list!"));
         return FALSE;
@@ -277,7 +272,7 @@ bool WizKMSync::syncCore()
     //
     if (!m_bGroup)
     {
-        if (m_server.wiz_getInfo())
+        if (m_server.kb_getInfo())
         {
             m_pDatabase->setKbInfo("", m_server.kbInfo());
         }

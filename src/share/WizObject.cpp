@@ -110,6 +110,13 @@ bool WIZUSERCERT::loadFromXmlRpc(WizXmlRpcStructValue& val)
 
 WIZKBINFO::WIZKBINFO()
 {
+    nDocumentVersion = -1;
+    nTagVersion = -1;
+    nStyleVersion = -1;
+    nAttachmentVersion = -1;
+    nDeletedGUIDVersion = -1;
+    nParamVersion = -1;
+    //
     nStorageLimit = 0;
     nStorageUsage = 0;
     nTrafficLimit = 0;
@@ -117,21 +124,33 @@ WIZKBINFO::WIZKBINFO()
     nUploadSizeLimit = 30 * 1024 * 1024;
 }
 
-bool WIZKBINFO::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZKBINFO::fromJson(const Json::Value& value)
 {
-    data.getInt64("storage_limit", nStorageLimit);
-    data.getInt64("storage_usage", nStorageUsage);
-    data.getStr("storage_limit_string", strStorageLimit);
-    data.getStr("storage_usage_string", strStorageUsage);
-    data.getInt64("traffic_limit", nTrafficLimit);
-    data.getInt64("traffic_usage", nTrafficUsage);
-    data.getStr("traffic_limit_string", strTrafficLimit);
-    data.getStr("traffic_usage_string", strTrafficUsage);
-    data.getInt64("upload_size_limit", nUploadSizeLimit);
-    data.getString("upload_size_limit_string", strUploadSizeLimitString);
-    data.getInt64("notes_count", nNotesCount);
-    data.getInt64("notes_count_limit", nNotesCountLimit);
-
+    try {
+        //
+        nStorageLimit = value["storageLimit"].asInt64();
+        nStorageUsage = value["storageUsage"].asInt64();
+        //
+        nTrafficLimit = value["trafficLimit"].asInt64();
+        nTrafficUsage = value["trafficUsage"].asInt64();
+        //
+        nUploadSizeLimit = value["uploadSizeLimit"].asInt64();
+        //
+        nNotesCount = value["noteCount"].asInt64();
+        nNotesCountLimit = value["noteCountLimit"].asInt64();
+        //
+        nDocumentVersion = value["documentVersion"].asInt64();
+        nTagVersion = value["documentVersion"].asInt64();
+        nStyleVersion = value["documentVersion"].asInt64();
+        nAttachmentVersion = value["documentVersion"].asInt64();
+        nDeletedGUIDVersion = value["documentVersion"].asInt64();
+        nParamVersion = value["paramVersion"].asInt64();
+        //
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
     return true;
 }
 

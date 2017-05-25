@@ -435,12 +435,15 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
             userInfo.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
         }
     }
+    //
     WizKMDatabaseServer server(userInfo, NULL);
-    WIZOBJECTVERSION versionServer;
-    if (!server.wiz_getVersion(versionServer))
+    //
+    if (!server.kb_getInfo())
         return false;
-
-    if (versionServer.nDocumentVersion <= db.getObjectVersion("document"))
+    //
+    WIZKBINFO info = server.kbInfo();
+    //
+    if (info.nDocumentVersion <= db.getObjectVersion("document"))
         return false;
 
     WIZDOCUMENTDATAEX docOnServer;
