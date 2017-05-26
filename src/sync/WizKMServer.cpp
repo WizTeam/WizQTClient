@@ -730,7 +730,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     , m_userInfo(kbInfo)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
-    m_userInfo.strKbServer = "http://localhost:4001";
+    //m_userInfo.strKbServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
