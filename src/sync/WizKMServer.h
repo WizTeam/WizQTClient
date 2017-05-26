@@ -236,73 +236,11 @@ protected:
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream);
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName);
     //
-    ////////////////////////////////////////////////////////////
-    //downloadList
-    ////通过GUID列表，下载完整的对象信息列表，和getList不同，getList对于文档，仅下载有限的信息，例如md5信息等等////
-    //
-    //
-    template <class TData, class TWrapData>
-    bool downloadListCore(const QString& strMethodName, const QString& strGUIDArrayValueName, const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayRet)
-    {
-        if (arrayGUID.empty())
-            return TRUE;
-        //
-        CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-        param.addStringArray(strGUIDArrayValueName, arrayGUID);
-        //
-        std::deque<TWrapData> arrayWrap;
-        if (!call(strMethodName, arrayWrap, &param))
-        {
-            TOLOG1("%1 failure!", strMethodName);
-            return FALSE;
-        }
-        //
-        arrayRet.assign(arrayWrap.begin(), arrayWrap.end());
-        //
-        return TRUE;
-    }
-
-
-    template <class TData, class TWrapData>
-    bool downloadList(const QString& strMethodName, const QString& strGUIDArrayValueName, const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayRet)
-    {
-        int nCountPerPage = 30;
-        //
-        CWizStdStringArray::const_iterator it = arrayGUID.begin();
-        //
-        while (1)
-        {
-            CWizStdStringArray subArray;
-            //
-            for (;
-                 it != arrayGUID.end(); )
-            {
-                subArray.push_back(*it);
-                it++;
-                //
-                if (subArray.size() == nCountPerPage)
-                    break;
-            }
-            //
-            std::deque<TData> subRet;
-            if (!downloadListCore<TData, TWrapData>(strMethodName, strGUIDArrayValueName, subArray, subRet))
-                return FALSE;
-            //
-            arrayRet.insert(arrayRet.end(), subRet.begin(), subRet.end());
-            //
-            if (it == arrayGUID.end())
-                break;
-        }
-        //
-        return TRUE;
-    }
-
-    //
-    //
     ////////////////////////////////////////////
     //postList
     ////上传对象列表，适用于简单对象：标签，样式，已删除对象////
     //
+
     template <class TData, class TWrapData>
     bool postList(const QString& strMethosName, const QString& strArrayName, std::deque<TData>& arrayData)
     {
@@ -428,15 +366,6 @@ public:
         return param_getList(nCountPerPage, nVersion, arrayRet);
     }
 
-    ///////////////////////////////////////////////////////
-    ////下载列表//////////////
-    //
-    template <class TData>
-    bool downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayData)
-    {
-        return TRUE;
-    }
-    //
     template <class TData>
     bool postList(std::deque<TData>& arrayData)
     {
@@ -482,33 +411,7 @@ public:
     {
         return attachment_postData(data, bWithData, nServerVersion);
     }
-public:
-    //
-    bool getDocumentInfoOnServer(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& dataServer)
-    {
-        CWizStdStringArray arrayDocument;
-        arrayDocument.push_back(strDocumentGUID);
-        //
-        CWizDocumentDataArray arrayData;
-        if (!downloadSimpleList<WIZDOCUMENTDATAEX>(arrayDocument, arrayData))
-        {
-            TOLOG("Can't download document info list from server!");
-            return FALSE;
-        }
-        //
-        if (arrayData.empty())
-            return TRUE;
-        //
-        if (arrayData.size() != 1)
-        {
-            TOLOG1("Too more documents info downloaded: %1!", WizInt64ToStr(arrayData.size()));
-            return FALSE;
-        }
-        //
-        dataServer = arrayData[0];
-        //
-        return TRUE;
-    }
+
 };
 
 
