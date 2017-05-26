@@ -4908,7 +4908,7 @@ Asian characters: %5</source>
     </message>
     <message>
         <location filename="../src/ui/WizPreferenceDialog.ui" line="381"/>
-        <source>Default note view(Only works for psersonal note)</source>
+        <source>Default note view(Only works for personal note)</source>
         <translation type="unfinished">預設筆記檢視方式 (僅對個人筆記有效)</translation>
     </message>
     <message>

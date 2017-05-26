@@ -378,7 +378,7 @@
        <item>
         <widget class="QGroupBox" name="groupBoxNoteView">
          <property name="title">
-          <string>Default note view(Only works for psersonal note)</string>
+          <string>Default note view(Only works for personal note)</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
