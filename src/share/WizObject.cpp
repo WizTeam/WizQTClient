@@ -466,19 +466,26 @@ BOOL WIZDOCUMENTATTACHMENTDATA::equalForSync(const WIZDOCUMENTATTACHMENTDATA& da
             && strDataMD5 == data.strDataMD5;
 }
 
-BOOL WIZDOCUMENTATTACHMENTDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZDOCUMENTATTACHMENTDATA::fromJson(const Json::Value& value)
 {
-    data.getStr("attachment_guid", strGUID);
-    data.getStr("attachment_document_guid", strDocumentGUID);
-    data.getStr("attachment_name", strName);
-    data.getStr("attachment_url", strURL);
-    data.getStr("attachment_description", strDescription);
-    data.getTime("dt_info_modified", tInfoModified);
-    data.getStr("info_md5", strInfoMD5);
-    data.getTime("dt_data_modified", tDataModified);
-    data.getStr("data_md5", strDataMD5);
-    data.getInt64("version", nVersion);
+    try {
+        //
+        //strKbGuid = QString::fromStdString(value["kbGuid"].asString());
+        nVersion = value["version"].asInt64();
+        strGUID = QString::fromStdString(value["attGuid"].asString());
+        strDocumentGUID = QString::fromStdString(value["docGuid"].asString());
+        strName = QString::fromStdString(value["name"].asString());
+        strURL = QString::fromStdString(value["url"].asString());
+        strDataMD5 = QString::fromStdString(value["dataMd5"].asString());
+        strInfoMD5 = QString::fromStdString(value["infoMd5"].asString());
+        tInfoModified = QDateTime::fromTime_t(value["infoModified"].asInt64() / 1000);
+        tDataModified = QDateTime::fromTime_t(value["dataModified"].asInt64() / 1000);
 
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
     return !strGUID.isEmpty() && !strDocumentGUID.isEmpty();
 }
 
@@ -548,70 +555,48 @@ WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator= (const WIZDOCUMENTDATAEX& right)
     return *this;
 }
 
-bool WIZDOCUMENTDATAEX::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZDOCUMENTDATAEX::fromJson(const Json::Value& value)
 {
-    nInfoChanged = 0;
-    nDataChanged = 0;
-    data.getInt64("version", nVersion);
-    data.getString("document_guid", strGUID);
+    try {
+        //
+        nInfoChanged = 0;
+        nDataChanged = 0;
+        //strKbGuid = QString::fromStdString(value["kbGuid"].asString());
+        nVersion = value["version"].asInt64();
+        strGUID = QString::fromStdString(value["docGuid"].asString());
+        strTitle = QString::fromStdString(value["title"].asString());
+        strLocation = QString::fromStdString(value["category"].asString());
+        strDataMD5 = QString::fromStdString(value["dataMd5"].asString());
+        strName = QString::fromStdString(value["name"].asString());
+        strURL = QString::fromStdString(value["url"].asString());
+        strSEO = QString::fromStdString(value["seo"].asString());
+        strAuthor = QString::fromStdString(value["author"].asString());
+        strKeywords = QString::fromStdString(value["keywords"].asString());
+        strType = QString::fromStdString(value["type"].asString());
+        strOwner = QString::fromStdString(value["owner"].asString());
+        strFileType = QString::fromStdString(value["fileType"].asString());
+        strStyleGUID = QString::fromStdString(value["styleGuid"].asString());
+        //
+        QString tags = QString::fromStdString(value["tags"].asString());
+        QStringList sl = tags.split('*');
+        arrayTagGUID.assign(sl.begin(), sl.end());
+        //
+        nProtected = value["protected"].asInt();
+        nAttachmentCount = value["attachmentCount"].asInt();
+        //
+        tCreated = QDateTime::fromTime_t(value["created"].asInt64() / 1000);
+        tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
+        tDataModified = QDateTime::fromTime_t(value["dataModified"].asInt64() / 1000);
 
-    data.getString("document_title", strTitle);
-    data.getString("document_category", strLocation);
-    data.getString("data_md5", strDataMD5);
-    data.getString("document_filename", strName);
-    data.getString("document_url", strURL);
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
     //
-    data.getString("document_seo", strSEO);
-    data.getString("document_author", strAuthor);
-    data.getString("document_keywords", strKeywords);
-    data.getString("document_type", strType);
-    data.getString("document_owner", strOwner);
-    data.getString("document_filetype", strFileType);
-    data.getString("style_guid", strStyleGUID);
-    data.getInt("document_protect", nProtected);
-    data.getInt("document_attachment_count", nAttachmentCount);
-
-    // time
-    data.getTime("dt_created", tCreated);
-    data.getTime("dt_modified", tModified);
-    data.getTime("dt_data_modified", tDataModified);
-
-    if (WizXmlRpcArrayValue* objTags = data.getArray("document_tags"))
-    {
-        std::deque<WizXmlRpcValue*> arr = objTags->value();
-        for (WizXmlRpcValue* elem : arr)
-        {
-            if (WizXmlRpcStructValue* pTag = dynamic_cast<WizXmlRpcStructValue *>(elem))
-            {
-                QString tagGuid;
-                if (pTag->getString("tag_guid", tagGuid))
-                {
-                    arrayTagGUID.push_back(tagGuid);
-                }
-            }
-            else if (WizXmlRpcStringValue* pTag = dynamic_cast<WizXmlRpcStringValue *>(elem))
-            {
-                arrayTagGUID.push_back(pTag->toString());
-            }
-            else
-            {
-                qDebug() << "invalid tag param from server: " << elem->toString();
-            }
-        }
-    }
-    else
-    {
-        QString tagGuids;
-        data.getString("document_tag_guids", tagGuids);
-        if (!tagGuids.isEmpty())
-        {
-            QStringList sl = tagGuids.split('*');
-            arrayTagGUID.assign(sl.begin(), sl.end());
-        }
-    }
-
-    return !strGUID.isEmpty();
+    return !strGUID.isEmpty()
+            && nVersion >= 0;
 }
+
 
 WIZDOCUMENTATTACHMENTDATAEX::WIZDOCUMENTATTACHMENTDATAEX()
     : nObjectPart(0)

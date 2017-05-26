@@ -405,7 +405,7 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
 
     WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
 
     // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
@@ -437,9 +437,10 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     WIZDOCUMENTATTACHMENTDATA();
     virtual ~WIZDOCUMENTATTACHMENTDATA();
 
+    bool fromJson(const Json::Value& value);
+    //
     friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
     BOOL equalForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
-    virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
 
     static QString versionName() { return "attachment_version"; }
     static QString objectName() { return "attachment"; }

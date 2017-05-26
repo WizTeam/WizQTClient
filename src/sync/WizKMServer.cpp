@@ -730,7 +730,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     , m_userInfo(kbInfo)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
-    //m_userInfo.strKbServer = "http://localhost:4001";
+    m_userInfo.strKbServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
@@ -1426,7 +1426,7 @@ bool uploadResources(WizKMDatabaseServer& server, const QString& url, const QStr
     multiPart->setParent(reply); // delete the multiPart with the reply
     //
     WizAutoTimeOutEventLoop loop(reply);
-    loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+    loop.setTimeoutWaitSeconds(60 * 60);
     loop.exec();
     //
     if (loop.error() != QNetworkReply::NoError)
@@ -1519,7 +1519,7 @@ bool uploadObject(WizKMDatabaseServer& server, const QString& url, const QString
         multiPart->setParent(reply); // delete the multiPart with the reply
         //
         WizAutoTimeOutEventLoop loop(reply);
-        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+        loop.setTimeoutWaitSeconds(60 * 60);
         loop.exec();
         //
         if (loop.error() != QNetworkReply::NoError)
@@ -1901,10 +1901,6 @@ bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data,
 }
 
 
-bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
-{
-   return downloadList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>("document.downloadInfoList", "document_guids", arrayDocumentGUID, arrayRet);
-}
 
 bool WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc)
 {
@@ -1923,17 +1919,6 @@ bool WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDO
 }
 
 
-bool WizKMDatabaseServer::document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
-{
-    return getList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>("document.getSimpleList", nCountPerPage, nVersion, arrayRet);
-}
-
-bool WizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
-{
-    return getList<WIZDOCUMENTATTACHMENTDATAEX, WIZDOCUMENTATTACHMENTDATAEX>("attachment.getList", nCountPerPage, nVersion, arrayRet);
-}
-
-
 
 bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
@@ -1944,15 +1929,13 @@ bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& array
     return postList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.postList", "deleteds", arrayDeletedGUID);
 }
 
+
+
 template <class TData>
-bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
+bool queryJsonList(WizKMDatabaseServer& server, QString url, QString method, const QByteArray& bodyData, std::deque<TData>& arrayRet)
 {
-    const WIZUSERINFOBASE userInfo = server.userInfo();
-    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1&count=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
-    url = url.arg(nStartVersion).arg(nCountPerPage);
-    //
     Json::Value doc;
-    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, method, bodyData, doc);
     if (!jsonRet)
     {
         server.setLastError(jsonRet);
@@ -1989,6 +1972,16 @@ bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage
 }
 
 
+template <class TData>
+bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
+{
+    const WIZUSERINFOBASE userInfo = server.userInfo();
+    QString url = userInfo.strKbServer + urlPath + "/" + userInfo.strKbGUID + "?version=%1&count=%2&token=" + userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    url = url.arg(nStartVersion).arg(nCountPerPage);
+    //
+    return queryJsonList<TData>(server, url, "GET", QByteArray(), arrayRet);
+}
+
 
 template <class TData>
 bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque<TData>& arrayData)
@@ -2024,6 +2017,40 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque
     return true;
 }
 
+
+bool WizKMDatabaseServer::document_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
+{
+    QString urlPath = "/ks/note/list/version";
+    //
+    return getJsonList<WIZDOCUMENTDATAEX>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
+}
+
+bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
+{
+    if (arrayDocumentGUID.empty())
+        return true;
+    //
+    const WIZUSERINFOBASE info = userInfo();
+    QString url = info.strKbServer + "/ks/note/list/guids/" + info.strKbGUID + "?token=" + info.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    //
+    Json::Value guids(Json::arrayValue);
+    for (int i = 0; i < arrayDocumentGUID.size(); i++)
+    {
+        guids[i] = arrayDocumentGUID[i].toStdString();
+    }
+    //
+    Json::FastWriter writer;
+    std::string data = writer.write(guids);
+    //
+    return queryJsonList<WIZDOCUMENTDATAEX>(*this, url, "POST", QByteArray::fromStdString(data), arrayRet);
+}
+
+bool WizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
+{
+    QString urlPath = "/ks/attachment/list/version";
+    //
+    return getJsonList<WIZDOCUMENTATTACHMENTDATAEX>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
+}
 
 bool WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZTAGDATA>& arrayRet)
 {
