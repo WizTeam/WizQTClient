@@ -1920,15 +1920,6 @@ bool WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDO
 
 
 
-bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
-{
-    return getList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.getList", nCountPerPage, nVersion, arrayRet);
-}
-bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
-{
-    return postList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.postList", "deleteds", arrayDeletedGUID);
-}
-
 
 
 template <class TData>
@@ -2095,3 +2086,15 @@ bool WizKMDatabaseServer::param_postList(const std::deque<WIZDOCUMENTPARAMDATA>&
     return postJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, arrayParam);
 }
 
+bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
+{
+    QString urlPath = "/ks/deleted/download";
+    //
+    return getJsonList<WIZDELETEDGUIDDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
+}
+bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
+{
+    QString urlPath = "/ks/deleted/upload";
+    //
+    return postJsonList<WIZDELETEDGUIDDATA>(*this, urlPath, arrayDeletedGUID);
+}

@@ -215,7 +215,7 @@ public:
     bool param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet);
     bool param_postList(const std::deque<WIZDOCUMENTPARAMDATA>& arrayParam);
     //
-    bool deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet);
+    bool deleted_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet);
     bool deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
     //
     bool document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
@@ -236,6 +236,7 @@ protected:
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream);
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName);
     //
+    /*
     ////////////////////////////////////////////
     //postList
     ////上传对象列表，适用于简单对象：标签，样式，已删除对象////
@@ -321,7 +322,7 @@ protected:
         //
         return TRUE;
     }
-
+*/
 public:
     //
 

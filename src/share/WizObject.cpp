@@ -426,29 +426,29 @@ bool WIZDELETEDGUIDDATA::equalForSync(const WIZDELETEDGUIDDATA& data) const
     return TRUE;
 }
 
-bool WIZDELETEDGUIDDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZDELETEDGUIDDATA::fromJson(const Json::Value& value)
 {
-    CString strType;
+    try {
+        nVersion = value["version"].asInt64();
+        tDeleted = QDateTime::fromTime_t(value["deleted"].asInt64() / 1000);
+        strGUID = QString::fromStdString(value["deletedGuid"].asString());
+        QString type = QString::fromStdString(value["guidType"].asString());
+        eType = WIZOBJECTDATA::typeStringToObjectType(type);
 
-    // this field maybe "nil"
-    data.getTime("dt_deleted", tDeleted);
-
-    bool bRet = data.getStr("deleted_guid", strGUID)
-        && data.getStr("guid_type", strType)
-        && data.getInt64("version", nVersion);
-
-    eType = WIZOBJECTDATA::typeStringToObjectType(strType);
-
-    return bRet;
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
+    return !strGUID.isEmpty()
+            && nVersion >= 0;
 }
 
-bool WIZDELETEDGUIDDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
+bool WIZDELETEDGUIDDATA::toJson(QString kbGuid, Json::Value& value) const
 {
-    data.addString("deleted_guid", strGUID);
-    data.addString("guid_type", WIZOBJECTDATA::objectTypeToTypeString(eType));
-    data.addTime("dt_deleted", tDeleted);
-    data.addInt64("version", nVersion);
-
+    value["deletedGuid"] = strGUID.toStdString();
+    value["guidType"] = WIZOBJECTDATA::objectTypeToTypeString(eType).toStdString();
+    value["deleted"] = tDeleted.toTime_t() * 1000;
     return true;
 }
 
