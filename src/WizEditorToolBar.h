@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <functional>
 #include <QToolButton>
+#include <QDateTime>
 
 class QFontDialog;
 class QString;
@@ -29,6 +30,10 @@ public:
     explicit WizDblclickableToolButton(QWidget *parent = Q_NULLPTR);
 protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
+
+private:
+    QDateTime m_tDblClicked;
 Q_SIGNALS:
     void dblClicked();
 };
@@ -134,7 +139,7 @@ protected Q_SLOTS:
     void on_comboParagraph_indexChanged(int index);
     void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
-    void on_btnFormatPainter_clicked();
+    void on_btnFormatPainter_clicked(bool checked);
     void on_btnFormatPainter_dblClicked();
     void on_btnRemoveFormat_clicked();
     void on_btnForeColor_clicked();

@@ -479,14 +479,26 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
 WizDblclickableToolButton::WizDblclickableToolButton(QWidget *parent)
     : QToolButton(parent)
 {
-
+    m_tDblClicked = QDateTime::currentDateTime();
 }
 
 void WizDblclickableToolButton::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QToolButton::mouseDoubleClickEvent(event);
+    m_tDblClicked = QDateTime::currentDateTime();
     //
     emit dblClicked();
+}
+
+void WizDblclickableToolButton::mouseReleaseEvent(QMouseEvent* event)
+{
+    QDateTime now = QDateTime::currentDateTime();
+    int seconds = now.toTime_t() - m_tDblClicked.toTime_t();
+    if (seconds < 1) {
+        event->ignore();
+    } else {
+        QToolButton::mouseReleaseEvent(event);
+    }
 }
 
 
@@ -1067,8 +1079,9 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     //m_btnFormatPainter->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
     m_btnFormatPainter->setToolTip(tr("Format Painter"));
     m_btnFormatPainter->setCheckable(true);
+    m_btnFormatPainter->setChecked(false);
     m_btnFormatPainter->setPosition(CWizToolButton::left);
-    connect(m_btnFormatPainter, SIGNAL(clicked()), SLOT(on_btnFormatPainter_clicked()));
+    connect(m_btnFormatPainter, SIGNAL(clicked(bool)), SLOT(on_btnFormatPainter_clicked(bool)));
     connect(m_btnFormatPainter, SIGNAL(dblClicked()), SLOT(on_btnFormatPainter_dblClicked()));
     //
     m_btnRemoveFormat = new CWizToolButton(this);
@@ -2450,15 +2463,16 @@ void WizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
     setFontPointSize(strSize);
 }
 
-void WizEditorToolBar::on_btnFormatPainter_clicked()
+void WizEditorToolBar::on_btnFormatPainter_clicked(bool checked)
 {
     WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
     if (m_editor) {
-        if (m_btnFormatPainter->isChecked()) {
-            m_editor->editorCommandExecuteFormatPainterOff();
-        } else {
+        if (checked) {
             m_btnFormatPainter->setChecked(true);
             m_editor->editorCommandExecuteFormatPainterOn(false);
+        } else {
+            m_btnFormatPainter->setChecked(false);
+            m_editor->editorCommandExecuteFormatPainterOff();
         }
     }
 }
