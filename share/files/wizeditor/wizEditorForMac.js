@@ -2083,7 +2083,13 @@ var WizEditor = {
 
         setTimeout(function() {
             if (!ENV.client.type.isPhone || !ENV.client.type.isPad) {
-                ENV.doc.body.scrollTop = scrollTopLast;
+                if (ENV.client.type.isMac && ENV.options.noteType !== CONST.NOTE_TYPE.COMMON) {
+                    setTimeout(function() {
+                        ENV.doc.body.scrollTop = scrollTopLast;
+                    }, 100);
+                } else {
+                    ENV.doc.body.scrollTop = scrollTopLast;
+                }
             }
 
             if (typeof callback === 'function') {
@@ -3263,7 +3269,7 @@ var amendEvent = {
         }
     },
     /**
-     * 按下键盘 for  Amend
+     * 按下键盘 for Amend
      * @param e
      */
     onKeyDownAmend: function (e) {
@@ -5732,10 +5738,10 @@ function findBlocks() {
         var code, codeContainer;
         for (i = _codeList.length - 1; i >= 0; i--) {
             code = _codeList[i];
-            codeContainer = codeUtils.getContainer(code);
+            codeContainer = codeUtils.getContainerFromChild(code);
             if (!codeContainer) {
                 codeUtils.fixCode(code);
-                codeContainer = codeUtils.getContainer(code);
+                codeContainer = codeUtils.getContainerFromChild(code);
             }
             // 不使用 codeMirror 自定义的滚动条
             scrollTarget = code.querySelector('.' + CONST.CLASS.CODE_MIRROR_HSCROLL);
@@ -5857,13 +5863,14 @@ var _event = {
     },
     bindScroll: function() {
         _event.unbindScroll();
-        scroll.curBlock.target.addEventListener('scroll', _event.handler.onTxScroll);
+        // 避免 滚动条循环事件导致 滚动不流畅， 不监听 target 的 scroll 事件
+        // scroll.curBlock.target.addEventListener('scroll', _event.handler.onTxScroll);
         scroll.addEventListener('scroll', _event.handler.onSxScroll);
     },
     unbindScroll: function() {
-        if (scroll.curBlock) {
-            scroll.curBlock.target.removeEventListener('scroll', _event.handler.onTxScroll);
-        }
+        // if (scroll.curBlock) {
+        //     scroll.curBlock.target.removeEventListener('scroll', _event.handler.onTxScroll);
+        // }
         scroll.removeEventListener('scroll', _event.handler.onSxScroll);
     },
     handler: {
@@ -5879,12 +5886,6 @@ var _event = {
         },
         onSxScroll: function () {
             if (scroll.curBlock) {
-
-                if (scroll.curBlock.type == BlockType.Code &&
-                    scroll.curBlock.codeMirror && scroll.curBlock.codeMirror.hasFocus()) {
-                    // 点击滚动条时， 如果 hasFocus = true 需要执行 focus 方法让焦点还原
-                    scroll.curBlock.codeMirror.focus();
-                }
                 scroll.curBlock.target.scrollLeft = scroll.scrollLeft;
             }
         },
@@ -5924,6 +5925,7 @@ module.exports = blockCore;
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     utils = require('../common/utils'),
+    historyUtils = require('../common/historyUtils'),
     domUtils = require('../domUtils/domExtend'),
     commandExtend = require('../editor/commandExtend'),
     tableZone = require('../tableUtils/tableZone'),
@@ -6024,6 +6026,7 @@ var blockUtils = {
             }
         }
         if (container && (isAfter || isBefore)) {
+            historyUtils.saveSnap(false);
             blockUtils.insertEmptyLine(container, isAfter);
         } else {
             dom = null;
@@ -6031,11 +6034,12 @@ var blockUtils = {
     },
     insertBlock: function(target) {
         var range = rangeUtils.getRange();
-        var curDom, curBlock, br;
+        var start, curDom, curBlock, br;
 
         if (range) {
             range = rangeUtils.getRange();
-            curDom = range.startContainer;
+            start = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
+            curDom = start.container;
             curBlock = domUtils.getBlockParent(curDom, true);
             if (domUtils.hasClass(curBlock, CONST.CLASS.TODO_LAYER)) {
                 // 如果光标在 TodoList 内，则直接在 TodoList 下面创建
@@ -6086,7 +6090,7 @@ var blockUtils = {
 };
 
 module.exports = blockUtils;
-},{"../common/const":18,"../common/env":20,"../common/utils":24,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47,"../tableUtils/tableZone":53}],14:[function(require,module,exports){
+},{"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47,"../tableUtils/tableZone":53}],14:[function(require,module,exports){
 /**
  * 代码区域操作核心包 core
  */
@@ -6108,32 +6112,19 @@ var _event = {
         ENV.event.add(CONST.EVENT.BEFORE_GET_DOCHTML, _event.handler.beforeGetDocHtml);
         ENV.event.add(CONST.EVENT.BEFORE_SAVESNAP, _event.handler.onBeforeSaveSnap);
         ENV.event.add(CONST.EVENT.AFTER_RESTORE_HISTORY, _event.handler.onAfterRestoreHistory);
-
+        ENV.event.add(CONST.EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
     },
     unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_SELECT_PLUGIN_CHANGE, _event.handler.onChangeSelector);
         ENV.event.remove(CONST.EVENT.BEFORE_GET_DOCHTML, _event.handler.beforeGetDocHtml);
         ENV.event.remove(CONST.EVENT.BEFORE_SAVESNAP, _event.handler.onBeforeSaveSnap);
         ENV.event.remove(CONST.EVENT.AFTER_RESTORE_HISTORY, _event.handler.onAfterRestoreHistory);
+        ENV.event.remove(CONST.EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
     },
     handler: {
         beforeGetDocHtml: function () {
             codeUtils.saveToText();
             codeStyle.clearStyle();
-        },
-        onBeforeSaveSnap: function () {
-            var containerList = codeUtils.getContainerList();
-            var container, cm, i;
-            for (i = containerList.length - 1; i >= 0; i--) {
-                container = containerList[i];
-                cm = container.codeMirror;
-                if (cm) {
-                    // CodeMirror 将最新代码保存到 textarea
-                    cm.save();
-                    // 将 textarea 的 value 写入 html
-                    domUtils.setTextarea(cm.getTextArea());
-                }
-            }
         },
         onAfterRestoreHistory: function () {
             var containerList = codeUtils.getContainerList();
@@ -6153,22 +6144,45 @@ var _event = {
                 }
             }
         },
+        onBeforeSaveSnap: function () {
+            var containerList = codeUtils.getContainerList();
+            var container, cm, i;
+            for (i = containerList.length - 1; i >= 0; i--) {
+                container = containerList[i];
+                cm = container.codeMirror;
+                if (cm) {
+                    // CodeMirror 将最新代码保存到 textarea
+                    cm.save();
+                    // 将 textarea 的 value 写入 html
+                    domUtils.setTextarea(cm.getTextArea());
+                }
+            }
+        },
         onChangeSelector: function (target) {
+            var container;
             if (domUtils.hasClass(target, CONST.CLASS.CODE_TOOLS_MODE)) {
-                codeUtils.changeMode(codeUtils.getContainer(target), target.value);
-                target.blur();
+                container = codeUtils.getContainerFromChild(target);
+                codeUtils.changeMode(container, target.value);
+                container.codeMirror.focus();
                 return;
             }
             if (domUtils.hasClass(target, CONST.CLASS.CODE_TOOLS_THEME)) {
+                container = codeUtils.getContainerFromChild(target);
                 codeStyle.insertTheme(target.value);
-                codeUtils.changeTheme(codeUtils.getContainer(target), target.value);
-                target.blur();
+                codeUtils.changeTheme(container, target.value);
+                container.codeMirror.focus();
                 return;
             }
         },
+        onMouseDown: function (e) {
+            // 点击 Tools 的时候 阻止默认事件，避免与 CodeMirror 抢焦点
+            var tools = codeUtils.getToolsFromChild(e.target);
+            if (tools) {
+                utils.stopEvent(e);
+            }
+        },
         onKeyDown: function (e) {
-            var container = codeUtils.getContainerWithMoveCursor(e);
-            if (container) {
+            if (codeUtils.onKeyDown(e)) {
                 utils.stopEvent(e);
                 return false;
             }
@@ -6208,16 +6222,24 @@ var codeCore = {
             // CodeMirror / Table 内
             return;
         }
-
+        var curObj, container, textarea;
         if (range) {
             range.deleteContents();
+            curObj = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
+            curObj = domUtils.getBlockParent(curObj.container, true);
+            if (curObj && curObj !== ENV.doc.body && domUtils.isEmptyDom(curObj)) {
+                container = curObj;
+                curObj.innerHTML = '';
+            }
         }
 
-        var textarea = ENV.doc.createElement('textarea');
-        var container = ENV.doc.createElement('div');
+        textarea = ENV.doc.createElement('textarea');
+        container = container ? container : ENV.doc.createElement('div');
         container.appendChild(textarea);
         domUtils.addClass(container, CONST.CLASS.CODE_CONTAINER);
-        blockUtils.insertBlock(container);
+        if (!container.parentNode) {
+            blockUtils.insertBlock(container);
+        }
         codeUtils.fixCodeContainer(container);
 
         //修正 光标
@@ -6240,7 +6262,18 @@ var ENV = require('../common/env'),
     domUtils = require('../domUtils/domBase');
 
 var CSS = {
-    common: '.' + CONST.CLASS.CODE_CONTAINER + '{position: relative; padding:13px 0; margin: 20px 25px 20px 5px;}' + // 专门用于 CodeMirror 之间间隔，并且可以自动添加空行
+    tmp: {
+        common: '.wiz-code-tools {display:none;position: absolute; top: -32px; right: 0; opacity: .95; z-index: 10;}' +
+        '.CodeMirror-focused .wiz-code-tools {display:block;}' +
+        '.CodeMirror-sizer {border-right: 0 !important;}',
+// 'body pre.prettyprint {padding:0;}' +
+// 'body pre.prettyprint code {white-space: pre;}' +
+// 'body pre.prettyprint.linenums {box-shadow:none; overflow: auto;-webkit-overflow-scrolling: touch;}' +
+// 'body pre.prettyprint.linenums ol.linenums {box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset; padding: 10px 10px 10px 40px !important;}',
+        reader: '.CodeMirror-cursors {visibility: hidden !important;}',
+        phone: '.' + CONST.CLASS.CODE_CONTAINER + '{margin-left:0; margin-right:0;}'
+    },
+    common: '.' + CONST.CLASS.CODE_CONTAINER + '{position: relative; padding:13px 0; margin: 5px 25px 5px 5px;}' + // 专门用于 CodeMirror 之间间隔，并且可以自动添加空行
     '.CodeMirror {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; color: black; font-size: 14px; font-size: 0.93rem}' +
     '.CodeMirror-lines {padding: 4px 0;}' +
     '.CodeMirror pre {padding: 0 4px;}' +
@@ -6313,7 +6346,7 @@ var CSS = {
     // '.CodeMirror {position: relative; overflow: hidden; background: white;}' +
     '.CodeMirror {position: relative; background: #f5f5f5;}' +
     // '.CodeMirror-scroll {overflow: scroll !important; margin-bottom: -30px; margin-right: -30px; padding-bottom: 30px; height: 100%; outline: none; position: relative;}' +
-    '.CodeMirror-scroll {overflow: auto !important; margin-bottom: 0; margin-right: 0; padding: 10px 0 20px; outline: none; position: relative;}' +
+    '.CodeMirror-scroll {overflow: auto !important; margin-bottom: 0; margin-right: 0; padding: 10px 0 25px; outline: none; position: relative;}' +
     '.CodeMirror-sizer {position: relative; border-right: 30px solid transparent;}' +
     '.CodeMirror-vscrollbar, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {position: absolute; z-index: 6; display: none;}' +
     '.CodeMirror-vscrollbar {right: 0; top: 0; overflow-x: hidden; overflow-y: scroll;}' +
@@ -6321,7 +6354,7 @@ var CSS = {
     '.CodeMirror-scrollbar-filler {right: 0; bottom: 0;}' +
     '.CodeMirror-gutter-filler {left: 0; bottom: 0;}' +
     '.CodeMirror-gutters {position: absolute; left: 0; top: 0; min-height: 100%; z-index: 3;}' +
-    '.CodeMirror-gutter {white-space: normal; height: 100%; display: inline-block; vertical-align: top; margin-bottom: -30px;}' +
+    '.CodeMirror-gutter {white-space: normal; height: inherit; display: inline-block; vertical-align: top; margin-bottom: -30px;}' +
     '.CodeMirror-gutter-wrapper {position: absolute; z-index: 4; background: none !important; border: none !important;}' +
     '.CodeMirror-gutter-background {position: absolute; top: 0; bottom: 0; z-index: 4;}' +
     '.CodeMirror-gutter-elt {position: absolute; cursor: default; z-index: 4; text-align: center;}' +
@@ -6354,8 +6387,9 @@ var CSS = {
     '}' +
     '.cm-tab-wrap-hack:after { content: ""; }' +
     'span.CodeMirror-selectedtext { background: none; }' +
-    '.CodeMirror-activeline-background, .CodeMirror-selected {visibility:hidden;transition: visibility 0ms 100ms;}' +
-    '.CodeMirror-focused .CodeMirror-activeline-background, .CodeMirror-focused .CodeMirror-selected {visibility:visible;}' +
+    '.CodeMirror-activeline-background, .CodeMirror-selected {transition: visibility 0ms 100ms;}' +
+    '.CodeMirror-blur .CodeMirror-activeline-background, .CodeMirror-blur .CodeMirror-selected {visibility:hidden;}' +
+    '.CodeMirror-blur .CodeMirror-matchingbracket {color:inherit !important;outline:none !important;text-decoration:none !important;}' +
     '',
     theme: {
         'base16-dark': '.cm-s-base16-dark.CodeMirror { background: #151515; color: #e0e0e0; }' +
@@ -6562,6 +6596,21 @@ var codeStyle = {
     },
     insertCommon: function () {
         wizStyle.replaceStyleById(CONST.ID.CODE_STYLE, CSS.common, false);
+        wizStyle.insertStyle({
+            name: CONST.NAME.TMP_STYLE
+        }, CSS.tmp.common);
+
+        if (ENV.client.type.isPhone || ENV.client.type.isPad) {
+            wizStyle.insertStyle({
+                name: CONST.NAME.TMP_STYLE
+            }, CSS.tmp.phone);
+        }
+
+        if (ENV.readonly) {
+            wizStyle.insertStyle({
+                name: CONST.NAME.TMP_STYLE
+            }, CSS.tmp.reader);
+        }
     },
     insertTheme: function (theme) {
         if (CSS.theme[theme] && !ENV.doc.querySelector('#' + CONST.ID.CODE_STYLE + '-' + theme)) {
@@ -6581,58 +6630,233 @@ module.exports = codeStyle;
  */
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
+    // utils = require('../common/utils'),
     historyUtils = require('../common/historyUtils'),
     domUtils = require('../domUtils/domExtend'),
     selectPlugin = require('../domUtils/selectPlugin'),
     rangeUtils = require('../rangeUtils/rangeExtend'),
     codeStyle = require('./codeStyle');
 
+var CODE_MIRROR = {
+    MODE: {
+        'APL': {
+            cm: 'text/apl',
+            file: 'apl',
+            same: ['apollo']
+        },
+        'C': {
+            cm: 'text/x-csrc',
+            file: 'clike',
+            same: []
+        },
+        'C++': {
+            cm: 'text/x-c++src',
+            file: 'clike',
+            same: ['cpp']
+        },
+        'C#': {
+            cm: 'text/x-csharp',
+            file: 'clike',
+            same: ['cs']
+        },
+        'CSS': {
+            cm: 'text/css',
+            file: 'css',
+            same: []
+        },
+        'Erlang': {
+            cm: 'text/x-erlang',
+            file: 'erlang',
+            same: []
+        },
+        'Go': {
+            cm: 'text/x-go',
+            file: 'go',
+            same: []
+        },
+        'HTML': {
+            cm: 'text/html',
+            file: [
+                ['xml', 'css', 'javascript', 'vbscript'],
+                ['htmlmixed']
+            ],
+            same: []
+        },
+        'Java': {
+            cm: 'text/x-java',
+            file: 'clike',
+            same: []
+        },
+        'JavaScript': {
+            cm: 'text/javascript',
+            file: 'javascript',
+            same: ['js']
+        },
+        'JSX': {
+            cm: 'text/jsx',
+            file: [
+                ['xml', 'javascript'],
+                ['jsx']
+            ],
+            same: []
+        },
+        'Lua': {
+            cm: 'text/x-lua',
+            file: 'lua',
+            same: []
+        },
+        'Octave (MATLAB)': {
+            cm: 'text/x-octave',
+            file: 'octave',
+            same: ['matlab', 'octave']
+        },
+        'Objective-C': {
+            cm: 'text/x-objectivec',
+            file: 'clike',
+            same: []
+        },
+        'Pascal': {
+            cm: 'text/x-pascal',
+            file: 'pascal',
+            same: []
+        },
+        'Perl': {
+            cm: 'text/x-perl',
+            file: 'perl',
+            same: []
+        },
+        'PHP': {
+            cm: 'application/x-httpd-php',
+            file: 'php',
+            same: []
+        },
+        'Python': {
+            cm: 'text/x-python',
+            file: 'python',
+            same: ['py']
+        },
+        'Ruby': {
+            cm: 'text/x-ruby',
+            file: 'ruby',
+            same: ['rb']
+        },
+        'Shell': {
+            cm: 'text/x-sh',
+            file: 'shell',
+            same: ['sh']
+        },
+        'SQL': {
+            cm: 'text/x-sql',
+            file: 'sql',
+            same: []
+        },
+        'Swift': {
+            cm: 'text/x-swift',
+            file: 'swift',
+            same: []
+        },
+        'VBScript': {
+            cm: 'text/vbscript',
+            file: 'vbscript',
+            same: ['basic', 'vb']
+        },
+        'Verilog': {
+            cm: 'text/x-verilog',
+            file: 'verilog',
+            same: []
+        },
+        'VHDL': {
+            cm: 'text/x-vhdl',
+            file: 'vhdl',
+            same: []
+        },
+        'XML': {
+            cm: 'application/xml',
+            file: 'xml',
+            same: []
+        },
+        'XSL': {
+            cm: 'application/xml',
+            file: 'xml',
+            same: []
+        },
+        'YAML': {
+            cm: 'text/x-yaml',
+            file: 'yaml',
+            same: []
+        }
+    },
+    THEME: {
+        'default': {
+            name: 'L1 (default)',
+            same: ['L1']
+        },
+        'base16-light': {
+            name: 'L2 (base16-light)',
+            same: ['L2']
+        },
+        'eclipse': {
+            name: 'L3 (eclipse)',
+            same: ['L3']
+        },
+        'base16-dark': {
+            name: 'D1 (base16-dark)',
+            same: ['D1']
+        },
+        'blackboard': {
+            name: 'D2 (blackboard)',
+            same: ['D2']
+        },
+        'material': {
+            name: 'D3 (material)',
+            same: ['D3']
+        },
+        'monokai': {
+            name: 'D4 (monokai)',
+            same: ['D4']
+        },
+        'tomorrow-night-eighties': {
+            name: 'D5 (tomorrow)',
+            same: ['D5']
+        }
+    }
+};
 
 var ModeOptions = [];
 var ThemeOptions = [];
+var modeDic = {};
+var themeDic = {};
 
 (function () {
-    var key;
-    for (key in CONST.CODE_MIRROR.MODE) {
-        if (CONST.CODE_MIRROR.MODE.hasOwnProperty(key)) {
+    var key, same, i;
+    for (key in CODE_MIRROR.MODE) {
+        if (CODE_MIRROR.MODE.hasOwnProperty(key)) {
             ModeOptions.push({
                 text: key,
                 value: key
             });
+            same = CODE_MIRROR.MODE[key].same;
+            modeDic[key.toLowerCase()] = key;
+            for (i = 0; i < same.length; i++) {
+                modeDic[same[i].toLowerCase()] = key;
+            }
         }
     }
-    var i, j, theme;
-    for (i = 0, j = CONST.CODE_MIRROR.THEME.length; i < j; i++) {
-        theme = CONST.CODE_MIRROR.THEME[i];
-        ThemeOptions.push({
-            text: theme,
-            value: theme
-        });
+    for (key in CODE_MIRROR.THEME) {
+        if (CODE_MIRROR.THEME.hasOwnProperty(key)) {
+            ThemeOptions.push({
+                text: CODE_MIRROR.THEME[key].name,
+                value: key
+            });
+            same = CODE_MIRROR.THEME[key].same;
+            themeDic[key.toLowerCase()] = key;
+            for (i = 0; i < same.length; i++) {
+                themeDic[same[i].toLowerCase()] = key;
+            }
+        }
     }
 })();
 
-/**
- * 适配 之前 prettyprint 设置的 code language，制作 字典进行对照
- */
-function initModeDic () {
-    var k, v;
-    for (k in CONST.CODE_MIRROR.MODE) {
-        if (CONST.CODE_MIRROR.MODE.hasOwnProperty(k)) {
-            modeDic[k] = k;
-            modeDic[k.toLowerCase()] = k;
-        }
-    }
-    for (k in CONST.CODE_MIRROR.PRETTY_PRINT) {
-        if (CONST.CODE_MIRROR.PRETTY_PRINT.hasOwnProperty(k)) {
-            v = CONST.CODE_MIRROR.PRETTY_PRINT[k];
-            modeDic[k] = v;
-            modeDic[k.toLowerCase()] = v;
-        }
-    }
-}
-
-var modeDic = {};
-initModeDic();
 
 var codeKey = {
     mode: 'wiz-code-mode',
@@ -6643,7 +6867,7 @@ var codeUtils = {
     canCreateCode: function () {
         var range = rangeUtils.getRange();
         if (!range ||
-            codeUtils.getContainer(range.startContainer) ||
+            codeUtils.getContainerFromChild(range.startContainer) ||
             domUtils.getParentByClass(range.startContainer, CONST.CLASS.TABLE_CONTAINER, true)) {
             // CodeMirror / Table 内
             return false;
@@ -6658,7 +6882,7 @@ var codeUtils = {
         if (!cm) {
             return;
         }
-        cm.setOption('mode', CONST.CODE_MIRROR.MODE[mode]);
+        cm.setOption('mode', CODE_MIRROR.MODE[mode].cm);
         domUtils.attr(container, {
             'data-mode': mode
         });
@@ -6722,173 +6946,44 @@ var codeUtils = {
         }
         return container;
     },
-    focusToFirst: function(cm) {
+    focusToFirst: function (cm) {
         cm.focus();
         cm.setCursor({line: 0, ch: 0});
     },
-    focusToLast: function(cm) {
+    focusToLast: function (cm) {
         cm.focus();
         cm.setCursor({
             line: cm.lastLine(),
             ch: cm.getLineHandle(cm.lastLine()).text.length
         });
     },
-    getContainer: function (target) {
+    getContainerFromChild: function (target) {
         return domUtils.getParentByClass(target, CONST.CLASS.CODE_CONTAINER, true);
     },
-    // 判断从 CodeMirror 之外移动光标是否进入 CodeMirror
-    getContainerWithMoveCursor: function (e) {
-        var range = rangeUtils.getRange();
-        var sel = ENV.doc.getSelection();
-        if (!range || !range.collapsed) {
-            return null;
-        }
-
-        var code = e.keyCode || e.which;
-        var startLast = rangeUtils.getRangeDom(range.startContainer, range.startOffset),
-            start, block;
-        var direct, charMove,
-            searchBackward = false,
-            searchForward = false,
-            searchStart = null,
-            searchEnd = null,
-            container = null,
-            cm;
-
-        // 判断键盘，控制光标移动
-        switch (code) {
-            case 37:
-                //left
-                if (!e.ctrlKey && !e.metaKey) {
-                    charMove = true;
-                    sel.modify('move', 'backward', 'character');
-                }
-                direct = {x: -1, y: 0};
-                break;
-            case 38:
-                //up
-                if (!e.ctrlKey && !e.metaKey) {
-                    charMove = true;
-                    sel.modify('move', 'backward', 'line');
-                }
-                direct = {x: 0, y: -1};
-                break;
-            case 39:
-                //right
-                if (!e.ctrlKey && !e.metaKey) {
-                    charMove = true;
-                    sel.modify('move', 'forward', 'character');
-                }
-                direct = {x: 1, y: 0};
-                break;
-            case 40:
-                //down
-                if (!e.ctrlKey && !e.metaKey) {
-                    charMove = true;
-                    sel.modify('move', 'forward', 'line');
-                }
-                direct = {x: 0, y: 1};
-                break;
-        }
-
-        // 模拟光标移动后，检查移动范围内是否出现 CodeMirror 的 container
-        if (charMove) {
-            range = rangeUtils.getRange();
-            start = rangeUtils.getRangeDom(range.startContainer, range.startOffset);
-            searchStart = start.container;
-
-            if (start.container === startLast.container && start.offset !== startLast.offset) {
-                // 光标移动且 start 未变化，说明是在但行内移动，无需查找 CodeMirror Container
-
-            } else if (start.container !== startLast.container) {
-                // 光标移动
-                if (direct.x > 0 || direct.y > 0) {
-                    // forward
-                    searchBackward = true;
-                } else {
-                    // backward
-                    searchForward = true;
-                }
-                searchEnd = startLast.container;
-            } else {
-                // 光标未移动
-                if (direct.x > 0 || direct.y > 0) {
-                    // forward
-                    searchForward = true;
-                } else {
-                    // backward
-                    searchBackward = true;
-                }
-                searchEnd = ENV.doc.body;
-            }
-
-            if (searchBackward) {
-                block = domUtils.getPreviousNode(searchStart);
-                while (block && block !== searchEnd && !domUtils.isTag(block, 'br') && domUtils.isEmptyDom(block)) {
-                    block = domUtils.getPreviousNode(block);
-                }
-                if (block) {
-                    block = domUtils.getPrevBlock(block);
-                }
-            } else if (searchForward) {
-                block = domUtils.getNextNode(searchStart);
-                while (block && block !== searchEnd && !domUtils.isTag(block, 'br') && domUtils.isEmptyDom(block)) {
-                    block = domUtils.getNextNode(block);
-                }
-                if (block) {
-                    block = domUtils.getNextBlock(block);
-                }
-            }
-
-            if (block) {
-                container = codeUtils.getContainer(block);
-                cm = container && container.codeMirror;
-                if (!cm) {
-                    container = null;
-                } else {
-                    // 找到 container 后，设置对应光标位置
-                    cm.focus();
-                    if (direct.x > 0 || direct.y > 0) {
-                        codeUtils.focusToFirst(cm);
-                    } else {
-                        codeUtils.focusToLast(cm);
-                    }
-                }
-            }
-
-            // 没有找到 Container 的情况下 恢复光标位置
-            if (!container) {
-                if (direct.x < 0) {
-                    sel.modify('move', 'forward', 'character');
-                } else if (direct.y < 0) {
-                    sel.modify('move', 'forward', 'line');
-                } else if (direct.x > 0) {
-                    sel.modify('move', 'backward', 'character');
-                } else if (direct.y > 0) {
-                    sel.modify('move', 'backward', 'line');
-                }
-            }
-        }
-        return container;
+    getToolsFromChild: function (target) {
+        return domUtils.getParentByClass(target, CONST.CLASS.CODE_TOOLS, true);
     },
     getContainerList: function () {
         return ENV.doc.querySelectorAll('.' + CONST.CLASS.CODE_CONTAINER);
     },
     getCmMode: function (container) {
+        var mode = (container.getAttribute('data-mode') || '').toLowerCase();
         var lastMode = '';
         if (ENV.win.localStorage && !ENV.readonly) {
-            lastMode = ENV.win.localStorage.getItem(codeKey.mode);
+            lastMode = (ENV.win.localStorage.getItem(codeKey.mode) || '').toLowerCase();
         }
-        return modeDic[container.getAttribute('data-mode')] ||
-            modeDic[lastMode] ||
-            'JavaScript';
+        return modeDic[mode] || modeDic[lastMode] || 'JavaScript';
     },
     getCmTheme: function (container) {
+        var theme = (container.getAttribute('data-theme') || '').toLowerCase();
         var lastTheme = '';
         if (ENV.win.localStorage && !ENV.readonly) {
-            lastTheme = ENV.win.localStorage.getItem(codeKey.theme);
+            lastTheme = (ENV.win.localStorage.getItem(codeKey.theme) || '').toLowerCase();
         }
-        return container.getAttribute('data-theme') || lastTheme || 'default';
+        return themeDic[theme] || themeDic[lastTheme] || 'default';
+    },
+    getCmWrapper: function (container) {
+        return container.querySelector('.' + CONST.CLASS.CODE_MIRROR);
     },
     initCodeMirror: function (container) {
         if (!container) {
@@ -6910,13 +7005,13 @@ var codeUtils = {
             if (ENV.readonly) {
                 // 设置 readOnly 为 nocursor 会导致内容无法被复制
                 // cm.setOption('readOnly', 'nocursor');
-                cm.setOption('readOnly', true);
+                // cm.setOption('readOnly', true);
+                cm.setOption('readOnly', (ENV.client.type.isPhone || ENV.client.type.isPad) ? 'nocursor' : true);
                 cm.setOption('styleActiveLine', false);
                 cm.getDoc().clearHistory();
             } else {
-                cm.setOption('readOnly', '');
+                cm.setOption('readOnly', false);
                 cm.setOption('styleActiveLine', true);
-                codeUtils.initTools(container);
             }
             return;
         }
@@ -6926,14 +7021,14 @@ var codeUtils = {
             container.removeChild(container.lastChild);
         }
         textarea = container.querySelector('textarea');
-        // 手机、Pad 避免滑动滚动条，所以设置为 强行换行，不显示横向滚动条
         options = {
             fixedGutter: false,
             indentUnit: 4,
-            lineWrapping: (ENV.client.type.isPhone || ENV.client.type.isPad),
+            // lineWrapping: (ENV.client.type.isPhone || ENV.client.type.isPad),
+            lineWrapping: true,
             lineNumbers: true,
             matchBrackets: true,
-            mode: CONST.CODE_MIRROR.MODE[mode],
+            mode: CODE_MIRROR.MODE[mode].cm,
             extraKeys: {
                 Tab: function (cm) {
                     var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
@@ -6957,9 +7052,12 @@ var codeUtils = {
             }
         };
         if (ENV.readonly) {
-            options.readOnly = true;
+            // options.readOnly = 'nocursor';
+            // options.readOnly = true;
+            options.readOnly = (ENV.client.type.isPhone || ENV.client.type.isPad) ? 'nocursor' : true;
             options.styleActiveLine = false;
         } else {
+            options.readOnly = false;
             options.styleActiveLine = true;
         }
 
@@ -7005,7 +7103,7 @@ var codeUtils = {
                         newCur = domUtils.getPreviousNode(newCur);
                     }
                     if (newCur) {
-                        codeContainer = codeUtils.getContainer(newCur);
+                        codeContainer = codeUtils.getContainerFromChild(newCur);
                         if (codeContainer) {
                             cm = codeContainer.codeMirror;
                             codeUtils.focusToLast(cm);
@@ -7020,7 +7118,7 @@ var codeUtils = {
                         newCur = domUtils.getNextNode(newCur);
                     }
                     if (newCur) {
-                        codeContainer = codeUtils.getContainer(newCur);
+                        codeContainer = codeUtils.getContainerFromChild(newCur);
                         if (codeContainer) {
                             cm = codeContainer.codeMirror;
                             codeUtils.focusToFirst(cm);
@@ -7048,6 +7146,10 @@ var codeUtils = {
         });
 
         cm.on('focus', function (cm, obj) {
+            var container = codeUtils.getContainerFromChild(cm.display.wrapper);
+
+            codeUtils.initTools(container);
+
             if (!ENV.readonly) {
                 // Chrome 49 内核 body contenteditable = true 时，
                 // codeMirror 内的 focus 方法会导致页面跳跃，
@@ -7055,60 +7157,21 @@ var codeUtils = {
                 // 因此 必须 利用 focus 、blur 事件调整 body 的 contenteditable
                 ENV.doc.body.setAttribute('contenteditable', false);
             }
+            domUtils.removeClass(cm.display.wrapper, 'CodeMirror-blur');
         });
         cm.on('blur', function (cm, obj) {
             if (!ENV.readonly) {
                 ENV.doc.body.setAttribute('contenteditable', true);
             }
+            domUtils.addClass(cm.display.wrapper, 'CodeMirror-blur');
         });
-
-        if (!ENV.readonly) {
-            // 在 cm 生成时生成 codeTools
-            codeUtils.initTools(container);
-        }
     },
-    // createModeSelector: function (defaultMode) {
-    //     var selector = ENV.doc.createElement('select'),
-    //         option;
-    //     var key;
-    //     for (key in CONST.CODE_MIRROR.MODE) {
-    //         if (CONST.CODE_MIRROR.MODE.hasOwnProperty(key)) {
-    //             option = ENV.doc.createElement('option');
-    //             option.innerHTML = key;
-    //             if (key === defaultMode) {
-    //                 option.selected = true;
-    //             }
-    //             domUtils.attr(option, {
-    //                 'value': key
-    //             });
-    //             selector.appendChild(option);
-    //         }
-    //     }
-    //     return selector;
-    // },
-    // createThemeSelector: function (defaultTheme) {
-    //     var selector = ENV.doc.createElement('select'),
-    //         option;
-    //     var i, j, theme;
-    //     for (i = 0, j = CONST.CODE_MIRROR.THEME.length; i < j; i++) {
-    //         theme = CONST.CODE_MIRROR.THEME[i];
-    //         option = ENV.doc.createElement('option');
-    //         option.innerHTML = theme;
-    //         if (theme === defaultTheme) {
-    //             option.selected = true;
-    //         }
-    //         domUtils.attr(option, {
-    //             'value': theme
-    //         });
-    //         selector.appendChild(option);
-    //     }
-    //     return selector;
-    // },
     initTools: function (container) {
-        if (ENV.client.type.isPhone || ENV.client.type.isPad) {
+        if (!container || ENV.readonly || ENV.client.type.isPhone || ENV.client.type.isPad) {
             return;
         }
 
+        var cmWrapper = codeUtils.getCmWrapper(container);
         var codeTools = container.querySelector('.' + CONST.CLASS.CODE_TOOLS);
         var modeSelector, themeSelector;
         var mode = codeUtils.getCmMode(container);
@@ -7122,13 +7185,173 @@ var codeUtils = {
             domUtils.addClass(modeSelector, CONST.CLASS.CODE_TOOLS_MODE);
             domUtils.addClass(themeSelector, CONST.CLASS.CODE_TOOLS_THEME);
             domUtils.addClass(codeTools, CONST.CLASS.CODE_TOOLS);
-            codeTools.style.display = 'none';
-            container.appendChild(codeTools);
-            // PC 客户端内核效率有问题， 必须先隐藏，然后再显示
-            setTimeout(function () {
-                codeTools.style.display = 'block';
-            }, 10);
         }
+        cmWrapper.appendChild(codeTools);
+    },
+    // 1. 处理 删除操作
+    // 2. 判断从 CodeMirror 之外移动光标是否进入 CodeMirror
+    onKeyDown: function (e) {
+        var range = rangeUtils.getRange();
+        var sel = ENV.doc.getSelection();
+        if (!range || !range.collapsed) {
+            return false;
+        }
+
+        var code = e.keyCode || e.which;
+        var startLast = rangeUtils.getRangeStart(range.startContainer, range.startOffset),
+            start, block, target;
+        var direct, charMove,
+            searchBackward = false,
+            searchForward = false,
+            searchStart = null,
+            searchEnd = null,
+            container = null,
+            cm;
+
+        /**
+         * Backspace
+         */
+        if (code === 8 && startLast.offset === 0) {
+            target = domUtils.getPreviousNode(startLast.container, false);
+            container = codeUtils.getContainerFromChild(target);
+        }
+        /**
+         * Delete
+         */
+        if (code === 46 && (domUtils.isTag(startLast.container, 'br') ||
+            startLast.offset === domUtils.getEndOffset(startLast.container))) {
+            target = domUtils.getNextNode(startLast.container, false);
+            container = codeUtils.getContainerFromChild(target);
+
+            if (container && domUtils.isTag(startLast.container, 'br')) {
+                // 删除当前空行
+                startLast.container.parentNode.removeChild(startLast.container);
+                codeUtils.focusToFirst(container.codeMirror);
+                return true;
+            }
+        }
+
+        if (container) {
+            historyUtils.saveSnap(false);
+            container.parentNode.removeChild(container);
+            return true;
+        }
+
+        // 判断键盘，控制光标移动
+        switch (code) {
+            case 37:
+                //left
+                if (!e.ctrlKey && !e.metaKey) {
+                    charMove = true;
+                    sel.modify('move', 'backward', 'character');
+                }
+                direct = {x: -1, y: 0};
+                break;
+            case 38:
+                //up
+                if (!e.ctrlKey && !e.metaKey) {
+                    charMove = true;
+                    sel.modify('move', 'backward', 'line');
+                }
+                direct = {x: 0, y: -1};
+                break;
+            case 39:
+                //right
+                if (!e.ctrlKey && !e.metaKey) {
+                    charMove = true;
+                    sel.modify('move', 'forward', 'character');
+                }
+                direct = {x: 1, y: 0};
+                break;
+            case 40:
+                //down
+                if (!e.ctrlKey && !e.metaKey) {
+                    charMove = true;
+                    sel.modify('move', 'forward', 'line');
+                }
+                direct = {x: 0, y: 1};
+                break;
+        }
+
+        // 模拟光标移动后，检查移动范围内是否出现 CodeMirror 的 container
+        if (charMove) {
+            range = rangeUtils.getRange();
+            start = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
+            searchStart = startLast.container;
+            searchEnd = start.container;
+
+            if (start.container === startLast.container && start.offset !== startLast.offset) {
+                // 光标移动且 start 未变化，说明是在但行内移动，无需查找 CodeMirror Container
+
+            } else if (start.container !== startLast.container) {
+                // 光标移动
+                if (direct.x > 0 || direct.y > 0) {
+                    // forward
+                    searchForward = true;
+                } else {
+                    // backward
+                    searchBackward = true;
+                }
+            } else {
+                // 光标未移动
+                if (direct.x > 0 || direct.y > 0) {
+                    // forward
+                    searchForward = true;
+                } else {
+                    // backward
+                    searchBackward = true;
+                }
+                searchEnd = ENV.doc.body;
+            }
+
+            if (searchForward) {
+                block = domUtils.getNextNode(searchStart, false, searchEnd);
+                while (block && block !== searchEnd && !domUtils.isTag(block, 'br') && domUtils.isEmptyDom(block)) {
+                    block = domUtils.getNextNode(block, false, searchEnd);
+                }
+                if (block) {
+                    block = domUtils.getNextBlock(block);
+                }
+            } else if (searchBackward) {
+                block = domUtils.getPreviousNode(searchStart, false, searchEnd);
+                while (block && block !== searchEnd && !domUtils.isTag(block, 'br') && domUtils.isEmptyDom(block)) {
+                    block = domUtils.getPreviousNode(block, false, searchEnd);
+                }
+                if (block) {
+                    block = domUtils.getPrevBlock(block);
+                }
+            }
+
+            if (block) {
+                container = codeUtils.getContainerFromChild(block);
+                cm = container && container.codeMirror;
+                if (!cm) {
+                    container = null;
+                } else {
+                    // 找到 container 后，设置对应光标位置
+                    cm.focus();
+                    if (direct.x > 0 || direct.y > 0) {
+                        codeUtils.focusToFirst(cm);
+                    } else {
+                        codeUtils.focusToLast(cm);
+                    }
+                }
+            }
+
+            // 没有找到 Container 的情况下 恢复光标位置
+            if (!container) {
+                if (direct.x < 0) {
+                    sel.modify('move', 'forward', 'character');
+                } else if (direct.y < 0) {
+                    sel.modify('move', 'forward', 'line');
+                } else if (direct.x > 0) {
+                    sel.modify('move', 'backward', 'character');
+                } else if (direct.y > 0) {
+                    sel.modify('move', 'backward', 'line');
+                }
+            }
+        }
+        return !!container;
     },
     saveToText: function () {
         var containerList = codeUtils.getContainerList();
@@ -7143,7 +7366,7 @@ var codeUtils = {
     },
     oldPatch: {
         fixOldCode: function () {
-            var codeList, code, modeObj, mode,
+            var codeList, code, mode,
                 container, src, textarea,
                 i;
             codeList = ENV.doc.querySelectorAll('.' + CONST.CLASS.CODE_CONTAINER_OLD);
@@ -7151,11 +7374,7 @@ var codeUtils = {
                 code = codeList[i];
                 container = codeUtils.fixCode(code);
                 src = codeUtils.oldPatch.getSrc(code);
-                modeObj = code.querySelector('code');
-                if (modeObj) {
-                    mode = modeObj.className.toString().replace('language-', '');
-                    mode = CONST.CODE_MIRROR.PRETTY_PRINT[mode];
-                }
+                mode = codeUtils.oldPatch.getMode(code);
                 container.removeChild(code);
                 textarea = ENV.doc.createElement('textarea');
                 textarea.value = src;
@@ -7169,6 +7388,21 @@ var codeUtils = {
                 }
             }
         },
+        getMode: function (code) {
+            var regCode = /language-([\w]+)/i;
+            var regPre = /lang-([\w]+)/i;
+            var modeObj = code.querySelector('code'), result,
+                mode;
+            if (modeObj && modeObj.className && (result = modeObj.className.match(regCode))) {
+                mode = result[1];
+            } else if (code.className && (result = code.className.match(regPre))) {
+                mode = result[1];
+            }
+            if (mode) {
+                mode = modeDic[mode.toLowerCase()];
+            }
+            return mode;
+        },
         getSrc: function (code) {
             if (!code) {
                 return '';
@@ -7176,6 +7410,9 @@ var codeUtils = {
             // 注意：旧的 DOM 结构 针对整个 code 使用 innerText 获取源码 会导致空行 丢失，所以必须逐行处理
             var rowList = code.querySelectorAll('ol > li');
             var srcList = [], i, j;
+            if (rowList.length === 0) {
+                return code.innerText || code.textContent || ''
+            }
             for (i = 0, j = rowList.length; i < j; i++) {
                 srcList.push(rowList[i].innerText || '')
             }
@@ -7474,101 +7711,6 @@ var CONST = {
         WizMarkdownRender: 'wizMarkdownRender',
         WizEditorTrackEvent: 'wizEditorTrackEvent',
         WizGetWebViewSize: 'wizGetWebViewSize'
-    },
-    CODE_MIRROR: {
-        MODE: {
-            'APL': 'text/apl',
-            'C': 'text/x-csrc',
-            'C++': 'text/x-c++src',
-            'C#': 'text/x-csharp',
-            'CSS': 'text/css',
-            'Erlang': 'text/x-erlang',
-            'Go': 'text/x-go',
-            'HTML': 'text/html',
-            'Java': 'text/x-java',
-            'JavaScript': 'text/javascript',
-            'JSX': 'text/jsx',
-            'Lua': 'text/x-lua',
-            'Octave (MATLAB)': 'text/x-octave',
-            'Objective-C': 'text/x-objectivec',
-            'Pascal': 'text/x-pascal',
-            'Perl': 'text/x-perl',
-            'PHP': 'application/x-httpd-php',
-            'Python': 'text/x-python',
-            'Ruby': 'text/x-ruby',
-            'Shell': 'text/x-sh',
-            'SQL': 'text/x-sql',
-            'Swift': 'text/x-swift',
-            'VBScript': 'text/vbscript',
-            'Verilog': 'text/x-verilog',
-            'VHDL': 'text/x-vhdl',
-            'XML': 'application/xml',
-            'XSL': 'application/xml',
-            'YAML': 'text/x-yaml'
-        },
-        MODE_TO_FILE: {
-            'APL': 'apl',
-            'C': 'clike',
-            'C++': 'clike',
-            'C#': 'clike',
-            'CSS': 'css',
-            'Erlang': 'erlang',
-            'Go': 'go',
-            'HTML': [
-                ['xml', 'css', 'javascript', 'vbscript'],
-                ['htmlmixed']
-            ],
-            'Java': 'clike',
-            'JavaScript': 'javascript',
-            'JSX': [
-                ['xml','javascript'],
-                ['jsx']
-            ],
-            'Lua': 'lua',
-            'Octave (MATLAB)': 'octave',
-            'Objective-C': 'clike',
-            'Pascal': 'pascal',
-            'Perl': 'perl',
-            'PHP': 'php',
-            'Python': 'python',
-            'Ruby': 'ruby',
-            'Shell': 'shell',
-            'SQL': 'sql',
-            'Swift': 'swift',
-            'VBScript': 'vbscript',
-            'Verilog': 'verilog',
-            'VHDL': 'vhdl',
-            'XML': 'xml',
-            'XSL': 'xml',
-            'YAML': 'text/x-yaml'
-        },
-        PRETTY_PRINT: {
-            'apollo': 'Apollo',
-            'basic': 'VBScript',
-            'c': 'C',
-            'cpp': 'C++',
-            'cs': 'C#',
-            'css': 'CSS',
-            'erlang': 'Erlang',
-            'go': 'Go',
-            'html': 'XML/HTML',
-            'java': 'Java',
-            'js': 'Javascript',
-            'lua': 'Lua',
-            'matlab': 'Octave (MATLAB)',
-            'pascal': 'Pascal',
-            'perl': 'Perl',
-            'php': 'PHP',
-            'py': 'Python',
-            'rb': 'Ruby',
-            'sh': 'Shell',
-            'sql': 'SQL',
-            'vb': 'VBScript',
-            'xml': 'XML/HTML',
-            'xsl': 'XML/HTML',
-            'yaml': 'YAML'
-        },
-        THEME: ['default', 'base16-dark', 'base16-light', 'blackboard', 'eclipse', 'material', 'monokai', 'tomorrow-night-eighties']
     },
     COLOR: [
         '#CB3C3C', '#0C9460', '#FF3399', '#FF6005', '#8058BD', '#009999', '#8AA725',
@@ -8150,6 +8292,9 @@ var historyUtils = {
     // 根据 containerId 获取对应的 CodeMirror Doc 副本
     getCodeMirrorDoc: function(containerId) {
         var cmDoc = codeMirrorDocList[containerId] || null;
+        if (cmDoc) {
+            cmDoc = cmDoc.copy(true);
+        }
         return cmDoc;
     },
     getUndoState: function () {
@@ -8190,7 +8335,7 @@ var historyUtils = {
         if (historyObj.type === CONST.HISTORY.TYPE.COMMON) {
             domUtils.focus();
         }
-//            console.log('undo: ' + historyUtils.stackIndex);
+       // console.log('undo: ' + historyUtils.stackIndex);
     },
     /**
      * redo 操作
@@ -8218,7 +8363,7 @@ var historyUtils = {
         if (historyObj.type === CONST.HISTORY.TYPE.COMMON) {
             domUtils.focus();
         }
-//            console.log('redo: ' + historyUtils.stackIndex);
+       // console.log('redo: ' + historyUtils.stackIndex);
     },
     /**
      * 保存当前内容的快照
@@ -8255,8 +8400,7 @@ var historyUtils = {
 
         prevHistoryObj = historyUtils.stackIndex > 0 ? historyUtils.stack[historyUtils.stackIndex - 1] : null;
         if (prevHistoryObj &&
-            prevHistoryObj.nextChange.type == CONST.HISTORY.TYPE.CODE_MIRROR &&
-            historyObj.nextChange.type == CONST.HISTORY.TYPE.CODE_MIRROR) {
+            prevHistoryObj.nextChange.type == CONST.HISTORY.TYPE.CODE_MIRROR) {
             // CodeMirror 的 History
 
             // console.log('history  ---- code mirror');
@@ -8287,6 +8431,9 @@ var historyUtils = {
                 ) {
                     // 不记录新的 history，但要更新 nextChange
                     prevHistoryObj.nextChange = historyObj.nextChange;
+                    if (historyObj.snap) {
+                        prevHistoryObj.snap = historyObj.snap;
+                    }
                     if (keepIndex) {
                         historyUtils.stackIndex--;
                     }
@@ -8322,7 +8469,7 @@ var historyUtils = {
                 if (historyUtils.stackIndex >= 0) {
                     historyUtils.stack.splice(historyUtils.stackIndex, historyUtils.stack.length - historyUtils.stackIndex);
                 }
-//                console.log(snap.content);
+               // console.log(snap.content);
                 if (canSave.add) {
                     // console.log('save snap.add.... stack: [' + historyUtils.stack.length + ']  index: [' + historyUtils.stackIndex + ']  keepIndex: [' + !!keepIndex + ']');
                     historyObj.snap = snap;
@@ -8424,8 +8571,8 @@ var historyUtils = {
             }
         }
         // console.log(' ..... can Save .....');
-        // // // // console.log((s1.focus.lastChar !== s2.focus.lastChar) + ', ' + (s1.focus.lastChar === ' ') + ', ' + (s2.focus.lastChar === ' '));
-        // // console.log(s1.direct + ', ' + s2.direct + ', ' + result.direct);
+        // console.log((s1.focus.lastChar !== s2.focus.lastChar) + ', ' + (s1.focus.lastChar === ' ') + ', ' + (s2.focus.lastChar === ' '));
+        // console.log(s1.direct + ', ' + s2.direct + ', ' + result.direct);
         // console.log(JSON.stringify(s1.focus));
         // console.log(JSON.stringify(s2.focus));
         // console.log(result);
@@ -9360,14 +9507,6 @@ var utils = {
             span.insertAfter(target);
             target.remove();
         });
-        //处理 img
-        el.find('img').each(function (index) {
-            var target = $(this);
-            var span = $("<span></span>");
-            span.text(target[0].outerHTML);
-            span.insertAfter(target);
-            target.remove();
-        });
         //处理 a 超链接
         el.find('a').each(function (index, link) {
             var linkObj = $(link);
@@ -9379,6 +9518,16 @@ var utils = {
                 linkObj.remove();
             }
         });
+        // 必须先处理 A 标签，后处理 Img，否则 A 标签包含 Img 后 会导致 Img 被转义为 html 源码
+        //处理 img
+        el.find('img').each(function (index) {
+            var target = $(this);
+            var span = $("<span></span>");
+            span.text(target[0].outerHTML);
+            span.insertAfter(target);
+            target.remove();
+        });
+
         //处理段落 p
         el.find('p').each(function () {
             var target = $(this);
@@ -9398,7 +9547,7 @@ var ENV = require('./env'),
     domUtils = require('../domUtils/domBase');
 
 var TmpEditorStyle = {
-        phone: 'body {' +
+        iosPhone: 'body {' +
         'overflow-y:scroll;' +
         '-webkit-overflow-scrolling: touch;' +
         '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' +
@@ -9408,7 +9557,7 @@ var TmpEditorStyle = {
         '}' +
         'td,th {position:static;}' +
         'th:before,td:before,th:after,td:after {display:none;}',
-        pad: 'body {' +
+        iosPad: 'body {' +
         'min-width: 90%;' +
         'max-width: 100%;' +
         'min-height: 100%;' +
@@ -9419,51 +9568,8 @@ var TmpEditorStyle = {
         'padding-bottom: 44px !important;' +
         '}' +
         'td,th {position:static;}' +
-        'th:before,td:before,th:after,td:after {display:none;}'
-    },
-    TmpReaderStyle = {
-        phone: 'img {' +
-        'max-width: 100%;' +
-        'height: auto !important;' +
-        'margin: 0px auto;' +
-        'cursor: pointer;' + //专门用于 ios 点击 img 触发 click 事件
-        '}'
-    },
-    DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
-    DefaultStyle = {
-        common: 'html, body {' +
-        'font-size: 15px;' +
-        '}' +
-        'body {' +
-        'font-family: ' + DefaultFont +
-        'line-height: 1.6;' +
-        'margin: 0 auto;' +
-        'padding: 20px 15px;padding: 1.33rem 1rem;' +
-        '}' +
-        'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' +
-        'h1 {font-size:24px;font-size:1.6rem;}' +
-        'h2 {font-size:19.5px;font-size:1.3rem;}' +
-        'h3 {font-size:17.25px;font-size:1.15rem;}' +
-        'h4 {font-size:17px;font-size:1.13rem;}' +
-        'h5 {font-size:15px;font-size:1rem;}' +
-        'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' +
-        'div, p, ul, ol, dl, li {margin:0;}' +
-        'blockquote, table, pre, code {margin:8px 0;}' +
-        'ul, ol {padding-left:32px;padding-left:2.13rem;}' +
-        'blockquote {padding:0 12px;padding:0 0.8rem;}' +
-        'blockquote > :first-child {margin-top:0;}' +
-        'blockquote > :last-child {margin-bottom:0;}' +
-        'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' +
-        'table {border-collapse:collapse;border:1px solid #bbbbbb;}' +
-        'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' +
-        '.wiz-hide {display:none !important;}'
-    },
-    BlockScroll = '.wiz-block-scroll::-webkit-scrollbar {width: 7px;height: 7px;}' +
-        '.wiz-block-scroll::-webkit-scrollbar-thumb {background-color: #7f7f7f;border-radius: 7px;}' +
-        '.wiz-block-scroll::-webkit-scrollbar-button {display: none;}',
-    BodyStyle = 'html {height:100%;} body {min-height:100%;box-sizing:border-box;word-wrap: break-word !important;}' +
-        'a {word-wrap: break-word;}',
-    ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' +
+        'th:before,td:before,th:after,td:after {display:none;}',
+        imageResize: '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' +
         '.wiz-img-resize-handle {width:5px;height:5px;}' +
         '.wiz-img-resize-handle.lt {cursor: nw-resize;}' +
         '.wiz-img-resize-handle.tm {cursor: n-resize;}' +
@@ -9473,18 +9579,7 @@ var TmpEditorStyle = {
         '.wiz-img-resize-handle.lb {cursor: sw-resize;}' +
         '.wiz-img-resize-handle.bm {cursor: s-resize;}' +
         '.wiz-img-resize-handle.rb {cursor: se-resize;}',
-    TableContainerStyle = '.' + CONST.CLASS.TABLE_CONTAINER + ' {}' +
-        '.' + CONST.CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' +
-        '.' + CONST.CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' +
-        'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
-    CodeStyle = '.wiz-code-tools {position: absolute; top: -18px; right: 0; opacity: .95; z-index: 10;}' +
-        '.CodeMirror-sizer {border-right: 0 !important;}',
-    CodeReadStyle = '.CodeMirror-cursors {visibility: hidden !important;}',
-        // 'body pre.prettyprint {padding:0;}' +
-        // 'body pre.prettyprint code {white-space: pre;}' +
-        // 'body pre.prettyprint.linenums {box-shadow:none; overflow: auto;-webkit-overflow-scrolling: touch;}' +
-        // 'body pre.prettyprint.linenums ol.linenums {box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset; padding: 10px 10px 10px 40px !important;}',
-    SelectPluginStyle = '.wiz-select-plugin-container {position:relative;display:inline-block;width:160px;height:28px;border-radius:4px;padding:0;margin-left:5px;cursor:pointer;}' +
+        selectPlugin: '.wiz-select-plugin-container {position:relative;display:inline-block;width:160px;height:28px;border-radius:4px;padding:0;margin-left:5px;cursor:pointer;}' +
         '.wiz-select-plugin-container, .wiz-select-plugin-options {box-sizing:border-box;background:white;border:1px solid #e7e7e7;color:#333;box-shadow: 1px 1px 5px #d0d0d0;}' +
         '.wiz-select-plugin-options {display:none;}' +
         '.wiz-select-plugin-header {line-height:28px;font-size:14px;padding: 0 0 0 5px;overflow:hidden;margin-right:27px;white-space:nowrap;}' +
@@ -9495,7 +9590,7 @@ var TmpEditorStyle = {
         '.wiz-select-plugin-options-item.selected {background:#448aff;color:white;}' +
         '.wiz-select-plugin-options-item:hover {background:#448aff !important;color:white !important;}' +
         '.wiz-select-plugin-container.active .wiz-select-plugin-options {display:block;}',
-    TableEditStyle = '.' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *,' +
+        table: '.' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *,' +
         ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:before,' +
         ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' +
         'td,th {position:relative;}' +
@@ -9548,8 +9643,57 @@ var TmpEditorStyle = {
         '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' +
         'th.wiz-selected-cell-multi, td.wiz-selected-cell-multi {background: rgba(0,102,255,.05);}' +
         'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}' +
-        'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}';
-
+        'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}'
+    },
+    TmpReaderStyle = {
+        ios: 'img {' +
+        'max-width: 100%;' +
+        'height: auto !important;' +
+        'margin: 0px auto;' +
+        'cursor: pointer;' + //专门用于 ios 点击 img 触发 click 事件
+        '}'
+    },
+    TmpCommonStyle = {
+        body: 'html {height:100%;} body {min-height:100%;box-sizing:border-box;word-wrap: break-word !important;}' +
+        'a {word-wrap: break-word;}',
+        blockScroll: '.wiz-block-scroll::-webkit-scrollbar {width: 7px;height: 7px;}' +
+        '.wiz-block-scroll::-webkit-scrollbar-thumb {background-color: #7f7f7f;border-radius: 7px;}' +
+        '.wiz-block-scroll::-webkit-scrollbar-button {display: none;}',
+        table: '.' + CONST.CLASS.TABLE_CONTAINER + ' {}' +
+        '.' + CONST.CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' +
+        '.' + CONST.CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' +
+        'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}'
+    },
+    DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
+    DefaultStyle = {
+        common: 'html, body {' +
+        'font-size: 15px;' +
+        '}' +
+        'body {' +
+        'font-family: ' + DefaultFont +
+        'line-height: 1.6;' +
+        'margin: 0 auto;' +
+        'padding: 20px 15px;padding: 1.33rem 1rem;' +
+        '}' +
+        'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' +
+        'h1 {font-size:24px;font-size:1.6rem;}' +
+        'h2 {font-size:19.5px;font-size:1.3rem;}' +
+        'h3 {font-size:17.25px;font-size:1.15rem;}' +
+        'h4 {font-size:17px;font-size:1.13rem;}' +
+        'h5 {font-size:15px;font-size:1rem;}' +
+        'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' +
+        'div, p, ul, ol, dl, li {margin:0;}' +
+        'blockquote, table, pre, code {margin:8px 0;}' +
+        'ul, ol {padding-left:32px;padding-left:2.13rem;}' +
+        'blockquote {padding:0 12px;padding:0 0.8rem;}' +
+        'blockquote > :first-child {margin-top:0;}' +
+        'blockquote > :last-child {margin-bottom:0;}' +
+        'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' +
+        'table {border-collapse:collapse;border:1px solid #bbbbbb;}' +
+        'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' +
+        '.wiz-hide {display:none !important;}'
+    };
+    
 var WizStyle = {
     insertDefaultStyle: function (isReplace, customCss) {
         WizStyle.replaceStyleById(CONST.ID.WIZ_DEFAULT_STYLE, DefaultStyle.common, isReplace);
@@ -9604,26 +9748,27 @@ var WizStyle = {
     },
     insertTmpEditorStyle: function () {
         WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE},
-            BodyStyle + ImageResizeStyle + SelectPluginStyle +
-            TableEditStyle + TableContainerStyle + CodeStyle);
+            TmpCommonStyle.body + TmpCommonStyle.table + TmpCommonStyle.code + 
+            TmpEditorStyle.imageResize + TmpEditorStyle.selectPlugin + TmpEditorStyle.table);
 
         if (ENV.client.type.isIOS && ENV.client.type.isPhone) {
-            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpEditorStyle.phone);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpEditorStyle.iosPhone);
         } else if (ENV.client.type.isIOS && ENV.client.type.isPad) {
-            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpEditorStyle.pad);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpEditorStyle.iosPad);
         }
         if (ENV.client.type.isMac) {
-            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, BlockScroll);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpCommonStyle.blockScroll);
         }
     },
     insertTmpReaderStyle: function () {
         WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE},
-            BodyStyle + TableContainerStyle + CodeStyle + CodeReadStyle);
+            TmpCommonStyle.body + TmpCommonStyle.table + TmpCommonStyle.code +
+            TmpReaderStyle.code);
         if (ENV.client.type.isIOS) {
-            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpReaderStyle.phone);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpReaderStyle.ios);
         }
         if (ENV.client.type.isMac) {
-            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, BlockScroll);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpCommonStyle.blockScroll);
         }
     },
 
@@ -9667,16 +9812,16 @@ var WizStyle = {
             return;
         }
 
-        function isWizDom(dom) {
+        function isWizDom (dom) {
             return !!dom && dom.nodeType == 1 && (
-                domUtils.isTag(dom, [CONST.TAG.TMP_TAG, CONST.TAG.TMP_PLUGIN_TAG]) ||
-                dom.getAttribute('name') == CONST.NAME.TMP_STYLE ||
-                /^wiz[_-]/i.test(dom.id) ||
-                /(^| )wiz[_-]/i.test(dom.className)
-            );
+                    domUtils.isTag(dom, [CONST.TAG.TMP_TAG, CONST.TAG.TMP_PLUGIN_TAG]) ||
+                    dom.getAttribute('name') == CONST.NAME.TMP_STYLE ||
+                    /^wiz[_-]/i.test(dom.id) ||
+                    /(^| )wiz[_-]/i.test(dom.className)
+                );
         }
 
-        function removeStyle(elem) {
+        function removeStyle (elem) {
             if (!elem) {
                 return;
             }
@@ -9700,7 +9845,7 @@ var WizStyle = {
             }
         }
 
-        function removeClass(elem) {
+        function removeClass (elem) {
             if (!elem) {
                 return;
             }
@@ -9731,7 +9876,7 @@ var WizStyle = {
     removeStyleByName: function (name) {
         var sList = ENV.doc.getElementsByName(name);
         var i, s;
-        for (i=sList.length -1; i>=0; i--) {
+        for (i = sList.length - 1; i >= 0; i--) {
             s = sList[i];
             if (s && domUtils.isTag(s, ['style', 'link'])) {
                 s.parentNode.removeChild(s);
@@ -12077,11 +12222,12 @@ var domUtils = {
             //if hasn't nextSibling,so find its parent's nextSibling
             while (dom.parentNode) {
                 dom = dom.parentNode;
-                if (dom == endDom) {
-                    break;
-                }
+                //必须首先判断 是否 body
                 if (domUtils.isBody(dom)) {
                     dom = null;
+                    break;
+                }
+                if (dom == endDom) {
                     break;
                 }
                 if (next(dom)) {
@@ -12252,11 +12398,12 @@ var domUtils = {
             //if hasn't previousSibling,so find its parent's previousSibling
             while (dom.parentNode) {
                 dom = dom.parentNode;
-                if (dom == startDom) {
-                    break;
-                }
+                //必须首先判断 是否 body
                 if (domUtils.isBody(dom)) {
                     dom = null;
+                    break;
+                }
+                if (dom == startDom) {
                     break;
                 }
                 if (prev(dom)) {
@@ -12787,6 +12934,14 @@ var domUtils = {
         var reg = new RegExp('<' + tag + '( [^>]*)?>((?!<\/' + tag + '>).|\r|\n)*?<\/' + tag + '>', 'ig');
         return html.replace(reg, '');
     },
+    removeViewportFromHtml: function (html, tag) {
+        //检查 head 内存在 viewport 才删除，避免将 code 内的 viewport 删除
+        if (ENV.doc.querySelector('head meta[name=viewport]')) {
+            var reg = new RegExp('<meta( ([^<>])+[ ]+|[ ]+)name *= *([\'"])viewport\\3[^<>]*>', 'i');
+            return html.replace(reg, '');
+        }
+        return html;
+    },
     /**
      * 将 dom 剥壳
      * @param dom
@@ -13091,17 +13246,22 @@ domUtils.clearChild = function (dom, excludeList) {
         return;
     }
     var isExclude = excludeList.indexOf(dom) >= 0;
-    if (!isExclude && dom.nodeType == 3 && !domUtils.isUsableTextNode(dom) &&
+    var str;
+    if (!isExclude && dom.nodeType === 3 && !domUtils.isUsableTextNode(dom) &&
         !domUtils.getParentByTagName(dom, 'pre', false)) {
         // pre 内不进行清理
         dom.parentNode.removeChild(dom);
         return;
-    } else if (!isExclude && dom.nodeType == 3) {
-        dom.nodeValue = dom.nodeValue.replace(CONST.FILL_CHAR_REG, '');
+    } else if (!isExclude && dom.nodeType === 3) {
+        str = dom.nodeValue.replace(CONST.FILL_CHAR_REG, '');
+        // ios 10.3 设置 nodeValue 会导致光标移位（str === nodeValue 时，也会移位）
+        if (str !== dom.nodeValue) {
+            dom.nodeValue = str;
+        }
         return;
     }
 
-    if (!isExclude && dom.nodeType == 1) {
+    if (!isExclude && dom.nodeType === 1) {
         var ns = dom.childNodes, i, item;
         for (i = ns.length - 1; i >= 0; i--) {
             item = ns[i];
@@ -13110,7 +13270,7 @@ domUtils.clearChild = function (dom, excludeList) {
         domUtils.mergeChildSpan(dom, excludeList);
 
         if (excludeList.indexOf(dom) < 0 &&
-            dom.childNodes.length === 0 && dom.nodeType == 1 && !domUtils.isSelfClosingTag(dom) &&
+            dom.childNodes.length === 0 && dom.nodeType === 1 && !domUtils.isSelfClosingTag(dom) &&
 //                    dom.tagName.toLowerCase() == 'span' && !!dom.getAttribute(CONST.ATTR.SPAN)) {
             !!dom.getAttribute(CONST.ATTR.SPAN)) {
             dom.parentNode.removeChild(dom);
@@ -13166,6 +13326,8 @@ domUtils.getContentHtml = function (options) {
     content = domUtils.removeDomByTagFromHtml(content, CONST.TAG.TMP_TAG);
     content = domUtils.peelTagFromHtml(content, CONST.TAG.TMP_PLUGIN_TAG);
 
+    //移除 viewport
+    content = domUtils.removeViewportFromHtml(content, CONST.TAG.TMP_TAG);
     //移除 script
     content = content.replace(/<script[^<>]*\/>/ig, '')
         .replace(/<script[^<>]*>(((?!<\/script>).)|(\r?\n))*<\/script>/ig, '');
@@ -13257,8 +13419,10 @@ domUtils.getNextBlock = function (tmpEnd) {
  * @returns {XML|string|*|void}
  */
 domUtils.hideCodeFromHtml = function (html) {
-    var regex = /(<div [^<>]*)(CodeMirror-activeline-background|CodeMirror-activeline-gutter|CodeMirror-cursors|CodeMirror-selected|CodeMirror-hscrollbar|CodeMirror-vscrollbar)([^<>]*>)/ig;
-    html = html.replace(regex, '$1 wiz-hide wiz_$2$3');
+    var regHide = /(<div [^<>]*)(CodeMirror-activeline-background|CodeMirror-cursors|CodeMirror-selected|CodeMirror-hscrollbar|CodeMirror-vscrollbar)([^<>]*>)/ig;
+    html = html.replace(regHide, '$1 wiz-hide wiz_$2$3');
+    var regNoClass = /(<span [^<>]*)(CodeMirror-matchingbracket)([^<>]*>)/ig;
+    html = html.replace(regNoClass, '$1$3');
     return html;
 };
 /**
@@ -13379,13 +13543,13 @@ domUtils.modifyChildNodesStyle = function (dom, style, attr) {
         if (!done && domUtils.isUsableTextNode(item)) {
             done = true;
             domUtils.modifyStyle(dom, style, attr);
-        } else if (item.nodeType == 1) {
+        } else if (item.nodeType === 1) {
             domUtils.modifyChildNodesStyle(item, style, attr);
         }
     }
 };
 domUtils.modifyNodeStyle = function (item, style, attr, isLast) {
-    if (item.nodeType == 1) {
+    if (item.nodeType === 1) {
         if (domUtils.isSelfClosingTag(item)) {
             domUtils.modifyStyle(item, style, attr);
         } else {
@@ -13477,7 +13641,7 @@ domUtils.modifyStyle = function (dom, style, attr) {
         // 如果父节点有 A 标签，需要特殊处理，避免 清理样式时 A 标签被拆分成多个
         if (!tmpA) {
             domUtils.splitDomSingle(p, d);
-        } else if (tmpA == p) {
+        } else if (tmpA === p) {
             filterForA(tmpA);
             domUtils.splitDomSingle(tmpA.firstChild, d);
         } else {
@@ -13541,7 +13705,7 @@ domUtils.moveOutFromTableContainer = function (container) {
             }
         }
 
-        if (_container.childNodes.length == 0) {
+        if (_container.childNodes.length === 0) {
             // 如果 table 容器内清空，则删除 容器
             mainDom.parentNode.removeChild(mainDom);
         }
@@ -13633,7 +13797,7 @@ domUtils.splitDomAfterSub = function (mainDom, subDom) {
     // 拆分 subDom 后面的内容
     if (!subDom.nextSibling) {
         tmpP = subDom.parentNode;
-        while (tmpP && tmpP != mainDom) {
+        while (tmpP && tmpP !== mainDom) {
             // if (tmpP.getAttribute(CONST.ATTR.SPAN) !== CONST.ATTR.SPAN) {
             if (domUtils.isBlockDom(tmpP)) {
                 break;
@@ -13660,7 +13824,7 @@ domUtils.splitDomAfterSub = function (mainDom, subDom) {
  */
 domUtils.splitDomSingle = function (mainDom, subDom) {
     if (mainDom && subDom && mainDom.nodeType === 1 &&
-        subDom == mainDom.firstChild && mainDom.childNodes.length === 1) {
+        subDom === mainDom.firstChild && mainDom.childNodes.length === 1) {
         return mainDom;
     }
 
@@ -13686,28 +13850,25 @@ var _class = {
 
 var _event = {
     bind: function () {
+        // 选项不采用 click 方式，主要为了避免 与 CodeMirror 抢焦点
+        // 组件中不进行 阻止默认事件 的操作（具体实现中根据情况进行控制，例如：codeCore 中的 onMouseDown）
         _event.unbind();
-        ENV.event.add(CONST.EVENT.ON_CLICK, _event.handler.onClick);
         ENV.event.add(CONST.EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
     },
     unbind: function () {
-        ENV.event.remove(CONST.EVENT.ON_CLICK, _event.handler.onClick);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
     },
     handler: {
-        onClick: function(e) {
-            var target = e.target;
-            var option = selectUtils.getOptionFromDom(target);
-            if (option) {
-                selectUtils.selectOption(option);
-            }
-        },
         onMouseDown: function (e) {
             var target = e.target;
             var header = selectUtils.getHeaderFromDom(target);
             if (header) {
                 selectUtils.showOptions(header);
                 return;
+            }
+            var option = selectUtils.getOptionFromDom(target);
+            if (option) {
+                selectUtils.selectOption(option);
             }
             var container = selectUtils.getContainerFromDom(target);
             if (!container) {
@@ -14233,7 +14394,7 @@ function patchQueryForSubAndSup(command) {
     var range = rangeUtils.getRange();
     var start;
     if (range) {
-        start = rangeUtils.getRangeDom(range.startContainer, range.startOffset);
+        start = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
         start = start.container;
         start = domUtils.getFirstDeepChild(start);
         start = domUtils.getParentByTagName(start, tagName, true);
@@ -14431,7 +14592,7 @@ function _getCaretStyle() {
         // 在表格内
         result.canCreateTable = '0';
         result.canCreateCode = '0';
-    } else if (range && codeUtils.getContainer(range.startContainer)) {
+    } else if (range && codeUtils.getContainerFromChild(range.startContainer)) {
         // 在 CodeMirror 内
         result.clientTools = '0';
         result.canCreateCode = '0';
@@ -15001,7 +15162,7 @@ var handler = {
     },
     onCopy: function (e) {
         // CodeMirror 内 复制操作全部忽略
-        if (codeUtils.getContainer(e.target)) {
+        if (codeUtils.getContainerFromChild(e.target)) {
             return;
         }
         copySelection(e, false);
@@ -15009,7 +15170,7 @@ var handler = {
     },
     onCut: function (e) {
         // CodeMirror 内 剪贴操作全部忽略
-        if (codeUtils.getContainer(e.target)) {
+        if (codeUtils.getContainerFromChild(e.target)) {
             return;
         }
         historyUtils.saveSnap(false);
@@ -15031,7 +15192,7 @@ var handler = {
     onKeydown: function (e) {
         var keyCode = e.keyCode || e.which;
 
-        if (codeUtils.getContainer(e.target)) {
+        if (codeUtils.getContainerFromChild(e.target)) {
             // CodeMirror 内键盘操作全部忽略
             return;
         }
@@ -15122,7 +15283,7 @@ var handler = {
     },
     onPaste: function (e) {
         // CodeMirror 内 粘贴操作全部忽略
-        if (codeUtils.getContainer(e.target)) {
+        if (codeUtils.getContainerFromChild(e.target)) {
             return;
         }
         if (ENV.client.type.isIOS) {
@@ -15276,6 +15437,8 @@ var FormatCommand = {
     'sub': 'subscript',
     'sup': 'superscript',
     'u': 'underline',
+    'text-align-center': 'justifyCenter',
+    'text-align-justify': 'justifyFull',
     'text-align-left': 'JustifyLeft',
     'text-align-right': 'JustifyRight'
 };
@@ -15490,7 +15653,7 @@ var formatPainterCore = {
             zone = tableZone.getZone();
         var start, startOffset = 0;
         if (range) {
-            start = rangeUtils.getRangeDom(range.startContainer, range.startOffset);
+            start = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
             startOffset = start.offset;
             start = start.container;
         } else {
@@ -15529,7 +15692,7 @@ var formatPainterCore = {
             return 0;
         }
 
-        if (range && codeUtils.getContainer(range.startContainer)) {
+        if (range && codeUtils.getContainerFromChild(range.startContainer)) {
             // CodeMirror 内禁止使用 格式刷
             return 0;
         }
@@ -15540,6 +15703,7 @@ var formatPainterCore = {
 };
 
 module.exports = formatPainterCore;
+
 },{"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/wizStyle":25,"../domUtils/domExtend":29,"../editor/commandExtend":32,"../rangeUtils/rangeExtend":47,"../tableUtils/tableCore":50,"../tableUtils/tableZone":53}],36:[function(require,module,exports){
 /**
  * 超链接操作基本方法集合
@@ -19724,7 +19888,7 @@ var Render = {
         var imgSrc = 'file://|data:image/';
         var imgSrcReg = new RegExp('^(' + imgSrc + fileName + ')', 'i');
 
-        var hrefReg = /^((file|wiz(note)?):)/;
+        var hrefReg = /^((file|wiz(note)?):\/\/)|(index_files\/)/;
         var hrefFileSrc = '#';
         var hrefFileReg = new RegExp('^(' + hrefFileSrc.escapeRegex() + fileName.escapeRegex() + ')', 'i');
 
@@ -19741,7 +19905,7 @@ var Render = {
                 }
 
                 var x = filterXSS.parseAttr(html, function (name, value) {
-                    value = filterXSS.safeAttrValue(tag, name, value, xss);
+                    value = xss.options.safeAttrValue(tag, name, value, xss);
                     if (/^on/i.test(name)) {
                         return '';
                     } else if (value) {
@@ -19772,7 +19936,7 @@ var Render = {
             },
             safeAttrValue: function (tag, name, value) {
                 // 自定义过滤属性值函数，如果为a标签的href属性，则先判断是否以wiz://开头
-                if (tag === 'a' && name === 'href') {
+                if (/^(a|link)$/i.test(tag) && name === 'href') {
                     if (hrefReg.test(value) || hrefFileReg.test(value)) {
                         return filterXSS.escapeAttrValue(value);
                     }
@@ -20148,19 +20312,24 @@ var rangeUtils = {
      * @param startOffset
      * @returns {{startContainer: *, startOffset: *}}
      */
-    getRangeDom: function (startContainer, startOffset) {
-        if (startContainer.nodeType === 1) {
-            if (startOffset < startContainer.childNodes.length) {
+    getRangeStart: function (startContainer, startOffset) {
+        // 必须要保留 isEnd 标志，不能强行设定 nextNode 当作 container
+        // 不同的需求会导致有时候需要 光标当前位置的 dom，有时候需要 next dom
+        var isEnd = false;
+        if (startOffset > 0 && startOffset === domUtils.getEndOffset(startContainer)) {
+            isEnd = true;
+        } else if (startContainer.nodeType === 1) {
+            if (startContainer.childNodes.length === 0) {
+                // br
+            } else if (startOffset < startContainer.childNodes.length) {
                 startContainer = startContainer.childNodes[startOffset];
                 startOffset = 0;
-            } else {
-                startContainer = startContainer.childNodes[startContainer.childNodes.length - 1];
-                startOffset = domUtils.getEndOffset(startContainer);
             }
         }
         return {
             container: startContainer,
-            offset: startOffset
+            offset: startOffset,
+            isEnd: true
         }
     },
     /**
@@ -20606,7 +20775,7 @@ var reader = {
         if (!noteSrc) {
             return;
         }
-        if (ENV.options.noteType == CONST.NOTE_TYPE.COMMON) {
+        if (ENV.options.noteType === CONST.NOTE_TYPE.COMMON) {
             domUtils.removeDomByName(CONST.NAME.TMP_STYLE);
             domUtils.removeDomByTag(CONST.TAG.TMP_TAG);
             setDomReadOnly('input', false);
@@ -20690,6 +20859,7 @@ var ENV = require('../common/env'),
     utils = require('../common/utils'),
     historyUtils = require('../common/historyUtils'),
     blockUtils = require('../blockUtils/blockUtils'),
+    codeUtils = require('../codeUtils/codeUtils'),
     domUtils = require('../domUtils/domExtend'),
     rangeUtils = require('../rangeUtils/rangeExtend'),
     tableUtils = require('./tableUtils'),
@@ -20841,7 +21011,7 @@ var _event = {
                     break;
             }
 
-            var last, cellData, check;
+            var last, cellData, check, codeContainer, cm;
 
             if (charMove) {
                 newCur = sel.focusNode;
@@ -20854,6 +21024,7 @@ var _event = {
                         tableZone.setStart(newCur).setEnd(newCur);
                     }
                 }
+
                 if (charMove) {
                     // 如果光标移动到表格外，则清除 表格选中区域 以及表格工具栏
                     check = tableUtils.checkCaretInTableContainer(e);
@@ -20879,11 +21050,16 @@ var _event = {
                         // 如果 table 上面的段落不是 table，则 x = 0 的 cell 直接进入行首，否则行尾
                         tableZone.clear();
                         tableMenu.show();
-                        rangeUtils.setRange(newCur, domUtils.getEndOffset(newCur));
-                        if (startX === 0 && !domUtils.getParentByTagName(newCur, ['table'], true, null)) {
-                            sel.modify('move', 'backward', 'lineboundary');
+                        codeContainer = codeUtils.getContainerFromChild(newCur);
+                        if (codeContainer) {
+                            codeUtils.focusToLast(codeContainer.codeMirror);
+                        } else {
+                            rangeUtils.setRange(newCur, domUtils.getEndOffset(newCur));
+                            if (startX === 0 && !domUtils.getParentByTagName(newCur, ['table'], true, null)) {
+                                sel.modify('move', 'backward', 'lineboundary');
+                            }
+                            rangeUtils.fixScroll();
                         }
-                        rangeUtils.fixScroll();
                     } else {
                         // 如果 table 上面无内容，则保持原样
                         rangeUtils.setRange(zone.start.cell, 0);
@@ -20892,7 +21068,7 @@ var _event = {
                     utils.stopEvent(e);
                     return false;
                 } else if (code == 40 && zone.start.cell == zone.end.cell && zone.start.y_src + zone.start.cell.rowSpan >= zone.grid.length) {
-                    // 表格第一行 按 down 键，直接进入 table 下面的段落
+                    // 表格最后一行 按 down 键，直接进入 table 下面的段落
                     startX = zone.start.x;
                     newCur = domUtils.getNextNode(tableUtils.getContainer(oldCur));
                     while (newCur && !domUtils.isTag(newCur, 'br') && domUtils.isEmptyDom(newCur)) {
@@ -20902,11 +21078,16 @@ var _event = {
                         // 如果 table 下面的段落不是 table，则 x = 0 的 cell 直接进入行首，否则行尾
                         tableZone.clear();
                         tableMenu.show();
-                        rangeUtils.setRange(newCur, domUtils.getEndOffset(newCur));
-                        if (startX === 0 && !domUtils.getParentByTagName(newCur, ['table'], true, null)) {
-                            sel.modify('move', 'backward', 'lineboundary');
+                        codeContainer = codeUtils.getContainerFromChild(newCur);
+                        if (codeContainer) {
+                            codeUtils.focusToFirst(codeContainer.codeMirror);
+                        } else {
+                            rangeUtils.setRange(newCur, domUtils.getEndOffset(newCur));
+                            if (startX === 0 && !domUtils.getParentByTagName(newCur, ['table'], true, null)) {
+                                sel.modify('move', 'backward', 'lineboundary');
+                            }
+                            rangeUtils.fixScroll();
                         }
-                        rangeUtils.fixScroll();
                     } else {
                         // 如果 table 上面无内容，则保持原样
                         tableZone.setStart(zone.start.cell).setEnd(zone.start.cell);
@@ -21064,11 +21245,11 @@ var _event = {
                     domUtils.moveOutFromTableContainer(tableContainer);
                 }
             }
-
-            if (check.tableContainer) {
+            var zone = tableZone.getZone();
+            if (check.tableContainer && !zone.range) {
                 //如果光标定位在 table & table container 之间，则定位到 table 内第一个 td
                 cell = check.tableContainer.querySelectorAll('td');
-                cell = check.after ? cell[cell.length - 1] : (check.before ? cell[0] : null);
+                cell = (check.tableMenu || check.after) ? cell[cell.length - 1] : (check.before ? cell[0] : null);
                 if (cell) {
                     tableZone.setStart(cell).setEnd(cell);
                     tableMenu.show();
@@ -21195,22 +21376,27 @@ var tableCore = {
         if (!tableCore.canCreateTable()) {
             return;
         }
+        var curObj, container, table;
         if (range) {
             range.deleteContents();
+            curObj = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
+            curObj = domUtils.getBlockParent(curObj.container, true);
+            if (curObj && curObj !== ENV.doc.body && domUtils.isEmptyDom(curObj)) {
+                container = curObj;
+                curObj.innerHTML = '';
+            }
         }
-        var table = tableUtils.createTable(col, row);
-        var container = blockUtils.insertBlock(table);
+        table = tableUtils.createTable(col, row);
+        container = container ? container : ENV.doc.createElement('div');
+        container.appendChild(table);
+        if (!container.parentNode) {
+            container = blockUtils.insertBlock(table);
+        }
         tableUtils.initTableContainer(table);
 
         //修正 光标
-        range = rangeUtils.getRange();
-        if (!range) {
-            return;
-        }
-        tmpCell = domUtils.getParentByTagName(range.startContainer, ['tbody'], true, null);
-        if (tmpCell) {
-            rangeUtils.setRange(domUtils.getFirstDeepChild(tmpCell), 0);
-        }
+        tmpCell = table.querySelector('td');
+        tableZone.setStart(tmpCell).setEnd(tmpCell);
 
         ENV.event.call(CONST.EVENT.UPDATE_RENDER);
     },
@@ -21277,7 +21463,7 @@ var tableCore = {
 };
 
 module.exports = tableCore;
-},{"../blockUtils/blockUtils":13,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./tableMenu":51,"./tableUtils":52,"./tableZone":53}],51:[function(require,module,exports){
+},{"../blockUtils/blockUtils":13,"../codeUtils/codeUtils":16,"../common/const":18,"../common/env":20,"../common/historyUtils":21,"../common/utils":24,"../domUtils/domExtend":29,"../rangeUtils/rangeExtend":47,"./tableMenu":51,"./tableUtils":52,"./tableZone":53}],51:[function(require,module,exports){
 /*
  表格菜单 控制
  */
@@ -21870,11 +22056,12 @@ var tableUtils = {
     checkCaretInTableContainer: function (e) {
         var result = {
             tableContainer: null,
+            tableMenu: false,
             before: false,
             after: false
         };
         var range, tableContainer, table,
-            target, startOffset;
+            target, startOffset, start;
         var eType = /^(mouse|touch)/i;
 
         if (e && eType.test(e.type)) {
@@ -21887,14 +22074,10 @@ var tableUtils = {
                 //选择区域 由 keyUp & mouseUp 中的 tableUtils.fixSelection(e); 进行过滤
                 return result;
             }
-            target = range.startContainer;
-            startOffset = range.startOffset;
 
-            if (target.nodeType === 1) {
-                target = target.childNodes[startOffset];
-            } else if (target.nodeType === 3 && startOffset == domUtils.getEndOffset(target)) {
-                target = target.nextSibling;
-            }
+            start = rangeUtils.getRangeStart(range.startContainer, range.startOffset);
+            target = start.container;
+            startOffset = start.offset;
         }
 
         if (domUtils.isTag(target, 'table')) {
@@ -21902,6 +22085,8 @@ var tableUtils = {
         }
 
         if (tableUtils.isMenu(target)) {
+            result.tableContainer = tableUtils.getContainerExcludeTable(target);
+            result.tableMenu = true;
             return result;
         }
 
@@ -22651,9 +22836,17 @@ var tableUtils = {
         for (i = 0, j = tableList.length; i < j; i++) {
             table = tableList[i];
             tableBody = checkParent(table, function (parent) {
+                if (parent.childNodes.length === 1) {
+                    parent.className = CONST.CLASS.TABLE_BODY;
+                    return true;
+                }
                 return domUtils.hasClass(parent, CONST.CLASS.TABLE_BODY);
             });
             container = checkParent(tableBody, function (parent) {
+                if (parent.childNodes.length === 1) {
+                    parent.className = CONST.CLASS.TABLE_CONTAINER;
+                    return true;
+                }
                 return domUtils.hasClass(parent, CONST.CLASS.TABLE_CONTAINER);
             });
 

@@ -126,12 +126,14 @@
     list-style: none;
 }
 .markdown-body li.wiz-md-todo-list-item input.wiz-md-todo-checkbox {
-    width: .9rem;
-    height: .9rem;
+    /*width: 1.9rem;*/
+    /*height: 1.9rem;*/
     margin-left: -1.2rem;
     margin-right: 5px;
-    position: relative;
-    top: .13rem;
+    /*position: relative;*/
+    /*top: .13rem;*/
+    /*vertialc-align:-3px;*/
+    vertical-align:middle;
 }
 
 .markdown-body hr {
