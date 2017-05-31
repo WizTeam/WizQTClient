@@ -1851,9 +1851,28 @@ void WizDocumentWebView::editorCommandExecuteRemoveFormat()
     editorCommandExecuteCommand("removeFormat");
 }
 
-void WizDocumentWebView::editorCommandExecuteFormatPainter(bool multi)
+void WizDocumentWebView::editorCommandExecuteFormatPainterOn(bool multi)
 {
     QString script = QString("WizEditor.formatPainter.on(%1);").arg(multi ? "true" : "false");
+    //
+    page()->runJavaScript(script, [=] (const QVariant& vRet) {
+        if (vRet.type() == QVariant::Bool) {
+            if (!vRet.toBool()) {
+                //
+                TOLOG("Can't stsart format painter");
+
+            }
+        }
+
+    });
+    //
+    WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
+    analyzer.logAction("formatPainter");
+}
+
+void WizDocumentWebView::editorCommandExecuteFormatPainterOff()
+{
+    QString script = QString("WizEditor.formatPainter.off();");
     //
     page()->runJavaScript(script, [=] (const QVariant& vRet) {
         if (vRet.type() == QVariant::Bool) {

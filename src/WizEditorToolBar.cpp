@@ -1798,7 +1798,7 @@ void WizEditorToolBar::on_fontDailogFontChanged(const QFont& font)
 
 void WizEditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> callback)
 {
-    m_editor->editorCommandQueryCommandValue("fontFamily", [=](const QString& familyName){
+    m_editor->editorCommandQueryCommandValue("fontFamily", [=](QString familyName){
         //
         m_editor->editorCommandQueryCommandState("bold", [=](int bold){
 
@@ -1806,7 +1806,7 @@ void WizEditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> c
 
                 m_editor->editorCommandQueryCommandState("underline", [=](int underline){
 
-                    m_editor->editorCommandQueryCommandValue("fontSize", [=](const QString& fontSize){
+                    m_editor->editorCommandQueryCommandValue("fontSize", [=](QString fontSize){
 
                         m_editor->editorCommandQueryCommandState("strikethrough", [=](int strikethrough){
                             //
@@ -2454,16 +2454,21 @@ void WizEditorToolBar::on_btnFormatPainter_clicked()
 {
     WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
     if (m_editor) {
-        m_btnFormatPainter->setChecked(true);
-        m_editor->editorCommandExecuteFormatPainter(false);
+        if (m_btnFormatPainter->isChecked()) {
+            m_editor->editorCommandExecuteFormatPainterOff();
+        } else {
+            m_btnFormatPainter->setChecked(true);
+            m_editor->editorCommandExecuteFormatPainterOn(false);
+        }
     }
 }
 void WizEditorToolBar::on_btnFormatPainter_dblClicked()
 {
+    qDebug() << "formatPainter dblClicked";
     WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
     if (m_editor) {
         m_btnFormatPainter->setChecked(true);
-        m_editor->editorCommandExecuteFormatPainter(true);
+        m_editor->editorCommandExecuteFormatPainterOn(true);
     }
 }
 
