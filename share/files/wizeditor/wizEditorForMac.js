@@ -6277,7 +6277,7 @@ var CSS = {
         phone: '.' + CONST.CLASS.CODE_CONTAINER + '{margin-left:0; margin-right:0;}'
     },
     common: '.' + CONST.CLASS.CODE_CONTAINER + '{position: relative; padding:13px 0; margin: 5px 25px 5px 5px;}' + // 专门用于 CodeMirror 之间间隔，并且可以自动添加空行
-    '.CodeMirror {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; color: black; font-size: 10pt; font-size: 0.9rem}' +
+    '.CodeMirror {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; color: black; font-size: 10pt; font-size: 0.83rem}' +
     '.CodeMirror-lines {padding: 4px 0;}' +
     '.CodeMirror pre {padding: 0 4px;}' +
     '.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {background-color: white;}' +
@@ -9679,25 +9679,25 @@ var TmpEditorStyle = {
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
         common: 'html, body {' +
-        'font-size: 11pt;' +
+        'font-size: 12pt;' +
         '}' +
         'body {' +
         'font-family: ' + DefaultFont +
         'line-height: 1.6;' +
         'margin: 0 auto;' +
-        'padding: 20px 15px;padding: 1.33rem 1rem;' +
+        'padding: 21px 16px;padding: 1.33rem 1rem;' +
         '}' +
         'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' +
-        'h1 {font-size:18pt;font-size:1.64rem;}' +
-        'h2 {font-size:16pt;font-size:1.45rem;}' +
-        'h3 {font-size:14pt;font-size:1.27rem;}' +
-        'h4 {font-size:13pt;font-size:1.18rem;}' +
-        'h5 {font-size:11pt;font-size:1rem;}' +
-        'h6 {font-size:11pt;font-size:1rem;color: #777777;margin: 1rem 0;}' +
+        'h1 {font-size:20pt;font-size:1.67rem;}' +
+        'h2 {font-size:18pt;font-size:1.5rem;}' +
+        'h3 {font-size:15pt;font-size:1.25rem;}' +
+        'h4 {font-size:14pt;font-size:1.17rem;}' +
+        'h5 {font-size:12pt;font-size:1rem;}' +
+        'h6 {font-size:12pt;font-size:1rem;color: #777777;margin: 1rem 0;}' +
         'div, p, ul, ol, dl, li {margin:0;}' +
         'blockquote, table, pre, code {margin:8px 0;}' +
-        'ul, ol {padding-left:32px;padding-left:2.13rem;}' +
-        'blockquote {padding:0 12px;padding:0 0.8rem;}' +
+        'ul, ol {padding-left:34px;padding-left:2.13rem;}' +
+        'blockquote {padding:0 13px;padding:0 0.8rem;}' +
         'blockquote > :first-child {margin-top:0;}' +
         'blockquote > :last-child {margin-bottom:0;}' +
         'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' +
@@ -11500,7 +11500,12 @@ var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
     utils = require('./../common/utils');
 
+var defaultFontSize = 12;
+
 var domUtils = {
+    /**
+     * 生成并返回当前设备 1pt 对应 px 的值
+     */
     pt2px: function() {
         var pt2px;
         var span = document.createElement('span');
@@ -11508,14 +11513,30 @@ var domUtils = {
         span.style.position = 'absolute';
         span.style.top = 0;
         span.style.left = 0;
-        span.style.fontSize = '12pt';
+        span.style.fontSize = defaultFontSize + 'pt';
         ENV.doc.body.appendChild(span);
         pt2px = window.getComputedStyle(span).fontSize;
-        pt2px = parseInt(pt2px, 10)/12;
+        pt2px = parseInt(pt2px, 10)/defaultFontSize;
         ENV.doc.body.removeChild(span);
         domUtils.pt2px = function() {
             return pt2px;
+        };
+        // console.log('1px == ' + pt2px + 'px');
+        return pt2px;
+    },
+    /**
+     * 生成并返回当前笔记视图放大状态
+     * 1. 必须有 wiz_customm_css 样式
+     * 2. 强制 12pt 当作 1:1 的状态
+     */
+    getRootSizeRate: function() {
+        if (!ENV.doc.getElementById(CONST.ID.WIZ_DEFAULT_STYLE)) {
+            return 1;
         }
+        var s = ENV.win.getComputedStyle(ENV.doc.body),
+            rootSize = parseFloat(s.fontSize);
+        // console.log('rootSize rate: ' + (parseFloat(rootSize) / domUtils.pt2px() / 12));
+        return parseFloat(rootSize) / domUtils.pt2px() / defaultFontSize;
     },
     /**
      * 添加 class name
@@ -11853,9 +11874,11 @@ var domUtils = {
                 return null;
             }
             if (/pt/i.test(fontSize)) {
-                size = size * domUtils.pt2px();
+                size = size / 12;
+            } else {
+                size = size / rootSize;
             }
-            return (Math.round((size / rootSize) * 1000)) / 1000 + 'rem';
+            return (Math.round((size) * 1000)) / 1000 + 'rem';
         }
     },
     /**
@@ -14689,7 +14712,7 @@ function _getCaretStyle() {
 
     var s = style['font-size'];
     if (s) {
-        result['fontSize'] = Math.round(parseFloat(s) / domUtils.pt2px()) + 'pt';
+        result['fontSize'] = Math.round(parseFloat(s) / domUtils.pt2px() / domUtils.getRootSizeRate()) + 'pt';
     }
     s = style['font-family'];
     if (s) {
@@ -14714,7 +14737,7 @@ function _getCaretStyle() {
     if (result.backColor == '#f3f7ff') {
         result.backColor = '';
     }
-
+    // console.log(result.fontSize);
     EditorEvent.triggerListener(EditorEventType.SelectionChange, [result]);
 
     function queryCommand(command) {

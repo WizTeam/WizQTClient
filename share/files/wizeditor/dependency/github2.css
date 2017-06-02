@@ -115,7 +115,7 @@
 .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
 .markdown-body dl, .markdown-body table, .markdown-body pre {
     margin: 10px 0;
-    margin: .7rem 0;
+    margin: .83rem 0;
 }
 
 .markdown-body li {
@@ -191,7 +191,7 @@
 
 .markdown-body dl dt {
     font-size: 10pt;
-    font-size: 0.9rem;
+    font-size: 0.83rem;
     font-weight: bold;
     font-style: italic;
     padding: 0;
@@ -255,7 +255,7 @@
 
 .markdown-body table tr th {
     font-size: 10pt;
-    font-size: 0.9rem;
+    font-size: 0.83rem;
     font-weight: bold;
     border: 1px solid #cccccc;
     margin: 0;
@@ -267,7 +267,7 @@
     margin: 0;
     padding: 6px 13px;
     font-size: 10pt;
-    font-size: 0.9rem;
+    font-size: 0.83rem;
 }
 
 .markdown-body table tr th :first-child, .markdown-body table tr td :first-child {
@@ -287,7 +287,7 @@
     position: relative;
     top: -0.5em;
     font-size: 9pt;
-    font-size: .81rem
+    font-size: .75rem
 }
 
 .markdown-body span.frame {
@@ -400,10 +400,10 @@
 .markdown-body pre {
     background-color: #f8f8f8;
     border: 1px solid #cccccc;
-    font-size: 9pt;
-    font-size: 0.81rem;
+    font-size: 10pt;
+    font-size: 0.83rem;
     line-height: 14pt;
-    line-height: 1.27rem;
+    line-height: 1.17rem;
     overflow: auto;
     padding: 6px 10px;
     border-radius: 3px;
