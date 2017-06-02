@@ -1,5 +1,5 @@
 ﻿html, body {
-    font-size: 15px;
+    font-size: 11pt;
 }
 
 body {
@@ -18,32 +18,32 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-    font-size: 24px;
-    font-size: 1.6rem;
+    font-size: 18pt;
+    font-size: 1.64rem;
 }
 
 h2 {
-    font-size: 19.5px;
-    font-size: 1.3rem;
+    font-size: 16pt;
+    font-size: 1.45rem;
 }
 
 h3 {
-    font-size: 17.25px;
-    font-size: 1.15rem;
+    font-size: 14pt;
+    font-size: 1.27rem;
 }
 
 h4 {
-    font-size: 17px;
-    font-size: 1.13rem;
+    font-size: 13px;
+    font-size: 1.18rem;
 }
 
 h5 {
-    font-size: 15px;
+    font-size: 11pt;
     font-size: 1rem;
 }
 
 h6 {
-    font-size: 15px;
+    font-size: 11pt;
     font-size: 1rem;
     color: #777777;
     margin: 1rem 0;

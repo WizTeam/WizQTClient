@@ -5743,6 +5743,9 @@ function findBlocks() {
                 codeUtils.fixCode(code);
                 codeContainer = codeUtils.getContainerFromChild(code);
             }
+            if (!codeContainer) {
+                continue;
+            }
             // 不使用 codeMirror 自定义的滚动条
             scrollTarget = code.querySelector('.' + CONST.CLASS.CODE_MIRROR_HSCROLL);
             blockList.push({
@@ -6274,7 +6277,7 @@ var CSS = {
         phone: '.' + CONST.CLASS.CODE_CONTAINER + '{margin-left:0; margin-right:0;}'
     },
     common: '.' + CONST.CLASS.CODE_CONTAINER + '{position: relative; padding:13px 0; margin: 5px 25px 5px 5px;}' + // 专门用于 CodeMirror 之间间隔，并且可以自动添加空行
-    '.CodeMirror {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; color: black; font-size: 14px; font-size: 0.93rem}' +
+    '.CodeMirror {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; color: black; font-size: 10pt; font-size: 0.9rem}' +
     '.CodeMirror-lines {padding: 4px 0;}' +
     '.CodeMirror pre {padding: 0 4px;}' +
     '.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {background-color: white;}' +
@@ -7017,9 +7020,17 @@ var codeUtils = {
         }
 
         // 创建 cm 实例，必须删除原 cm Dom 结构
+        // 如果 codeMirror 在 p 内， 恢复时 CodeMirror 的 div 会成为 p 的 nextSibiling，所以只能根据 id 进行删除
+        var tmpWrapper = ENV.doc.body.querySelector('.' + CONST.CLASS.CODE_MIRROR + '[data-id=' + container.id + ']');
+        if (tmpWrapper) {
+            tmpWrapper.parentNode.removeChild(tmpWrapper);
+        }
+
+        // 防止 万一 data-id 不存在的情况
         while (container.lastChild && !domUtils.isTag(container.lastChild, 'textarea')) {
             container.removeChild(container.lastChild);
         }
+
         textarea = container.querySelector('textarea');
         options = {
             fixedGutter: false,
@@ -7064,6 +7075,7 @@ var codeUtils = {
         cm = CodeMirror.fromTextArea(textarea, options);
         container.codeMirror = cm;
         container.mode = mode;
+        cm.display.wrapper.setAttribute('data-id', container.id);
         cmDiv = container.querySelector('.' + CONST.CLASS.CODE_MIRROR);
         cmTag = ENV.doc.createElement(CONST.TAG.CODE_MIRROR);
         domUtils.before(cmTag, cmDiv);
@@ -9667,7 +9679,7 @@ var TmpEditorStyle = {
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
         common: 'html, body {' +
-        'font-size: 15px;' +
+        'font-size: 11pt;' +
         '}' +
         'body {' +
         'font-family: ' + DefaultFont +
@@ -9676,12 +9688,12 @@ var TmpEditorStyle = {
         'padding: 20px 15px;padding: 1.33rem 1rem;' +
         '}' +
         'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' +
-        'h1 {font-size:24px;font-size:1.6rem;}' +
-        'h2 {font-size:19.5px;font-size:1.3rem;}' +
-        'h3 {font-size:17.25px;font-size:1.15rem;}' +
-        'h4 {font-size:17px;font-size:1.13rem;}' +
-        'h5 {font-size:15px;font-size:1rem;}' +
-        'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' +
+        'h1 {font-size:18pt;font-size:1.64rem;}' +
+        'h2 {font-size:16pt;font-size:1.45rem;}' +
+        'h3 {font-size:14pt;font-size:1.27rem;}' +
+        'h4 {font-size:13pt;font-size:1.18rem;}' +
+        'h5 {font-size:11pt;font-size:1rem;}' +
+        'h6 {font-size:11pt;font-size:1rem;color: #777777;margin: 1rem 0;}' +
         'div, p, ul, ol, dl, li {margin:0;}' +
         'blockquote, table, pre, code {margin:8px 0;}' +
         'ul, ol {padding-left:32px;padding-left:2.13rem;}' +
@@ -11488,9 +11500,23 @@ var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
     utils = require('./../common/utils');
 
-var pt2px = 0;
-
 var domUtils = {
+    pt2px: function() {
+        var pt2px;
+        var span = document.createElement('span');
+        span.style.visibility = 'hidden';
+        span.style.position = 'absolute';
+        span.style.top = 0;
+        span.style.left = 0;
+        span.style.fontSize = '12pt';
+        ENV.doc.body.appendChild(span);
+        pt2px = window.getComputedStyle(span).fontSize;
+        pt2px = parseInt(pt2px, 10)/12;
+        ENV.doc.body.removeChild(span);
+        domUtils.pt2px = function() {
+            return pt2px;
+        }
+    },
     /**
      * 添加 class name
      * @param domList
@@ -11821,28 +11847,13 @@ var domUtils = {
                 return isNaN(size) ? null : size + 'rem';
             }
 
-            if (!pt2px) {
-                (function() {
-                    var span = document.createElement('span');
-                    span.style.visibility = 'hidden';
-                    span.style.position = 'absolute';
-                    span.style.top = 0;
-                    span.style.left = 0;
-                    span.style.fontSize = '12pt';
-                    ENV.doc.body.appendChild(span);
-                    pt2px = window.getComputedStyle(span).fontSize;
-                    pt2px = parseInt(pt2px, 10)/12;
-                    ENV.doc.body.removeChild(span);
-                })();
-            }
-
             var s = ENV.win.getComputedStyle(ENV.doc.body),
-                rootSize = parseInt(s.fontSize, 10);
+                rootSize = parseFloat(s.fontSize);
             if (isNaN(rootSize) || isNaN(size) || rootSize == 0) {
                 return null;
             }
             if (/pt/i.test(fontSize)) {
-                size = size * pt2px;
+                size = size * domUtils.pt2px();
             }
             return (Math.round((size / rootSize) * 1000)) / 1000 + 'rem';
         }
@@ -14678,7 +14689,7 @@ function _getCaretStyle() {
 
     var s = style['font-size'];
     if (s) {
-        result['fontSize'] = s;
+        result['fontSize'] = Math.round(parseFloat(s) / domUtils.pt2px()) + 'pt';
     }
     s = style['font-family'];
     if (s) {
@@ -22837,14 +22848,15 @@ var tableUtils = {
             table = tableList[i];
             tableBody = checkParent(table, function (parent) {
                 if (parent.childNodes.length === 1) {
-                    parent.className = CONST.CLASS.TABLE_BODY;
+                    domUtils.addClass(parent, CONST.CLASS.TABLE_BODY);
                     return true;
                 }
                 return domUtils.hasClass(parent, CONST.CLASS.TABLE_BODY);
             });
+
             container = checkParent(tableBody, function (parent) {
                 if (parent.childNodes.length === 1) {
-                    parent.className = CONST.CLASS.TABLE_CONTAINER;
+                    domUtils.addClass(parent, CONST.CLASS.TABLE_CONTAINER);
                     return true;
                 }
                 return domUtils.hasClass(parent, CONST.CLASS.TABLE_CONTAINER);

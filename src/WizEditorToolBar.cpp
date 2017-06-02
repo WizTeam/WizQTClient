@@ -97,21 +97,21 @@ WizComboboxStyledItem* FontSizes()
 {
     static WizComboboxStyledItem fontItems[] =
     {
-        {"9", "9px", "", 14, false},
-        {"10", "10px", "", 14, false},
-        {"11", "11px", "", 14, false},
-        {"12", "12px", "", 14, false},
-        {"13", "13px", "", 14, false},
-        {"14", "14px", "", 14, false},
-        {"15", "15px", "", 14, false},
-        {"16", "16px", "", 14, false},
-        {"17", "17px", "", 14, false},
-        {"18", "18px", "", 14, false},
-        {"24", "24px", "", 14, false},
-        {"36", "36px", "", 14, false},
-        {"48", "48px", "", 14, false},
-        {"64", "64px", "", 14, false},
-        {"72", "72px", "", 14, false}
+        {"9", "9pt", "", 14, false},
+        {"10", "10pt", "", 14, false},
+        {"11", "11pt", "", 14, false},
+        {"12", "12pt", "", 14, false},
+        {"13", "13pt", "", 14, false},
+        {"14", "14pt", "", 14, false},
+        {"15", "15pt", "", 14, false},
+        {"16", "16pt", "", 14, false},
+        {"17", "17pt", "", 14, false},
+        {"18", "18pt", "", 14, false},
+        {"24", "24pt", "", 14, false},
+        {"36", "36pt", "", 14, false},
+        {"48", "48pt", "", 14, false},
+        {"64", "64pt", "", 14, false},
+        {"72", "72pt", "", 14, false}
     };
     return fontItems;
 }
@@ -1419,7 +1419,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_secondLineButtonContainer->setVisible(showExtraButtons);
     m_btnShowExtra->setChecked(showExtraButtons);
 
-    m_delayUpdateUITimer.setInterval(300);
+    m_delayUpdateUITimer.setInterval(100);
     connect(&m_delayUpdateUITimer, SIGNAL(timeout()), SLOT(on_delay_updateToolbar()));
 }
 
@@ -1480,12 +1480,12 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     //
     m_comboFontFamily->setFontName(strFontName);
     //
-    strFontSize.remove("px");
-    int fontSizeInPx = wiz_ttoi(strFontSize);
-    if (0 != fontSizeInPx)
+    strFontSize.remove("pt");
+    int fontSizeInPt = wiz_ttoi(strFontSize);
+    if (0 != fontSizeInPt)
     {
-        CString strsFontsizeInPx = WizIntToStr(fontSizeInPx);
-        m_comboFontSize->setText(strsFontsizeInPx);
+        CString strsFontsizeInPt = WizIntToStr(fontSizeInPt);
+        m_comboFontSize->setText(strsFontsizeInPt);
     }
     else
     {
@@ -1832,7 +1832,7 @@ void WizEditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> c
                             font.setUnderline(underline == 1);
                             //
                             QString size = fontSize;
-                            size.remove("px");
+                            size.remove("pt");
                             int sizeValue = size.toInt();
                             font.setPointSize(sizeValue == 0 ? m_app.userSettings().defaultFontSize() : sizeValue);
                             //

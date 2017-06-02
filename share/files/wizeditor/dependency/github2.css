@@ -126,13 +126,8 @@
     list-style: none;
 }
 .markdown-body li.wiz-md-todo-list-item input.wiz-md-todo-checkbox {
-    /*width: 1.9rem;*/
-    /*height: 1.9rem;*/
     margin-left: -1.2rem;
     margin-right: 5px;
-    /*position: relative;*/
-    /*top: .13rem;*/
-    /*vertialc-align:-3px;*/
     vertical-align:middle;
 }
 
@@ -195,8 +190,8 @@
 }
 
 .markdown-body dl dt {
-    font-size: 14px;
-    font-size: 0.93rem;
+    font-size: 10pt;
+    font-size: 0.9rem;
     font-weight: bold;
     font-style: italic;
     padding: 0;
@@ -259,8 +254,8 @@
 }
 
 .markdown-body table tr th {
-    font-size: 14px;
-    font-size: 0.93rem;
+    font-size: 10pt;
+    font-size: 0.9rem;
     font-weight: bold;
     border: 1px solid #cccccc;
     margin: 0;
@@ -271,7 +266,8 @@
     border: 1px solid #cccccc;
     margin: 0;
     padding: 6px 13px;
-    font-size: 14px;
+    font-size: 10pt;
+    font-size: 0.9rem;
 }
 
 .markdown-body table tr th :first-child, .markdown-body table tr td :first-child {
@@ -290,8 +286,8 @@
     vertical-align: top;
     position: relative;
     top: -0.5em;
-    font-size: 12px;
-    font-size: .8rem
+    font-size: 9pt;
+    font-size: .81rem
 }
 
 .markdown-body span.frame {
@@ -404,9 +400,9 @@
 .markdown-body pre {
     background-color: #f8f8f8;
     border: 1px solid #cccccc;
-    font-size: 13px;
-    font-size: 0.87rem;
-    line-height: 19px;
+    font-size: 9pt;
+    font-size: 0.81rem;
+    line-height: 14pt;
     line-height: 1.27rem;
     overflow: auto;
     padding: 6px 10px;
