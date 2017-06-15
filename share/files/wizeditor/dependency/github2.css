@@ -126,8 +126,7 @@
     list-style: none;
 }
 .markdown-body li.wiz-md-todo-list-item input.wiz-md-todo-checkbox {
-    margin-left: -1.2rem;
-    margin-right: 5px;
+    margin: 0px 5px 0px -1rem;
     vertical-align:middle;
 }
 
@@ -175,7 +174,8 @@
 }
 
 .markdown-body ul, .markdown-body ol {
-    padding-left: 32px;
+    padding-left: 34px;
+    padding-left: 2.13rem;
 }
 .markdown-body ul p, .markdown-body ol p{
     margin: 0;
@@ -562,7 +562,7 @@ only screen and (-o-min-device-pixel-ratio: 3),
 only screen and (min-device-pixel-ratio: 3) {
     .markdown-body {
         padding: 12px 15px;
-        color: #353c47;
+        /*color: #353c47;*/
     }
 
     /*.markdown-body,*/
@@ -601,9 +601,9 @@ only screen and (min-device-pixel-ratio: 3) {
     }
 
     .markdown-body blockquote {
-        border-left: 4px solid #c8d4e8;
+        /*border-left: 4px solid #c8d4e8;*/
         padding: 0 15px;
-        color: #b3c2dd;
+        /*color: #b3c2dd;*/
     }
 }
 

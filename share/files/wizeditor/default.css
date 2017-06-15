@@ -6,13 +6,13 @@ body {
     font-family: Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;
     line-height: 1.6;
     margin: 0 auto;
-    padding: 21px 16px;
-    padding: 1.33rem 1rem;
+    padding: 20px 16px;
+    padding: 1.25rem 1rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    margin: 21px 0 10px;
-    margin: 1.33rem 0 0.667rem;
+    margin: 20px 0 10px;
+    margin: 1.25rem 0 0.625rem;
     padding: 0;
     font-weight: bold;
 }
@@ -59,12 +59,15 @@ blockquote, table, pre, code {
 
 ul, ol {
     padding-left: 32px;
-    padding-left: 2.13rem;
+    padding-left: 2rem;
 }
+ol.wiz-list-level1 > li {list-style-type:decimal;}
+ol.wiz-list-level2 > li {list-style-type:lower-latin;}
+ol.wiz-list-level3 > li {list-style-type:lower-roman;}
 
 blockquote {
     padding: 0 12px;
-    padding: 0 0.8rem;
+    padding: 0 0.75rem;
 }
 
 blockquote > :first-child {

@@ -57,65 +57,112 @@ static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url, TData& data
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
 
-WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strUrl, QObject* parent)
-    : WizXmlRpcServerBase(strUrl, parent)
+WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strServer, QObject* parent)
+    : WizXmlRpcServerBase(strServer, parent)
 {
 }
 
-bool WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion)
+QString WizKMXmlRpcServerBase::appendNormalParams(const QString& strUrl, const QString& token)
 {
-    CWizKMTokenOnlyParam param(strToken, strKbGUID);
-    //
-    param.addString("key", strKey);
-    //
-    QString strVersion;
-    //
-    if (!call(QString(strMethodPrefix) + ".getValueVersion", "version", strVersion, &param))
+    QString url = strUrl;
+    if (-1 == url.indexOf("?"))
     {
-        TOLOG1("Failed to get value version: key=%1", strKey);
-        return FALSE;
+        url += "?";
+    }
+    else
+    {
+        url += "&";
     }
     //
-    nVersion = wiz_ttoi64(strVersion);
+    url += QString("clientType=macos&clientVersion=") + WIZ_CLIENT_VERSION;
     //
-    return TRUE;
+    if (!token.isEmpty())
+    {
+        url += "&token=" + token;
+    }
+    //
+    return url;
 }
-bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion)
+
+
+bool WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion)
 {
-    CWizKMTokenOnlyParam param(strToken, strKbGUID);
+    QString url = m_strUrl + "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
+#ifdef QT_DEBUG
+    url = QString("http://localhost:4001") + "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
+#endif
+    url = appendNormalParams(url, strToken);
     //
-    param.addString("key", strKey);
-    //
-    QString strVersion;
-    //
-    if (!call(QString(strMethodPrefix) + ".getValue",  "value_of_key", strValue, "version", strVersion, &param))
+    Json::Value doc;
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
+    if (!jsonRet)
     {
-        TOLOG1("Failed to get value: key=%1", strKey);
-        return FALSE;
+        setLastError(jsonRet);
+        TOLOG1("Failed to call %1", url);
+        return false;
     }
     //
-    nVersion = wiz_ttoi64(strVersion);
-    //
-    return TRUE;
+    try {
+        Json::Value result = doc["result"];
+        nVersion = result.asInt64();
+        return true;
+    } catch (Json::Exception& err) {
+        TOLOG1("josn error: %1", err.what());
+        return false;
+    }
+
 }
-bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion)
+bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    CWizKMTokenOnlyParam param(strToken, strKbGUID);
+    QString url = m_strUrl + "/" + strMethodPrefix + "/kv/value/" + strGuid + "?key=" + strKey;
+#ifdef QT_DEBUG
+    url = QString("http://localhost:4001") + "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
+#endif
+    url = appendNormalParams(url, strToken);
     //
-    param.addString("key", strKey);
-    param.addString("value_of_key", strValue);
-    //
-    QString strRetVersion;
-    //
-    if (!call(QString(strMethodPrefix) + ".setValue", "version", strRetVersion, &param))
+    Json::Value doc;
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);
+    if (!jsonRet)
     {
-        TOLOG1("Failed to set value: key=%1", strKey);
-        return FALSE;
+        setLastError(jsonRet);
+        TOLOG1("Failed to call %1", url);
+        return false;
     }
     //
-    nRetVersion = wiz_ttoi64(strRetVersion);
+    try {
+        //
+        Json::Value result = doc["result"];
+        strValue = QString::fromStdString(result["value"].asString());
+        nVersion = result["version"].asInt64();
+        return true;
+    } catch (Json::Exception& err) {
+        TOLOG1("josn error: %1", err.what());
+        return false;
+    }
+}
+
+bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion)
+{
+    QString url = m_strUrl + "/" + strMethodPrefix + "/kv/value/" + strGuid;
+#ifdef QT_DEBUG
+    url = QString("http://localhost:4001") + "/" + strMethodPrefix + "/kv/version/" + strGuid;
+#endif
+    url = appendNormalParams(url, strToken);
     //
-    return TRUE;
+    Json::Value body;
+    body["key"] = strKey.toStdString();
+    body["value"] = strValue.toStdString();
+    //
+    Json::Value doc;
+    WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, "PUT", body, doc);
+    if (!jsonRet)
+    {
+        setLastError(jsonRet);
+        TOLOG1("Failed to call %1", url);
+        return false;
+    }
+    //
+    return true;
 }
 
 
@@ -372,15 +419,15 @@ bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, i
 
 bool WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValueVersion("accounts", getToken(), getKbGuid(), strKey, nVersion);
+    return WizKMXmlRpcServerBase::getValueVersion("as", getToken(), m_userInfo.strUserGUID, strKey, nVersion);
 }
 bool WizKMAccountsServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValue("accounts", getToken(), getKbGuid(), strKey, strValue, nVersion);
+    return WizKMXmlRpcServerBase::getValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nVersion);
 }
 bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMXmlRpcServerBase::setValue("accounts", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+    return WizKMXmlRpcServerBase::setValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
 }
 
 
@@ -810,15 +857,15 @@ bool WizKMDatabaseServer::kb_getInfo()
 
 bool WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValueVersion("kb", getToken(), getKbGuid(), strKey, nVersion);
+    return WizKMXmlRpcServerBase::getValueVersion("ks", getToken(), getKbGuid(), strKey, nVersion);
 }
 bool WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValue("kb", getToken(), getKbGuid(), strKey, strValue, nVersion);
+    return WizKMXmlRpcServerBase::getValue("ks", getToken(), getKbGuid(), strKey, strValue, nVersion);
 }
 bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMXmlRpcServerBase::setValue("kb", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+    return WizKMXmlRpcServerBase::setValue("ks", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
 }
 
 bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)

@@ -18,10 +18,13 @@
 class WizKMXmlRpcServerBase : public WizXmlRpcServerBase
 {
 public:
-    WizKMXmlRpcServerBase(const QString& strUrl, QObject* parent);
-    bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion);
-    bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion);
-    bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    WizKMXmlRpcServerBase(const QString& strServer, QObject* parent);
+    //
+    static QString appendNormalParams(const QString& strUrl, const QString& token);
+    //
+    bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
+    bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
+    bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion);
     //
     void setLastError(const WIZSTANDARDRESULT& ret) { WizXmlRpcServerBase::setLastError(ret.returnCode, ret.returnMessage); }
 };
@@ -30,7 +33,7 @@ public:
 class WizKMAccountsServer : public WizKMXmlRpcServerBase, public WizJSONServerBase
 {
 public:
-    WizKMAccountsServer(const QString& strUrl, QObject* parent = 0);
+    WizKMAccountsServer(const QString& strServer, QObject* parent = 0);
     virtual ~WizKMAccountsServer(void);
 
     virtual void onXmlRpcError();
@@ -71,8 +74,6 @@ public:
     bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
     //
-
-
 public:
     bool getWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
     QString getToken();
