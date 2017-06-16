@@ -44,8 +44,12 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     syncType = info.syncType;
 }
 
-
-bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
+bool WIZUSERINFO::fromJson(const Json::Value& value)
+{
+    return true;
+}
+/*
+bool loadFromXmlRpc(WizXmlRpcStructValue& val)
 {
     WizXmlRpcStructValue& data = val;    
     data.getString("token", strToken);
@@ -91,6 +95,7 @@ bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
             && !strUserGUID.isEmpty()
             && !strDatabaseServer.isEmpty();
 }
+*/
 
 WIZUSERCERT::WIZUSERCERT()
 {
@@ -426,32 +431,37 @@ bool WIZDELETEDGUIDDATA::equalForSync(const WIZDELETEDGUIDDATA& data) const
     return TRUE;
 }
 
-bool WIZDELETEDGUIDDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZDELETEDGUIDDATA::fromJson(const Json::Value& value)
 {
-    CString strType;
+    try {
+        //
+        tDeleted = QDateTime::fromTime_t(value["created"].asInt64() / 1000);
+        strGUID = QString::fromStdString(value["deletedGuid"].asString());
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
+        QString strType = QString::fromStdString(value["type"].asString());
+        nVersion = value["version"].asInt64();
+        //
+        bool bRet = !strGUID.isEmpty()
+                && !strType.isEmpty()
+                && nVersion > 0;
 
-    // this field maybe "nil"
-    data.getTime("dt_deleted", tDeleted);
+        eType = WIZOBJECTDATA::typeStringToObjectType(strType);
+        //
+        return bRet;
 
-    bool bRet = data.getStr("deleted_guid", strGUID)
-        && data.getStr("guid_type", strType)
-        && data.getInt64("version", nVersion);
-
-    eType = WIZOBJECTDATA::typeStringToObjectType(strType);
-
-    return bRet;
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
 }
 
-bool WIZDELETEDGUIDDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
+bool WIZDELETEDGUIDDATA::toJson(QString kbGuid, Json::Value& value) const
 {
-    data.addString("deleted_guid", strGUID);
-    data.addString("guid_type", WIZOBJECTDATA::objectTypeToTypeString(eType));
-    data.addTime("dt_deleted", tDeleted);
-    data.addInt64("version", nVersion);
-
+    value["deletedGuid"] = strGUID.toStdString();
+    value["type"] = WIZOBJECTDATA::objectTypeToTypeString(eType).toStdString();
+    value["created"] = tDeleted.toTime_t() * 1000;
     return true;
 }
-
 
 ////////////////////////////////////////////////////////////////////
 WIZDOCUMENTATTACHMENTDATA::WIZDOCUMENTATTACHMENTDATA()

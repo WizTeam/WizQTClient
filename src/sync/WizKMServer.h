@@ -15,18 +15,30 @@
 #define WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR    30321
 #define WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR     30322
 
-class WizKMXmlRpcServerBase : public WizXmlRpcServerBase
+class WizKMXmlRpcServerBase : public QObject
 {
 public:
     WizKMXmlRpcServerBase(const QString& strServer, QObject* parent);
+protected:
+    QString m_strServer;
+    int m_nLastErrorCode;
+    QString m_strLastErrorMessage;
+
+public:
+    QString getServer() const { return m_strServer; }
+    virtual QString getToken() const = 0;
     //
-    static QString appendNormalParams(const QString& strUrl, const QString& token);
+    QString buildUrl(QString urlPath);
+    //
+    int getLastErrorCode() const { return m_nLastErrorCode; }
+    QString getLastErrorMessage() const { return m_strLastErrorMessage; }
+    //
+    void setLastError(int code, QString message) { m_nLastErrorCode = code; m_strLastErrorMessage = message; }
+    void setLastError(const WIZSTANDARDRESULT& ret) { setLastError(ret.returnCode, ret.returnMessage); }
     //
     bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion);
-    //
-    void setLastError(const WIZSTANDARDRESULT& ret) { WizXmlRpcServerBase::setLastError(ret.returnCode, ret.returnMessage); }
 };
 
 
@@ -46,7 +58,7 @@ public:
     WIZUSERINFO m_userInfo;
 
 public:
-    bool login(const QString& strUserName, const QString& strPassword, const QString& strType = "normal");
+    bool login(const QString& strUserName, const QString& strPassword);
     bool logout();
     bool changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
     bool changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
@@ -76,7 +88,7 @@ public:
     //
 public:
     bool getWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
-    QString getToken();
+    QString getToken() const;
     QString getKbGuid();
     //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
     const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
@@ -236,93 +248,6 @@ protected:
     bool data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, bool& bEOF);
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream);
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName);
-    //
-    ////////////////////////////////////////////
-    //postList
-    ////上传对象列表，适用于简单对象：标签，样式，已删除对象////
-    //
-
-    template <class TData, class TWrapData>
-    bool postList(const QString& strMethosName, const QString& strArrayName, std::deque<TData>& arrayData)
-    {
-        if (arrayData.empty())
-            return TRUE;
-        //
-        int nCountPerPage = getCountPerPage();
-        //
-        typename std::deque<TData>::const_iterator it = arrayData.begin();
-        //
-        while (1)
-        {
-            //
-            std::deque<TWrapData> subArray;
-            //
-            for (;
-                it != arrayData.end(); )
-            {
-                subArray.push_back(*it);
-                it++;
-                //
-                if (subArray.size() == nCountPerPage)
-                    break;
-            }
-            //
-
-            CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-            //
-            param.addArray<TWrapData>(strArrayName, subArray);
-            //
-            QString strCount;
-            if (!call(strMethosName, "success_count", strCount, &param))
-            {
-                TOLOG1("%1 failure!", strMethosName);
-                return FALSE;
-            }
-            //
-            if (wiz_ttoi(strCount) != (int)subArray.size())
-            {
-                QString strError = WizFormatString3("Failed to upload list: %1, upload count=%2, success_count=%3", strMethosName,
-                    WizIntToStr(int(subArray.size())),
-                    strCount);
-                TOLOG1("%1 failure!", strMethosName);
-                //
-                ATLASSERT(FALSE);
-                return FALSE;
-            }
-            //
-            //
-            if (it == arrayData.end())
-                break;
-        }
-        //
-        return TRUE;
-    }
-    //
-
-    /////////////////////////////////////////////
-    //getList
-    ////通过版本号获得对象列表////
-    //
-
-    template <class TData, class TWrapData>
-    bool getList(const QString& strMethodName, int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
-    {
-        CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-        param.addInt("count", nCountPerPage);
-        param.addString("version", WizInt64ToStr(nVersion));
-        //
-        std::deque<TWrapData> arrayWrap;
-        if (!call(strMethodName, arrayWrap, &param))
-        {
-            TOLOG("object.getList failure!");
-            return FALSE;
-        }
-        //
-        arrayRet.assign(arrayWrap.begin(), arrayWrap.end());
-        //
-        return TRUE;
-    }
-
 public:
     //
 

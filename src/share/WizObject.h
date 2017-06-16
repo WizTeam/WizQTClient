@@ -77,7 +77,7 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
     WIZUSERINFO(const WIZUSERINFO& info);
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& val);
+    bool fromJson(const Json::Value& value);
 
     // field: api_version, default: 1
 
@@ -499,8 +499,9 @@ struct WIZDELETEDGUIDDATA : public WIZOBJECTBASE
 {
     WIZDELETEDGUIDDATA();
 
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-    bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
+    //
     bool equalForSync(const WIZDELETEDGUIDDATA& data) const;
     static CString versionName() { return CString("deleted_guid_version"); }
     static CString objectName() { return CString("deleted_guid"); }
