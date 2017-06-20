@@ -421,7 +421,7 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
     }
 
     isGroup = false;
-    WIZUSERINFO userInfo = WizToken::info();
+    WIZUSERINFO userInfo = WizToken::userInfo();
     if (db.isGroup())
     {
         isGroup = true;
@@ -429,11 +429,6 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
         if (!WizDatabaseManager::instance()->db().getGroupData(strKbGUID, group))
             return false;
         userInfo.strKbGUID = group.strGroupGUID;
-        userInfo.strDatabaseServer = group.strDatabaseServer;
-        if (userInfo.strDatabaseServer.isEmpty())
-        {
-            userInfo.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
-        }
     }
     //
     WizKMDatabaseServer server(userInfo, NULL);

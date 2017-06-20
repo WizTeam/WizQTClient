@@ -556,7 +556,7 @@ bool WizSearcher::onlineSearchOnly(const QString& kbGuid, const QString& keyword
     postData.addQueryItem("ss", keywords);
     if (kbGuid.isEmpty())
     {
-        postData.addQueryItem("kb_guid", WizToken::info().strKbGUID);
+        postData.addQueryItem("kb_guid", WizToken::userInfo().strKbGUID);
     }
     else
     {
@@ -675,7 +675,7 @@ bool WizSearcher::onlineSearchOnly(const QString& kbGuid, const QString& keyword
     //
     if (!downloadDocGuids.empty())
     {
-        WIZUSERINFO userInfo = WizToken::info();
+        WIZUSERINFO userInfo = WizToken::userInfo();
         CWizDocumentDataArray downloadedArrayDocument;
         WizDownloadDocumentsByGuids(userInfo,
                                          &db,

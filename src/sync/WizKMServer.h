@@ -1,10 +1,9 @@
 ﻿#ifndef WIZKMXMLRPC_H
 #define WIZKMXMLRPC_H
 
-#include "WizXmlRpcServer.h"
-#include "WizJSONServerBase.h"
 #include "share/WizMessageBox.h"
 #include "share/WizRequest.h"
+#include "share/WizObject.h"
 #include "WizDef.h"
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
@@ -15,26 +14,35 @@
 #define WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR    30321
 #define WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR     30322
 
+
+//返回的网络错误。 此处使用客户端自定义的错误代码
+#define WIZKM_XMLRPC_ERROR_INVALID_TOKEN		301
+#define WIZKM_XMLRPC_ERROR_INVALID_USER			31001
+#define WIZKM_XMLRPC_ERROR_INVALID_PASSWORD		31002
+#define WIZKM_XMLRPC_ERROR_TOO_MANY_LOGINS		31004
+
+#define WIZKM_XMLRPC_ERROR_SYSTEM_ERROR         60000
+
 class WizKMXmlRpcServerBase : public QObject
 {
 public:
     WizKMXmlRpcServerBase(const QString& strServer, QObject* parent);
 protected:
     QString m_strServer;
-    int m_nLastErrorCode;
-    QString m_strLastErrorMessage;
+    WIZSTANDARDRESULT m_lastError;
 
 public:
     QString getServer() const { return m_strServer; }
     virtual QString getToken() const = 0;
+    virtual QString getKbGuid() const = 0;
     //
     QString buildUrl(QString urlPath);
     //
-    int getLastErrorCode() const { return m_nLastErrorCode; }
-    QString getLastErrorMessage() const { return m_strLastErrorMessage; }
+    bool isNetworkError() const { return m_lastError.isNetworkError(); }
+    int getLastErrorCode() const { return m_lastError.returnCode; }
+    QString getLastErrorMessage() const { return m_lastError.returnMessage; }
     //
-    void setLastError(int code, QString message) { m_nLastErrorCode = code; m_strLastErrorMessage = message; }
-    void setLastError(const WIZSTANDARDRESULT& ret) { setLastError(ret.returnCode, ret.returnMessage); }
+    void setLastError(const WIZSTANDARDRESULT& ret) { m_lastError = ret; }
     //
     bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
@@ -42,10 +50,10 @@ public:
 };
 
 
-class WizKMAccountsServer : public WizKMXmlRpcServerBase, public WizJSONServerBase
+class WizKMAccountsServer : public WizKMXmlRpcServerBase
 {
 public:
-    WizKMAccountsServer(const QString& strServer, QObject* parent = 0);
+    WizKMAccountsServer(QObject* parent = 0);
     virtual ~WizKMAccountsServer(void);
 
     virtual void onXmlRpcError();
@@ -72,7 +80,7 @@ public:
     bool getBizList(CWizBizDataArray& arrayBiz);
     bool createTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
     bool keepAlive(const QString& strToken);
-    bool getMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
+    bool getMessages(__int64 nStartVersion, CWizMessageDataArray& arrayMessage);
     bool setMessageReadStatus(const QString& strMessageIDs, int nStatus);
 
     bool getAdminBizCert(const QString& strToken, const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
@@ -89,7 +97,7 @@ public:
 public:
     bool getWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
     QString getToken() const;
-    QString getKbGuid();
+    QString getKbGuid() const;
     //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
     const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
     WIZUSERINFO& getUserInfo() { return m_userInfo; }
@@ -112,54 +120,11 @@ private:
     bool accounts_getGroupList(CWizGroupDataArray& arrayGroup);
     bool accounts_getBizList(CWizBizDataArray& arrayBiz);
     bool accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
-    bool accounts_getMessagesByXmlrpc(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
-
-    //
-    bool accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
 };
 
 
 
 #define WIZKM_WEBAPI_VERSION		10
-
-struct CWizKMBaseParam: public WizXmlRpcStructValue
-{
-    CWizKMBaseParam(int apiVersion = WIZKM_WEBAPI_VERSION)
-    {
-        changeApiVersion(apiVersion);
-        //
-#ifdef Q_OS_MAC
-        addString("client_type", "mac");
-#else
-        addString("client_type", "linux");
-#endif
-        addString("client_version", WIZ_CLIENT_VERSION);
-        //
-        QString LocalLanguage = QLocale::system().name();
-        addString("client_lang", LocalLanguage);
-    }
-    //
-    void changeApiVersion(int nApiVersion)
-    {
-        addString("api_version", WizIntToStr(nApiVersion));
-    }
-    int getApiVersion()
-    {
-        QString str;
-        getString("api_version", str);
-        return wiz_ttoi(str);
-    }
-};
-
-struct CWizKMTokenOnlyParam : public CWizKMBaseParam
-{
-    CWizKMTokenOnlyParam(const QString& strToken, const QString& strKbGUID)
-    {
-        addString("token", strToken);
-        addString("kb_guid", strKbGUID);
-    }
-};
-
 
 class WizKMDatabaseServer: public WizKMXmlRpcServerBase
 {

@@ -61,7 +61,7 @@ struct WIZUSERINFOBASE
 {
     QString strToken;
     QString strKbGUID;
-    QString strDatabaseServer;
+    QString strXmlRpcServer;
     QString strKbServer;
 
     //NOTE: DEPRECATED
@@ -73,27 +73,14 @@ struct WIZUSERINFOBASE
     }    
 };
 
+// use 10 minutes locally, server use 20 minutes
+#define TOKEN_TIMEOUT_INTERVAL 60 * 10
+
 struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
     WIZUSERINFO(const WIZUSERINFO& info);
     bool fromJson(const Json::Value& value);
-
-    // field: api_version, default: 1
-
-    // field: capi_url, default: /xmlrpc
-    QString strChatUrl;
-
-    // field: download_url, default: /a/download
-    QString strDownloadUrl;
-
-    // field: email_verify, default: verified
-
-    // field: enable_group, default: 0
-    int bEnableGroup;
-
-    // field: expried_time
-    WizOleDateTime tTokenExpried;
 
     // field: invite_code, current is 8 length char
     QString strInviteCode;
@@ -107,46 +94,20 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     // field: notice_text, currently null
     QString strNoticeText;
 
-    // field: public_tags, default: config.public_tags, what's this?
-    // field: push_tags, default: config.push_tags, what's this?
-    // field: return_code, default: 200
-    // field: return_message, default: successfuly login, hello! user!
-    // field: server, currently null
-    // field: sns_list, default: sina=zh_CN name, 1
-    QString strSNSList;
-
-    // field: upload_url, default: /a/upload
-    QString strUploadUrl;
-
-    // ---> user struct begin
-    // field: api_version, why return two times of this field?
-
     // field: displayname
     QString strDisplayName;
 
     // field: email, account id
     QString strUserEmail;
 
-    // field: language, default: zh_CN
-    QString strLanguage;
-
-    // field: nickname
-    QString strNickName;
-
-    // field: return_code, why return two times of this field?
-
     // field: user_guid
     QString strUserGUID;
-
-    // <--- user struct end
 
     // field: user_level
     int nUserLevel;
 
     // field: user_level_name
     QString strUserLevelName;
-
-    // field: user_photo_url, currently null
 
     // field: user_points
     int nUserPoints;
@@ -159,11 +120,10 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
 
     // field: sign up date
     WizOleDateTime tCreated;
-
     //
     int syncType;
-
-    QString strBackupDatabaseServer;
+    //
+    WizOleDateTime tTokenExpried;
 };
 
 Q_DECLARE_METATYPE(WIZUSERINFO)
@@ -641,6 +601,7 @@ const int WIZ_USER_MSG_TYPE_SYSTEM = 100;
 const int WIZ_USER_MSG_TYPE_REMIND_CREATE = 110;
 const int WIZ_USER_MSG_TYPE_MAX = 110;      //支持的最大消息类型，超过该类型的消息直接丢弃
 
+/*
 struct WIZUSERMESSAGEDATA
 {
     qint64 nMessageID;
@@ -675,18 +636,17 @@ struct WIZUSERMESSAGEDATA
     }
 
     bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
 };
 
 typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
-
-
+*/
 
 struct WIZMESSAGEDATA
 {
     WIZMESSAGEDATA();
     WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
-    WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
     static QString objectName() { return "messages"; }
 
     bool isAd();
@@ -785,21 +745,6 @@ struct WIZMESSAGEDATA
 
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 
-// struct return from accounts.getValue method
-struct WIZKVRETURN
-{
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-
-    // field: return_code
-    // 200 ok
-    int nCode;
-
-    // field: value_of_key
-    QString value;
-
-    // field: version
-    qint64 nVersion;
-};
 
 // this struct is parsed from json document by xml-rpc kv api return field value
 struct WIZBIZUSER

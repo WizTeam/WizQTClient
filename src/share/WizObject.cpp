@@ -8,7 +8,6 @@
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
-    , bEnableGroup(false)
     , syncType(0)
 {
 }
@@ -17,23 +16,15 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 {
     strToken = info.strToken;
     strKbGUID = info.strKbGUID;
-    strDatabaseServer = info.strDatabaseServer;
+    strXmlRpcServer = info.strXmlRpcServer;
     strKbServer = info.strKbServer;
     nMaxFileSize = info.nMaxFileSize;
-    strChatUrl = info.strChatUrl;
-    strDownloadUrl = info.strDownloadUrl;
-    bEnableGroup = info.bEnableGroup;
-    //tTokenExpried = info.tTokenExpried;
     strInviteCode = info.strInviteCode;
     strMywizEmail = info.strMywizEmail;
     strNoticeLink = info.strNoticeLink;
     strNoticeText = info.strNoticeText;
-    strSNSList = info.strSNSList;
-    strUploadUrl = info.strUploadUrl;
     strDisplayName = info.strDisplayName;
     strUserEmail = info.strUserEmail;
-    strLanguage = info.strLanguage;
-    strNickName = info.strNickName;
     strUserGUID = info.strUserGUID;
     nUserLevel = info.nUserLevel;
     strUserLevelName = info.strUserLevelName;
@@ -46,56 +37,48 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 
 bool WIZUSERINFO::fromJson(const Json::Value& value)
 {
+    try {
+        strToken = QString::fromStdString(value["token"].asString());
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
+        strKbServer = QString::fromStdString(value["kbServer"].asString());
+        strXmlRpcServer = QString::fromStdString(value["kbXmlRpcServer"].asString());
+        strMywizEmail = QString::fromStdString(value["mywizEmail"].asString());
+        nUserLevel = value["user_level"].asInt();
+        strUserLevelName = QString::fromStdString(value["user_level_name"].asString());
+        nUserPoints = value["user_points"].asInt();
+        strUserType = QString::fromStdString(value["user_type"].asString());
+        nMaxFileSize = value["uploadSizeLimit"].asInt64();
+        syncType = value["syncType"].asInt();
+
+        strInviteCode = QString::fromStdString(value["inviteCode"].asString());
+        strNoticeText = QString::fromStdString(value["noticeText"].asString());
+        strNoticeLink = QString::fromStdString(value["noticeLink"].asString());
+        //
+        tVipExpried = QDateTime::fromTime_t(value["vipDate"].asInt64() / 1000);
+        //
+        Json::Value user = value["user"];
+        //
+        strUserEmail = QString::fromStdString(user["email"].asString());
+        strDisplayName = QString::fromStdString(user["displayName"].asString());
+        strUserGUID = QString::fromStdString(user["userGuid"].asString());
+        tCreated = QDateTime::fromTime_t(user["created"].asInt64() / 1000);
+        //
+        tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
+        //
+        return !strToken.isEmpty()
+                && !strKbGUID.isEmpty()
+                && !strUserGUID.isEmpty()
+                && !strKbServer.isEmpty()
+                && !strXmlRpcServer.isEmpty();
+        //
+    } catch (Json::Exception& e) {
+        TOLOG1("failed to convert json to userinfo: %1", e.what());
+        return false;
+    }
+    //
     return true;
 }
-/*
-bool loadFromXmlRpc(WizXmlRpcStructValue& val)
-{
-    WizXmlRpcStructValue& data = val;    
-    data.getString("token", strToken);
-    data.getTime("expried_time", tTokenExpried);
 
-    data.getStr("download_url", strDownloadUrl);
-    data.getStr("upload_url", strUploadUrl);
-    data.getStr("capi_url", strChatUrl);
-    data.getInt("enable_group", bEnableGroup);
-
-    data.getString("kapi_url", strDatabaseServer);
-    data.getString("kb_guid", strKbGUID);
-    data.getString("invite_code", strInviteCode);
-    data.getString("mywiz_email", strMywizEmail);
-    data.getInt("upload_size_limit", nMaxFileSize);
-
-    data.getString("notice_link", strNoticeLink);
-    data.getString("notice_text", strNoticeText);
-    data.getString("sns_list", strSNSList);
-
-    if (WizXmlRpcStructValue* pUser = data.getStruct("user"))
-    {
-        pUser->getString("displayname", strDisplayName);
-        pUser->getString("email", strUserEmail);
-        pUser->getString("language", strLanguage);
-        pUser->getString("nickname", strNickName);
-        pUser->getString("user_guid", strUserGUID);
-        pUser->getTime("dt_created", tCreated);
-    }
-
-    data.getInt("user_level", nUserLevel);
-    data.getString("user_level_name", strUserLevelName);
-    data.getInt("user_points", nUserPoints);
-    data.getString("user_type", strUserType);
-    data.getTime("vip_date", tVipExpried);
-    //
-    data.getStr("kb_server_url", strKbServer);
-    //
-    data.getInt("sync_type", syncType);
-
-    return !strToken.isEmpty()
-            && !strKbGUID.isEmpty()
-            && !strUserGUID.isEmpty()
-            && !strDatabaseServer.isEmpty();
-}
-*/
 
 WIZUSERCERT::WIZUSERCERT()
 {
@@ -743,7 +726,6 @@ bool WIZBIZDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
     return true;
 }
 
-//TODO: 合并WIZUSERMESSAGEDATA 和WIZMESSAGEDATA
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */
 WIZMESSAGEDATA::WIZMESSAGEDATA()
     : nId(0)
@@ -778,59 +760,38 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZMESSAGEDATA& data)
 {
 }
 
-WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
-    : nId(data.nMessageID)
-    , bizGUID(data.strBizGUID)
-    , kbGUID(data.strKbGUID)
-    , documentGUID(data.strDocumentGUID)
-    , senderAlias(data.strSender)
-    , senderGUID(data.strSenderGUID)
-    , senderId(data.strSenderID)
-    , receiverAlias(data.strReceiver)
-    , receiverGUID(data.strReceiverGUID)
-    , receiverId(data.strReceiverID)
-    , tCreated(data.tCreated)
-    , nMessageType(data.nMessageType)
-    , nReadStatus(data.nReadStatus)
-    , nDeleteStatus(data.nDeletedStatus)
-    , title(data.strTitle)
-    , messageBody(data.strMessageText)
-    , nVersion(data.nVersion)
-    , nLocalChanged(data.nLocalChanged)
-    , note(data.strNote)
+bool WIZMESSAGEDATA::fromJson(const Json::Value& value)
 {
+    try {
+        nId = (__int64)value["id"].asInt64();
+        bizGUID = QString::fromStdString(value["biz_guid"].asString());
+        kbGUID = QString::fromStdString(value["kb_guid"].asString());
+        documentGUID = QString::fromStdString(value["document_guid"].asString());
+        senderGUID = QString::fromStdString(value["sender_guid"].asString());
+        senderId = QString::fromStdString(value["sender_id"].asString());
+        receiverGUID = QString::fromStdString(value["receiver_guid"].asString());
+        receiverId = QString::fromStdString(value["receiver_id"].asString());
+        messageBody = QString::fromStdString(value["message_body"].asString());
+        senderAlias = QString::fromStdString(value["sender_alias"].asString());
+        receiverAlias = QString::fromStdString(value["receiver_alias"].asString());
+        senderAlias = QString::fromStdString(value["sender_alias"].asString());
+        title = QString::fromStdString(value["title"].asString());
+        note = QString::fromStdString(value["note"].asString());
 
-}
-
-bool WIZMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
-{
-    data.getString("biz_guid", bizGUID);
-    data.getString("kb_guid", kbGUID);
-    data.getString("document_guid", documentGUID);
-
-    data.getInt64("id", nId);
-    data.getTime("dt_created", tCreated);
-    data.getInt("message_type", nMessageType);
-    data.getInt("read_status", nReadStatus);
-    data.getInt("delete_status", nDeleteStatus);
-    data.getInt("email_status", nEmailStatus);
-    data.getInt("sms_status", nSMSStatus);
-
-    data.getString("title", title);
-    data.getString("message_body", messageBody);
-    data.getString("note", note);
-
-    data.getString("receiver_alias", receiverAlias);
-    data.getString("receiver_guid", receiverGUID);
-    data.getString("receiver_id", receiverId);
-
-    data.getString("sender_alias", senderAlias);
-    data.getString("sender_guid", senderGUID);
-    data.getString("sender_id", senderId);
-
-    data.getInt64("version", nVersion);
-
-    return true;
+        nMessageType = value["message_type"].asInt();
+        nReadStatus = value["read_status"].asInt();
+        nDeleteStatus = value["delete_status"].asInt();
+        nVersion = (__int64)value["version"].asInt64();
+        //
+        time_t dateCreated = __int64(value["dt_created"].asInt64()) / 1000;
+        tCreated = WizOleDateTime(dateCreated);
+        //
+        return nId > 0
+                && nVersion > 0;
+    } catch (Json::Exception err) {
+        TOLOG1("invalid json: %1", err.what());
+        return false;
+    }
 }
 
 bool WIZMESSAGEDATA::isAd()
@@ -849,41 +810,6 @@ bool WIZMESSAGEDATA::isAd()
     QString type = QString::fromStdString(d["type"].asString());
 
     return type == "ad";
-}
-
-/* ---------------------------- WIZKVRETURN ---------------------------- */
-bool WIZKVRETURN::loadFromXmlRpc(WizXmlRpcStructValue& data)
-{
-    data.getInt("return_code", nCode);
-    data.getString("value_of_key", value);
-    data.getInt64("version", nVersion);
-
-    return nCode == 200;
-}
-
-
-bool WIZUSERMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue &data)
-{
-    data.getInt64("id", nMessageID);
-    data.getStr("biz_guid", strBizGUID);
-    data.getStr("kb_guid", strKbGUID);
-    data.getStr("document_guid", strDocumentGUID);
-    data.getStr("sender_guid", strSenderGUID);
-    data.getStr("sender_id", strSenderID);
-    data.getStr("receiver_guid", strReceiverGUID);
-    data.getStr("receiver_id", strReceiverID);
-    data.getInt("message_type", nMessageType);
-    data.getInt("read_status", nReadStatus);
-    data.getInt("delete_status", nDeletedStatus);
-    data.getTime("dt_created", tCreated);
-    data.getStr("message_body", strMessageText);
-    data.getInt64("version", nVersion);
-    data.getStr("sender_alias", strSender);
-    data.getStr("receiver_alias", strReceiver);
-    data.getStr("sender_alias", strSender);
-    data.getStr("title", strTitle);
-    data.getStr("note", strNote);
-    return 	TRUE;
 }
 
 //---------------------------------------------------------

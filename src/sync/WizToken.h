@@ -4,9 +4,7 @@
 #include <QObject>
 #include <QDateTime>
 
-class QString;
-
-struct WIZUSERINFO;
+#include "share/WizObject.h"
 
 class WizTokenPrivate;
 
@@ -20,8 +18,7 @@ public:
     WizToken(const QString& strUserId = 0, const QString& strPasswd = 0);
     ~WizToken();
 
-    static WIZUSERINFO info();
-
+    static WIZUSERINFO userInfo();
     static QString token(); // sync
     static void requestToken(); // async
     static void clearToken();

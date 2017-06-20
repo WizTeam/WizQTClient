@@ -8,6 +8,7 @@
 
 #include "jsoncpp/json/json.h"
 #include "share/WizMisc.h"
+#include "utils/WizLogger.h"
 
 
 WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message, QString extCode)
@@ -70,9 +71,10 @@ bool WizRequest::execJsonRequest(const QString& url, QString method, const QByte
     loop.setTimeoutWaitSeconds(60 * 60);
     loop.exec();
     //
-    if (loop.error() != QNetworkReply::NoError)
+    QNetworkReply::NetworkError err = loop.error();
+    if (err != QNetworkReply::NoError)
     {
-        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+        TOLOG2("Failed to exec json request, network error=%1, message=%2", WizIntToStr(err), loop.errorString());
         return false;
     }
     //
@@ -146,7 +148,11 @@ WIZSTANDARDRESULT WizRequest::isSucceededStandardJsonRequest(Json::Value& res)
                 externCode = WizIntToStr(externCodeValue.asInt()).toUtf8().constData();
             }
             //
-            qDebug() << "Can't upload note data, ret code=" << returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
+            TOLOG3("Can't exec request, ret code=%1, message=%2, externCode=%3",
+                   WizIntToStr(returnCode.asInt()),
+                   QString::fromStdString(returnMessage.asString()),
+                   QString::fromStdString(externCode));
+            //
             return WIZSTANDARDRESULT(returnCode.asInt(), returnMessage.asString(), externCode);
         }
         //

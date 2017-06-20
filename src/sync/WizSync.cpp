@@ -109,12 +109,20 @@ bool WizKMSync::syncCore()
         {
             m_pDatabase->setKbInfo("", m_server.kbInfo());
         }
+        else
+        {
+            return false;
+        }
     }
     else
     {
         if (m_server.kb_getInfo())
         {
             m_pDatabase->setKbInfo(m_info.strKbGUID, m_server.kbInfo());
+        }
+        else
+        {
+            return false;
         }
     }
     //
@@ -1281,11 +1289,6 @@ bool WizDownloadDocumentsByGuids(IWizKMSyncEvents* pEvents, WizKMAccountsServer&
             return false;
         }
         //
-        if (!group.strDatabaseServer.isEmpty())
-        {
-            userInfo.strDatabaseServer = group.strDatabaseServer;
-        }
-        //
         userInfo.strKbGUID = group.strGroupGUID;
     }
     //
@@ -1311,13 +1314,15 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
 {
     __int64 nOldVersion = pDatabase->getObjectVersion("Messages");
     //
-    std::deque<WIZUSERMESSAGEDATA> arrayMessage;
-    server.getMessages(nOldVersion, arrayMessage);
+    std::deque<WIZMESSAGEDATA> arrayMessage;
+    if (!server.getMessages(nOldVersion, arrayMessage))
+        return false;
     //
     if (arrayMessage.empty())
-        return FALSE;
+    {
+        return true;
+    }
     //
-
     /*
     ////////
     ////准备群组信息////
@@ -1334,13 +1339,13 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
     ////按照群组分组笔记////
     */
     std::map<QString, CWizStdStringArray> mapKbGUIDDocuments;
-    for (WIZUSERMESSAGEDATA it : arrayMessage)
+    for (WIZMESSAGEDATA it : arrayMessage)
     {
-        if (!it.strKbGUID.isEmpty()
-            && !it.strDocumentGUID.isEmpty())
+        if (!it.kbGUID.isEmpty()
+            && !it.documentGUID.isEmpty())
         {
-            CWizStdStringArray& documents = mapKbGUIDDocuments[it.strKbGUID];
-            documents.push_back(it.strDocumentGUID);            
+            CWizStdStringArray& documents = mapKbGUIDDocuments[it.kbGUID];
+            documents.push_back(it.documentGUID);
         }
     }
     //
@@ -1366,12 +1371,6 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
         }
         //
         WIZUSERINFO userInfo = server.m_userInfo;
-        //
-        if (!group.strDatabaseServer.isEmpty())
-        {
-            userInfo.strDatabaseServer = group.strDatabaseServer;
-        }
-        //
         userInfo.strKbGUID = group.strGroupGUID;
         WizKMDatabaseServer serverDB(userInfo, server.parent());
         //
@@ -1388,20 +1387,20 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
         pDatabase->closeGroupDatabase(pGroupDatabase);
     }
     //
-    __int64 nNewVersion = WizKMSync::getObjectsVersion<WIZUSERMESSAGEDATA>(nOldVersion, arrayMessage);
+    __int64 nNewVersion = WizKMSync::getObjectsVersion<WIZMESSAGEDATA>(nOldVersion, arrayMessage);
     //
     pDatabase->onDownloadMessageList(arrayMessage);
     pDatabase->setObjectVersion("Messages", nNewVersion);
 
-    for (WIZUSERMESSAGEDATA it : arrayMessage)
+    for (WIZMESSAGEDATA it : arrayMessage)
     {
-        if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
+        if (it.nReadStatus == 0 && it.nDeleteStatus == 0)
         {
             QList<QVariant> paramList;
             paramList.append(wizBubbleMessageCenter);
-            paramList.append(it.nMessageID);
+            paramList.append(it.nId);
             paramList.append(QObject::tr("New Message"));
-            paramList.append(it.strMessageText);
+            paramList.append(it.messageBody);
             pEvents->onBubbleNotification(paramList);
         }
     }
@@ -1623,7 +1622,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
         return false;
 
-    WizKMAccountsServer server(syncUrl);
+    WizKMAccountsServer server;
     server.setUserInfo(info);
 
     pEvents->onSyncProgress(::GetSyncStartProgress(syncAccountLogin));
@@ -1754,7 +1753,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         }
         //
         WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
         //
@@ -1822,7 +1820,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         }
         //
         WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
         //
@@ -1872,7 +1869,7 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
 bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
 {
     pEvents->onStatus(_TR("Quick download messages"));
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     server.setUserInfo(info);
     /*
     ////获得群组信息////
@@ -1892,7 +1889,7 @@ bool WizDownloadDocumentsByGuids(const WIZUSERINFO& info,
                                  const CWizStdStringArray& guids,
                                  CWizDocumentDataArray& arrayDocument)
 {
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     server.setUserInfo(info);
     /*
     ////获得群组信息////

@@ -209,7 +209,7 @@ bool WizKMSyncThread::prepareToken()
         return false;
     }
     //
-    m_info = WizToken::info();
+    m_info = WizToken::userInfo();
     //
     return true;
 }
@@ -319,7 +319,7 @@ bool WizKMSyncThread::syncAll()
         return false;
 
     if (m_db.kbGUID().isEmpty()) {
-        m_db.setKbGUID(WizToken::info().strKbGUID);
+        m_db.setKbGUID(WizToken::userInfo().strKbGUID);
     }
 
     syncUserCert();
@@ -360,11 +360,6 @@ bool WizKMSyncThread::quickSync()
                 //
                 WIZUSERINFO userInfo = m_info;
                 userInfo.strKbGUID = group.strGroupGUID;
-                userInfo.strDatabaseServer = group.strDatabaseServer;
-                if (userInfo.strDatabaseServer.isEmpty())
-                {
-                    userInfo.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
-                }
                 //
                 WizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
                 //
@@ -400,7 +395,7 @@ bool WizKMSyncThread::resetGroups()
     if (!prepareToken())
         return false;
     //
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     server.setUserInfo(m_info);
     //
     CWizBizDataArray bizs;
@@ -425,7 +420,7 @@ void WizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     if (server.getCert(m_db.getUserId(), m_db.getPassword(), strN, stre, strd, strHint)) {
         m_db.setUserCert(strN, stre, strd, strHint);
     }

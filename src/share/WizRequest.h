@@ -19,6 +19,12 @@ struct WIZSTANDARDRESULT
     };
 
     //
+    WIZSTANDARDRESULT()
+    {
+        *this = noError();
+    }
+
+    //
     WIZSTANDARDRESULT(int code, QString message, QString extCode)
         : returnCode(code)
         , returnMessage(message)
@@ -41,18 +47,24 @@ struct WIZSTANDARDRESULT
     operator bool () {
         return returnCode == 200;
     }
+    //
+    bool isNetworkError() const {
+        return returnCode < 0;
+    }
 };
 
 class WizRequest
 {
-public:
+private:
     static bool execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody);
     static bool execJsonRequest(const QString &url, const QString& method, const Json::Value &reqBody, QByteArray &resBody);
     static bool execJsonRequest(const QString &url, QByteArray &resBody);
     //
+public:
     static WIZSTANDARDRESULT isSucceededStandardJsonRequest(const QByteArray& resBody, Json::Value& res);
     static WIZSTANDARDRESULT isSucceededStandardJsonRequest(const QByteArray& resBody);
     static WIZSTANDARDRESULT isSucceededStandardJsonRequest(Json::Value& res);
+    //
     static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url, const QString& method, const QByteArray &reqBody, Json::Value& res);
     static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url, const QString& method, const Json::Value &reqBody, Json::Value& res);
     static WIZSTANDARDRESULT execStandardJsonRequest(const QString &url, const QString& method);

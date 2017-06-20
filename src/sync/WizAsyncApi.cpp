@@ -30,7 +30,7 @@ void WizAsyncApi::login(const QString& strUserId, const QString& strPasswd)
 
 bool WizAsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
 {
-    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer asServer;
     bool ret = asServer.login(strUserId, strPasswd);
     if (!ret) {
         m_nErrorCode = asServer.getLastErrorCode();
@@ -52,7 +52,7 @@ bool WizAsyncApi::getToken_impl(const QString& strUserId, const QString& strPass
 {
     QString strToken;
 
-    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer asServer;
     bool ret = asServer.getToken(strUserId, strPasswd, strToken);
     if (!ret) {
         m_nErrorCode = asServer.getLastErrorCode();
@@ -72,7 +72,7 @@ void WizAsyncApi::keepAlive(const QString& strToken, const QString& strKbGUID)
 
 bool WizAsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
 {
-    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer asServer;
 
     WIZUSERINFO info;
     info.strToken = strToken;
@@ -100,7 +100,7 @@ void WizAsyncApi::registerAccount(const QString& strUserId, const QString& strPa
 bool WizAsyncApi::registerAccount_impl(const QString& strUserId, const QString& strPasswd,
                                     const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer;
 
     bool ret = aServer.createAccount(strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
     if (!ret) {
@@ -135,9 +135,9 @@ void WizAsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
         return;
     }
 
-    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer;
 
-    WIZUSERINFO info = WizToken::info();
+    WIZUSERINFO info = WizToken::userInfo();
     info.strToken = strToken;
     aServer.setUserInfo(info);
 
@@ -161,9 +161,9 @@ void WizAsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
         return;
     }
 
-    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer;
 
-    WIZUSERINFO info = WizToken::info();
+    WIZUSERINFO info = WizToken::userInfo();
     info.strToken = strToken;
     aServer.setUserInfo(info);
 

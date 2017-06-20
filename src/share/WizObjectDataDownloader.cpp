@@ -241,10 +241,9 @@ bool WizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
         return false;
     }
 
-    info = WizToken::info();
+    info = WizToken::userInfo();
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }

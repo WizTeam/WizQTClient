@@ -99,7 +99,7 @@ void WizCommentQuerier::run()
     if (QueryCount != m_type && QueryUrlAndCount != m_type)
         return;
 
-    QString kUrl = WizCommonApiEntry::kUrlFromGuid(token, m_kbGUID);
+    QString kUrl = WizToken::userInfo().strXmlRpcServer;
     QString strCountUrl = WizCommonApiEntry::commentCountUrl(kUrl, token, m_kbGUID, m_GUID);
 
     QNetworkAccessManager net;

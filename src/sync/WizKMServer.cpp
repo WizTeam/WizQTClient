@@ -1,6 +1,8 @@
 ﻿#include "WizKMServer.h"
 #include "WizApiEntry.h"
 #include "WizToken.h"
+#include "WizXmlRpcServer.h"
+//
 #include "share/jsoncpp/json/json.h"
 #include "share/WizZip.h"
 #include "share/WizRequest.h"
@@ -35,7 +37,7 @@ QString appendNormalParams(const QString& strUrl, const QString& token)
         url += "&";
     }
     //
-    url += QString("clientType=macos&clientVersion=") + WIZ_CLIENT_VERSION;
+    url += QString("clientType=macos&clientVersion=") + WIZ_CLIENT_VERSION + "&apiVersion=" + WizIntToStr(WIZKM_WEBAPI_VERSION);
     //
     if (!token.isEmpty())
     {
@@ -103,6 +105,10 @@ template <class TData>
 static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, __int64& data)
 {
     QString url = server.buildUrl(urlPath);
+    //
+#ifdef QT_DEBUG
+    qDebug() << url;
+#endif
     //
     Json::Value res;
     WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, method, reqBody, res);
@@ -200,12 +206,13 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     return execStandardJsonRequest<QString>(server, urlPath, "GET", QByteArray(), resultFiledName, data);
 }
 //
+
 /*
  * GET/POST list
   */
 
 template <class TData>
-bool queryJsonList(WizKMDatabaseServer& server, QString url, QString method, const QByteArray& bodyData, std::deque<TData>& arrayRet)
+bool queryJsonList(WizKMXmlRpcServerBase& server, QString url, QString method, const QByteArray& bodyData, std::deque<TData>& arrayRet)
 {
     Json::Value doc;
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, method, bodyData, doc);
@@ -252,9 +259,9 @@ bool queryJsonList(WizKMDatabaseServer& server, QString url, QString method, con
 
 
 template <class TData>
-bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
+bool getJsonList(WizKMXmlRpcServerBase& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
 {
-    urlPath = urlPath + "/" + server.userInfo().strKbGUID + "?version=" + nStartVersion + "&count=" + nCountPerPage;
+    urlPath = urlPath + "/" + server.getKbGuid() + "?version=" + nStartVersion + "&count=" + nCountPerPage;
     QString url = server.buildUrl(urlPath);
     //
     return queryJsonList<TData>(server, url, "GET", QByteArray(), arrayRet);
@@ -262,9 +269,9 @@ bool getJsonList(WizKMDatabaseServer& server, QString urlPath, int nCountPerPage
 
 
 template <class TData>
-bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque<TData>& arrayData)
+bool postJsonList(WizKMXmlRpcServerBase& server, QString urlPath, const std::deque<TData>& arrayData)
 {
-    urlPath = urlPath + "/" + server.userInfo().strKbGUID;
+    urlPath = urlPath + "/" + server.getKbGuid();
     //
     Json::Value doc(Json::arrayValue);
     //
@@ -272,7 +279,7 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque
     for (auto elem : arrayData)
     {
         Json::Value v;
-        if (!elem.toJson(server.userInfo().strKbGUID, v))
+        if (!elem.toJson(server.getKbGuid(), v))
         {
             TOLOG1("Failed to convert data to json while calling %1", urlPath);
             return false;
@@ -292,29 +299,75 @@ bool postJsonList(WizKMDatabaseServer& server, QString urlPath, const std::deque
     return true;
 }
 
+////////////////
+/// \brief The old xml-rpc data
+/////
+struct CWizKMBaseParam: public WizXmlRpcStructValue
+{
+    CWizKMBaseParam(int apiVersion = WIZKM_WEBAPI_VERSION)
+    {
+        changeApiVersion(apiVersion);
+        //
+#ifdef Q_OS_MAC
+        addString("client_type", "mac");
+#else
+        addString("client_type", "linux");
+#endif
+        addString("client_version", WIZ_CLIENT_VERSION);
+        //
+        QString LocalLanguage = QLocale::system().name();
+        addString("client_lang", LocalLanguage);
+    }
+    //
+    void changeApiVersion(int nApiVersion)
+    {
+        addString("api_version", WizIntToStr(nApiVersion));
+    }
+    int getApiVersion()
+    {
+        QString str;
+        getString("api_version", str);
+        return wiz_ttoi(str);
+    }
+};
 
-#define WIZUSERMESSAGE_AT		0
-#define WIZUSERMESSAGE_EDIT		1
+struct CWizKMTokenOnlyParam : public CWizKMBaseParam
+{
+    CWizKMTokenOnlyParam(const QString& strToken, const QString& strKbGUID)
+    {
+        addString("token", strToken);
+        addString("kb_guid", strKbGUID);
+    }
+};
+
+//
 
 WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strServer, QObject* parent)
     : QObject(parent)
     , m_strServer(strServer)
-    , m_nLastErrorCode(0)
 {
     while (m_strServer.endsWith("/"))
     {
         m_strServer.remove(m_strServer.length() - 1, 1);
     }
-    //
-#ifdef QT_DEBUG
-    m_strServer = QString("http://localhost:4001");
-#endif
 }
 
 QString WizKMXmlRpcServerBase::buildUrl(QString urlPath)
 {
-    QString url = getServer() + urlPath;
-    return appendNormalParams(url, getToken());
+    if (urlPath.startsWith("http://") || urlPath.startsWith("https://")) {
+        QString url = urlPath;
+        return appendNormalParams(url, getToken());
+    }
+    else
+    {
+        //
+        if (!urlPath.startsWith("/"))
+        {
+            urlPath = "/" + urlPath;
+        }
+        QString url = getServer() + urlPath;
+        return appendNormalParams(url, getToken());
+    }
 }
 
 bool WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion)
@@ -383,8 +436,8 @@ bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QStri
 }
 
 
-WizKMAccountsServer::WizKMAccountsServer(const QString& strUrl, QObject* parent)
-    : WizKMXmlRpcServerBase(strUrl, parent)
+WizKMAccountsServer::WizKMAccountsServer(QObject* parent)
+    : WizKMXmlRpcServerBase(WizCommonApiEntry::newAsServerUrl(), parent)
 {
     m_bLogin = FALSE;
     m_bAutoLogout = FALSE;
@@ -417,7 +470,7 @@ bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
     //
     QString urlPath = "/as/user/login";
     Json::Value params;
-    params["user"] = strUserName.toStdString();
+    params["userId"] = strUserName.toStdString();
     params["password"] = strPassword.toStdString();
     //
     m_bLogin = execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo);
@@ -545,7 +598,7 @@ QString WizKMAccountsServer::getToken() const
     //
     return m_userInfo.strToken;
 }
-QString WizKMAccountsServer::getKbGuid()
+QString WizKMAccountsServer::getKbGuid() const
 {
     if (!m_bLogin)
         return QString();
@@ -577,25 +630,29 @@ bool WizKMAccountsServer::keepAlive(const QString& strToken)
 {
     return accounts_keepAlive(strToken);
 }
-bool WizKMAccountsServer::getMessages(__int64 nVersion, CWizUserMessageDataArray& arrayRet)
+//
+//
+bool WizKMAccountsServer::getMessages(__int64 nStartVersion, CWizMessageDataArray& arrayRet)
 {
     int nCountPerPage = 100;
+    __int64 nNextVersion = nStartVersion + 1;
     //
-    __int64 nNextVersion = nVersion + 1;
+    QString urlPath = "/messages";
+    QString strUrl = WizCommonApiEntry::messageServerUrl() + urlPath;
     //
     while (1)
     {
-        CWizUserMessageDataArray arrayPageData;
+        CWizMessageDataArray arrayPageData;
         //
-        if (!accounts_getMessagesByJson(nCountPerPage, nNextVersion, arrayPageData))
+        if (!getJsonList<WIZMESSAGEDATA>(*this, strUrl, nCountPerPage, nNextVersion, arrayRet))
         {
-            TOLOG2("Failed to get message list: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
+            TOLOG2("Failed to get message list: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nNextVersion));
             return FALSE;
         }
         //
         arrayRet.insert(arrayRet.end(), arrayPageData.begin(), arrayPageData.end());
         //
-        for (CWizUserMessageDataArray::const_iterator it = arrayPageData.begin();
+        for (CWizMessageDataArray::const_iterator it = arrayPageData.begin();
             it != arrayPageData.end();
             it++)
         {
@@ -633,10 +690,11 @@ bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int
 bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
-    strUrl += QString("/messages?token=%1&ids=%2").arg(m_userInfo.strToken).arg(strMessageIDs);
+    strUrl += QString("/messages?ids=%2").arg(m_userInfo.strToken).arg(strMessageIDs);
+    strUrl = appendNormalParams(strUrl, getToken());
     qDebug() << "set message delete status, strken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
-    return deleteResource(strUrl);
+    return WizRequest::execStandardJsonRequest(strUrl, "DELETE");
 }
 
 bool WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
@@ -900,102 +958,11 @@ bool WizKMAccountsServer::accounts_createTempGroupKb(const QString& strEmails, c
     return TRUE;
 }
 
-
-
-
-
-bool WizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
-{
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("token", getToken());
-    param.addString("version", WizInt64ToStr(nVersion));
-    param.addInt("count", nCountPerPage);
-    //
-    std::deque<WIZUSERMESSAGEDATA> arrayWrap;
-    if (!call("accounts.getMessages", arrayWrap, &param))
-    {
-        TOLOG("document.getMessage failure!");
-        return FALSE;
-    }
-    //
-    arrayMessage.assign(arrayWrap.begin(), arrayWrap.end());
-    */
-    //
-    return TRUE;
-}
-
-bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
-{
-    QString strUrl = WizCommonApiEntry::messageServerUrl();
-    strUrl += QString("/messages?token=%1&page_size=%2&version=%3&api_version=6").arg(m_userInfo.strToken).arg(nCountPerPage).arg(nVersion);
-    //
-    QString strResult;
-    if (!get(strUrl, strResult))
-        return false;
-
-    Json::Value d;
-    Json::Reader reader;
-    if (!reader.parse(strResult.toUtf8().constData(), d))
-        return false;
-
-    if (!d.isMember("result")) {
-        qDebug() << "Error occured when try to parse json of messages";
-        qDebug() << strResult;
-        return false;
-    }
-
-//    qDebug() << "url : " << strUrl << " result : " << strResult;
-
-    const Json::Value& users = d["result"];
-    for (Json::ArrayIndex i = 0; i < users.size(); i++) {
-        const Json::Value& u = users[i];
-        if (!u.isObject()) {
-            qDebug() << "Error occured when parse json of messages";
-            return false;
-        }
-
-        WIZUSERMESSAGEDATA data;
-        data.nMessageID = (__int64)u["id"].asInt64();
-        data.strBizGUID = QString::fromStdString(u["biz_guid"].asString());
-        data.strKbGUID = QString::fromStdString(u["kb_guid"].asString());
-        data.strDocumentGUID = QString::fromStdString(u["document_guid"].asString());
-        data.strSenderGUID = QString::fromStdString(u["sender_guid"].asString());
-        data.strSenderID = QString::fromStdString(u["sender_id"].asString());
-        data.strReceiverGUID = QString::fromStdString(u["receiver_guid"].asString());
-        data.strReceiverID = QString::fromStdString(u["receiver_id"].asString());
-        data.strMessageText = QString::fromStdString(u["message_body"].asString());
-        data.strSender = QString::fromStdString(u["sender_alias"].asString());
-        data.strReceiver = QString::fromStdString(u["receiver_alias"].asString());
-        data.strSender = QString::fromStdString(u["sender_alias"].asString());
-        data.strTitle = QString::fromStdString(u["title"].asString());
-        data.strNote = QString::fromStdString(u["note"].asString());
-        //
-        data.nMessageType = u["message_type"].asInt();
-        data.nReadStatus = u["read_status"].asInt();
-        data.nDeletedStatus = u["delete_status"].asInt();
-        data.nVersion = (__int64)u["version"].asInt64();
-        //
-        time_t dateCreated = __int64(u["dt_created"].asInt64()) / 1000;
-        data.tCreated = WizOleDateTime(dateCreated);
-
-        arrayMessage.push_back(data);
-    }
-    return true;
-}
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
-
 WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent)
-    : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
+    : WizKMXmlRpcServerBase(kbInfo.strKbServer, parent)
     , m_userInfo(kbInfo)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
@@ -1015,9 +982,9 @@ const WIZKBINFO& WizKMDatabaseServer::kbInfo()
 
 bool WizKMDatabaseServer::isGroup() const
 {
-    Q_ASSERT(!WizToken::info().strKbGUID.isEmpty());
+    Q_ASSERT(!WizToken::userInfo().strKbGUID.isEmpty());
     //
-    return WizToken::info().strKbGUID != m_userInfo.strKbGUID;
+    return WizToken::userInfo().strKbGUID != m_userInfo.strKbGUID;
 }
 
 bool WizKMDatabaseServer::isUseNewSync() const
@@ -1031,7 +998,7 @@ bool WizKMDatabaseServer::isUseNewSync() const
     }
 #endif
     //
-    int syncType = WizToken::info().syncType;
+    int syncType = WizToken::userInfo().syncType;
     if (syncType == 100)
         return true;
     //
@@ -1064,7 +1031,7 @@ int WizKMDatabaseServer::getCountPerPage()
 //
 bool WizKMDatabaseServer::kb_getInfo()
 {
-    QString url = m_userInfo.strKbServer + "/ks/kb/info/" + m_userInfo.strKbGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url = m_userInfo.strKbServer + "/ks/kb/info/" + m_userInfo.strKbGUID;
     //
     WIZSTANDARDRESULT jsonRet = execStandardJsonRequest<WIZKBINFO>(*this, url, m_kbInfo);
     if (!jsonRet)
@@ -1438,11 +1405,12 @@ struct WIZKMDATAPART
 
 bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, bool& bEOF)
 {
-    /*
+    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
+
     CWizKMDataDownloadParam param(m_userInfo.strToken, m_userInfo.strKbGUID, strObjectGUID, strObjectType, pos, size);
     //
     WIZKMDATAPART part;
-    if (!call("data.download", part, &param))
+    if (!server.call("data.download", part, &param))
     {
         TOLOG("data.download failure!");
         return FALSE;
@@ -1466,7 +1434,7 @@ bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QStr
     bEOF = part.bEOF;
     //
     stream.append(part.stream);
-    */
+
     return TRUE;
 }
 
@@ -1495,7 +1463,8 @@ struct CWizKMDataUploadParam
 
 bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream)
 {
-    /*
+    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
+
     __int64 nStreamSize = stream.size();
     if (partSize != (int)nStreamSize)
     {
@@ -1505,12 +1474,12 @@ bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
     //
     CWizKMDataUploadParam param(m_userInfo.strToken, m_userInfo.strKbGUID, strObjectGUID, strObjectType, strObjectMD5, allSize, partCount, partIndex, stream);
     //
-    if (!call("data.upload", &param))
+    if (!server.call("data.upload", &param))
     {
         TOLOG("Can not upload object part data!");
         return FALSE;
     }
-    */
+
     //
     return TRUE;
 }
@@ -1605,7 +1574,8 @@ bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
 //
 bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
-    /*
+    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
+
     if (!data.arrayData.isEmpty() && data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
         TOLOG1("%1 is too large, skip it", data.strTitle);
@@ -1631,7 +1601,7 @@ bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bo
     CWizKMDocumentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, bWithDocumentData, data, data.arrayTagGUID, strObjMd5);
     //
     WizXmlRpcResult ret;
-    if (!call("document.postSimpleData", ret, &param))
+    if (!server.call("document.postSimpleData", ret, &param))
     {
         TOLOG("document.postSimpleData failure!");
         return FALSE;
@@ -1641,7 +1611,6 @@ bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bo
     {
         pRet->getInt64("version", nServerVersion);
     }
-    */
     //
     return TRUE;
 }
@@ -1704,9 +1673,10 @@ bool uploadResources(WizKMDatabaseServer& server, const QString& url, const QStr
     loop.setTimeoutWaitSeconds(60 * 60);
     loop.exec();
     //
-    if (loop.error() != QNetworkReply::NoError)
+    QNetworkReply::NetworkError err = loop.error();
+    if (err != QNetworkReply::NoError)
     {
-        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+        TOLOG2("Failed to exec json request, network error=%1, message=%2", WizIntToStr(err), loop.errorString());
         return false;
     }
     //
@@ -1797,9 +1767,10 @@ bool uploadObject(WizKMDatabaseServer& server, const QString& url, const QString
         loop.setTimeoutWaitSeconds(60 * 60);
         loop.exec();
         //
-        if (loop.error() != QNetworkReply::NoError)
+        QNetworkReply::NetworkError err = loop.error();
+        if (err != QNetworkReply::NoError)
         {
-            qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+            TOLOG2("Failed to exec json request, network error=%1, message=%2", WizIntToStr(err), loop.errorString());
             return false;
         }
         //
@@ -2135,7 +2106,8 @@ bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool 
 
 bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
-    /*
+    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
+
     if (data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
         TOLOG1("%1 is too large, skip it", data.strName);
@@ -2153,7 +2125,7 @@ bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& da
     CWizKMAttachmentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, data, strObjMd5);
     //
     WizXmlRpcResult ret;
-    if (!call("attachment.postSimpleData", ret, &param))
+    if (!server.call("attachment.postSimpleData", ret, &param))
     {
         TOLOG("attachment.postSimpleData failure!");
         return FALSE;
@@ -2163,7 +2135,6 @@ bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& da
     {
         pRet->getInt64("version", nServerVersion);
     }
-    */
     //
     return TRUE;
 }
@@ -2224,7 +2195,7 @@ bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arra
         return true;
     //
     const WIZUSERINFOBASE info = userInfo();
-    QString url = info.strKbServer + "/ks/note/list/guids/" + info.strKbGUID + "?token=" + info.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url = info.strKbServer + "/ks/note/list/guids/" + info.strKbGUID;
     //
     Json::Value guids(Json::arrayValue);
     for (int i = 0; i < arrayDocumentGUID.size(); i++)

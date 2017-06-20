@@ -69,7 +69,8 @@
 static QString LocalLanguage = QLocale::system().name();
 QString WizCommonApiEntry::m_server = QString();
 QMap<QString, QString> WizCommonApiEntry::m_cacheMap = QMap<QString, QString>();
-QMap<QString, QString> WizCommonApiEntry::m_mapkUrl = QMap<QString, QString>();
+QMap<QString, QString> WizCommonApiEntry::m_mapXmlrpcUrl = QMap<QString, QString>();
+QMap<QString, QString> WizCommonApiEntry::m_mapKbUrl = QMap<QString, QString>();
 QMutex WizCommonApiEntry::m_mutex(QMutex::Recursive);
 
 
@@ -170,7 +171,7 @@ QString WizCommonApiEntry::newAsServerUrl()
     if (!strAsUrl.startsWith("http"))
     {
         qCritical() << "request url by command error. command : sync_https,  return : " << strAsUrl;
-        strAsUrl.clear();
+        strAsUrl = "https://as.wiz.cn";
     }
 
     return strAsUrl;
@@ -357,7 +358,7 @@ QString WizCommonApiEntry::groupUsersUrl(const QString& strToken, const QString&
     return url.scheme() + "://" + url.host() + "/wizas/a/biz/user_aliases" + strExt;
 }
 
-QString WizCommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
+QString WizCommonApiEntry::xmlrpcUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
     QMutexLocker locker(&m_mutex);
     //
@@ -367,14 +368,14 @@ QString WizCommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& 
         return QString();
     }
     
-    if (m_mapkUrl.contains(strKbGUID))
-        return m_mapkUrl.value(strKbGUID);
+    if (m_mapXmlrpcUrl.contains(strKbGUID))
+        return m_mapXmlrpcUrl.value(strKbGUID);
     
-    WIZUSERINFO info = WizToken::info();
-    m_mapkUrl.insert(info.strKbGUID, info.strDatabaseServer);
-    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
+    WIZUSERINFO info = WizToken::userInfo();
+    m_mapXmlrpcUrl.insert(info.strKbGUID, info.strXmlRpcServer);
+    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strXmlRpcServer;
     
-    WizKMAccountsServer asServer(syncUrl());
+    WizKMAccountsServer asServer;
     asServer.setUserInfo(info);
     
     CWizGroupDataArray arrayGroup;
@@ -382,14 +383,50 @@ QString WizCommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& 
         CWizGroupDataArray::const_iterator it = arrayGroup.begin();
         for (; it != arrayGroup.end(); it++) {
             const WIZGROUPDATA& group = *it;
-            m_mapkUrl.insert(group.strGroupGUID, group.strDatabaseServer);
-            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
+            m_mapXmlrpcUrl.insert(group.strGroupGUID, group.strDatabaseServer);
+            qDebug() << "group:" << group.strGroupGUID << " xmlrpc-url: " <<  group.strDatabaseServer;
         }
     } else {
         qDebug() << asServer.getLastErrorMessage();
     }
     
-    return m_mapkUrl.value(strKbGUID, 0);
+    return m_mapXmlrpcUrl.value(strKbGUID, 0);
+}
+
+
+QString WizCommonApiEntry::kbUrlFromGuid(const QString& strToken, const QString& strKbGUID)
+{
+    QMutexLocker locker(&m_mutex);
+    //
+    if (strToken.isEmpty())
+    {
+        qCritical() << "request kb url by empty token";
+        return QString();
+    }
+
+    if (m_mapKbUrl.contains(strKbGUID))
+        return m_mapKbUrl.value(strKbGUID);
+
+    WIZUSERINFO info = WizToken::userInfo();
+    m_mapKbUrl.insert(info.strKbGUID, info.strKbServer);
+    qDebug() << "user: " << info.strKbGUID << " kb-url: " << info.strKbServer;
+
+    WizKMAccountsServer asServer;
+    asServer.setUserInfo(info);
+
+    CWizGroupDataArray arrayGroup;
+    if (asServer.getGroupList(arrayGroup)) {
+        CWizGroupDataArray::const_iterator it = arrayGroup.begin();
+        for (; it != arrayGroup.end(); it++) {
+            const WIZGROUPDATA& group = *it;
+            m_mapKbUrl.insert(group.strGroupGUID, group.strDatabaseServer);
+            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
+        }
+    } else {
+        qDebug() << asServer.getLastErrorMessage();
+    }
+
+    return m_mapKbUrl.value(strKbGUID, 0);
 }
 
 QString WizCommonApiEntry::appstoreParam(bool useAndSymbol)

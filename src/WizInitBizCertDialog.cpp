@@ -58,7 +58,7 @@ void WizInitBizCertDialog::verifyCert()
         bool ret = false;
         QString error;
         //
-        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        WizKMAccountsServer asServer;
         if (asServer.login(userId, password))
         {
             QString n;

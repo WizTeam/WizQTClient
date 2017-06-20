@@ -2,6 +2,8 @@
 #define WIZSERVICE_SYNC_P_H
 
 #include "WizKMServer.h"
+#include "utils/WizLogger.h"
+#include "share/WizMisc.h"
 
 class WizKMSync
 {

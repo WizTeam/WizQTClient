@@ -28,7 +28,7 @@ public:
     void clearLastError();
     void setUserId(const QString& strUserId);
     void setPasswd(const QString& strPasswd);
-    WIZUSERINFO info();
+    WIZUSERINFO userInfo();
 
     int lastErrorCode() const;
     QString lastErrorMessage() const;

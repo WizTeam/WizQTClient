@@ -174,7 +174,7 @@ public:
     virtual bool onDownloadStyleList(const CWizStyleDataArray& arrayData);
     virtual bool onDownloadDocumentList(const CWizDocumentDataArray& arrayData);
     virtual bool onDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData);
-    virtual bool onDownloadMessageList(const CWizUserMessageDataArray& arrayData);
+    virtual bool onDownloadMessageList(const CWizMessageDataArray& arrayData);
     virtual bool onDownloadParamList(const CWizDocumentParamDataArray& arrayData);
 
     virtual bool updateObjectData(const QString& strDisplayName,

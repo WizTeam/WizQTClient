@@ -17,7 +17,7 @@ struct IWizSyncableDatabase
     virtual bool onDownloadStyleList(const CWizStyleDataArray& arrayData) = 0;
     virtual bool onDownloadDocumentList(const CWizDocumentDataArray& arrayData) = 0;
     virtual bool onDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData) = 0;
-    virtual bool onDownloadMessageList(const CWizUserMessageDataArray& arrayMessage) = 0;
+    virtual bool onDownloadMessageList(const CWizMessageDataArray& arrayMessage) = 0;
     virtual bool onDownloadParamList(const CWizDocumentParamDataArray& arrayData) = 0;
 
     virtual QString getDocumentFileName(const QString& strGUID) const = 0;

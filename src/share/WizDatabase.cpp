@@ -795,17 +795,9 @@ bool WizDatabase::onDownloadAttachmentList(const CWizDocumentAttachmentDataArray
 
     return updateAttachments(arrayAttach);
 }
-bool WizDatabase::onDownloadMessageList(const CWizUserMessageDataArray& arrayData)
+bool WizDatabase::onDownloadMessageList(const CWizMessageDataArray& arrayData)
 {
-    CWizMessageDataArray arrayMsg;
-
-    CWizUserMessageDataArray::const_iterator it;
-    for (it = arrayData.begin(); it != arrayData.end(); it++) {
-        WIZMESSAGEDATA data(*it);
-        arrayMsg.push_back(data);
-    }
-
-    return updateMessages(arrayMsg);
+    return updateMessages(arrayData);
 }
 
 bool WizDatabase::onDownloadParamList(const CWizDocumentParamDataArray& arrayData)
@@ -3601,7 +3593,7 @@ bool WizDatabase::refreshCertFromServer()
         if (isGroup())
         {
             WizDatabase* db = personalDatabase();
-            WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+            WizKMAccountsServer server;
             if (!server.login(db->getUserId(), db->getPassword()))
                 return false;
             //
@@ -3616,7 +3608,7 @@ bool WizDatabase::refreshCertFromServer()
         {
             QString strN, stre, strd, strHint;
             //
-            WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+            WizKMAccountsServer server;
             if (!server.getCert(getUserId(), getPassword(), strN, stre, strd, strHint))
                 return false;
             //

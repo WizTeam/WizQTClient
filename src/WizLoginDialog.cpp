@@ -20,6 +20,7 @@
 #include <QAbstractState>
 #include <QStateMachine>
 #include <QWebEngineView>
+#include <QNetworkReply>
 
 #include "share/jsoncpp/json/json.h"
 #include "utils/WizStyleHelper.h"
@@ -418,7 +419,7 @@ bool WizLoginDialog::updateUserProfile(bool bLogined)
         if (ui->cbx_remberPassword->checkState() == Qt::Checked)
             userSettings.setPassword(::WizEncryptPassword(password()));
 
-        db.setUserInfo(WizToken::info());
+        db.setUserInfo(WizToken::userInfo());
     }
     db.setMeta("ACCOUNT", "USERID", userId());
     db.close();
@@ -1157,7 +1158,7 @@ void WizLoginDialog::onTokenAcquired(const QString &strToken)
         }
     }
 
-    m_loginUserGuid = WizToken::info().strUserGUID;
+    m_loginUserGuid = WizToken::userInfo().strUserGUID;
     if (updateUserProfile(true) && updateGlobalProfile())
         QDialog::accept();
 }
