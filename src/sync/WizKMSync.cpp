@@ -322,8 +322,6 @@ bool WizKMSyncThread::syncAll()
         m_db.setKbGUID(WizToken::userInfo().strKbGUID);
     }
 
-    syncUserCert();
-
     ::WizSyncDatabase(m_info, m_pEvents, &m_db, m_bBackground);
 
     return true;
@@ -413,18 +411,6 @@ bool WizKMSyncThread::resetGroups()
     return true;
 }
 
-
-
-// FIXME: remove this to syncing flow
-void WizKMSyncThread::syncUserCert()
-{
-    QString strN, stre, strd, strHint;
-
-    WizKMAccountsServer server;
-    if (server.getCert(m_db.getUserId(), m_db.getPassword(), strN, stre, strd, strHint)) {
-        m_db.setUserCert(strN, stre, strd, strHint);
-    }
-}
 
 bool WizKMSyncThread::needQuickSync()
 {

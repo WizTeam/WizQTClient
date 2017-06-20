@@ -115,8 +115,6 @@ private:
     bool downloadMesages();
     bool resetGroups();
 
-    void syncUserCert();
-    //
     bool peekQuickSyncKb(QString& kbGuid);
     //
     friend class CWizKMSyncThreadHelper;

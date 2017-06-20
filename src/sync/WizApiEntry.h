@@ -43,9 +43,6 @@ public:
 
     static QString getUrlByCommand(const QString& strCommand);
 
-    static QString xmlrpcUrlFromGuid(const QString& strToken, const QString& strKbGUID);
-    static QString kbUrlFromGuid(const QString& strToken, const QString& strKbGUID);
-
     static QString appstoreParam(bool useAndSymbol = true);
 
     static QString newAsServerUrl();
@@ -60,8 +57,6 @@ private:
     static QMutex m_mutex;
     static QString m_server;
     static QMap<QString, QString> m_cacheMap;
-    static QMap<QString, QString> m_mapXmlrpcUrl;
-    static QMap<QString, QString> m_mapKbUrl;
 };
 
 class WizApiEntry

@@ -42,7 +42,7 @@ public:
     int getLastErrorCode() const { return m_lastError.returnCode; }
     QString getLastErrorMessage() const { return m_lastError.returnMessage; }
     //
-    void setLastError(const WIZSTANDARDRESULT& ret) { m_lastError = ret; }
+    WIZSTANDARDRESULT setLastError(const WIZSTANDARDRESULT& ret) { m_lastError = ret; return ret; }
     //
     bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
@@ -64,62 +64,45 @@ protected:
 
 public:
     WIZUSERINFO m_userInfo;
-
 public:
+    void setAutoLogout(bool b) { m_bAutoLogout = b; }
+    //
     bool login(const QString& strUserName, const QString& strPassword);
     bool logout();
-    bool changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
-    bool changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
+    bool keepAlive();
+    //
     bool getToken(const QString& strUserName, const QString& strPassword, QString& strToken);
-    bool getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
-    bool setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool createAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode, const QString& strCaptchaID, const QString& strCaptcha);
-    void setAutoLogout(bool b) { m_bAutoLogout = b; }
-    bool shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
+    //
+    bool getCert(QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool setCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
+    //
     bool getGroupList(CWizGroupDataArray& arrayGroup);
     bool getBizList(CWizBizDataArray& arrayBiz);
-    bool createTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
-    bool keepAlive(const QString& strToken);
+    //
     bool getMessages(__int64 nStartVersion, CWizMessageDataArray& arrayMessage);
     bool setMessageReadStatus(const QString& strMessageIDs, int nStatus);
-
+    bool setMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
+    //
     bool getAdminBizCert(const QString& strToken, const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool setUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool getUserBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
-
     //
-    bool setMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
-
     bool getValueVersion(const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
     //
 public:
-    bool getWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
     QString getToken() const;
     QString getKbGuid() const;
-    //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
     const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
     WIZUSERINFO& getUserInfo() { return m_userInfo; }
     void setUserInfo(const WIZUSERINFO& userInfo);
-
 private:
-    QString makeXmlRpcPassword(const QString& strPassword);
-
-    bool accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret);
-    bool accounts_clientLogout(const QString& strToken);
-    bool accounts_keepAlive(const QString& strToken);
     bool accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
-    bool accounts_changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
-    bool accounts_changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
-    bool accounts_getToken(const QString& strUserName, const QString& strPassword, QString& strToken);
-    bool accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
-    bool accounts_setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
-    bool document_shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
-
+    //
     bool accounts_getGroupList(CWizGroupDataArray& arrayGroup);
     bool accounts_getBizList(CWizBizDataArray& arrayBiz);
-    bool accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
 };
 
 

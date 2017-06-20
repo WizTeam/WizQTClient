@@ -50,6 +50,7 @@ QString appendNormalParams(const QString& strUrl, const QString& token)
 /*
  * no result
  * */
+namespace NoResult {
 
 static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody)
 {
@@ -69,10 +70,21 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     return ret;
 }
 
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method)
+{
+    QString url = server.buildUrl(urlPath);
+    //
+    WIZSTANDARDRESULT ret = execStandardJsonRequest(server, url, method, QByteArray());
+    return ret;
+}
+
+}
+
 /*
  * with result
  * */
 
+namespace WithResult {
 template <class TData>
 static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, TData& data)
 {
@@ -82,8 +94,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, method, reqBody, res);
     if (!ret)
     {
-        server.setLastError(ret);
-        return ret;
+        return server.setLastError(ret);
     }
     //
     try {
@@ -92,7 +103,8 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
         if (!parseRet)
         {
             qDebug() << "invalid json format: failed to convert result to object data";
-            return WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+            ret = WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+            return server.setLastError(ret);
         }
         return WIZSTANDARDRESULT::noError();
     } catch (Json::Exception& err) {
@@ -106,16 +118,11 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
 {
     QString url = server.buildUrl(urlPath);
     //
-#ifdef QT_DEBUG
-    qDebug() << url;
-#endif
-    //
     Json::Value res;
     WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, method, reqBody, res);
     if (!ret)
     {
-        server.setLastError(ret);
-        return ret;
+        return server.setLastError(ret);
     }
     //
     try {
@@ -124,7 +131,8 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
         return WIZSTANDARDRESULT::noError();
     } catch (Json::Exception& err) {
         TOLOG1("josn error: %1", err.what());
-        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+        ret = WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+        return server.setLastError(ret);
     }
 }
 //
@@ -137,8 +145,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, method, reqBody, res);
     if (!ret)
     {
-        server.setLastError(ret);
-        return ret;
+        return server.setLastError(ret);
     }
     //
     try {
@@ -147,7 +154,8 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
         return WIZSTANDARDRESULT::noError();
     } catch (Json::Exception& err) {
         TOLOG1("josn error: %1", err.what());
-        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+        ret = WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
+        return server.setLastError(ret);
     }
 }
 //
@@ -206,6 +214,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     return execStandardJsonRequest<QString>(server, urlPath, "GET", QByteArray(), resultFiledName, data);
 }
 //
+}
 
 /*
  * GET/POST list
@@ -218,9 +227,8 @@ bool queryJsonList(WizKMXmlRpcServerBase& server, QString url, QString method, c
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, method, bodyData, doc);
     if (!jsonRet)
     {
-        server.setLastError(jsonRet);
         TOLOG1("Failed to call %1", url);
-        return false;
+        return server.setLastError(jsonRet);
     }
     //
     try {
@@ -250,7 +258,7 @@ bool queryJsonList(WizKMXmlRpcServerBase& server, QString url, QString method, c
         }
     } catch (Json::Exception& err) {
         TOLOG1("josn error: %1", err.what());
-        return false;
+        return server.setLastError(WIZSTANDARDRESULT(WIZSTANDARDRESULT::format));
     }
 
     //
@@ -282,18 +290,18 @@ bool postJsonList(WizKMXmlRpcServerBase& server, QString urlPath, const std::deq
         if (!elem.toJson(server.getKbGuid(), v))
         {
             TOLOG1("Failed to convert data to json while calling %1", urlPath);
-            return false;
+            return server.setLastError(WIZSTANDARDRESULT(WIZSTANDARDRESULT::format));
         }
         //
         doc[index] = v;
         index++;
     }
     //
-    WIZSTANDARDRESULT jsonRet = execStandardJsonRequest(server, urlPath, "POST", doc);
+    WIZSTANDARDRESULT jsonRet = NoResult::execStandardJsonRequest(server, urlPath, "POST", doc);
     if (!jsonRet)
     {
         TOLOG1("Failed to call %1", urlPath);
-        return false;
+        return server.setLastError(jsonRet);
     }
     //
     return true;
@@ -374,7 +382,7 @@ bool WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, cons
 {
     QString urlPath = "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
     //
-    WIZSTANDARDRESULT jsonRet = execStandardJsonRequest<__int64>(*this, urlPath, "result", nVersion);
+    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<__int64>(*this, urlPath, "result", nVersion);
     return jsonRet;
 }
 bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
@@ -403,10 +411,9 @@ bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QStri
     QString urlPath = "/" + strMethodPrefix + "/kv/value/" + strGuid + "?key=" + strKey;
     //
     KEYVALUEDATA data;
-    WIZSTANDARDRESULT jsonRet = execStandardJsonRequest<KEYVALUEDATA>(*this, urlPath, data);
+    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<KEYVALUEDATA>(*this, urlPath, data);
     if (!jsonRet)
     {
-        setLastError(jsonRet);
         TOLOG1("Failed to call %1", urlPath);
         return false;
     }
@@ -424,10 +431,9 @@ bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QStri
     body["key"] = strKey.toStdString();
     body["value"] = strValue.toStdString();
     //
-    WIZSTANDARDRESULT jsonRet = execStandardJsonRequest(*this, urlPath, "PUT", body);
+    WIZSTANDARDRESULT jsonRet = NoResult::execStandardJsonRequest(*this, urlPath, "PUT", body);
     if (!jsonRet)
     {
-        setLastError(jsonRet);
         TOLOG1("Failed to call %1", urlPath);
         return false;
     }
@@ -473,7 +479,7 @@ bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
     params["userId"] = strUserName.toStdString();
     params["password"] = strPassword.toStdString();
     //
-    m_bLogin = execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo);
+    m_bLogin = WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo);
     //
     return m_bLogin;
 }
@@ -489,21 +495,10 @@ bool WizKMAccountsServer::logout()
     Json::Value params;
     params["token"] = m_userInfo.strToken.toStdString();
     //
-    bool bRet = execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo);
+    bool bRet = NoResult::execStandardJsonRequest(*this, urlPath, "POST", params);
     m_bLogin = false;
     m_userInfo.strToken.clear();
     return bRet;
-}
-
-
-bool WizKMAccountsServer::changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword)
-{
-    return accounts_changePassword(strUserName, strOldPassword, strNewPassword);
-}
-
-bool WizKMAccountsServer::changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId)
-{
-    return accounts_changeUserId(strUserName, strPassword, strNewUserId);
 }
 
 bool WizKMAccountsServer::createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
@@ -513,15 +508,68 @@ bool WizKMAccountsServer::createAccount(const QString& strUserName, const QStrin
 
 bool WizKMAccountsServer::getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
 {
-    return accounts_getToken(strUserName, strPassword, strToken);
+    return false;
+    //return accounts_getToken(strUserName, strPassword, strToken);
 }
-bool WizKMAccountsServer::getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)
+
+bool WizKMAccountsServer::getCert(QString& strN, QString& stre, QString& strd, QString& strHint)
 {
-    return accounts_getCert(strUserName, strPassword, strN, stre, strd, strHint);
+    struct WIZCERTDATA
+    {
+        QString n;
+        QString e;
+        QString d;
+        QString hint;
+
+        bool fromJson(const Json::Value& value)
+        {
+            try {
+                n = QString::fromStdString(value["n"].asString());
+                e = QString::fromStdString(value["e"].asString());
+                d = QString::fromStdString(value["d"].asString());
+                hint = QString::fromStdString(value["hint"].asString());
+                return true;
+            } catch (Json::Exception& err) {
+                TOLOG1("Failed to convert josn to cert: %1", err.what());
+                return false;
+            }
+        }
+    };
+    //
+    QString urlPath = "/as/user/cert";
+    //
+    WIZCERTDATA data;
+    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<WIZCERTDATA>(*this, urlPath, data);
+    if (!jsonRet)
+    {
+        TOLOG1("Failed to call %1", urlPath);
+        return false;
+    }
+    //
+    strN = data.n;
+    stre = data.e;
+    strd = data.d;
+    strHint = data.hint;
+    return true;
 }
-bool WizKMAccountsServer::setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
+
+bool WizKMAccountsServer::setCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
-    return accounts_setCert(strUserName, strPassword, strN, stre, strd, strHint);
+    QString urlPath = "/as/user/cert";
+    //
+    Json::Value params;
+    params["n"] = strN.toStdString();
+    params["e"] = stre.toStdString();
+    params["d"] = strd.toStdString();
+    params["hint"] = strHint.toStdString();
+    //
+    WIZSTANDARDRESULT jsonRet = NoResult::execStandardJsonRequest(*this, urlPath, "POST", params);
+    if (!jsonRet)
+    {
+        TOLOG1("Failed to call %1", urlPath);
+        return false;
+    }
+    return true;
 }
 
 bool WizKMAccountsServer::getAdminBizCert(const QString& strToken, const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
@@ -606,11 +654,6 @@ QString WizKMAccountsServer::getKbGuid() const
     return m_userInfo.strKbGUID;
 }
 
-bool WizKMAccountsServer::shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID)
-{
-    return document_shareSNS(strToken, strSNS, strComment, strURL, strDocumentGUID);
-}
-
 bool WizKMAccountsServer::getGroupList(CWizGroupDataArray& arrayGroup)
 {
     return accounts_getGroupList(arrayGroup);
@@ -621,14 +664,21 @@ bool WizKMAccountsServer::getBizList(CWizBizDataArray& arrayBiz)
     return accounts_getBizList(arrayBiz);
 }
 
-bool WizKMAccountsServer::createTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
+bool WizKMAccountsServer::keepAlive()
 {
-    return accounts_createTempGroupKb(strEmails, strAccessControl, strSubject, strEmailText, group);
-}
+    /*
+    qDebug() << "keepAlive: " << strToken << "kb: " << getKbGuid();
+    CWizKMTokenOnlyParam param(strToken, getKbGuid());
 
-bool WizKMAccountsServer::keepAlive(const QString& strToken)
-{
-    return accounts_keepAlive(strToken);
+    WizXmlRpcResult callRet;
+    if (!call("accounts.keepAlive", callRet, &param))
+    {
+        TOLOG("Keep alive failure!");
+        return FALSE;
+    }
+    */
+    //
+    return TRUE;
 }
 //
 //
@@ -694,7 +744,7 @@ bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, i
     strUrl = appendNormalParams(strUrl, getToken());
     qDebug() << "set message delete status, strken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
-    return WizRequest::execStandardJsonRequest(strUrl, "DELETE");
+    return NoResult::execStandardJsonRequest(*this, strUrl, "DELETE");
 }
 
 bool WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
@@ -708,22 +758,6 @@ bool WizKMAccountsServer::getValue(const QString& strKey, QString& strValue, __i
 bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
     return WizKMXmlRpcServerBase::setValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
-}
-
-
-
-QString WizKMAccountsServer::makeXmlRpcPassword(const QString& strPassword)
-{
-    return strPassword;
-}
-
-
-
-
-bool WizKMAccountsServer::accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret)
-{
-    //
-    return TRUE;
 }
 
 bool WizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
@@ -746,148 +780,6 @@ bool WizKMAccountsServer::accounts_createAccount(const QString& strUserName, con
     if (!call("accounts.createAccount", ret, &param))
     {
         TOLOG("Failed to create account!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-
-bool WizKMAccountsServer::accounts_clientLogout(const QString& strToken)
-{
-    //
-    return TRUE;
-}
-bool WizKMAccountsServer::accounts_keepAlive(const QString& strToken)
-{
-    /*
-    qDebug() << "keepAlive: " << strToken << "kb: " << getKbGuid();
-    CWizKMTokenOnlyParam param(strToken, getKbGuid());
-
-    WizXmlRpcResult callRet;
-    if (!call("accounts.keepAlive", callRet, &param))
-    {
-        TOLOG("Keep alive failure!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-
-
-
-bool WizKMAccountsServer::accounts_changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword)
-{
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("user_id", strUserName);
-    param.addString("old_password", makeXmlRpcPassword(strOldPassword));
-    param.addString("new_password", makeXmlRpcPassword(strNewPassword));
-    //
-    WizXmlRpcResult callRet;
-    if (!call("accounts.changePassword", callRet, &param))
-    {
-        TOLOG("Change password failure!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-
-bool WizKMAccountsServer::accounts_changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId)
-{
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("user_id", strUserName);
-    param.addString("password", makeXmlRpcPassword(strPassword));
-    param.addString("new_user_id", strNewUserId);
-    //
-    WizXmlRpcResult callRet;
-    if (!call("accounts.changeAccount", callRet, &param))
-    {
-        TOLOG("Change password failure!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-bool WizKMAccountsServer::accounts_getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
-{
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("user_id", strUserName);
-    param.addString("password", makeXmlRpcPassword(strPassword));
-
-    //
-    if (!call("accounts.getToken", "token", strToken, &param))
-    {
-        TOLOG("Failed to get token!");
-        return FALSE;
-    }
-    DEBUG_TOLOG1("Get token: %1", strToken);
-    */
-
-    return TRUE;
-}
-bool WizKMAccountsServer::accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)
-{
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("user_id", strUserName);
-    param.addString("password", makeXmlRpcPassword(strPassword));
-    //
-    if (!call("accounts.getCert", "n", strN, "e", stre, "d", strd, "hint", strHint, &param))
-    {
-        TOLOG("Failed to get cert!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-
-bool WizKMAccountsServer::accounts_setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
-{
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("user_id", strUserName);
-    param.addString("password", makeXmlRpcPassword(strPassword));
-    param.addString("n", strN);
-    param.addString("e", stre);
-    param.addString("d", strd);
-    param.addString("hint", strHint);
-    //
-    if (!call("accounts.setCert", &param))
-    {
-        TOLOG("Failed to set cert!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-
-bool WizKMAccountsServer::document_shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID)
-{
-    /*
-    CWizKMTokenOnlyParam param(strToken, getKbGuid());
-    param.addString("sns_list", strSNS);
-    param.addString("content", strComment);
-    param.addString("url", strURL);
-    param.addString("document_guid", strDocumentGUID);
-    //
-    WizXmlRpcResult callRet;
-    if (!call("document.shareSNS", callRet, &param))
-    {
-        TOLOG("share note by sns failed!");
         return FALSE;
     }
     */
@@ -934,29 +826,6 @@ bool WizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
     return TRUE;
 }
 
-bool WizKMAccountsServer::accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
-{
-    /*
-    CWizKMTokenOnlyParam param(getToken(), getKbGuid());
-    param.addString("kb_name", strSubject);
-    param.addString("user_ids", strEmails);
-    param.addString("group_role", strAccessControl);
-    param.addString("email_ext_text", strEmailText);
-    //
-    WIZGROUPDATA wrap;
-    if (!call("accounts.createTempGroupKb", wrap, &param))
-    {
-        TOLOG("document.getGroupKbList failure!");
-        return FALSE;
-    }
-    //
-    group.nUserGroup = 0;
-    //
-    group = wrap;
-    */
-    //
-    return TRUE;
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1033,10 +902,9 @@ bool WizKMDatabaseServer::kb_getInfo()
 {
     QString url = m_userInfo.strKbServer + "/ks/kb/info/" + m_userInfo.strKbGUID;
     //
-    WIZSTANDARDRESULT jsonRet = execStandardJsonRequest<WIZKBINFO>(*this, url, m_kbInfo);
+    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<WIZKBINFO>(*this, url, m_kbInfo);
     if (!jsonRet)
     {
-        setLastError(jsonRet);
         TOLOG1("Failed to call %1", url);
         return false;
     }
@@ -1072,9 +940,6 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
     QString url = buildUrl("/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1");
-#ifdef QT_DEBUG
-    qDebug() << url;
-#endif
     //
     Json::Value doc;
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, doc);

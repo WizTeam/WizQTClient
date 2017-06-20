@@ -56,7 +56,7 @@ QString WizTokenPrivate::token()
         WizKMAccountsServer asServer;
         asServer.setUserInfo(info);
 
-        if (asServer.keepAlive(m_info.strToken))
+        if (asServer.keepAlive())
         {
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;

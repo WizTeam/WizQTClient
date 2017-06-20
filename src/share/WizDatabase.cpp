@@ -16,6 +16,8 @@
 #include "share/WizZip.h"
 #include "share/WizGlobal.h"
 
+#include "sync/WizToken.h"
+
 #include "html/WizHtmlCollector.h"
 #include "share/jsoncpp/json/json.h"
 
@@ -3609,7 +3611,8 @@ bool WizDatabase::refreshCertFromServer()
             QString strN, stre, strd, strHint;
             //
             WizKMAccountsServer server;
-            if (!server.getCert(getUserId(), getPassword(), strN, stre, strd, strHint))
+            server.setUserInfo(WizToken::userInfo());
+            if (!server.getCert(strN, stre, strd, strHint))
                 return false;
             //
             return setUserCert(strN, stre, strd, strHint);
