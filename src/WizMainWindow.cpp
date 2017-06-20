@@ -625,7 +625,7 @@ void WizMainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 
 bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
 {
-    return WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode ||
+    return //WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode ||
             WIZKM_XMLRPC_ERROR_INVALID_USER == nErrorCode ||
             WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode ||
             WIZKM_XMLRPC_ERROR_SYSTEM_ERROR == nErrorCode;

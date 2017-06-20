@@ -48,6 +48,11 @@ struct WIZSTANDARDRESULT
         return returnCode == 200;
     }
     //
+    QString toString() const {
+        return QString("code=%1, message=%2, externCode=%3").arg(QString::number(returnCode), returnMessage, externCode);
+    }
+
+    //
     bool isNetworkError() const {
         return returnCode < 0;
     }

@@ -6,6 +6,8 @@
 #include "share/WizObject.h"
 #include "WizDef.h"
 
+struct IWizKMSyncEvents;
+
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
 #define WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT		3032
@@ -23,13 +25,15 @@
 
 #define WIZKM_XMLRPC_ERROR_SYSTEM_ERROR         60000
 
-class WizKMXmlRpcServerBase : public QObject
+class WizKMApiServerBase : public QObject
 {
 public:
-    WizKMXmlRpcServerBase(const QString& strServer, QObject* parent);
+    WizKMApiServerBase(const QString& strServer, QObject* parent);
+    void setEvents(IWizKMSyncEvents* pEvents) { m_pEvents = pEvents; }
 protected:
     QString m_strServer;
     WIZSTANDARDRESULT m_lastError;
+    IWizKMSyncEvents* m_pEvents;
 
 public:
     QString getServer() const { return m_strServer; }
@@ -42,7 +46,9 @@ public:
     int getLastErrorCode() const { return m_lastError.returnCode; }
     QString getLastErrorMessage() const { return m_lastError.returnMessage; }
     //
-    WIZSTANDARDRESULT setLastError(const WIZSTANDARDRESULT& ret) { m_lastError = ret; return ret; }
+    WIZSTANDARDRESULT setLastError(const WIZSTANDARDRESULT& ret) { m_lastError = ret; onApiError(); return ret; }
+    //
+    void onApiError();
     //
     bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
@@ -50,14 +56,12 @@ public:
 };
 
 
-class WizKMAccountsServer : public WizKMXmlRpcServerBase
+class WizKMAccountsServer : public WizKMApiServerBase
 {
 public:
     WizKMAccountsServer(QObject* parent = 0);
     virtual ~WizKMAccountsServer(void);
 
-    virtual void onXmlRpcError();
-    //
 protected:
     bool m_bLogin;
     bool m_bAutoLogout;
@@ -109,13 +113,12 @@ private:
 
 #define WIZKM_WEBAPI_VERSION		10
 
-class WizKMDatabaseServer: public WizKMXmlRpcServerBase
+class WizKMDatabaseServer: public WizKMApiServerBase
 {
     Q_OBJECT
 public:
     WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
     virtual ~WizKMDatabaseServer();
-    virtual void onXmlRpcError();
 
     const WIZKBINFO& kbInfo();
     void setKBInfo(const WIZKBINFO& info);

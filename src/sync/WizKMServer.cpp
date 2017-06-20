@@ -52,7 +52,7 @@ QString appendNormalParams(const QString& strUrl, const QString& token)
  * */
 namespace NoResult {
 
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -61,7 +61,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     return ret;
 }
 
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -70,7 +70,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
     return ret;
 }
 
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -86,7 +86,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
 
 namespace WithResult {
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, TData& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, TData& data)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -114,7 +114,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
 }
 //
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, __int64& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, __int64& data)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -137,7 +137,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
 }
 //
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, QString& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, QString& data)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -164,7 +164,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
  */
 
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, TData& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, TData& data)
 {
     Json::FastWriter writer;
     std::string body = writer.write(reqBody);
@@ -174,7 +174,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
 }
 //
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, QString resultFiledName, __int64& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, QString resultFiledName, __int64& data)
 {
     Json::FastWriter writer;
     std::string body = writer.write(reqBody);
@@ -184,7 +184,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
 }
 //
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, QString resultFiledName,QString& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, QString resultFiledName,QString& data)
 {
     Json::FastWriter writer;
     std::string body = writer.write(reqBody);
@@ -197,19 +197,19 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
  * GET only
  */
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, TData& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, TData& data)
 {
     return execStandardJsonRequest<TData>(server, urlPath, "GET", QByteArray(), data);
 }
 //
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, QString resultFiledName, __int64& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, QString resultFiledName, __int64& data)
 {
     return execStandardJsonRequest<__int64>(server, urlPath, "GET", QByteArray(), resultFiledName, data);
 }
 //
 template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, QString urlPath, QString resultFiledName, QString& data)
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, QString resultFiledName, QString& data)
 {
     return execStandardJsonRequest<QString>(server, urlPath, "GET", QByteArray(), resultFiledName, data);
 }
@@ -221,13 +221,13 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMXmlRpcServerBase& server, 
   */
 
 template <class TData>
-bool queryJsonList(WizKMXmlRpcServerBase& server, QString url, QString method, const QByteArray& bodyData, std::deque<TData>& arrayRet)
+bool queryJsonList(WizKMApiServerBase& server, QString url, QString method, const QByteArray& bodyData, std::deque<TData>& arrayRet)
 {
     Json::Value doc;
     WIZSTANDARDRESULT jsonRet = WizRequest::execStandardJsonRequest(url, method, bodyData, doc);
     if (!jsonRet)
     {
-        TOLOG1("Failed to call %1", url);
+        TOLOG2("Failed to call %1, %2", url, jsonRet.toString());
         return server.setLastError(jsonRet);
     }
     //
@@ -267,9 +267,16 @@ bool queryJsonList(WizKMXmlRpcServerBase& server, QString url, QString method, c
 
 
 template <class TData>
-bool getJsonList(WizKMXmlRpcServerBase& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
+bool getJsonList(WizKMApiServerBase& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
 {
-    urlPath = urlPath + "/" + server.getKbGuid() + "?version=" + nStartVersion + "&count=" + nCountPerPage;
+    if (urlPath.startsWith("http://") || urlPath.startsWith("https://"))
+    {
+        urlPath = urlPath + "?version=" + WizInt64ToStr(nStartVersion) + "&count=" + WizIntToStr(nCountPerPage) + "&pageSize=" + WizIntToStr(nCountPerPage);
+    }
+    else
+    {
+        urlPath = urlPath + "/" + server.getKbGuid() + "?version=" + WizInt64ToStr(nStartVersion) + "&count=" + WizIntToStr(nCountPerPage);
+    }
     QString url = server.buildUrl(urlPath);
     //
     return queryJsonList<TData>(server, url, "GET", QByteArray(), arrayRet);
@@ -277,7 +284,7 @@ bool getJsonList(WizKMXmlRpcServerBase& server, QString urlPath, int nCountPerPa
 
 
 template <class TData>
-bool postJsonList(WizKMXmlRpcServerBase& server, QString urlPath, const std::deque<TData>& arrayData)
+bool postJsonList(WizKMApiServerBase& server, QString urlPath, const std::deque<TData>& arrayData)
 {
     urlPath = urlPath + "/" + server.getKbGuid();
     //
@@ -350,9 +357,10 @@ struct CWizKMTokenOnlyParam : public CWizKMBaseParam
 
 //
 
-WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strServer, QObject* parent)
+WizKMApiServerBase::WizKMApiServerBase(const QString& strServer, QObject* parent)
     : QObject(parent)
     , m_strServer(strServer)
+    , m_pEvents(NULL)
 {
     while (m_strServer.endsWith("/"))
     {
@@ -360,7 +368,21 @@ WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strServer, QObject* 
     }
 }
 
-QString WizKMXmlRpcServerBase::buildUrl(QString urlPath)
+void WizKMApiServerBase::onApiError()
+{
+    if (m_pEvents)
+    {
+        m_pEvents->setLastErrorCode(m_lastError.returnCode);
+        m_pEvents->setLastErrorMessage(m_lastError.returnMessage);
+    }
+    //
+    if (m_lastError.returnCode == WIZKM_XMLRPC_ERROR_INVALID_TOKEN) {
+        WizToken::clearToken();
+    }
+}
+
+
+QString WizKMApiServerBase::buildUrl(QString urlPath)
 {
     if (urlPath.startsWith("http://") || urlPath.startsWith("https://")) {
         QString url = urlPath;
@@ -378,14 +400,14 @@ QString WizKMXmlRpcServerBase::buildUrl(QString urlPath)
     }
 }
 
-bool WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion)
+bool WizKMApiServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion)
 {
     QString urlPath = "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
     //
     WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<__int64>(*this, urlPath, "result", nVersion);
     return jsonRet;
 }
-bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
+bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
 {
     struct KEYVALUEDATA
     {
@@ -423,7 +445,7 @@ bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QStri
     return true;
 }
 
-bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion)
+bool WizKMApiServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
     QString urlPath = "/" + strMethodPrefix + "/kv/value/" + strGuid;
     //
@@ -443,7 +465,7 @@ bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QStri
 
 
 WizKMAccountsServer::WizKMAccountsServer(QObject* parent)
-    : WizKMXmlRpcServerBase(WizCommonApiEntry::newAsServerUrl(), parent)
+    : WizKMApiServerBase(WizCommonApiEntry::newAsServerUrl(), parent)
 {
     m_bLogin = FALSE;
     m_bAutoLogout = FALSE;
@@ -461,10 +483,6 @@ void WizKMAccountsServer::setUserInfo(const WIZUSERINFO& userInfo)
 {
     m_bLogin = TRUE;
     m_userInfo = userInfo;
-}
-
-void WizKMAccountsServer::onXmlRpcError()
-{
 }
 
 bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPassword)
@@ -749,15 +767,15 @@ bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, i
 
 bool WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValueVersion("as", getToken(), m_userInfo.strUserGUID, strKey, nVersion);
+    return WizKMApiServerBase::getValueVersion("as", getToken(), m_userInfo.strUserGUID, strKey, nVersion);
 }
 bool WizKMAccountsServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nVersion);
+    return WizKMApiServerBase::getValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nVersion);
 }
 bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMXmlRpcServerBase::setValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
+    return WizKMApiServerBase::setValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
 }
 
 bool WizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
@@ -831,16 +849,13 @@ bool WizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
 
 
 WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent)
-    : WizKMXmlRpcServerBase(kbInfo.strKbServer, parent)
+    : WizKMApiServerBase(kbInfo.strKbServer, parent)
     , m_userInfo(kbInfo)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
-{
-}
-void WizKMDatabaseServer::onXmlRpcError()
 {
 }
 
@@ -914,15 +929,15 @@ bool WizKMDatabaseServer::kb_getInfo()
 
 bool WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValueVersion("ks", getToken(), getKbGuid(), strKey, nVersion);
+    return WizKMApiServerBase::getValueVersion("ks", getToken(), getKbGuid(), strKey, nVersion);
 }
 bool WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValue("ks", getToken(), getKbGuid(), strKey, strValue, nVersion);
+    return WizKMApiServerBase::getValue("ks", getToken(), getKbGuid(), strKey, strValue, nVersion);
 }
 bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMXmlRpcServerBase::setValue("ks", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+    return WizKMApiServerBase::setValue("ks", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
 }
 
 bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)

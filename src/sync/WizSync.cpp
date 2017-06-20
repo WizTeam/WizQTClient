@@ -80,6 +80,7 @@ WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& inf
 #ifdef _DEBUG
     pEvents->onError(WizFormatString1("XmlRpcUrl: %1", info.strDatabaseServer));
 #endif
+    m_server.setEvents(m_pEvents);
 }
 
 bool WizKMSync::sync()
@@ -1624,6 +1625,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
 
     WizKMAccountsServer server;
     server.setUserInfo(info);
+    server.setEvents(pEvents);
 
     pEvents->onSyncProgress(::GetSyncStartProgress(syncAccountLogin));
     pEvents->onStatus(QObject::tr("Signing in"));    
@@ -1871,6 +1873,7 @@ bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->onStatus(_TR("Quick download messages"));
     WizKMAccountsServer server;
     server.setUserInfo(info);
+    server.setEvents(pEvents);
     /*
     ////获得群组信息////
     */

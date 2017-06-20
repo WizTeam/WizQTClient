@@ -395,6 +395,7 @@ bool WizKMSyncThread::resetGroups()
     //
     WizKMAccountsServer server;
     server.setUserInfo(m_info);
+    server.setEvents(m_pEvents);
     //
     CWizBizDataArray bizs;
     if (!server.getBizList(bizs))

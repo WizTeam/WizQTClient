@@ -136,10 +136,19 @@ WIZSTANDARDRESULT WizRequest::isSucceededStandardJsonRequest(Json::Value& res)
     try {
         //
         Json::Value returnCode = res["returnCode"];
+        if (returnCode.isNull())
+        {
+            returnCode = res["return_code"];
+        }
+        //
         if (returnCode.asInt() != 200)
         {
             Json::Value returnMessage = res["returnMessage"];
             Json::Value externCodeValue = res["externCode"];
+            //
+            if (returnMessage.isNull()) {
+                returnMessage = res["return_message"];
+            }
             //
             std::string externCode;
             if (externCodeValue.isString()) {
