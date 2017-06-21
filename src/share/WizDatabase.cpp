@@ -2141,7 +2141,6 @@ bool WizDatabase::getGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     group.bizName= getMetaDef(g_strGroupSection, groupGUID + "_BizName");
     group.bOwn = getMetaDef(g_strGroupSection, groupGUID + "_Own") == "1";
     group.nUserGroup = getMetaDef(g_strGroupSection, groupGUID + "_Role", QString::number(WIZ_USERGROUP_MAX)).toInt();
-    group.strDatabaseServer = getMetaDef(g_strGroupSection, group.strGroupGUID + "_DatabaseServer");
     group.strMyWiz = getMetaDef(g_strGroupSection, group.strGroupGUID + "_MyWizEmail");
     group.bEncryptData = getMetaDef(g_strGroupSection, groupGUID + "_EncryptData") == "1";
     //
@@ -2207,7 +2206,6 @@ bool WizDatabase::setAllGroupInfoCore(const CWizGroupDataArray& arrayGroup)
         setMeta(g_strGroupSection, group.strGroupGUID + "_BizName", group.bizGUID);
         setMeta(g_strGroupSection, group.strGroupGUID + "_Own", group.bOwn ? "1" : "0");
         setMeta(g_strGroupSection, group.strGroupGUID + "_Role", QString::number(group.nUserGroup));
-        setMeta(g_strGroupSection, group.strGroupGUID + "_DatabaseServer", group.strDatabaseServer);
         setMeta(g_strGroupSection, group.strGroupGUID + "_MyWizEmail", group.strMyWiz);
         setMeta(g_strGroupSection, group.strGroupGUID + "_EncryptData", group.bEncryptData ? "1" : "0");
     }

@@ -77,9 +77,6 @@ WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& inf
     , m_server(m_info, parent)
     , m_bUploadOnly(bUploadOnly)
 {
-#ifdef _DEBUG
-    pEvents->onError(WizFormatString1("XmlRpcUrl: %1", info.strDatabaseServer));
-#endif
     m_server.setEvents(m_pEvents);
 }
 

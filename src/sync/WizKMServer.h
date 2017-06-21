@@ -25,6 +25,10 @@ struct IWizKMSyncEvents;
 
 #define WIZKM_XMLRPC_ERROR_SYSTEM_ERROR         60000
 
+
+#define WIZKM_WEBAPI_VERSION		10
+
+
 class WizKMApiServerBase : public QObject
 {
 public:
@@ -104,14 +108,9 @@ public:
     void setUserInfo(const WIZUSERINFO& userInfo);
 private:
     bool accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
-    //
-    bool accounts_getGroupList(CWizGroupDataArray& arrayGroup);
-    bool accounts_getBizList(CWizBizDataArray& arrayBiz);
 };
 
 
-
-#define WIZKM_WEBAPI_VERSION		10
 
 class WizKMDatabaseServer: public WizKMApiServerBase
 {

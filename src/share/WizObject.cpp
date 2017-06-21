@@ -629,7 +629,6 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
     , tCreated(data.tCreated)
     , tModified(data.tModified)
     , tRoleCreated(data.tRoleCreated)
-    , strDatabaseServer(data.strDatabaseServer)
     , strGroupGUID(data.strGroupGUID)
     , strId(data.strId)
     , strGroupName(data.strGroupName)
@@ -639,8 +638,6 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
     , strMyWiz(data.strMyWiz)
     , strOwner(data.strOwner)
     , strRoleNote(data.strRoleNote)
-    , strServerUrl(data.strServerUrl)
-    , strGroupTags(data.strGroupTags)
     , nUserGroup(data.nUserGroup)
     , strUserName(data.strUserName)
     , bOwn(data.bOwn)
@@ -648,44 +645,43 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
 {
 }
 
-bool WIZGROUPDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZGROUPDATA::fromJson(const Json::Value& value)
 {
-    data.getString("biz_guid", bizGUID);
-    data.getString("biz_name", bizName);
+    try {
+        //
+        bizGUID = QString::fromStdString(value["bizGuid"].asString());
+        bizName = QString::fromStdString(value["bizName"].asString());
+        tCreated = QDateTime::fromTime_t(value["created"].asInt64() / 1000);
+        tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
+        tRoleCreated = QDateTime::fromTime_t(value["roleCreated"].asInt64() / 1000);
+        strGroupGUID = QString::fromStdString(value["kbGuid"].asString());
+        strId = QString::fromStdString(value["id"].asString());
+        strGroupName = QString::fromStdString(value["name"].asString());
+        strGroupNote = QString::fromStdString(value["note"].asString());
+        strGroupSEO = QString::fromStdString(value["seo"].asString());
+        strType = QString::fromStdString(value["type"].asString());
+        strMyWiz = QString::fromStdString(value["myWizEmail"].asString());
+        strOwner = QString::fromStdString(value["ownerGuid"].asString());
+        strRoleNote = QString::fromStdString(value["roleNote"].asString());
+        nUserGroup = value["userGroup"].asInt();
+        strUserName = value["userName"].asInt();
+        //
+        QString isKbOwner = QString::fromStdString(value["isKbOwner"].asString());
+        isKbOwner = isKbOwner.toLower();
+        bOwn = (isKbOwner == "1" || isKbOwner == "true");
+        //
+        QString encryptData = QString::fromStdString(value["isEncrypt"].asString());
+        encryptData = encryptData.toLower();
+        bEncryptData = (encryptData == "1" || encryptData == "true");
+        //
+        return !strGroupName.isEmpty()
+                && !strGroupGUID.isEmpty();
 
-    data.getTime("dt_created", tCreated);
-    data.getTime("dt_modified", tModified);
-    data.getTime("dt_role_created", tRoleCreated);
+    } catch (Json::Exception& err) {
+        TOLOG1("Failed to convert json to group, %1", err.what());
+        return false;
+    }
 
-    data.getString("kapi_url", strDatabaseServer);
-
-    data.getString("kb_guid", strGroupGUID);
-    data.getString("kb_id", strId);
-    data.getString("kb_name", strGroupName);
-    data.getString("kb_note", strGroupNote);
-    data.getString("kb_seo", strGroupSEO);
-    data.getString("kb_type", strType);
-    data.getString("mywiz_email", strMyWiz);
-    data.getString("owner_name", strOwner);
-    data.getString("role_note", strRoleNote);
-    data.getString("server_url", strServerUrl);
-    data.getString("tag_names", strGroupTags);
-    data.getInt("user_group", nUserGroup);
-    data.getString("user_name", strUserName);
-    //
-    QString owner;
-    data.getString("is_kb_owner", owner);
-    owner = owner.toLower();
-    bOwn = (owner == "1" || owner == "true");
-    //
-    QString encryptData;
-    data.getString(("is_encrypt"), encryptData);
-    encryptData = encryptData.toLower();
-    bEncryptData = (encryptData == "1" || encryptData == "true");
-
-    return !strGroupName.isEmpty()
-            && !strGroupGUID.isEmpty()
-            && !strDatabaseServer.isEmpty();
 }
 
 WIZBIZDATA::WIZBIZDATA()
@@ -704,26 +700,34 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
 {
 }
 
-bool WIZBIZDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZBIZDATA::fromJson(const Json::Value& value)
 {
-    data.getStr("biz_name", bizName);
-    data.getStr("biz_guid", bizGUID);
-    data.getInt("user_group", bizUserRole);
-    data.getInt("biz_level", bizLevel);
-    data.getBool("is_due", bizIsDue);
+    try {
+        bizName = QString::fromStdString(value["name"].asString());
+        bizGUID = QString::fromStdString(value["bizGuid"].asString());
+        bizUserRole = value["userRole"].asInt();
+        bizLevel = value["level"].asInt();
+        bizIsDue = value["isDue"].asBool();
+        //
+        /*
+        Json::Value avatars = value["avatarChanges"];
+        if (avatars.isArray())
+        {
+            for (int i = 0; i < avatars.size(); i++)
+            {
+                QString name = QString::fromStdString(avatars[i].asString());
+                mapAvatarChanges.insert(name);
+            }
+        }
+        */
+        //
+        return !bizName.isEmpty()
+                && !bizGUID.isEmpty();
 
-    WizXmlRpcStructValue* structData = data.getStruct("avatar_changes");
-    if (structData)
-    {
-        structData->toStringMap(mapAvatarChanges);
+    } catch (Json::Exception& err) {
+        TOLOG1("Failed to convert json to biz, %1", err.what());
+        return false;
     }
-
-    if (bizGUID.isEmpty() || bizName.isEmpty())
-    {
-        qWarning() << "Biz data warning, guid : " << bizGUID << " biz name : " << bizName;
-    }
-
-    return true;
 }
 
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */

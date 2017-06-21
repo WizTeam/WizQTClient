@@ -503,7 +503,6 @@ bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
 }
 bool WizKMAccountsServer::logout()
 {
-
     if (!m_bLogin)
         return FALSE;
     if (m_userInfo.strToken.isEmpty())
@@ -521,7 +520,25 @@ bool WizKMAccountsServer::logout()
 
 bool WizKMAccountsServer::createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    return accounts_createAccount(strUserName, strPassword, strInviteCode, strCaptchaID, strCaptcha);
+    QString urlPath = "/as/user/register";
+    Json::Value params;
+    params["userId"] = strUserName.toStdString();
+    params["password"] = strPassword.toStdString();
+    params["inviteCode"] = strInviteCode.toStdString();
+    params["productName"] = "WizNoteQT";
+    if (!strCaptchaID.isEmpty())
+    {
+        param["captchIid"] = strCaptchaID.toStdString();
+        param["captcha"] = strCaptcha.toStdString();
+    }
+    //
+    if (!WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo))
+    {
+        TOLOG("Failed to create account");
+        return false;
+    }
+    //
+    return true;
 }
 
 bool WizKMAccountsServer::getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
@@ -674,12 +691,28 @@ QString WizKMAccountsServer::getKbGuid() const
 
 bool WizKMAccountsServer::getGroupList(CWizGroupDataArray& arrayGroup)
 {
-    return accounts_getGroupList(arrayGroup);
+    QString urlPath = "/as/user/groups?kbType=group";
+    //
+    if (!getJsonList<WIZGROUPDATA>(*this, urlPath, 0, 0, arrayGroup))
+    {
+        TOLOG("Failed to get group list");
+        return false;
+    }
+    //
+    return true;
 }
 
 bool WizKMAccountsServer::getBizList(CWizBizDataArray& arrayBiz)
 {
-    return accounts_getBizList(arrayBiz);
+    QString urlPath = "/as/user/bizs";
+    //
+    if (!getJsonList<WIZBIZDATA>(*this, urlPath, 0, 0, arrayBiz))
+    {
+        TOLOG("Failed to get group list");
+        return false;
+    }
+    //
+    return true;
 }
 
 bool WizKMAccountsServer::keepAlive()
@@ -781,67 +814,7 @@ bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValu
 bool WizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
                                                   const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    /*
-    CWizKMBaseParam param;
 
-    param.addString("user_id", strUserName);
-    param.addString("password", makeXmlRpcPassword(strPassword));
-    param.addString("invite_code", strInviteCode);
-    param.addString("product_name", "WizNoteQT");
-    if (!strCaptchaID.isEmpty())
-    {
-        param.addString("captcha_id", strCaptchaID);
-        param.addString("captcha", strCaptcha);
-    }
-    //
-    WizXmlRpcResult ret;
-    if (!call("accounts.createAccount", ret, &param))
-    {
-        TOLOG("Failed to create account!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
-}
-
-
-bool WizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
-{
-    /*
-    CWizKMTokenOnlyParam param(getToken(), getKbGuid());    
-    //
-    param.addString("kb_type", "group");
-//    param.AddString("protocol", "https");
-    //
-    std::deque<WIZGROUPDATA> arrayWrap;
-    if (!call("accounts.getGroupKbList", arrayWrap, &param))
-    {
-        TOLOG("accounts.getGroupKbList failure!");
-        return FALSE;
-    }
-    //
-    arrayGroup.assign(arrayWrap.begin(), arrayWrap.end());
-    */
-    //
-    return TRUE;
-}
-bool WizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
-{
-    /*
-    CWizKMTokenOnlyParam param(getToken(), getKbGuid());    
-    //
-    std::deque<WIZBIZDATA> arrayWrap;
-    if (!call("accounts.getUserBizs", arrayWrap, &param))
-    {
-        TOLOG("accounts.getUserBizs failure!");
-        return FALSE;
-    }
-    //
-    arrayBiz.assign(arrayWrap.begin(), arrayWrap.end());
-    */
-    //
-    return TRUE;
 }
 
 

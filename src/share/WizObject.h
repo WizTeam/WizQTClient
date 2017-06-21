@@ -487,7 +487,7 @@ struct WIZGROUPDATA
 {
     WIZGROUPDATA();
     WIZGROUPDATA(const WIZGROUPDATA& data);
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
     //
     bool isBiz() const
     {
@@ -513,10 +513,6 @@ struct WIZGROUPDATA
 
     // field: dt_role_created, not used
     WizOleDateTime tRoleCreated;
-
-    // field: kapi_url
-    // server_url, aka "ks"(knowledge server)
-    QString strDatabaseServer;
 
     // field: kb_guid
     QString strGroupGUID;
@@ -545,13 +541,6 @@ struct WIZGROUPDATA
     // text description of permission, not used
     QString strRoleNote;
 
-    // filed: server_url, not used
-    QString strServerUrl;
-
-    // field: tag_names
-    // default "tags names api change", obsolete field now
-    QString strGroupTags;
-
     // field: user_group, group permission
     int nUserGroup;
 
@@ -577,7 +566,7 @@ struct WIZBIZDATA
 {
     WIZBIZDATA();
     WIZBIZDATA(const WIZBIZDATA& data);
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
 
     QString bizGUID;
     QString bizName;
