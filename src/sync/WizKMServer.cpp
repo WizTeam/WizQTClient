@@ -72,9 +72,13 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QSt
 
 static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method)
 {
-    QString url = server.buildUrl(urlPath);
-    //
-    WIZSTANDARDRESULT ret = execStandardJsonRequest(server, url, method, QByteArray());
+    WIZSTANDARDRESULT ret = execStandardJsonRequest(server, urlPath, method, QByteArray());
+    return ret;
+}
+
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath)
+{
+    WIZSTANDARDRESULT ret = execStandardJsonRequest(server, urlPath, "GET", QByteArray());
     return ret;
 }
 
@@ -269,13 +273,13 @@ bool queryJsonList(WizKMApiServerBase& server, QString url, QString method, cons
 template <class TData>
 bool getJsonList(WizKMApiServerBase& server, QString urlPath, int nCountPerPage, __int64 nStartVersion, std::deque<TData>& arrayRet)
 {
-    if (urlPath.startsWith("http://") || urlPath.startsWith("https://"))
+    if (urlPath.indexOf("?") == -1)
     {
         urlPath = urlPath + "?version=" + WizInt64ToStr(nStartVersion) + "&count=" + WizIntToStr(nCountPerPage) + "&pageSize=" + WizIntToStr(nCountPerPage);
     }
     else
     {
-        urlPath = urlPath + "/" + server.getKbGuid() + "?version=" + WizInt64ToStr(nStartVersion) + "&count=" + WizIntToStr(nCountPerPage);
+        urlPath = urlPath + "&version=" + WizInt64ToStr(nStartVersion) + "&count=" + WizIntToStr(nCountPerPage) + "&pageSize=" + WizIntToStr(nCountPerPage);
     }
     QString url = server.buildUrl(urlPath);
     //
@@ -528,8 +532,8 @@ bool WizKMAccountsServer::createAccount(const QString& strUserName, const QStrin
     params["productName"] = "WizNoteQT";
     if (!strCaptchaID.isEmpty())
     {
-        param["captchIid"] = strCaptchaID.toStdString();
-        param["captcha"] = strCaptcha.toStdString();
+        params["captchIid"] = strCaptchaID.toStdString();
+        params["captcha"] = strCaptcha.toStdString();
     }
     //
     if (!WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo))
@@ -543,8 +547,35 @@ bool WizKMAccountsServer::createAccount(const QString& strUserName, const QStrin
 
 bool WizKMAccountsServer::getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
 {
-    return false;
-    //return accounts_getToken(strUserName, strPassword, strToken);
+    QString urlPath = "/as/user/token";
+    Json::Value params;
+    params["userId"] = strUserName.toStdString();
+    params["password"] = strPassword.toStdString();
+    //
+    struct GETTOKENDATA
+    {
+        QString token;
+        bool fromJson(const Json::Value& value) {
+            try {
+                token = QString::fromStdString(value["token"].asString());
+                return true;
+            } catch (Json::Exception& err) {
+                TOLOG1("Failed to convert json to get token result. %1", err.what());
+                return false;
+            }
+        }
+    };
+
+    GETTOKENDATA data;
+    //
+    if (!WithResult::execStandardJsonRequest<GETTOKENDATA>(*this, urlPath, "POST", params, data))
+    {
+        TOLOG("Failed to create account");
+        return false;
+    }
+    //
+    strToken = data.token;
+    return true;
 }
 
 bool WizKMAccountsServer::getCert(QString& strN, QString& stre, QString& strd, QString& strHint)
@@ -717,19 +748,16 @@ bool WizKMAccountsServer::getBizList(CWizBizDataArray& arrayBiz)
 
 bool WizKMAccountsServer::keepAlive()
 {
-    /*
-    qDebug() << "keepAlive: " << strToken << "kb: " << getKbGuid();
-    CWizKMTokenOnlyParam param(strToken, getKbGuid());
-
-    WizXmlRpcResult callRet;
-    if (!call("accounts.keepAlive", callRet, &param))
-    {
-        TOLOG("Keep alive failure!");
-        return FALSE;
-    }
-    */
+    QString urlPath = "/as/user/keep";
     //
-    return TRUE;
+    WIZSTANDARDRESULT jsonRet = NoResult::execStandardJsonRequest(*this, urlPath);
+    if (!jsonRet)
+    {
+        TOLOG1("Failed to call %1", urlPath);
+        return false;
+    }
+    //
+    return true;
 }
 //
 //
@@ -810,13 +838,6 @@ bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValu
 {
     return WizKMApiServerBase::setValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
 }
-
-bool WizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
-                                                  const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
-{
-
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2023,13 +2044,13 @@ bool WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDO
 
 bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
-    QString urlPath = "/ks/deleted/list/version";
+    QString urlPath = "/ks/deleted/list/version/" + getKbGuid();
     //
     return getJsonList<WIZDELETEDGUIDDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
 {
-    QString urlPath = "/ks/deleted/upload";
+    QString urlPath = "/ks/deleted/upload/" + getKbGuid();
     //
     return postJsonList<WIZDELETEDGUIDDATA>(*this, urlPath, arrayDeletedGUID);
 }
@@ -2037,7 +2058,7 @@ bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& array
 
 bool WizKMDatabaseServer::document_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
 {
-    QString urlPath = "/ks/note/list/version";
+    QString urlPath = "/ks/note/list/version/" + getKbGuid();
     //
     return getJsonList<WIZDOCUMENTDATAEX>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
@@ -2064,21 +2085,21 @@ bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arra
 
 bool WizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
-    QString urlPath = "/ks/attachment/list/version";
+    QString urlPath = "/ks/attachment/list/version/" + getKbGuid();
     //
     return getJsonList<WIZDOCUMENTATTACHMENTDATAEX>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 
 bool WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZTAGDATA>& arrayRet)
 {
-    QString urlPath = "/ks/tag/download";
+    QString urlPath = "/ks/tag/list/version/" + getKbGuid();
     //
     return getJsonList<WIZTAGDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 
 bool WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
 {
-    QString urlPath = "/ks/tag/upload";
+    QString urlPath = "/ks/tag/upload/" + getKbGuid();
     //
     return postJsonList<WIZTAGDATA>(*this, urlPath, arrayTag);
 }
@@ -2086,28 +2107,28 @@ bool WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
 
 bool WizKMDatabaseServer::style_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZSTYLEDATA>& arrayRet)
 {
-    QString urlPath = "/ks/style/download";
+    QString urlPath = "/ks/style/list/version/" + getKbGuid();
     //
     return getJsonList<WIZSTYLEDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 
 bool WizKMDatabaseServer::style_postList(const std::deque<WIZSTYLEDATA>& arrayStyle)
 {
-    QString urlPath = "/ks/style/upload";
+    QString urlPath = "/ks/style/upload/" + getKbGuid();
     //
     return postJsonList<WIZSTYLEDATA>(*this, urlPath, arrayStyle);
 }
 
 bool WizKMDatabaseServer::param_getList(int nCountPerPage, __int64 nStartVersion, std::deque<WIZDOCUMENTPARAMDATA>& arrayRet)
 {
-    QString urlPath = "/ks/param/download";
+    QString urlPath = "/ks/param/list/version/" + getKbGuid();
     //
     return getJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, nCountPerPage, nStartVersion, arrayRet);
 }
 
 bool WizKMDatabaseServer::param_postList(const std::deque<WIZDOCUMENTPARAMDATA>& arrayParam)
 {
-    QString urlPath = "/ks/param/upload";
+    QString urlPath = "/ks/param/upload/" + getKbGuid();
     //
     return postJsonList<WIZDOCUMENTPARAMDATA>(*this, urlPath, arrayParam);
 }

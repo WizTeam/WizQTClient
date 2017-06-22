@@ -43,8 +43,7 @@ public:
     QString getServer() const { return m_strServer; }
     virtual QString getToken() const = 0;
     virtual QString getKbGuid() const = 0;
-    //
-    QString buildUrl(QString urlPath);
+    virtual QString buildUrl(QString urlPath);
     //
     bool isNetworkError() const { return m_lastError.isNetworkError(); }
     int getLastErrorCode() const { return m_lastError.returnCode; }
@@ -106,8 +105,6 @@ public:
     const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
     WIZUSERINFO& getUserInfo() { return m_userInfo; }
     void setUserInfo(const WIZUSERINFO& userInfo);
-private:
-    bool accounts_createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
 };
 
 

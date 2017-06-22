@@ -74,7 +74,7 @@ bool WizRequest::execJsonRequest(const QString& url, QString method, const QByte
     QNetworkReply::NetworkError err = loop.error();
     if (err != QNetworkReply::NoError)
     {
-        TOLOG2("Failed to exec json request, network error=%1, message=%2", WizIntToStr(err), loop.errorString());
+        TOLOG3("Failed to exec json request, network error=%1, message=%2, url=%3", WizIntToStr(err), loop.errorString(), url);
         return false;
     }
     //

@@ -664,7 +664,7 @@ bool WIZGROUPDATA::fromJson(const Json::Value& value)
         strOwner = QString::fromStdString(value["ownerGuid"].asString());
         strRoleNote = QString::fromStdString(value["roleNote"].asString());
         nUserGroup = value["userGroup"].asInt();
-        strUserName = value["userName"].asInt();
+        strUserName = QString::fromStdString(value["userName"].asString());
         //
         QString isKbOwner = QString::fromStdString(value["isKbOwner"].asString());
         isKbOwner = isKbOwner.toLower();
