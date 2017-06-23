@@ -709,17 +709,16 @@ bool WIZBIZDATA::fromJson(const Json::Value& value)
         bizLevel = value["level"].asInt();
         bizIsDue = value["isDue"].asBool();
         //
-        /*
         Json::Value avatars = value["avatarChanges"];
-        if (avatars.isArray())
+        if (avatars.isObject())
         {
-            for (int i = 0; i < avatars.size(); i++)
-            {
-                QString name = QString::fromStdString(avatars[i].asString());
-                mapAvatarChanges.insert(name);
+            Json::Value::Members keys = avatars.getMemberNames();
+            for (auto key : keys) {
+                //
+                QString name = QString::fromStdString(avatars[key].asString());
+                mapAvatarChanges[QString::fromStdString(key)] = name;
             }
         }
-        */
         //
         return !bizName.isEmpty()
                 && !bizGUID.isEmpty();

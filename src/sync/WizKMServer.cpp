@@ -503,6 +503,9 @@ bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
     //
     m_bLogin = WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo);
     //
+    qDebug() << "old server" << m_userInfo.strXmlRpcServer;
+    qDebug() << "new server" << m_userInfo.strKbServer;
+    //
     return m_bLogin;
 }
 bool WizKMAccountsServer::logout()
@@ -578,30 +581,32 @@ bool WizKMAccountsServer::getToken(const QString& strUserName, const QString& st
     return true;
 }
 
+
+struct WIZCERTDATA
+{
+    QString n;
+    QString e;
+    QString d;
+    QString hint;
+
+    bool fromJson(const Json::Value& value)
+    {
+        try {
+            n = QString::fromStdString(value["n"].asString());
+            e = QString::fromStdString(value["e"].asString());
+            d = QString::fromStdString(value["d"].asString());
+            hint = QString::fromStdString(value["hint"].asString());
+            return true;
+        } catch (Json::Exception& err) {
+            TOLOG1("Failed to convert josn to cert: %1", err.what());
+            return false;
+        }
+    }
+};
+//
+
 bool WizKMAccountsServer::getCert(QString& strN, QString& stre, QString& strd, QString& strHint)
 {
-    struct WIZCERTDATA
-    {
-        QString n;
-        QString e;
-        QString d;
-        QString hint;
-
-        bool fromJson(const Json::Value& value)
-        {
-            try {
-                n = QString::fromStdString(value["n"].asString());
-                e = QString::fromStdString(value["e"].asString());
-                d = QString::fromStdString(value["d"].asString());
-                hint = QString::fromStdString(value["hint"].asString());
-                return true;
-            } catch (Json::Exception& err) {
-                TOLOG1("Failed to convert josn to cert: %1", err.what());
-                return false;
-            }
-        }
-    };
-    //
     QString urlPath = "/as/user/cert";
     //
     WIZCERTDATA data;
@@ -638,20 +643,22 @@ bool WizKMAccountsServer::setCert(const QString& strN, const QString& stre, cons
     return true;
 }
 
-bool WizKMAccountsServer::getAdminBizCert(const QString& strToken, const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
+bool WizKMAccountsServer::getAdminBizCert(const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
 {
-    /*
-    CWizKMBaseParam param;
-    param.addString("token", strToken);
-    param.addString("biz_guid", strBizGuid);
+    QString urlPath = "/as/biz/cert/" + strBizGuid;
     //
-    if (!call("accounts.getBizCert", "n", strN, "e", stre, "d", strd, "hint", strHint, &param))
+    WIZCERTDATA data;
+    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<WIZCERTDATA>(*this, urlPath, data);
+    if (!jsonRet)
     {
-        TOLOG("Failed to get biz cert!");
+        TOLOG1("Failed to call %1", urlPath);
         return false;
     }
     //
-    */
+    strN = data.n;
+    stre = data.e;
+    strd = data.d;
+    strHint = data.hint;
     return true;
 }
 
@@ -799,29 +806,20 @@ bool WizKMAccountsServer::getMessages(__int64 nStartVersion, CWizMessageDataArra
 
 bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int nStatus)
 {
-    /*
-    CWizKMBaseParam param;
-
-    param.addString("token", getToken());
-    param.addString("ids", strMessageIDs);
-    param.addInt("status", nStatus);
+    QString strUrl = WizCommonApiEntry::messageServerUrl();
+    strUrl += QString("/messages/status?ids=%1&status=%2").arg(strMessageIDs).arg(WizIntToStr(nStatus));
+    strUrl = appendNormalParams(strUrl, getToken());
+    qDebug() << "set message raad status, strToken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
-    if (!call("accounts.setReadStatus", &param))
-    {
-        TOLOG("accounts.setReadStatus failure!");
-        return FALSE;
-    }
-    */
-    //
-    return TRUE;
+    return NoResult::execStandardJsonRequest(*this, strUrl);
 }
 
 bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
-    strUrl += QString("/messages?ids=%2").arg(m_userInfo.strToken).arg(strMessageIDs);
+    strUrl += QString("/messages?ids=%1").arg(strMessageIDs);
     strUrl = appendNormalParams(strUrl, getToken());
-    qDebug() << "set message delete status, strken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
+    qDebug() << "set message delete status, strToken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
     return NoResult::execStandardJsonRequest(*this, strUrl, "DELETE");
 }
@@ -2070,6 +2068,8 @@ bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arra
     //
     const WIZUSERINFOBASE info = userInfo();
     QString url = info.strKbServer + "/ks/note/list/guids/" + info.strKbGUID;
+    //
+    url = appendNormalParams(url, getToken());
     //
     Json::Value guids(Json::arrayValue);
     for (int i = 0; i < arrayDocumentGUID.size(); i++)
