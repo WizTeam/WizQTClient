@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
 {
     int ret = mainCore(argc, argv);
 
-    WizQueuedThreadsShutdown();
+    //WizQueuedThreadsShutdown();
     // clean up
     QString strTempPath = Utils::WizPathResolve::tempPath();
     ::WizDeleteAllFilesInFolder(strTempPath);

@@ -1589,6 +1589,8 @@ void syncGroupUsers(WizKMAccountsServer& server, const CWizGroupDataArray& array
 
     pEvents->onStatus(QObject::tr("Sync group users"));
 
+    int total = 0;
+    //
     for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
          it != arrayGroup.end();
          it++)
@@ -1596,15 +1598,21 @@ void syncGroupUsers(WizKMAccountsServer& server, const CWizGroupDataArray& array
         const WIZGROUPDATA& g = *it;
         if (!g.bizGUID.isEmpty())
         {
-            QString strUrl = WizCommonApiEntry::groupUsersUrl(server.getToken(), g.bizGUID, g.strGroupGUID);
-            QString strJsonRaw = downloadFromUrl(strUrl);            
-            if (!strJsonRaw.isEmpty())
-                pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
+            CWizBizUserDataArray arrayUser;
+            if (server.getBizUsers(g.bizGUID, g.strGroupGUID, arrayUser))
+            {
+                int start = WizGetTickCount();
+                pDatabase->onDownloadBizUsers(g.strGroupGUID, arrayUser);
+                int used = WizGetTickCount() - start;
+                total += used;
+            }
         }
-
+        //
         if (pEvents->isStop())
             return;
     }
+    //
+    qDebug() << "total used: " << total;
 
     pDatabase->setMeta("SYNC_INFO", "DownloadGroupUsers", QDateTime::currentDateTime().toString());
 }

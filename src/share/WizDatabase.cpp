@@ -1059,6 +1059,63 @@ bool WizDatabase::onDownloadBizs(const CWizBizDataArray& arrayBiz)
     return ret;
 }
 
+bool WizDatabase::onDownloadBizUsers(const QString& kbGuid, const CWizBizUserDataArray& arrayUser)
+{
+    if (arrayUser.empty())
+        return false;
+    //
+
+    CWizBizUserDataArray oldUsers;
+    if (users(kbGuid, oldUsers))
+    {
+        std::map<QString, WIZBIZUSER> old;
+        for (const auto& user: oldUsers)
+        {
+            old[user.userGUID] = user;
+        }
+        //
+        bool bHasError = false;
+        CWizBizUserDataArray::const_iterator it;
+        for (it = arrayUser.begin(); it != arrayUser.end(); it++)
+        {
+            const WIZBIZUSER& user = *it;
+            const WIZBIZUSER oldUser = old[user.userGUID];
+            //
+            if (oldUser == user)
+                continue;
+            //
+            if (oldUser.userGUID.isEmpty())
+            {
+                if (createUserEx(user)) {
+                    bHasError = true;
+                }
+            }
+            else
+            {
+                if (modifyUserEx(user)) {
+                    bHasError = true;
+                }
+            }
+        }
+        return !bHasError;
+    }
+    else
+    {
+        bool bHasError = false;
+        CWizBizUserDataArray::const_iterator it;
+        for (it = arrayUser.begin(); it != arrayUser.end(); it++)
+        {
+            const WIZBIZUSER& user = *it;
+            if (!updateBizUser(user)) {
+                bHasError = true;
+            }
+        }
+
+        return !bHasError;
+    }
+}
+
+
 IWizSyncableDatabase* WizDatabase::getGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
@@ -1571,11 +1628,6 @@ QString WizDatabase::meta(const QString& strSection, const QString& strKey)
     return getMetaDef(strSection, strKey);
 }
 
-void WizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& strJson)
-{
-    setBizUsers(strkbGUID, strJson);
-}
-
 void WizDatabase::setFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
     setLocalValueVersion("folders_pos", nVersion);
@@ -1864,68 +1916,6 @@ bool WizDatabase::isFolderExists(const QString& folder)
     pos = std::find_if(arrayExtra.begin(), arrayExtra.end(), WizCompareString(folder));
 
     return pos != arrayExtra.end();
-}
-
-void WizDatabase::setBizUsers(const QString& strBizGUID, const QString& strJsonUsers)
-{
-    CWizBizUserDataArray arrayUser;
-
-    if (!loadBizUsersFromJson(strBizGUID, strJsonUsers, arrayUser)) {
-        return;
-    }
-
-    if (!updateBizUsers(arrayUser)) {
-        return;
-    }
-}
-
-bool WizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
-                                        const QString& strJsonRaw,
-                                        CWizBizUserDataArray& arrayUser)
-{
-    Json::Value d;
-    Json::Reader reader;
-    if (!reader.parse(strJsonRaw.toUtf8().constData(), d))
-        return false;
-
-    if (d.isMember("error_code")) {
-        qDebug() << QString::fromStdString(d["error"].asString());
-        return false;
-    }
-
-    if (d.isMember("return_code")) {
-        int nCode = d["return_code"].asInt();
-        if (nCode != 200) {
-            qDebug() << QString::fromStdString(d["return_message"].asString()) << ", code = " << nCode;
-            return false;
-        }
-    }
-
-    if (!d.isMember("result")) {
-        qDebug() << "Error occured when try to parse json of biz users";
-        qDebug() << strJsonRaw;
-        return false;
-    }
-
-    const Json::Value& users = d["result"];
-    for (Json::ArrayIndex i = 0; i < users.size(); i++) {
-        const Json::Value& u = users[i];
-        if (!u.isObject()) {
-            qDebug() << "Error occured when parse json of biz users";
-            return false;
-        }
-
-        WIZBIZUSER user;
-        user.alias = QString::fromStdString(u["alias"].asString());
-        user.pinyin = QString::fromStdString(u["pinyin"].asString());
-        user.userGUID = QString::fromStdString(u["user_guid"].asString());
-        user.userId = QString::fromStdString(u["user_id"].asString());
-        user.bizGUID = strBizGUID;
-
-        arrayUser.push_back(user);
-    }
-
-    return true;
 }
 
 void WizDatabase::setFoldersPosModified()
@@ -2824,7 +2814,7 @@ bool WizDatabase::updateBizUser(const WIZBIZUSER& user)
     bool bRet = false;
 
     WIZBIZUSER userTemp;
-    if (userFromGUID(user.bizGUID, user.userGUID, userTemp)) {
+    if (userFromGUID(user.kbGUID, user.userGUID, userTemp)) {
         // only modify user when alias changed
 //        if (userTemp.alias != user.alias) {
         bRet = modifyUserEx(user);
@@ -2846,24 +2836,6 @@ bool WizDatabase::updateBizUser(const WIZBIZUSER& user)
     return bRet;
 }
 
-bool WizDatabase::updateBizUsers(const CWizBizUserDataArray& arrayUser)
-{
-    // TODO: delete users not exist on remote
-    if (arrayUser.empty())
-        return false;
-
-    bool bHasError = false;
-    CWizBizUserDataArray::const_iterator it;
-    for (it = arrayUser.begin(); it != arrayUser.end(); it++)
-    {
-        const WIZBIZUSER& user = *it;
-        if (!updateBizUser(user)) {
-            bHasError = true;
-        }
-    }
-
-    return !bHasError;
-}
 
 bool WizDatabase::updateMessage(const WIZMESSAGEDATA& msg)
 {

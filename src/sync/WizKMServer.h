@@ -91,6 +91,8 @@ public:
     bool setMessageReadStatus(const QString& strMessageIDs, int nStatus);
     bool setMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
     //
+    bool getBizUsers(const QString& bizGuid, const QString& kbGuid, CWizBizUserDataArray& arrayUser);
+    //
     bool getAdminBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool setUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool getUserBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);

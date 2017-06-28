@@ -145,6 +145,8 @@ private:
     WizUpgradeChecker* m_upgrade;
     WizIAPDialog* m_iapDialog;
     WizTemplatePurchaseDialog* m_templateIAPDialog;
+    //
+    bool m_quiting;
 
     //
     WizTrayIcon* m_tray;

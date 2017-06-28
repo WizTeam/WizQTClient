@@ -166,6 +166,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_trayMenu(nullptr)
     , m_mobileFileReceiver(nullptr)
     , m_bQuickDownloadMessageEnable(false)
+    , m_quiting(false)
 {
     WizGlobal::setMainWindow(this);
     WizKMSyncThread::setQuickThread(m_syncQuick);
@@ -376,6 +377,8 @@ void WizMainWindow::on_application_aboutToQuit()
 
 void WizMainWindow::cleanOnQuit()
 {
+    m_quiting = true;
+    //
     WizObjectDownloaderHost::instance()->waitForDone();
     WizKMSyncThread::setQuickThread(NULL);
     //
@@ -399,6 +402,8 @@ void WizMainWindow::cleanOnQuit()
     {
         m_mobileFileReceiver->waitForDone();
     }
+    //
+    WizQueuedThreadsShutdown();
 }
 
 WizSearcher*WizMainWindow::searcher()
@@ -1533,8 +1538,14 @@ void WizMainWindow::on_newNoteByExtraMenu_request()
 
 void WizMainWindow::windowActived()
 {
+    if (m_quiting)
+        return;
+    //
     static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
     if (!isBizUser || !m_bQuickDownloadMessageEnable)
+        return;
+    //
+    if (!m_syncFull)
         return;
 
     m_syncFull->quickDownloadMesages();

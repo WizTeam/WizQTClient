@@ -674,7 +674,7 @@ bool WizIndexBase::sqlToBizUserDataArray(const QString& strSQL,
         while (!query.eof())
         {
             WIZBIZUSER data;
-            data.bizGUID = query.getStringField(userBIZ_GUID);
+            data.kbGUID = query.getStringField(userBIZ_GUID);
             data.userId = query.getStringField(userUSER_ID);
             data.userGUID = query.getStringField(userUSER_GUID);
             data.alias = query.getStringField(userUSER_ALIAS);
@@ -793,7 +793,7 @@ bool WizIndexBase::createUserEx(const WIZBIZUSER& data)
 {
     qDebug() << "create user, alias: " << data.alias;
 
-    Q_ASSERT(!data.bizGUID.isEmpty() && !data.userGUID.isEmpty());
+    Q_ASSERT(!data.kbGUID.isEmpty() && !data.userGUID.isEmpty());
 
     CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_USER,
                                               FIELD_LIST_WIZ_USER,
@@ -801,7 +801,7 @@ bool WizIndexBase::createUserEx(const WIZBIZUSER& data)
 
     CString strSQL;
     strSQL.format(strFormat,
-                  STR2SQL(data.bizGUID).utf16(),
+                  STR2SQL(data.kbGUID).utf16(),
                   STR2SQL(data.userId).utf16(),
                   STR2SQL(data.userGUID).utf16(),
                   STR2SQL(data.alias).utf16(),
@@ -823,14 +823,14 @@ bool WizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 {
     qDebug() << "modify user, alias: " << user.alias;
 
-    Q_ASSERT(!user.bizGUID.isEmpty() && !user.userGUID.isEmpty());
+    Q_ASSERT(!user.kbGUID.isEmpty() && !user.userGUID.isEmpty());
 
     // save old user info
     WIZBIZUSER userOld;
-    userFromGUID(user.bizGUID, user.userGUID, userOld);
+    userFromGUID(user.kbGUID, user.userGUID, userOld);
 
     CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
-    strWhere = strWhere.arg(STR2SQL(user.bizGUID)).arg(STR2SQL(user.userGUID));
+    strWhere = strWhere.arg(STR2SQL(user.kbGUID)).arg(STR2SQL(user.userGUID));
 
     CString strFormat = formatUpdateSQLByWhere(TABLE_NAME_WIZ_USER,
                                               FIELD_LIST_WIZ_USER_MODIFY,
@@ -848,7 +848,7 @@ bool WizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 
     // read new user info
     WIZBIZUSER userNew;
-    userFromGUID(user.bizGUID, user.userGUID, userNew);
+    userFromGUID(user.kbGUID, user.userGUID, userNew);
 
     if (!m_bUpdating) {
         emit userModified(userOld, userNew);

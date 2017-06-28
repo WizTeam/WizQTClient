@@ -852,3 +852,33 @@ bool WIZDOCUMENTPARAMDATA::toJson(QString kbGuid, Json::Value& value) const
     //
     return true;
 }
+
+bool WIZBIZUSER::operator ==(const WIZBIZUSER& other) const
+{
+    bool ret = kbGUID == other.kbGUID
+            && userGUID == other.userGUID
+            && userId == other.userId
+            && alias == other.alias
+            && pinyin == other.pinyin;
+    //
+    return ret;
+}
+
+
+bool WIZBIZUSER::fromJson(const Json::Value& value)
+{
+    try {
+        //
+        alias = QString::fromStdString(value["alias"].asString());
+        pinyin = QString::fromStdString(value["pinyin"].asString());
+        userGUID = QString::fromStdString(value["user_guid"].asString());
+        userId = QString::fromStdString(value["user_id"].asString());
+        //user.bizGUID = strBizGUID;
+        //
+        return !userGUID.isEmpty();
+
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+}

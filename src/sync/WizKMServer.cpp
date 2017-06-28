@@ -804,6 +804,29 @@ bool WizKMAccountsServer::getMessages(__int64 nStartVersion, CWizMessageDataArra
     return TRUE;
 }
 
+bool WizKMAccountsServer::getBizUsers(const QString& bizGuid, const QString& kbGuid, CWizBizUserDataArray& arrayUser)
+{
+    int nCountPerPage = 100;
+    __int64 nNextVersion = 0;
+    //
+    QString urlPath = "/a/biz/user_aliases?biz_guid=" + bizGuid + "&kb_guid=" + kbGuid;
+    QString strUrl = WizCommonApiEntry::asServerUrl() + urlPath;
+    //
+    if (!getJsonList<WIZBIZUSER>(*this, strUrl, nCountPerPage, nNextVersion, arrayUser))
+    {
+        TOLOG2("Failed to get message list: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nNextVersion));
+        return FALSE;
+    }
+    //
+    for (auto& user : arrayUser)
+    {
+        user.kbGUID = kbGuid;
+    }
+    //
+    return true;
+}
+
+
 bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int nStatus)
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
