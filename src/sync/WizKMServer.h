@@ -72,6 +72,7 @@ protected:
 public:
     WIZUSERINFO m_userInfo;
     std::map<QString, WIZKBINFO> m_kbInfos;
+    std::map<QString, WIZKBVALUEVERSIONS> m_valueVersions;
 public:
     void setAutoLogout(bool b) { m_bAutoLogout = b; }
     //
@@ -94,6 +95,7 @@ public:
     //
     bool getBizUsers(const QString& bizGuid, const QString& kbGuid, CWizBizUserDataArray& arrayUser);
     bool getKbInfos(std::deque<WIZKBINFO>& arrayInfo);
+    bool getValueVersions(std::deque<WIZKBVALUEVERSIONS>& arrayVersion);
     //
     bool getAdminBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool setUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
@@ -111,6 +113,9 @@ public:
     //
     bool initAllKbInfos();
     WIZKBINFO getKbInfo(QString kbGuid) const;
+    //
+    bool initAllValueVersions();
+    WIZKBVALUEVERSIONS getValueVersions(QString kbGuid) const;
 };
 
 
@@ -119,7 +124,7 @@ class WizKMDatabaseServer: public WizKMApiServerBase
 {
     Q_OBJECT
 public:
-    WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, QObject* parent = 0);
+    WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo = WIZKBINFO(), const WIZKBVALUEVERSIONS& versions = WIZKBVALUEVERSIONS(), QObject* parent = 0);
     virtual ~WizKMDatabaseServer();
 
     const WIZKBINFO& kbInfo();
@@ -137,6 +142,7 @@ public:
 protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
+    WIZKBVALUEVERSIONS m_valueVersions;
     //
     WIZSTANDARDRESULT m_lastJsonResult;
     QString m_strLastLocalError;

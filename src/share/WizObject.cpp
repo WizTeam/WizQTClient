@@ -95,6 +95,40 @@ bool WIZUSERCERT::loadFromXmlRpc(WizXmlRpcStructValue& val)
     return true;
 }
 
+WIZKBVALUEVERSIONS::WIZKBVALUEVERSIONS()
+    : inited(false)
+{
+
+}
+
+
+bool WIZKBVALUEVERSIONS::fromJson(const Json::Value& value)
+{
+    try {
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
+        //
+        Json::Value versionsVal = value["versions"];
+        //
+        for (int i = 0; i < versionsVal.size(); i++)
+        {
+            Json::Value version = versionsVal[i];
+            //
+            QString key = QString::fromStdString(version["key"].asString());
+            __int64 versionVal = version["version"].asInt64();
+            //
+            versions[key] = versionVal;
+        }
+        //
+        inited = true;
+        //
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
+    return true;
+}
+
 
 WIZKBINFO::WIZKBINFO()
 {

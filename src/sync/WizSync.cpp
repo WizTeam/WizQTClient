@@ -69,13 +69,12 @@ int GetSyncStartProgress(WizKMSyncProgress progress)
 }
 
 
-WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo,IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
+WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
     : m_pDatabase(pDatabase)
     , m_userInfo(userInfo)
-    , m_kbInfo(kbInfo)
     , m_pEvents(pEvents)
     , m_bGroup(bGroup)
-    , m_server(userInfo, parent)
+    , m_server(userInfo, kbInfo, versions, parent)
     , m_bUploadOnly(bUploadOnly)
 {
     m_server.setEvents(m_pEvents);
@@ -104,16 +103,8 @@ bool WizKMSync::syncCore()
     m_pEvents->onStatus(QObject::tr("Query server infomation"));
     //
     //
-    if (m_kbInfo.nDocumentVersion == -1)
-    {
-        if (!m_server.kb_getInfo())
-            return false;
-        m_kbInfo = m_server.kbInfo();
-    }
-    else
-    {
-        m_server.setKBInfo(m_kbInfo);
-    }
+    if (!m_server.kb_getInfo())
+        return false;
     //
     QString kbInfoKey = m_bGroup ? m_userInfo.strKbGUID : "";
     m_pDatabase->setKbInfo(kbInfoKey, m_server.kbInfo());
@@ -1284,7 +1275,7 @@ bool WizDownloadDocumentsByGuids(IWizKMSyncEvents* pEvents, WizKMAccountsServer&
         userInfo.strKbGUID = group.strGroupGUID;
     }
     //
-    WizKMDatabaseServer serverDB(userInfo, server.parent());
+    WizKMDatabaseServer serverDB(userInfo);
     //
     pEvents->onStatus(_TR("Query notes information"));
     //
@@ -1364,7 +1355,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
         //
         WIZUSERINFO userInfo = server.m_userInfo;
         userInfo.strKbGUID = group.strGroupGUID;
-        WizKMDatabaseServer serverDB(userInfo, server.parent());
+        WizKMDatabaseServer serverDB(userInfo);
         //
         pEvents->onStatus(_TR("Query notes information"));
         //
@@ -1703,12 +1694,16 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     WizUploadMessages(pEvents, server, pDatabase);
     //
     server.initAllKbInfos();
+    server.initAllValueVersions();
     //
     pEvents->onStatus(QObject::tr("----------sync private notes----------"));
     //
     {
         pEvents->setCurrentDatabase(0);
-        WizKMSync syncPrivate(pDatabase, server.m_userInfo, server.getKbInfo(server.m_userInfo.strKbGUID), pEvents, FALSE, FALSE, NULL);
+        WizKMSync syncPrivate(pDatabase, server.m_userInfo,
+                              server.getKbInfo(server.m_userInfo.strKbGUID),
+                              server.getValueVersions(server.m_userInfo.strKbGUID),
+                              pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.sync())
         {
@@ -1759,7 +1754,10 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         userInfo.strKbGUID = group.strGroupGUID;
         //
         //
-        WizKMSync syncGroup(pGroupDatabase, userInfo, server.getKbInfo(userInfo.strKbGUID), pEvents, TRUE, FALSE, NULL);
+        WizKMSync syncGroup(pGroupDatabase, userInfo,
+                            server.getKbInfo(userInfo.strKbGUID),
+                            server.getValueVersions(server.m_userInfo.strKbGUID),
+                            pEvents, TRUE, FALSE, NULL);
         //
         if (syncGroup.sync())
         {
@@ -1787,7 +1785,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     {
         //pEvents->SetCurrentDatabase(0);
-        WizKMSync syncPrivate(pDatabase, server.m_userInfo, WIZKBINFO(), pEvents, FALSE, FALSE, NULL);
+        WizKMSync syncPrivate(pDatabase, server.m_userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.downloadObjectData())
         {
@@ -1826,7 +1824,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         userInfo.strKbGUID = group.strGroupGUID;
         //
         //
-        WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), pEvents, TRUE, FALSE, NULL);
+        WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, TRUE, FALSE, NULL);
         //
         if (syncGroup.downloadObjectData())
         {
@@ -1851,14 +1849,14 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
 
 bool WizUploadDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
 {
-    WizKMSync sync(pDatabase, info, WIZKBINFO(), pEvents, bGroup, TRUE, NULL);
+    WizKMSync sync(pDatabase, info, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, bGroup, TRUE, NULL);
     bool bRet = sync.sync();
     //
     return bRet;
 }
 bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
 {
-    WizKMSync sync(pDatabase, info, WIZKBINFO(), pEvents, bGroup, FALSE, NULL);
+    WizKMSync sync(pDatabase, info, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, bGroup, FALSE, NULL);
     bool bRet = sync.sync();
     if (bRet)
     {

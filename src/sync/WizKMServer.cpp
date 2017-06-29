@@ -448,11 +448,34 @@ bool WizKMAccountsServer::initAllKbInfos()
     return true;
 }
 
+
 WIZKBINFO WizKMAccountsServer::getKbInfo(QString kbGuid) const
 {
     auto it = m_kbInfos.find(kbGuid);
     if (it == m_kbInfos.end())
         return WIZKBINFO();
+    return it->second;
+}
+
+
+bool WizKMAccountsServer::initAllValueVersions()
+{
+    std::deque<WIZKBVALUEVERSIONS> versions;
+    if (!getValueVersions(versions))
+        return false;
+    //
+    for (const auto& version : versions) {
+        m_valueVersions[version.strKbGUID] = version;
+    }
+    //
+    return true;
+}
+
+WIZKBVALUEVERSIONS WizKMAccountsServer::getValueVersions(QString kbGuid) const
+{
+    auto it = m_valueVersions.find(kbGuid);
+    if (it == m_valueVersions.end())
+        return WIZKBVALUEVERSIONS();
     return it->second;
 }
 
@@ -809,6 +832,23 @@ bool WizKMAccountsServer::getKbInfos(std::deque<WIZKBINFO>& arrayInfo)
     return true;
 }
 
+bool WizKMAccountsServer::getValueVersions(std::deque<WIZKBVALUEVERSIONS>& arrayVersion)
+{
+    int nCountPerPage = 100;
+    __int64 nNextVersion = 0;
+    //
+    QString urlPath = "/as/user/kv/versions";
+    //
+    if (!getJsonList<WIZKBVALUEVERSIONS>(*this, urlPath, nCountPerPage, nNextVersion, arrayVersion))
+    {
+        TOLOG2("Failed to get Kb value verskons: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nNextVersion));
+        return false;
+    }
+    //
+    return true;
+}
+
+
 
 bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int nStatus)
 {
@@ -846,9 +886,11 @@ bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValu
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, QObject* parent)
+WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, QObject* parent)
     : WizKMApiServerBase(userInfo.strKbServer, parent)
     , m_userInfo(userInfo)
+    , m_kbInfo(kbInfo)
+    , m_valueVersions(versions)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
@@ -914,20 +956,35 @@ int WizKMDatabaseServer::getCountPerPage()
 //
 bool WizKMDatabaseServer::kb_getInfo()
 {
-    QString url = m_userInfo.strKbServer + "/ks/kb/info/" + m_userInfo.strKbGUID;
-    //
-    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<WIZKBINFO>(*this, url, m_kbInfo);
-    if (!jsonRet)
+    if (m_kbInfo.nDocumentVersion == -1)
     {
-        TOLOG1("Failed to call %1", url);
-        return false;
+        QString url = m_userInfo.strKbServer + "/ks/kb/info/" + m_userInfo.strKbGUID;
+        //
+        WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<WIZKBINFO>(*this, url, m_kbInfo);
+        if (!jsonRet)
+        {
+            TOLOG1("Failed to call %1", url);
+            return false;
+        }
+        //
     }
-    //
     return true;
 }
 
 bool WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
+    if (m_valueVersions.inited)
+    {
+        auto it = m_valueVersions.versions.find(strKey);
+        if (it != m_valueVersions.versions.end())
+        {
+            nVersion = it->second;
+            return true;
+        }
+        nVersion = -1;
+        return true;
+    }
+    //
     return WizKMApiServerBase::getValueVersion("ks", getKbGuid(), strKey, nVersion);
 }
 bool WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)

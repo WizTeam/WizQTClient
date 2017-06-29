@@ -144,6 +144,13 @@ struct WIZUSERCERT
     QString strHint;
 };
 
+struct WIZKBVALUEVERSIONS : public WIZOBJECTBASE
+{
+    WIZKBVALUEVERSIONS();
+    bool inited;
+    std::map<QString, __int64> versions;
+    bool fromJson(const Json::Value& value);
+};
 
 struct WIZKBINFO : public WIZOBJECTBASE
 {
