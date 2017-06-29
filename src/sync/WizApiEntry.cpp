@@ -238,41 +238,12 @@ QString WizCommonApiEntry::mailShareUrl(const QString& strKUrl, const QString& s
     return strMailShare;
 }
 
-QString WizCommonApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
+QString WizCommonApiEntry::commentUrlTemplate()
 {
     QString strCommentUrl = getUrlByCommand(WIZNOTE_API_COMMAND_COMMENT);
-
-    QString strUrl(strCommentUrl);
-    strUrl.replace("{token}", strToken);
-    strUrl.replace("{kbGuid}", strKbGUID);
-    strUrl.replace("{documentGuid}", strGUID);
-
-    return strUrl;
+    return strCommentUrl;
 }
 
-QString WizCommonApiEntry::commentCountUrl(const QString& strKUrl, const QString& strToken,
-                                  const QString& strKbGUID, const QString& strGUID)
-{
-    //通过endpoints获得api命令为comment_count，和之前使用的comment_count2不同，需要分开处理
-    //不能通过comment_count命令直接向服务器请求地址，返回的是已废弃的内容。如果endpoints的缓存中没有则使用comment_count2获取
-    QString strCommentCountUrl = getUrlFromCache("comment_count");// getUrlByCommand("comment_count");
-    if (strCommentCountUrl.isEmpty())
-    {
-        strCommentCountUrl = requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT);
-        updateUrlCache("comment_count", strCommentCountUrl);
-    }
-
-    QString strKSServer = strKUrl;
-    //NOTE: 新版服务器修改了评论数目获取方法，需要自行将KUrl中的/xmlrpc移除
-    strKSServer.remove("/xmlrpc");
-    QString strUrl(strCommentCountUrl);
-    strUrl.replace("{server_url}", strKSServer);
-    strUrl.replace("{token}", strToken);
-
-    strUrl.replace("{kbGuid}", strKbGUID);
-    strUrl.replace("{documentGuid}", strGUID);
-    return strUrl;
-}
 
 QString WizCommonApiEntry::accountInfoUrl(const QString& strToken)
 {

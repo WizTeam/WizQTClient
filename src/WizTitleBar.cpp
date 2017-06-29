@@ -28,6 +28,8 @@
 #include "share/WizAnimateAction.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizGlobal.h"
+#include "share/WizThreads.h"
+#include "sync/WizApiEntry.h"
 #include "utils/WizStyleHelper.h"
 #include "utils/WizPathResolve.h"
 #include "widgets/WizLocalProgressWebView.h"
@@ -197,8 +199,8 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
     connect(m_tagBar, SIGNAL(widgetStatusChanged()), SLOT(updateTagButtonStatus()));
 
-    connect(m_commentManager, SIGNAL(commentUrlAcquired(QString,QString)),
-            SLOT(on_commentUrlAcquired(QString,QString)));
+    connect(m_commentManager, SIGNAL(tokenAcquired(QString)),
+            SLOT(on_commentTokenAcquired(QString)));
     connect(m_commentManager, SIGNAL(commentCountAcquired(QString,int)),
             SLOT(on_commentCountAcquired(QString,int)));
 }
@@ -702,7 +704,7 @@ void WizTitleBar::onCommentsButtonClicked()
         splitter->setSizes(lin);
         commentWidget->show();
 
-        m_commentManager->queryCommentUrl(view->note().strKbGUID, view->note().strGUID);
+        m_commentManager->queryCommentCount(view->note().strKbGUID, view->note().strGUID, true);
     } else {
         m_commentsBtn->setEnabled(false);
     }
@@ -732,42 +734,38 @@ void WizTitleBar::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAE
 
     m_commentsBtn->setCount(0);
     m_commentManager->queryCommentCount(note.strKbGUID, note.strGUID, true);
-
-    WizLocalProgressWebView* commentWidget = noteView()->commentWidget();
-    if (commentWidget && commentWidget->isVisible())
-    {
-        //commentWidget->showLocalProgress();
-        m_commentManager->queryCommentUrl(note.strKbGUID, note.strGUID);
-    }
 }
 
-void WizTitleBar::on_commentUrlAcquired(QString GUID, QString url)
+void WizTitleBar::on_commentTokenAcquired(QString token)
 {
-    QUrl commentsUrl(url);
-    QUrlQuery query(commentsUrl.query());
-
-    QString token = query.queryItemValue("token");
-    QString kbGuid = query.queryItemValue("kb_guid");
-    //
     WizDocumentView* view = noteView();
-    if (view && view->note().strGUID == GUID)
+    if (view)
     {
-        WizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+        WizLocalProgressWebView* commentWidget = view->commentWidget();
         if (commentWidget && commentWidget->isVisible())
         {
-            if (url.isEmpty())
+            if (token.isEmpty())
             {
-                qDebug() << "Wow, query comment url failed!";
+                qDebug() << "Wow, query token= failed!";
                 loadErrorPage();
             }
             else
             {
+                WIZDOCUMENTDATA note = view->note();
 
-                QString js = QString("updateCmt('%1','%2','%3')").arg(token).arg(kbGuid).arg(GUID);
+                QString js = QString("updateCmt('%1','%2','%3')").arg(token).arg(note.strKbGUID).arg(note.strGUID);
                 commentWidget->web()->page()->runJavaScript(js, [=](const QVariant& vRet){
                     if (!vRet.toBool())
                     {
-                        commentWidget->web()->load(url);
+                        QString commentUrlTemplate = m_commentManager->getCommentUrlTemplate();
+                        if (!commentUrlTemplate.isEmpty())
+                        {
+                            QString strUrl = commentUrlTemplate;
+                            strUrl.replace("{token}", token);
+                            strUrl.replace("{kbGuid}", note.strKbGUID);
+                            strUrl.replace("{documentGuid}", note.strGUID);
+                            commentWidget->web()->load(strUrl);
+                        }
                     }
                 });
             }

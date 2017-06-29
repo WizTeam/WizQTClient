@@ -100,7 +100,6 @@ public:
     bool getValueVersion(const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
-    //
 public:
     QString getToken() const;
     QString getKbGuid() const;
@@ -186,6 +185,8 @@ public:
     bool getValueVersion(const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    //
+    bool getCommentCount(const QString& strDocumentGuid, int& commentCount);
 
 public:
     virtual int getCountPerPage();

@@ -1558,6 +1558,9 @@ void initWebActions(QWebEnginePage* page)
         //
         QString text = actionObj->text();
         g_webActions[text] = a;
+        //
+        text = text.replace("&", "");
+        g_webActions[text] = a;
     }
 }
 //
@@ -1565,6 +1568,7 @@ QWebEnginePage::WebAction menuText2WebAction(QWebEnginePage* page, QString text)
 {
     initWebActions(page);
     //
+    text = text.replace("&", "");
     auto it = g_webActions.find(text);
     if (it == g_webActions.end())
         return QWebEnginePage::NoWebAction;
@@ -1608,6 +1612,9 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         case QWebEnginePage::Reload:
 #if QT_VERSION >= 0x050600
         case QWebEnginePage::DownloadImageToDisk:
+#endif
+#if QT_VERSION >= 0x050800
+        case QWebEnginePage::ViewSource:
 #endif
             menu->removeAction(action);
             break;

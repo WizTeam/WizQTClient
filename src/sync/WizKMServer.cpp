@@ -89,8 +89,8 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QSt
  * */
 
 namespace WithResult {
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, TData& data)
+template <class TData, class TPost, class TConverter>
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, TData& data, const QString& method, const TPost &reqBody, TConverter convert)
 {
     QString url = server.buildUrl(urlPath);
     //
@@ -103,7 +103,7 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QSt
     //
     try {
         Json::Value result = res["result"];
-        bool parseRet = data.fromJson(result);
+        bool parseRet = convert(result, data);
         if (!parseRet)
         {
             qDebug() << "invalid json format: failed to convert result to object data";
@@ -117,109 +117,56 @@ static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QSt
     }
 }
 //
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, __int64& data)
+template <class TData, class TPost = Json::Value>
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, TData& data, const QString& method = "GET", const TPost &reqBody = TPost())
 {
-    QString url = server.buildUrl(urlPath);
-    //
-    Json::Value res;
-    WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, method, reqBody, res);
-    if (!ret)
-    {
-        return server.setLastError(ret);
-    }
-    //
-    try {
-        Json::Value result = res[resultFiledName.toStdString()];
-        data = result.asInt64();
-        return WIZSTANDARDRESULT::noError();
-    } catch (Json::Exception& err) {
-        TOLOG1("josn error: %1", err.what());
-        ret = WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
-        return server.setLastError(ret);
-    }
+    return execStandardJsonRequest(server, urlPath, data, method, reqBody, [=](const Json::Value& result, TData& data) {
+        return data.fromJson(result);
+    });
 }
 //
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const QByteArray &reqBody, QString resultFiledName, QString& data)
+template <class TData, class TPost = Json::Value>
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, int& data, const QString& method = "GET", const TPost &reqBody = TPost())
 {
-    QString url = server.buildUrl(urlPath);
-    //
-    Json::Value res;
-    WIZSTANDARDRESULT ret = WizRequest::execStandardJsonRequest(url, method, reqBody, res);
-    if (!ret)
-    {
-        return server.setLastError(ret);
-    }
-    //
-    try {
-        Json::Value result = res[resultFiledName.toStdString()];
-        data = QString::fromStdString(result.asString());
-        return WIZSTANDARDRESULT::noError();
-    } catch (Json::Exception& err) {
-        TOLOG1("josn error: %1", err.what());
-        ret = WIZSTANDARDRESULT(WIZSTANDARDRESULT::format);
-        return server.setLastError(ret);
-    }
-}
-//
-/*
- * POST/PUT
- */
-
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, TData& data)
-{
-    Json::FastWriter writer;
-    std::string body = writer.write(reqBody);
-    QByteArray buffer(body.c_str());
-    //
-    return execStandardJsonRequest<TData>(server, urlPath, method, buffer, data);
-}
-//
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, QString resultFiledName, __int64& data)
-{
-    Json::FastWriter writer;
-    std::string body = writer.write(reqBody);
-    QByteArray buffer(body.c_str());
-    //
-    return execStandardJsonRequest<__int64>(server, urlPath, method, buffer, resultFiledName, data);
-}
-//
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, const QString& method, const Json::Value &reqBody, QString resultFiledName,QString& data)
-{
-    Json::FastWriter writer;
-    std::string body = writer.write(reqBody);
-    QByteArray buffer(body.c_str());
-    //
-    return execStandardJsonRequest<QString>(server, urlPath, method, buffer, resultFiledName, data);
-}
-//
-/*
- * GET only
- */
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, TData& data)
-{
-    return execStandardJsonRequest<TData>(server, urlPath, "GET", QByteArray(), data);
-}
-//
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, QString resultFiledName, __int64& data)
-{
-    return execStandardJsonRequest<__int64>(server, urlPath, "GET", QByteArray(), resultFiledName, data);
-}
-//
-template <class TData>
-static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, QString resultFiledName, QString& data)
-{
-    return execStandardJsonRequest<QString>(server, urlPath, "GET", QByteArray(), resultFiledName, data);
-}
-//
+    return execStandardJsonRequest(server, urlPath, data, method, reqBody, [=](const Json::Value& result, TData& data) {
+        try {
+            data = result.asInt();
+            return true;
+        } catch (Json::Exception& err) {
+            return false;
+        }
+    });
 }
 
+template <class TData, class TPost = Json::Value>
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, __int64& data, const QString& method = "GET", const TPost &reqBody = TPost())
+{
+    return execStandardJsonRequest(server, urlPath, data, method, reqBody, [=](const Json::Value& result, TData& data) {
+        try {
+            data = result.asInt64();
+            return true;
+        } catch (Json::Exception& err) {
+            return false;
+        }
+    });
+}
+
+template <class TData, class TPost = Json::Value>
+static WIZSTANDARDRESULT execStandardJsonRequest(WizKMApiServerBase& server, QString urlPath, QString& data, const QString& method = "GET", const TPost &reqBody = TPost())
+{
+    return execStandardJsonRequest(server, urlPath, data, method, reqBody, [=](const Json::Value& result, TData& data) {
+        try {
+            data = QString::fromStdString(result.asString());
+            return true;
+        } catch (Json::Exception& err) {
+            return false;
+        }
+    });
+}
+
+//
+}   //end WithResult
+//
 /*
  * GET/POST list
   */
@@ -408,7 +355,7 @@ bool WizKMApiServerBase::getValueVersion(const QString& strMethodPrefix, const Q
 {
     QString urlPath = "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
     //
-    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<__int64>(*this, urlPath, "result", nVersion);
+    WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<__int64>(*this, urlPath, nVersion);
     return jsonRet;
 }
 bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
@@ -419,7 +366,7 @@ bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString&
         QString strKey;
         QString strValue;
         //
-        bool fromJson(Json::Value& value)
+        bool fromJson(const Json::Value& value)
         {
             try {
                 nVersion = value["version"].asInt64();
@@ -501,7 +448,7 @@ bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
     params["userId"] = strUserName.toStdString();
     params["password"] = strPassword.toStdString();
     //
-    m_bLogin = WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo);
+    m_bLogin = WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, m_userInfo, "POST", params);
     //
     qDebug() << "old server" << m_userInfo.strXmlRpcServer;
     qDebug() << "new server" << m_userInfo.strKbServer;
@@ -539,7 +486,7 @@ bool WizKMAccountsServer::createAccount(const QString& strUserName, const QStrin
         params["captcha"] = strCaptcha.toStdString();
     }
     //
-    if (!WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, "POST", params, m_userInfo))
+    if (!WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, m_userInfo, "POST", params))
     {
         TOLOG("Failed to create account");
         return false;
@@ -571,7 +518,7 @@ bool WizKMAccountsServer::getToken(const QString& strUserName, const QString& st
 
     GETTOKENDATA data;
     //
-    if (!WithResult::execStandardJsonRequest<GETTOKENDATA>(*this, urlPath, "POST", params, data))
+    if (!WithResult::execStandardJsonRequest<GETTOKENDATA>(*this, urlPath, data, "POST", params))
     {
         TOLOG("Failed to create account");
         return false;
@@ -953,6 +900,13 @@ bool WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __i
 bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
     return WizKMApiServerBase::setValue("ks", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+}
+
+
+bool WizKMDatabaseServer::getCommentCount(const QString& strDocumentGuid, int& commentCount)
+{
+    QString urlPath = "/ks/note/comments/count/" + getKbGuid() + "/" + strDocumentGuid;
+    return WithResult::execStandardJsonRequest<int>(*this, urlPath, commentCount);
 }
 
 bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)

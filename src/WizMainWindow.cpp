@@ -84,7 +84,6 @@
 #include "sync/WizToken.h"
 
 #include "WizUserVerifyDialog.h"
-#include "WizNoteComments.h"
 #include "WizMobileFileReceiver.h"
 #include "WizDocTemplateDialog.h"
 #include "share/WizFileMonitor.h"
@@ -273,8 +272,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     setupFullScreenMode(this);
 #endif
 
-    WizNoteComments::init();
-    //
     m_syncFull->start(QThread::IdlePriority);
     m_syncQuick->start(QThread::IdlePriority);
     //
