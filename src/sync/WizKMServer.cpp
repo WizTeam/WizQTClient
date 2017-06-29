@@ -351,14 +351,14 @@ QString WizKMApiServerBase::buildUrl(QString urlPath)
     }
 }
 
-bool WizKMApiServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion)
+bool WizKMApiServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, __int64& nVersion)
 {
     QString urlPath = "/" + strMethodPrefix + "/kv/version/" + strGuid + "?key=" + strKey;
     //
     WIZSTANDARDRESULT jsonRet = WithResult::execStandardJsonRequest<__int64>(*this, urlPath, nVersion);
     return jsonRet;
 }
-bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
+bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion)
 {
     struct KEYVALUEDATA
     {
@@ -396,7 +396,7 @@ bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString&
     return true;
 }
 
-bool WizKMApiServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion)
+bool WizKMApiServerBase::setValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
     QString urlPath = "/" + strMethodPrefix + "/kv/value/" + strGuid;
     //
@@ -434,6 +434,26 @@ void WizKMAccountsServer::setUserInfo(const WIZUSERINFO& userInfo)
 {
     m_bLogin = TRUE;
     m_userInfo = userInfo;
+}
+bool WizKMAccountsServer::initAllKbInfos()
+{
+    std::deque<WIZKBINFO> infos;
+    if (!getKbInfos(infos))
+        return false;
+    //
+    for (const auto& info : infos) {
+        m_kbInfos[info.strKbGUID] = info;
+    }
+    //
+    return true;
+}
+
+WIZKBINFO WizKMAccountsServer::getKbInfo(QString kbGuid) const
+{
+    auto it = m_kbInfos.find(kbGuid);
+    if (it == m_kbInfos.end())
+        return WIZKBINFO();
+    return it->second;
 }
 
 bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPassword)
@@ -761,13 +781,29 @@ bool WizKMAccountsServer::getBizUsers(const QString& bizGuid, const QString& kbG
     //
     if (!getJsonList<WIZBIZUSER>(*this, strUrl, nCountPerPage, nNextVersion, arrayUser))
     {
-        TOLOG2("Failed to get message list: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nNextVersion));
-        return FALSE;
+        TOLOG2("Failed to get Biz Users: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nNextVersion));
+        return false;
     }
     //
     for (auto& user : arrayUser)
     {
         user.kbGUID = kbGuid;
+    }
+    //
+    return true;
+}
+
+bool WizKMAccountsServer::getKbInfos(std::deque<WIZKBINFO>& arrayInfo)
+{
+    int nCountPerPage = 100;
+    __int64 nNextVersion = 0;
+    //
+    QString urlPath = "/as/user/kb/info/all";
+    //
+    if (!getJsonList<WIZKBINFO>(*this, urlPath, nCountPerPage, nNextVersion, arrayInfo))
+    {
+        TOLOG2("Failed to get Kb Infos: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nNextVersion));
+        return false;
     }
     //
     return true;
@@ -796,27 +832,28 @@ bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, i
 
 bool WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMApiServerBase::getValueVersion("as", getToken(), m_userInfo.strUserGUID, strKey, nVersion);
+    return WizKMApiServerBase::getValueVersion("as", m_userInfo.strUserGUID, strKey, nVersion);
 }
 bool WizKMAccountsServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMApiServerBase::getValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nVersion);
+    return WizKMApiServerBase::getValue("as", m_userInfo.strUserGUID, strKey, strValue, nVersion);
 }
 bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMApiServerBase::setValue("as", getToken(), m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
+    return WizKMApiServerBase::setValue("as", m_userInfo.strUserGUID, strKey, strValue, nRetVersion);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent)
-    : WizKMApiServerBase(kbInfo.strKbServer, parent)
-    , m_userInfo(kbInfo)
+WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, QObject* parent)
+    : WizKMApiServerBase(userInfo.strKbServer, parent)
+    , m_userInfo(userInfo)
     , m_lastJsonResult(200, QString(""), QString(""))
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
 }
+
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
 }
@@ -891,15 +928,15 @@ bool WizKMDatabaseServer::kb_getInfo()
 
 bool WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMApiServerBase::getValueVersion("ks", getToken(), getKbGuid(), strKey, nVersion);
+    return WizKMApiServerBase::getValueVersion("ks", getKbGuid(), strKey, nVersion);
 }
 bool WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMApiServerBase::getValue("ks", getToken(), getKbGuid(), strKey, strValue, nVersion);
+    return WizKMApiServerBase::getValue("ks", getKbGuid(), strKey, strValue, nVersion);
 }
 bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMApiServerBase::setValue("ks", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+    return WizKMApiServerBase::setValue("ks", getKbGuid(), strKey, strValue, nRetVersion);
 }
 
 

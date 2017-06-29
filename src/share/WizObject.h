@@ -145,7 +145,7 @@ struct WIZUSERCERT
 };
 
 
-struct WIZKBINFO
+struct WIZKBINFO : public WIZOBJECTBASE
 {
     WIZKBINFO();
     //

@@ -342,7 +342,7 @@ bool WizKMSyncThread::quickSync()
 
         if (kbGuid.isEmpty() || m_db.kbGUID() == kbGuid)
         {
-            WizKMSync syncPrivate(&m_db, m_info, m_pEvents, FALSE, TRUE, NULL);
+            WizKMSync syncPrivate(&m_db, m_info, WIZKBINFO(), m_pEvents, FALSE, TRUE, NULL);
             //
             if (syncPrivate.sync())
             {
@@ -359,7 +359,7 @@ bool WizKMSyncThread::quickSync()
                 WIZUSERINFO userInfo = m_info;
                 userInfo.strKbGUID = group.strGroupGUID;
                 //
-                WizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
+                WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), m_pEvents, TRUE, TRUE, NULL);
                 //
                 if (syncGroup.sync())
                 {

@@ -53,9 +53,9 @@ public:
     //
     void onApiError();
     //
-    bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
-    bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
-    bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    bool getValueVersion(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, __int64& nVersion);
+    bool getValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
+    bool setValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion);
 };
 
 
@@ -71,6 +71,7 @@ protected:
 
 public:
     WIZUSERINFO m_userInfo;
+    std::map<QString, WIZKBINFO> m_kbInfos;
 public:
     void setAutoLogout(bool b) { m_bAutoLogout = b; }
     //
@@ -92,6 +93,7 @@ public:
     bool setMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
     //
     bool getBizUsers(const QString& bizGuid, const QString& kbGuid, CWizBizUserDataArray& arrayUser);
+    bool getKbInfos(std::deque<WIZKBINFO>& arrayInfo);
     //
     bool getAdminBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool setUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
@@ -106,6 +108,9 @@ public:
     const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
     WIZUSERINFO& getUserInfo() { return m_userInfo; }
     void setUserInfo(const WIZUSERINFO& userInfo);
+    //
+    bool initAllKbInfos();
+    WIZKBINFO getKbInfo(QString kbGuid) const;
 };
 
 
@@ -114,7 +119,7 @@ class WizKMDatabaseServer: public WizKMApiServerBase
 {
     Q_OBJECT
 public:
-    WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
+    WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, QObject* parent = 0);
     virtual ~WizKMDatabaseServer();
 
     const WIZKBINFO& kbInfo();

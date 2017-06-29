@@ -115,6 +115,7 @@ WIZKBINFO::WIZKBINFO()
 bool WIZKBINFO::fromJson(const Json::Value& value)
 {
     try {
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
         //
         nStorageLimit = value["storageLimit"].asInt64();
         nStorageUsage = value["storageUsage"].asInt64();
