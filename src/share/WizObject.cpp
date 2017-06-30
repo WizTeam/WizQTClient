@@ -138,6 +138,7 @@ WIZKBINFO::WIZKBINFO()
     nAttachmentVersion = -1;
     nDeletedGUIDVersion = -1;
     nParamVersion = -1;
+    nUserVersion = -1;
     //
     nStorageLimit = 0;
     nStorageUsage = 0;
@@ -168,6 +169,7 @@ bool WIZKBINFO::fromJson(const Json::Value& value)
         nAttachmentVersion = value["attVersion"].asInt64();
         nDeletedGUIDVersion = value["deletedVersion"].asInt64();
         nParamVersion = value["paramVersion"].asInt64();
+        nUserVersion = value["userVersion"].asInt64();
         //
     } catch (Json::Exception& e) {
         TOLOG(e.what());

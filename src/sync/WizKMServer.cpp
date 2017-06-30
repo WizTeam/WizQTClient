@@ -237,8 +237,6 @@ bool getJsonList(WizKMApiServerBase& server, QString urlPath, int nCountPerPage,
 template <class TData>
 bool postJsonList(WizKMApiServerBase& server, QString urlPath, const std::deque<TData>& arrayData)
 {
-    urlPath = urlPath + "/" + server.getKbGuid();
-    //
     Json::Value doc(Json::arrayValue);
     //
     int index = 0;

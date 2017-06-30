@@ -164,6 +164,7 @@ struct WIZKBINFO : public WIZOBJECTBASE
     __int64 nAttachmentVersion;
     __int64 nDeletedGUIDVersion;
     __int64 nParamVersion;
+    __int64 nUserVersion;
     //
     qint64 nStorageLimit;
     qint64 nStorageUsage;

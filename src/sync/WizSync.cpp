@@ -1563,43 +1563,34 @@ QString downloadFromUrl(const QString& strUrl)
 void syncGroupUsers(WizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
                     IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool background)
 {
-    QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
-    if (!strt.isEmpty()) {
-            if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
-#ifndef QT_DEBUG
-                return;
-#endif
-        }
-    }
-
     pEvents->onStatus(QObject::tr("Sync group users"));
 
-    int total = 0;
-    //
     for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
          it != arrayGroup.end();
          it++)
     {
         const WIZGROUPDATA& g = *it;
-        if (!g.bizGUID.isEmpty())
+        if (!g.isBiz())
+            continue;
+        //
+        WIZKBINFO info = server.getKbInfo(g.strGroupGUID);
+        if (IWizSyncableDatabase* pGroupDatabase = pDatabase->getGroupDatabase(g))
         {
-            CWizBizUserDataArray arrayUser;
-            if (server.getBizUsers(g.bizGUID, g.strGroupGUID, arrayUser))
+            __int64 localVersion = pGroupDatabase->getObjectVersion("user");
+            if (localVersion < info.nUserVersion)
             {
-                int start = WizGetTickCount();
-                pDatabase->onDownloadBizUsers(g.strGroupGUID, arrayUser);
-                int used = WizGetTickCount() - start;
-                total += used;
+                CWizBizUserDataArray arrayUser;
+                if (server.getBizUsers(g.bizGUID, g.strGroupGUID, arrayUser))
+                {
+                    pDatabase->onDownloadBizUsers(g.strGroupGUID, arrayUser);
+                    pGroupDatabase->setObjectVersion("user", info.nUserVersion);
+                }
             }
         }
         //
         if (pEvents->isStop())
             return;
     }
-    //
-    qDebug() << "total used: " << total;
-
-    pDatabase->setMeta("SYNC_INFO", "DownloadGroupUsers", QDateTime::currentDateTime().toString());
 }
 
 bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
@@ -1652,11 +1643,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (server.getGroupList(arrayGroup))
     {
         pDatabase->onDownloadGroups(arrayGroup);
-        //
-        if (WizIsDayFirstSync(pDatabase))
-        {
-            syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
-        }
     }
     else
     {
@@ -1695,6 +1681,8 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     server.initAllKbInfos();
     server.initAllValueVersions();
+    //
+    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     //
     pEvents->onStatus(QObject::tr("----------sync private notes----------"));
     //
