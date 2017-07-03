@@ -2992,6 +2992,47 @@ bool WizURLDownloadToData(const QString& url, QByteArray& data)
     return true;
 }
 
+bool WizURLDownloadToData(const QString& url, QByteArray& data, QObject* receiver, const char *member)
+{
+    QString newUrl = url;
+    QNetworkAccessManager netCtrl;
+    QNetworkReply* reply;
+    //
+    bool redirect = false;
+    do
+    {
+        QNetworkRequest request(newUrl);
+        //
+        reply = netCtrl.get(request);
+        //
+        WizAutoTimeOutEventLoop loop(reply);
+        //
+        QObject::connect(&loop, SIGNAL(downloadProgress(QUrl, qint64, qint64)), receiver, member);
+        //
+        loop.setTimeoutWaitSeconds(60 * 60);
+        loop.exec();
+
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            return false;
+        }
+
+        //
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301) {
+            redirect = true;
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            newUrl = redirectUrl.toString();
+        } else {
+            redirect = false;
+            data = loop.result();
+        }
+        //
+    }
+    while (redirect);
+    //
+    return true;
+}
+
 
 QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString& strGuid)
 {

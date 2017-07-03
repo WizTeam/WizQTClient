@@ -146,6 +146,9 @@ protected:
     //
     WIZSTANDARDRESULT m_lastJsonResult;
     QString m_strLastLocalError;
+    //
+    qint64 m_objectsTotalSize;
+    std::map<QString, qint64> m_objectDownloadedSize;
 private:
     bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
     bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
@@ -204,6 +207,9 @@ public:
 
 signals:
     void downloadProgress(int totalSize, int loadedSize);
+
+public slots:
+    void onDocumentObjectDownloadProgress(QUrl url, qint64 downloadSize, qint64 totalSize);
 
 protected:
     bool data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, bool& bEOF);

@@ -7,6 +7,7 @@
 #include <QBuffer>
 #include <QByteArray>
 #include <QSettings>
+#include <functional>
 
 #include "WizObject.h"
 #include "WizMd5.h"
@@ -192,6 +193,8 @@ bool WizIsHighPixel();
 
 bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isImage);
 bool WizURLDownloadToData(const QString& url, QByteArray& data);
+
+bool WizURLDownloadToData(const QString& url, QByteArray& data, QObject* receiver, const char *member);
 
 
 ///  make sure document exist, if not try to download document, show download dialog by default.

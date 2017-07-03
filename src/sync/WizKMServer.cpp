@@ -890,6 +890,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
     , m_kbInfo(kbInfo)
     , m_valueVersions(versions)
     , m_lastJsonResult(200, QString(""), QString(""))
+    , m_objectsTotalSize(0)
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
 }
@@ -1013,6 +1014,21 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
 }
 
 
+void WizKMDatabaseServer::onDocumentObjectDownloadProgress(QUrl url, qint64 downloadSize, qint64 totalSize)
+{
+    QString urlString = url.toString();
+    m_objectDownloadedSize[urlString] = downloadSize;
+    //
+    qint64 totalDownloadedSize = 0;
+    for (auto it : m_objectDownloadedSize)
+    {
+        totalDownloadedSize += it.second;
+    }
+    //
+    emit downloadProgress(m_objectsTotalSize, totalDownloadedSize);
+}
+
+
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
     QString url = buildUrl("/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1");
@@ -1126,6 +1142,14 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
     int totalDownloaded = 0;
     int totalFailed = 0;
     //
+    int totalDownloadSize = 0;
+    for (auto res : serverResources)
+    {
+        totalDownloadSize += res.size;
+    }
+    //
+    m_objectsTotalSize =totalDownloadSize;
+    //
     for (auto res : serverResources)
     {
         QString resName = "index_files/" + res.name;
@@ -1137,7 +1161,7 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
             //
             QByteArray data;
             qDebug() << "downloading " << resName;
-            bool ret = WizURLDownloadToData(res.url, data);
+            bool ret = WizURLDownloadToData(res.url, data, this, SLOT(onDocumentObjectDownloadProgress(QUrl, qint64, qint64)));
             qDebug() << "downloaded " << resName;
             //
             QMutexLocker locker(&mutex);
@@ -1172,6 +1196,9 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
                 //
                 return false;
             }
+            //
+            QEventLoop loop;
+            loop.processEvents();
             //
             QThread::msleep(300);
         }

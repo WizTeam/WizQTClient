@@ -35,7 +35,8 @@ public Q_SLOTS:
     void on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void on_uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
-
+Q_SIGNALS:
+    void downloadProgress(QUrl url, qint64 bytesReceived, qint64 bytesTotal);
 protected:
     virtual void doFinished(QNetworkReply* reply);
     virtual void doError(QNetworkReply::NetworkError error);
@@ -43,6 +44,7 @@ protected:
     QByteArray m_result;
     QNetworkReply* m_reply;
     QNetworkReply::NetworkError m_error;
+    QUrl m_url;
     QString m_errorString;
     bool m_timeOut;
     int m_timeOutSeconds;
