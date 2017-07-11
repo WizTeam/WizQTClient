@@ -43,10 +43,10 @@ bool WIZUSERINFO::fromJson(const Json::Value& value)
         strKbServer = QString::fromStdString(value["kbServer"].asString());
         strXmlRpcServer = QString::fromStdString(value["kbXmlRpcServer"].asString());
         strMywizEmail = QString::fromStdString(value["mywizEmail"].asString());
-        nUserLevel = value["user_level"].asInt();
-        strUserLevelName = QString::fromStdString(value["user_level_name"].asString());
-        nUserPoints = value["user_points"].asInt();
-        strUserType = QString::fromStdString(value["user_type"].asString());
+        nUserLevel = value["userLevel"].asInt();
+        strUserLevelName = QString::fromStdString(value["userLevelName"].asString());
+        nUserPoints = value["userPoints"].asInt();
+        strUserType = QString::fromStdString(value["userType"].asString());
         nMaxFileSize = value["uploadSizeLimit"].asInt64();
         syncType = value["syncType"].asInt();
 

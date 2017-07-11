@@ -754,6 +754,9 @@ void WizTitleBar::on_commentTokenAcquired(QString token)
                 WIZDOCUMENTDATA note = view->note();
 
                 QString js = QString("updateCmt('%1','%2','%3')").arg(token).arg(note.strKbGUID).arg(note.strGUID);
+#ifdef QT_DEBUG
+                qDebug() << js;
+#endif
                 commentWidget->web()->page()->runJavaScript(js, [=](const QVariant& vRet){
                     if (!vRet.toBool())
                     {

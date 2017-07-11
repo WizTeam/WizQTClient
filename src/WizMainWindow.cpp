@@ -1103,9 +1103,23 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     WIZDOCUMENTDATA data;
     data.strKbGUID = kbGUID;
     //
+    data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
+    //  Journal {date}({week})
+    if (tmplData.strTitle.isEmpty())
+    {
+        data.strTitle = tmplData.strName;
+    }
+    else
+    {
+        WizOleDateTime dt;
+        data.strTitle.replace("{date}", dt.toLocalLongDate());
+        data.strTitle.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
+        QLocale local;
+        data.strTitle.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
+    }
+    //
     if (kbGUID.isEmpty())   //personal
     {
-        data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
         data.strLocation = tmplData.strFolder;
 
         if (data.strLocation.isEmpty())
@@ -1125,21 +1139,8 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
                 }
             }
         }
-        //  Journal {date}({week})
-        if (tmplData.strTitle.isEmpty())
-        {
-            data.strTitle = tmplData.strName;
-        }
-        else
-        {
-            WizOleDateTime dt;
-            data.strTitle.replace("{date}", dt.toLocalLongDate());
-            data.strTitle.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
-            QLocale local;
-            data.strTitle.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
-        }
     }
-    else
+    else        
     {
         data.strLocation = currLocation;
     }
@@ -1564,10 +1565,20 @@ void WizMainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
  */
 void WizMainWindow::GetToken(const QString& strFunctionName)
 {
-    QString strToken = WizToken::token();
-    QString strExec = strFunctionName + QString("('%1')").arg(strToken);
-    qDebug() << "cpp get token callled : " << strExec;
-    m_doc->commentView()->page()->runJavaScript(strExec);
+    CString functionName(strFunctionName);
+    ::WizExecuteOnThread(WIZ_THREAD_NETWORK, [=] {
+        //
+        QString strToken = WizToken::token();
+        if (strToken.isEmpty())
+            return;
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+
+            QString strExec = functionName + QString("('%1')").arg(strToken);
+            qDebug() << "cpp get token callled : " << strExec;
+            m_doc->commentView()->page()->runJavaScript(strExec);
+        });
+    });
 }
 
 /**   web页面调用该方法，将页面的结果返回
