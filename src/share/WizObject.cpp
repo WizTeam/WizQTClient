@@ -353,7 +353,7 @@ bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
     value["tagGuid"] = strGUID.toStdString();
     value["parentTagGuid"] = strParentGUID.toStdString();
     value["name"] = strName.toStdString();
-    value["modified"] = tModified.toTime_t() * 1000;
+    value["modified"] = tModified.toTime_t() * (Json::UInt64)1000;
     //
     return true;
 }
@@ -426,7 +426,7 @@ bool WIZSTYLEDATA::toJson(QString kbGuid, Json::Value& value) const
     value["backColor"] = ::WizColorToString(crBackColor).toStdString();
     value["textBold"] = bTextBold ? true : false;
     value["flagIndex"] = nFlagIndex;
-    value["modified"] = tModified.toTime_t() * 1000;
+    value["modified"] = tModified.toTime_t() * (Json::UInt64)1000;
     //
     return true;
 }
@@ -479,7 +479,7 @@ bool WIZDELETEDGUIDDATA::toJson(QString kbGuid, Json::Value& value) const
 {
     value["deletedGuid"] = strGUID.toStdString();
     value["type"] = WIZOBJECTDATA::objectTypeToTypeString(eType).toStdString();
-    value["created"] = tDeleted.toTime_t() * 1000;
+    value["created"] = tDeleted.toTime_t() * (Json::UInt64)1000;
     return true;
 }
 
