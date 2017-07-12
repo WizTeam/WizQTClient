@@ -113,7 +113,7 @@
 /*}*/
 
 .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
-.markdown-body dl, .markdown-body table, .markdown-body pre {
+.markdown-body dl, .markdown-body pre {
     margin: 10px 0;
     margin: .83rem 0;
 }
@@ -611,4 +611,9 @@ only screen and (min-device-pixel-ratio: 3) {
 .comment-list-item .markdown-body {
     padding: 0;
     margin: 1em .5em 1em 0;
+}
+/* 修正 CodeMirror & table */
+.markdown-body .wiz-code-container,
+.markdown-body .wiz-table-body {
+    padding: 0;
 }
