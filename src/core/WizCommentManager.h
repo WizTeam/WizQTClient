@@ -17,16 +17,12 @@ class WizCommentManager : public QObject
 public:
     WizCommentManager(QObject* parent = 0);
 
-    void queryCommentUrl(const QString& kbGUID, const QString& GUID);
+    QString getCommentUrlTemplate();
     void queryCommentCount(const QString& kbGUID, const QString& GUID, bool removeOtherQueryRequest);
 
-public slots:
-    void on_commentUrlAcquired(QString GUID, QString url);
-    void on_commentCountAcquired(QString GUID, int count);
-
 signals:
-    void commentUrlAcquired(const QString& GUID, const QString& url);
-    void commentCountAcquired(const QString& GUID, int count);
+    void tokenAcquired(QString token);
+    void commentCountAcquired(QString documentGUID, int count);
 
 private slots:
     void on_timer_timeOut();
@@ -41,44 +37,35 @@ private:
     QList<CountQueryData> m_queryList;
     QTimer m_timer;
     QMutex m_mutext;
+    bool m_busy;
+    QString m_commentUrlTemplate;
 
 private:
     void pickData(CountQueryData& data);
+    void setCommentUrlTemplate(QString url);
+    //
+    friend class WizCommentQuerier;
 };
 
 class WizCommentQuerier : public QObject
 {
     Q_OBJECT
 public:
-    enum QueryType
-    {
-        QueryNone,
-        QueryUrl,
-        QueryCount,
-        QueryUrlAndCount
-    };
-
-    WizCommentQuerier(const QString& kbGUID, const QString& GUID, QueryType type, QObject*parent = 0);
+    WizCommentQuerier(WizCommentManager* manager, const QString& kbGUID, const QString& GUID, QObject*parent = 0);
 
     void run();
 
 signals:
-    void commentUrlAcquired(const QString& GUID, const QString& url);
-    void commentCountAcquired(const QString& GUID, int count);
+    void tokenAcquired(QString token);
+    void commentCountAcquired(QString documentGUID, int count);
 
 private:
-    void setCommentsUrl(const QString& url);
     void setCommentsCount(int count);
 
-    void errorOccurred();
-
-    void parseReplyData(const QString& reply);
-
-
 private:
+    WizCommentManager* m_manager;
     QString m_kbGUID;
     QString m_GUID;
-    QueryType m_type;
 };
 
 #endif // CWIZCOMMENTDOWNLOADER_H

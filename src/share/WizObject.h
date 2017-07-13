@@ -144,8 +144,15 @@ struct WIZUSERCERT
     QString strHint;
 };
 
+struct WIZKBVALUEVERSIONS : public WIZOBJECTBASE
+{
+    WIZKBVALUEVERSIONS();
+    bool inited;
+    std::map<QString, __int64> versions;
+    bool fromJson(const Json::Value& value);
+};
 
-struct WIZKBINFO
+struct WIZKBINFO : public WIZOBJECTBASE
 {
     WIZKBINFO();
     //
@@ -157,6 +164,7 @@ struct WIZKBINFO
     __int64 nAttachmentVersion;
     __int64 nDeletedGUIDVersion;
     __int64 nParamVersion;
+    __int64 nUserVersion;
     //
     qint64 nStorageLimit;
     qint64 nStorageUsage;
@@ -590,46 +598,6 @@ const int WIZ_USER_MSG_TYPE_SYSTEM = 100;
 const int WIZ_USER_MSG_TYPE_REMIND_CREATE = 110;
 const int WIZ_USER_MSG_TYPE_MAX = 110;      //支持的最大消息类型，超过该类型的消息直接丢弃
 
-/*
-struct WIZUSERMESSAGEDATA
-{
-    qint64 nMessageID;
-    QString strBizGUID;
-    QString strKbGUID;
-    QString strDocumentGUID;
-    QString strSenderGUID;
-    QString strSenderID;
-    QString strReceiverGUID;
-    QString strReceiverID;
-    int nMessageType;
-    int nReadStatus;	//阅读状态, 0:未读，1:已读
-    int nDeletedStatus;  // 删除状态， 0：为删除， 1：已删除
-    WizOleDateTime tCreated;
-    QString strMessageText;
-    qint64 nVersion;
-    QString strSender;
-    QString strReceiver;
-    QString strTitle;
-    QString strNote;     //消息携带的数据，用于显示广告等内容
-    int nLocalChanged;
-
-    WIZUSERMESSAGEDATA()
-        : nMessageID(0)
-        , nMessageType(WIZ_USER_MSG_TYPE_CALLED_IN_TITLE)
-        , nReadStatus(0)
-        , nDeletedStatus(0)
-        , nVersion(0)
-        , nLocalChanged(0)
-    {
-
-    }
-
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-    bool fromJson(const Json::Value& value);
-};
-
-typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
-*/
 
 struct WIZMESSAGEDATA
 {
@@ -750,8 +718,12 @@ struct WIZBIZUSER
     // field: user_id, email account name
     QString userId;
 
-    // no field, indicate user biz group
-    QString bizGUID;
+    // no field, indicate user kb group
+    QString kbGUID;
+    //
+    bool operator ==(const WIZBIZUSER& other) const;
+    //
+    bool fromJson(const Json::Value& value);
 };
 
 typedef std::deque<WIZBIZUSER> CWizBizUserDataArray;

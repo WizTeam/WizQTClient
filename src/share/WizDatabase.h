@@ -214,6 +214,7 @@ public:
     virtual void setKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
     virtual bool onDownloadGroups(const CWizGroupDataArray& arrayGroup);
     virtual bool onDownloadBizs(const CWizBizDataArray& arrayBiz);
+    virtual bool onDownloadBizUsers(const QString& kbGuid, const CWizBizUserDataArray& arrayUser);
     virtual IWizSyncableDatabase* getGroupDatabase(const WIZGROUPDATA& group);
     virtual void closeGroupDatabase(IWizSyncableDatabase* pDatabase);
     virtual IWizSyncableDatabase* getPersonalDatabase();
@@ -284,7 +285,6 @@ public:
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);
-    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) ;
 
     // end interface implementations
     bool onDownloadDocument(const WIZDOCUMENTDATAEX& data);
@@ -303,11 +303,6 @@ public:
     void setGroupTagsPos(const QString& tagsPos, qint64 nVersion);
     QString getFavorites();
     void setFavorites(const QString& favorites, qint64 nVersion);
-
-    void setBizUsers(const QString &strBizGUID, const QString& strUsers);
-    bool loadBizUsersFromJson(const QString &strBizGUID,
-                              const QString& strJsonRaw,
-                              CWizBizUserDataArray& arrayUser);
 
     void setFoldersPosModified();
     void setGroupTagsPosModified();
@@ -377,7 +372,6 @@ public:
     static bool getJionedGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayJionedGroup);
 
     bool updateBizUser(const WIZBIZUSER& user);
-    bool updateBizUsers(const CWizBizUserDataArray& arrayUser);
     bool updateMessage(const WIZMESSAGEDATA& msg);
     bool updateMessages(const CWizMessageDataArray& arrayMsg);
     bool updateDeletedGuid(const WIZDELETEDGUIDDATA& data);

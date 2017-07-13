@@ -71,6 +71,7 @@ struct IWizSyncableDatabase
 
     virtual bool onDownloadGroups(const CWizGroupDataArray& arrayGroup) = 0;
     virtual bool onDownloadBizs(const CWizBizDataArray& arrayBiz) = 0;
+    virtual bool onDownloadBizUsers(const QString& kbGuid, const CWizBizUserDataArray& arrayUser) = 0;
     virtual IWizSyncableDatabase* getGroupDatabase(const WIZGROUPDATA& group) = 0;
     virtual void closeGroupDatabase(IWizSyncableDatabase* pDatabase) = 0;
     virtual IWizSyncableDatabase* getPersonalDatabase() = 0;
@@ -145,7 +146,6 @@ struct IWizSyncableDatabase
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) = 0;
     virtual QString meta(const QString& strSection, const QString& strKey) = 0;
-    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) = 0;
 
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners) = 0;
     //

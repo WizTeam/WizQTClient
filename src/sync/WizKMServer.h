@@ -53,9 +53,9 @@ public:
     //
     void onApiError();
     //
-    bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, __int64& nVersion);
-    bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
-    bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    bool getValueVersion(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, __int64& nVersion);
+    bool getValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, QString& strValue, __int64& nVersion);
+    bool setValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion);
 };
 
 
@@ -71,6 +71,8 @@ protected:
 
 public:
     WIZUSERINFO m_userInfo;
+    std::map<QString, WIZKBINFO> m_kbInfos;
+    std::map<QString, WIZKBVALUEVERSIONS> m_valueVersions;
 public:
     void setAutoLogout(bool b) { m_bAutoLogout = b; }
     //
@@ -91,6 +93,10 @@ public:
     bool setMessageReadStatus(const QString& strMessageIDs, int nStatus);
     bool setMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
     //
+    bool getBizUsers(const QString& bizGuid, const QString& kbGuid, CWizBizUserDataArray& arrayUser);
+    bool getKbInfos(std::deque<WIZKBINFO>& arrayInfo);
+    bool getValueVersions(std::deque<WIZKBVALUEVERSIONS>& arrayVersion);
+    //
     bool getAdminBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
     bool setUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool getUserBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
@@ -98,13 +104,18 @@ public:
     bool getValueVersion(const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
-    //
 public:
     QString getToken() const;
     QString getKbGuid() const;
     const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
     WIZUSERINFO& getUserInfo() { return m_userInfo; }
     void setUserInfo(const WIZUSERINFO& userInfo);
+    //
+    bool initAllKbInfos();
+    WIZKBINFO getKbInfo(QString kbGuid) const;
+    //
+    bool initAllValueVersions();
+    WIZKBVALUEVERSIONS getValueVersions(QString kbGuid) const;
 };
 
 
@@ -113,7 +124,7 @@ class WizKMDatabaseServer: public WizKMApiServerBase
 {
     Q_OBJECT
 public:
-    WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
+    WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo = WIZKBINFO(), const WIZKBVALUEVERSIONS& versions = WIZKBVALUEVERSIONS(), QObject* parent = 0);
     virtual ~WizKMDatabaseServer();
 
     const WIZKBINFO& kbInfo();
@@ -131,9 +142,13 @@ public:
 protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
+    WIZKBVALUEVERSIONS m_valueVersions;
     //
     WIZSTANDARDRESULT m_lastJsonResult;
     QString m_strLastLocalError;
+    //
+    qint64 m_objectsTotalSize;
+    std::map<QString, qint64> m_objectDownloadedSize;
 private:
     bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
     bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
@@ -184,12 +199,17 @@ public:
     bool getValueVersion(const QString& strKey, __int64& nVersion);
     bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    //
+    bool getCommentCount(const QString& strDocumentGuid, int& commentCount);
 
 public:
     virtual int getCountPerPage();
 
 signals:
     void downloadProgress(int totalSize, int loadedSize);
+
+public slots:
+    void onDocumentObjectDownloadProgress(QUrl url, qint64 downloadSize, qint64 totalSize);
 
 protected:
     bool data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, bool& bEOF);

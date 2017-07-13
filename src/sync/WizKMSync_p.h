@@ -8,7 +8,8 @@
 class WizKMSync
 {
 public:
-    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info,
+    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo,
+              const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions,
                IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent);
 public:
     bool sync();
@@ -39,7 +40,7 @@ protected:
 
 private:
     IWizSyncableDatabase* m_pDatabase;
-    WIZUSERINFOBASE m_info;
+    WIZUSERINFOBASE m_userInfo;
     IWizKMSyncEvents* m_pEvents;
     bool m_bGroup;
     bool m_bUploadOnly;
@@ -103,7 +104,7 @@ private:
             //
             for (TData& data : arrayPageData)
             {
-                data.strKbGUID = m_info.strKbGUID;
+                data.strKbGUID = m_userInfo.strKbGUID;
             }
             //
             if (!onDownloadList<TData>(arrayPageData))

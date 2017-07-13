@@ -153,7 +153,6 @@ set(wiznote_SOURCES
     WizProxyDialog.cpp
     WizCreateAccountDialog.cpp
     WizMainWindow.cpp
-    WizNoteComments.cpp
     WizCellButton.cpp
     WizTitleBar.cpp
     WizInfoBar.cpp
@@ -280,8 +279,6 @@ set(wiznote_HEADERS
     WizProxyDialog.h
     WizCreateAccountDialog.h
     WizMainWindow.h
-    WizNoteComments.h
-    WizNoteComments_p.h
     WizCellButton.h
     WizTitleBar.h
     WizInfoBar.h

@@ -431,7 +431,7 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
         userInfo.strKbGUID = group.strGroupGUID;
     }
     //
-    WizKMDatabaseServer server(userInfo, NULL);
+    WizKMDatabaseServer server(userInfo);
     //
     if (!server.kb_getInfo())
         return false;

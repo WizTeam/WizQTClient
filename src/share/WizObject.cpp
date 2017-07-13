@@ -43,10 +43,10 @@ bool WIZUSERINFO::fromJson(const Json::Value& value)
         strKbServer = QString::fromStdString(value["kbServer"].asString());
         strXmlRpcServer = QString::fromStdString(value["kbXmlRpcServer"].asString());
         strMywizEmail = QString::fromStdString(value["mywizEmail"].asString());
-        nUserLevel = value["user_level"].asInt();
-        strUserLevelName = QString::fromStdString(value["user_level_name"].asString());
-        nUserPoints = value["user_points"].asInt();
-        strUserType = QString::fromStdString(value["user_type"].asString());
+        nUserLevel = value["userLevel"].asInt();
+        strUserLevelName = QString::fromStdString(value["userLevelName"].asString());
+        nUserPoints = value["userPoints"].asInt();
+        strUserType = QString::fromStdString(value["userType"].asString());
         nMaxFileSize = value["uploadSizeLimit"].asInt64();
         syncType = value["syncType"].asInt();
 
@@ -95,6 +95,40 @@ bool WIZUSERCERT::loadFromXmlRpc(WizXmlRpcStructValue& val)
     return true;
 }
 
+WIZKBVALUEVERSIONS::WIZKBVALUEVERSIONS()
+    : inited(false)
+{
+
+}
+
+
+bool WIZKBVALUEVERSIONS::fromJson(const Json::Value& value)
+{
+    try {
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
+        //
+        Json::Value versionsVal = value["versions"];
+        //
+        for (int i = 0; i < versionsVal.size(); i++)
+        {
+            Json::Value version = versionsVal[i];
+            //
+            QString key = QString::fromStdString(version["key"].asString());
+            __int64 versionVal = version["version"].asInt64();
+            //
+            versions[key] = versionVal;
+        }
+        //
+        inited = true;
+        //
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
+    //
+    return true;
+}
+
 
 WIZKBINFO::WIZKBINFO()
 {
@@ -104,6 +138,7 @@ WIZKBINFO::WIZKBINFO()
     nAttachmentVersion = -1;
     nDeletedGUIDVersion = -1;
     nParamVersion = -1;
+    nUserVersion = -1;
     //
     nStorageLimit = 0;
     nStorageUsage = 0;
@@ -115,6 +150,7 @@ WIZKBINFO::WIZKBINFO()
 bool WIZKBINFO::fromJson(const Json::Value& value)
 {
     try {
+        strKbGUID = QString::fromStdString(value["kbGuid"].asString());
         //
         nStorageLimit = value["storageLimit"].asInt64();
         nStorageUsage = value["storageUsage"].asInt64();
@@ -133,6 +169,7 @@ bool WIZKBINFO::fromJson(const Json::Value& value)
         nAttachmentVersion = value["attVersion"].asInt64();
         nDeletedGUIDVersion = value["deletedVersion"].asInt64();
         nParamVersion = value["paramVersion"].asInt64();
+        nUserVersion = value["userVersion"].asInt64();
         //
     } catch (Json::Exception& e) {
         TOLOG(e.what());
@@ -316,7 +353,7 @@ bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
     value["tagGuid"] = strGUID.toStdString();
     value["parentTagGuid"] = strParentGUID.toStdString();
     value["name"] = strName.toStdString();
-    value["modified"] = tModified.toTime_t() * 1000;
+    value["modified"] = tModified.toTime_t() * (Json::UInt64)1000;
     //
     return true;
 }
@@ -389,7 +426,7 @@ bool WIZSTYLEDATA::toJson(QString kbGuid, Json::Value& value) const
     value["backColor"] = ::WizColorToString(crBackColor).toStdString();
     value["textBold"] = bTextBold ? true : false;
     value["flagIndex"] = nFlagIndex;
-    value["modified"] = tModified.toTime_t() * 1000;
+    value["modified"] = tModified.toTime_t() * (Json::UInt64)1000;
     //
     return true;
 }
@@ -442,7 +479,7 @@ bool WIZDELETEDGUIDDATA::toJson(QString kbGuid, Json::Value& value) const
 {
     value["deletedGuid"] = strGUID.toStdString();
     value["type"] = WIZOBJECTDATA::objectTypeToTypeString(eType).toStdString();
-    value["created"] = tDeleted.toTime_t() * 1000;
+    value["created"] = tDeleted.toTime_t() * (Json::UInt64)1000;
     return true;
 }
 
@@ -851,4 +888,34 @@ bool WIZDOCUMENTPARAMDATA::toJson(QString kbGuid, Json::Value& value) const
     value["value"] = strValue.toStdString();
     //
     return true;
+}
+
+bool WIZBIZUSER::operator ==(const WIZBIZUSER& other) const
+{
+    bool ret = kbGUID == other.kbGUID
+            && userGUID == other.userGUID
+            && userId == other.userId
+            && alias == other.alias
+            && pinyin == other.pinyin;
+    //
+    return ret;
+}
+
+
+bool WIZBIZUSER::fromJson(const Json::Value& value)
+{
+    try {
+        //
+        alias = QString::fromStdString(value["alias"].asString());
+        pinyin = QString::fromStdString(value["pinyin"].asString());
+        userGUID = QString::fromStdString(value["user_guid"].asString());
+        userId = QString::fromStdString(value["user_id"].asString());
+        //user.bizGUID = strBizGUID;
+        //
+        return !userGUID.isEmpty();
+
+    } catch (Json::Exception& e) {
+        TOLOG(e.what());
+        return false;
+    }
 }
