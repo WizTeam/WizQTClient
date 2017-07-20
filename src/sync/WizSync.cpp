@@ -1600,10 +1600,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->onSyncProgress(0);
     pEvents->onStatus(QObject::tr("Connecting to server"));
 
-    QString syncUrl = WizCommonApiEntry::syncUrl();
-    if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
-        return false;
-
     WizKMAccountsServer server;
     server.setUserInfo(info);
     server.setEvents(pEvents);
