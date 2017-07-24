@@ -669,29 +669,29 @@ bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total,
     WizOleDateTime tLocalModified;
     tLocalModified = local.tModified;
     //
+    int maxFileSize = server.getMaxFileSize();
+    if (maxFileSize == 1)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
+        QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+        pEvents->setLastErrorMessage(error);
+        pEvents->onFreeServiceExpr();
+        return FALSE;
+    }
+    else if (maxFileSize == 2)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+        QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
+        pEvents->setLastErrorMessage(error);
+        pEvents->onVipServiceExpr();
+        return FALSE;
+    }
+    //
     //check data size
     if (!local.arrayData.isEmpty())
     {
-        int maxFileSize = server.getMaxFileSize();
-        if (maxFileSize == 1)
-        {
-            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
-            QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
-            pEvents->setLastErrorMessage(error);
-            pEvents->onFreeServiceExpr();
-            return FALSE;
-        }
-        else if (maxFileSize == 2)
-        {
-            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
-            QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
-            pEvents->setLastErrorMessage(error);
-            pEvents->onVipServiceExpr();
-            return FALSE;
-        }
-        //
         __int64 nDataSize = local.arrayData.size();
-        if (nDataSize > server.getMaxFileSize())
+        if (nDataSize > maxFileSize)
         {
             QString str;
             str = local.strTitle;
@@ -1599,10 +1599,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->onStatus(QObject::tr("----------Sync start----------"));
     pEvents->onSyncProgress(0);
     pEvents->onStatus(QObject::tr("Connecting to server"));
-
-    QString syncUrl = WizCommonApiEntry::syncUrl();
-    if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
-        return false;
 
     WizKMAccountsServer server;
     server.setUserInfo(info);
