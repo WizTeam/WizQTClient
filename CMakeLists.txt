@@ -10,6 +10,8 @@
 #UPDATE_TRANSLATIONS  update transation files
 # PLCrashReporter   use PLCrashReporter for mac, need PLCrashReporter framework
 
+set(Qt5_DIR "/home/mzh/tools/Qt5.7.0/5.7/gcc_64/lib/cmake/Qt5")
+
 if (APPLE)
     cmake_minimum_required(VERSION 2.8.12)
 else(APPLE)
