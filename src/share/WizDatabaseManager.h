@@ -15,6 +15,7 @@ struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
 struct WIZGROUPDATA;
 struct WIZMESSAGEDATA;
+struct WIZDOCUMENTPARAMDATA;
 class WizDatabase;
 struct WIZDATABASEINFO;
 
@@ -85,6 +86,7 @@ Q_SIGNALS:
     void documentModified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void documentDeleted(const WIZDOCUMENTDATA& document);
     void documentDataModified(const WIZDOCUMENTDATA& document);
+    void documentParamModified(const WIZDOCUMENTPARAMDATA& param);
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
     void documentTagModified(const WIZDOCUMENTDATA& document);
     void documentAccessDateModified(const WIZDOCUMENTDATA& document);

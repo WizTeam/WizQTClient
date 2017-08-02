@@ -1036,6 +1036,16 @@ bool WizDatabase::initZiwReaderForEncryption()
     {
         if (!hasCert() || !loadUserCert())
         {
+            if (!refreshCertFromServer())
+            {
+                QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
+                                         " cert from windows client first."));
+                return false;
+            }
+        }
+        //
+        if (!hasCert() || !loadUserCert())
+        {
             QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
                                      " cert from windows client first."));
             return false;

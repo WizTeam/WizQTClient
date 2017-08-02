@@ -133,6 +133,9 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     connect(&m_dbMgr, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)),
             SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
 
+    connect(&m_dbMgr, SIGNAL(documentParamModified(const WIZDOCUMENTPARAMDATA&)),
+            SLOT(on_document_param_modified(const WIZDOCUMENTPARAMDATA&)));
+
     connect(&m_dbMgr, SIGNAL(documentReadCountChanged(const WIZDOCUMENTDATA&)),
             SLOT(on_documentReadCount_changed(const WIZDOCUMENTDATA&)));
     connect(&m_dbMgr, SIGNAL(documentAccessDateModified(WIZDOCUMENTDATA)),
@@ -412,6 +415,18 @@ bool WizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
 
     return true;
 }
+bool WizDocumentListView::acceptDocumentChange(const QString &documentGuid)
+{
+    //  搜索模式下屏蔽因同步带来的笔记新增和修改
+    if (m_accpetAllSearchItems)
+    {
+        if (documentIndexFromGUID(documentGuid) == -1)
+            return false;
+    }
+
+    return true;
+}
+
 
 void WizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
 {    
@@ -1423,6 +1438,42 @@ void WizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentOl
     }
     //
     WizMainWindow::instance()->quickSyncKb(documentNew.strKbGUID);
+}
+
+void WizDocumentListView::on_document_param_modified(const WIZDOCUMENTPARAMDATA& param)
+{
+    if (param.strName != "DOCUMENT_FLAGS")
+        return;
+    //
+    if (!acceptDocumentChange(param.strDocumentGuid))
+        return;
+    //
+    WIZDOCUMENTDATA document;
+    if (!m_dbMgr.db(param.strKbGUID).documentFromGuid(param.strDocumentGuid, document))
+        return;
+    //
+    if (acceptDocument(document))
+    {
+        int index = documentIndexFromGUID(document.strGUID);
+        if (-1 == index) {
+            addDocument(document, true);
+        } else {
+            if (WizDocumentListViewDocumentItem* pItem = documentItemAt(index)) {
+                pItem->reload(m_dbMgr.db(document.strKbGUID));
+                pItem->setSortingType(m_nSortingType);
+                update(indexFromItem(pItem));
+                updateSectionItems();
+                sortItems();
+            }
+        }
+    } else {
+        int index = documentIndexFromGUID(document.strGUID);
+        if (-1 != index) {
+            takeItem(index);
+            //
+            resetSectionData();
+        }
+    }
 }
 
 

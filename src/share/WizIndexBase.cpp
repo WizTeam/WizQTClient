@@ -6,6 +6,7 @@
 #include "utils/WizLogger.h"
 #include "utils/WizPathResolve.h"
 
+#include "share/WizThreads.h"
 
 WizIndexBase::WizIndexBase(void)
     : m_bUpdating(false)
@@ -1358,6 +1359,11 @@ bool WizIndexBase::updateDocumentParam(const WIZDOCUMENTPARAMDATA& data)
     //
     if (!execSQL(sql))
         return false;
+    //
+    WIZDOCUMENTPARAMDATA tmp = data;
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+        emit documentParamModified(tmp);
+    });
     //
     return true;
 }
