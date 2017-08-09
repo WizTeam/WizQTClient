@@ -1368,6 +1368,11 @@ void WizDocumentWebView::setEditorMode(WizEditorMode editorMode)
 
     m_currentEditorMode = editorMode;
     //
+    if (m_currentEditorMode == modeEditor) {
+        m_timerAutoSave.start();
+    } else {
+        m_timerAutoSave.stop();
+    }
 }
 
 void WizDocumentWebView::trySaveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback)
