@@ -1036,6 +1036,16 @@ bool WizDatabase::initZiwReaderForEncryption()
     {
         if (!hasCert() || !loadUserCert())
         {
+            if (!refreshCertFromServer())
+            {
+                QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
+                                         " cert from windows client first."));
+                return false;
+            }
+        }
+        //
+        if (!hasCert() || !loadUserCert())
+        {
             QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
                                      " cert from windows client first."));
             return false;
@@ -3150,7 +3160,8 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
     //
-    removeUnusedImages(strProcessedHtml, strResourcePath);
+    //如果同时保存多个数据，有可能导致较早的笔记保存将新假的图片删除。因此暂时禁止这个功能，等以后有好的办法。
+    //removeUnusedImages(strProcessedHtml, strResourcePath);
 
     if (isEncryptAllData())
         data.nProtected = 1;

@@ -251,6 +251,8 @@ Q_SIGNALS:
                             const WIZDOCUMENTATTACHMENTDATA& attachmentNew);
     void attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
+    void documentParamModified(const WIZDOCUMENTPARAMDATA& param);
+
     void folderCreated(const QString& strLocation);
     void folderDeleted(const QString& strLocation);
 

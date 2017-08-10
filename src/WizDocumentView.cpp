@@ -825,6 +825,8 @@ void WizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
     WizMainWindow::instance()->quickSyncKb(data.strKbGUID);
 }
 
+
+
 void WizDocumentView::on_document_data_changed(const QString& strGUID,
                                               WizDocumentView* viewer)
 {
