@@ -49,6 +49,7 @@
 #define DOCUMENT_STATUS_NEWVERSIONFOUNDED      0x0010
 #define DOCUMENT_STATUS_PERSONAL           0x0020
 #define DOCUMENT_STATUS_ON_EDITREQUEST       0x0040
+#define DOCUMENT_STATUS_ON_CHECKLIST       0x0080
 
 WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
@@ -479,7 +480,7 @@ void WizDocumentView::setEditorMode(WizEditorMode editorMode)
         // don not use message tips when check document editable
 //        m_title->showMessageTips(Qt::PlainText, tr("Checking whether note is eiditable..."));
         m_title->startEditButtonAnimation();
-        if (!checkDocumentEditable())
+        if (!checkDocumentEditable(false))
         {
             return;
         }
@@ -568,7 +569,7 @@ bool WizDocumentView::checkListClickable()
     {
         //m_title->showMessageTips(Qt::PlainText, tr("Checking whether checklist is clickable..."));
         setCursor(Qt::WaitCursor);
-        return checkDocumentEditable();
+        return checkDocumentEditable(true);
     }
     return false;
 }
@@ -717,13 +718,17 @@ void WizDocumentView::stopCheckDocumentEditStatus()
     emit stopCheckDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }
 
-bool WizDocumentView::checkDocumentEditable()
+bool WizDocumentView::checkDocumentEditable(bool checklist)
 {
     QEventLoop loop;
     connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), &loop, SLOT(quit()));
     connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), &loop, SLOT(quit()));
     startCheckDocumentEditStatus();
     m_editStatus = m_editStatus | DOCUMENT_STATUS_ON_EDITREQUEST;
+    if (checklist)
+    {
+        m_editStatus |= DOCUMENT_STATUS_ON_CHECKLIST;
+    }
     loop.exec();
     //
 
@@ -796,6 +801,13 @@ void WizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSucc
 
 
     bool onEditRequest = m_editStatus & DOCUMENT_STATUS_ON_EDITREQUEST;
+    if (onEditRequest)
+    {
+        if (m_editStatus & DOCUMENT_STATUS_ON_CHECKLIST)
+        {
+            onEditRequest = false;
+        }
+    }
     //
     bool forceEdit = onEditRequest ? true : false;
 
@@ -812,6 +824,8 @@ void WizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
     //
     WizMainWindow::instance()->quickSyncKb(data.strKbGUID);
 }
+
+
 
 void WizDocumentView::on_document_data_changed(const QString& strGUID,
                                               WizDocumentView* viewer)

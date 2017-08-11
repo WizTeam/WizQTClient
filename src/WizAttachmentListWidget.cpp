@@ -394,6 +394,10 @@ void WizAttachmentListView::waitForDownload()
 
 bool WizAttachmentListView::isAttachmentModified(const WIZDOCUMENTATTACHMENTDATAEX& attachment)
 {
+    return false;
+    //
+    //下面的方式是错误的，不应该按照这种方式检测，而应该检测文件的md5。
+    //
     QString fileNmae = m_dbMgr.db(attachment.strKbGUID).getAttachmentFileName(attachment.strGUID);
     QFileInfo info(fileNmae);
     if (info.exists())

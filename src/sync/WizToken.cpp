@@ -10,8 +10,6 @@
 #include "WizApiEntry.h"
 #include "share/WizThreads.h"
 
-// use 5 minutes locally, server use 20 minutes
-#define TOKEN_TIMEOUT_INTERVAL 60 * 5
 
 WizTokenPrivate::WizTokenPrivate(WizToken* token)
     : m_bProcessing(false)
@@ -31,11 +29,9 @@ QString WizTokenPrivate::token()
     QMutexLocker locker(m_mutex);
     Q_UNUSED(locker);
     //
-//    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
-
     if (m_info.strToken.isEmpty())
     {
-        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        WizKMAccountsServer asServer;
         if (asServer.login(m_strUserId, m_strPasswd))
         {
             m_info = asServer.getUserInfo();
@@ -57,10 +53,10 @@ QString WizTokenPrivate::token()
     else
     {
         WIZUSERINFO info = m_info;
-        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        WizKMAccountsServer asServer;
         asServer.setUserInfo(info);
 
-        if (asServer.keepAlive(m_info.strToken))
+        if (asServer.keepAlive())
         {
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;
@@ -138,12 +134,13 @@ void WizTokenPrivate::setPasswd(const QString& strPasswd)
     m_strPasswd = strPasswd;
 }
 
-WIZUSERINFO WizTokenPrivate::info()
+WIZUSERINFO WizTokenPrivate::userInfo()
 {
     QMutexLocker locker(m_mutex);
     Q_UNUSED(locker);
     //
-    return m_info;
+    WIZUSERINFO ret = m_info;
+    return ret;
 }
 
 int WizTokenPrivate::lastErrorCode() const
@@ -223,11 +220,11 @@ void WizToken::setPasswd(const QString& strPasswd)
     d->setPasswd(strPasswd);
 }
 
-WIZUSERINFO WizToken::info()
+WIZUSERINFO WizToken::userInfo()
 {
     Q_ASSERT(m_instance);
 
-    return d->info();
+    return d->userInfo();
 }
 
 QString WizToken::lastErrorMessage()

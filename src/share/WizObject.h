@@ -6,6 +6,10 @@
 #include <QMap>
 #include "WizQtHelper.h"
 
+namespace Json {
+class Value;
+}
+
 const UINT WIZ_USERGROUP_ADMIN = 0;
 const UINT WIZ_USERGROUP_SUPER = 10;
 const UINT WIZ_USERGROUP_EDITOR = 50;
@@ -57,7 +61,7 @@ struct WIZUSERINFOBASE
 {
     QString strToken;
     QString strKbGUID;
-    QString strDatabaseServer;
+    QString strXmlRpcServer;
     QString strKbServer;
 
     //NOTE: DEPRECATED
@@ -69,27 +73,14 @@ struct WIZUSERINFOBASE
     }    
 };
 
+// use 10 minutes locally, server use 20 minutes
+#define TOKEN_TIMEOUT_INTERVAL 60 * 10
+
 struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
     WIZUSERINFO(const WIZUSERINFO& info);
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& val);
-
-    // field: api_version, default: 1
-
-    // field: capi_url, default: /xmlrpc
-    QString strChatUrl;
-
-    // field: download_url, default: /a/download
-    QString strDownloadUrl;
-
-    // field: email_verify, default: verified
-
-    // field: enable_group, default: 0
-    int bEnableGroup;
-
-    // field: expried_time
-    WizOleDateTime tTokenExpried;
+    bool fromJson(const Json::Value& value);
 
     // field: invite_code, current is 8 length char
     QString strInviteCode;
@@ -103,46 +94,20 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     // field: notice_text, currently null
     QString strNoticeText;
 
-    // field: public_tags, default: config.public_tags, what's this?
-    // field: push_tags, default: config.push_tags, what's this?
-    // field: return_code, default: 200
-    // field: return_message, default: successfuly login, hello! user!
-    // field: server, currently null
-    // field: sns_list, default: sina=zh_CN name, 1
-    QString strSNSList;
-
-    // field: upload_url, default: /a/upload
-    QString strUploadUrl;
-
-    // ---> user struct begin
-    // field: api_version, why return two times of this field?
-
     // field: displayname
     QString strDisplayName;
 
     // field: email, account id
     QString strUserEmail;
 
-    // field: language, default: zh_CN
-    QString strLanguage;
-
-    // field: nickname
-    QString strNickName;
-
-    // field: return_code, why return two times of this field?
-
     // field: user_guid
     QString strUserGUID;
-
-    // <--- user struct end
 
     // field: user_level
     int nUserLevel;
 
     // field: user_level_name
     QString strUserLevelName;
-
-    // field: user_photo_url, currently null
 
     // field: user_points
     int nUserPoints;
@@ -155,11 +120,10 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
 
     // field: sign up date
     WizOleDateTime tCreated;
-
     //
     int syncType;
-
-    QString strBackupDatabaseServer;
+    //
+    WizOleDateTime tTokenExpried;
 };
 
 Q_DECLARE_METATYPE(WIZUSERINFO)
@@ -180,31 +144,44 @@ struct WIZUSERCERT
     QString strHint;
 };
 
+struct WIZKBVALUEVERSIONS : public WIZOBJECTBASE
+{
+    WIZKBVALUEVERSIONS();
+    bool inited;
+    std::map<QString, __int64> versions;
+    bool fromJson(const Json::Value& value);
+};
 
-struct WIZKBINFO
+struct WIZKBINFO : public WIZOBJECTBASE
 {
     WIZKBINFO();
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    //
+    bool fromJson(const Json::Value& value);
+    //
+    __int64 nDocumentVersion;
+    __int64 nTagVersion;
+    __int64 nStyleVersion;
+    __int64 nAttachmentVersion;
+    __int64 nDeletedGUIDVersion;
+    __int64 nParamVersion;
+    __int64 nUserVersion;
+    //
+    qint64 nStorageLimit;
+    qint64 nStorageUsage;
+    //
+    qint64 nTrafficLimit;
+    qint64 nTrafficUsage;
+    //
+    qint64 nUploadSizeLimit;
+    //
+    qint64 nNotesCount;
+    qint64 nNotesCountLimit;
     //
     int getMaxFileSize() const
     {
         return nUploadSizeLimit;
     }
-
-    qint64 nStorageLimit;
-    qint64 nStorageUsage;
-    QString strStorageLimit;
-    QString strStorageUsage;
-
-    qint64 nUploadSizeLimit;
-    QString strUploadSizeLimitString;
-    qint64 nNotesCount;
-    qint64 nNotesCountLimit;
-
-    qint64 nTrafficLimit;
-    qint64 nTrafficUsage;
-    QString strTrafficLimit;
-    QString strTrafficUsage;
+    //
 };
 
 
@@ -245,6 +222,9 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     WIZTAGDATA(const WIZTAGDATA& data);
     virtual ~WIZTAGDATA();
 
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
+
     CString strGUID;
     CString strParentGUID;
     CString strName;
@@ -256,8 +236,6 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
 
     BOOL equalForSync(const WIZTAGDATA& data) const;
-    virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
-    virtual BOOL saveToXmlRpc(WizXmlRpcStructValue& data) const;
 
     static CString versionName() { return CString("tag_version"); }
     static CString objectName() { return CString("tag"); }
@@ -272,18 +250,19 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
 {
     WIZSTYLEDATA();
 
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-    virtual bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
 
     bool equalForSync(const WIZSTYLEDATA& data) const;
     static CString versionName() { return CString("style_version"); }
     static CString objectName() { return CString("style"); }
+    bool valid();
 
     CString strGUID;
     CString strName;
     CString strDescription;
-    COLORREF crTextColor;
-    COLORREF crBackColor;
+    QColor crTextColor;
+    QColor crBackColor;
     bool bTextBold;
     int nFlagIndex;
     WizOleDateTime tModified;
@@ -381,6 +360,11 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
 
     // field: local data modified
     long nDataChanged;
+    //
+    int nFlags;
+    int nRate;
+    //
+    bool isAlwaysOnTop() const { return nFlags & wizDocumentAlwaysOnTop; }
 };
 
 struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
@@ -389,7 +373,7 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
 
     WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
 
     // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
@@ -402,15 +386,29 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     bool bSkipped;
 };
 
+struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
+{
+    QString strDocumentGuid;
+    QString strName;
+    QString strValue;
+    __int64 nVersion;
+    //
+    WIZDOCUMENTPARAMDATA();
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
+};
+
+typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;
 
 struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
 {
     WIZDOCUMENTATTACHMENTDATA();
     virtual ~WIZDOCUMENTATTACHMENTDATA();
 
+    bool fromJson(const Json::Value& value);
+    //
     friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
     BOOL equalForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
-    virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
 
     static QString versionName() { return "attachment_version"; }
     static QString objectName() { return "attachment"; }
@@ -469,8 +467,9 @@ struct WIZDELETEDGUIDDATA : public WIZOBJECTBASE
 {
     WIZDELETEDGUIDDATA();
 
-    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-    bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
+    bool fromJson(const Json::Value& value);
+    bool toJson(QString kbGuid, Json::Value& value) const;
+    //
     bool equalForSync(const WIZDELETEDGUIDDATA& data) const;
     static CString versionName() { return CString("deleted_guid_version"); }
     static CString objectName() { return CString("deleted_guid"); }
@@ -496,7 +495,7 @@ struct WIZGROUPDATA
 {
     WIZGROUPDATA();
     WIZGROUPDATA(const WIZGROUPDATA& data);
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
     //
     bool isBiz() const
     {
@@ -522,10 +521,6 @@ struct WIZGROUPDATA
 
     // field: dt_role_created, not used
     WizOleDateTime tRoleCreated;
-
-    // field: kapi_url
-    // server_url, aka "ks"(knowledge server)
-    QString strDatabaseServer;
 
     // field: kb_guid
     QString strGroupGUID;
@@ -554,13 +549,6 @@ struct WIZGROUPDATA
     // text description of permission, not used
     QString strRoleNote;
 
-    // filed: server_url, not used
-    QString strServerUrl;
-
-    // field: tag_names
-    // default "tags names api change", obsolete field now
-    QString strGroupTags;
-
     // field: user_group, group permission
     int nUserGroup;
 
@@ -586,7 +574,7 @@ struct WIZBIZDATA
 {
     WIZBIZDATA();
     WIZBIZDATA(const WIZBIZDATA& data);
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
 
     QString bizGUID;
     QString bizName;
@@ -610,52 +598,12 @@ const int WIZ_USER_MSG_TYPE_SYSTEM = 100;
 const int WIZ_USER_MSG_TYPE_REMIND_CREATE = 110;
 const int WIZ_USER_MSG_TYPE_MAX = 110;      //支持的最大消息类型，超过该类型的消息直接丢弃
 
-struct WIZUSERMESSAGEDATA
-{
-    qint64 nMessageID;
-    QString strBizGUID;
-    QString strKbGUID;
-    QString strDocumentGUID;
-    QString strSenderGUID;
-    QString strSenderID;
-    QString strReceiverGUID;
-    QString strReceiverID;
-    int nMessageType;
-    int nReadStatus;	//阅读状态, 0:未读，1:已读
-    int nDeletedStatus;  // 删除状态， 0：为删除， 1：已删除
-    WizOleDateTime tCreated;
-    QString strMessageText;
-    qint64 nVersion;
-    QString strSender;
-    QString strReceiver;
-    QString strTitle;
-    QString strNote;     //消息携带的数据，用于显示广告等内容
-    int nLocalChanged;
-
-    WIZUSERMESSAGEDATA()
-        : nMessageID(0)
-        , nMessageType(WIZ_USER_MSG_TYPE_CALLED_IN_TITLE)
-        , nReadStatus(0)
-        , nDeletedStatus(0)
-        , nVersion(0)
-        , nLocalChanged(0)
-    {
-
-    }
-
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-};
-
-typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
-
-
 
 struct WIZMESSAGEDATA
 {
     WIZMESSAGEDATA();
     WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
-    WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool fromJson(const Json::Value& value);
     static QString objectName() { return "messages"; }
 
     bool isAd();
@@ -754,21 +702,6 @@ struct WIZMESSAGEDATA
 
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 
-// struct return from accounts.getValue method
-struct WIZKVRETURN
-{
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
-
-    // field: return_code
-    // 200 ok
-    int nCode;
-
-    // field: value_of_key
-    QString value;
-
-    // field: version
-    qint64 nVersion;
-};
 
 // this struct is parsed from json document by xml-rpc kv api return field value
 struct WIZBIZUSER
@@ -785,8 +718,12 @@ struct WIZBIZUSER
     // field: user_id, email account name
     QString userId;
 
-    // no field, indicate user biz group
-    QString bizGUID;
+    // no field, indicate user kb group
+    QString kbGUID;
+    //
+    bool operator ==(const WIZBIZUSER& other) const;
+    //
+    bool fromJson(const Json::Value& value);
 };
 
 typedef std::deque<WIZBIZUSER> CWizBizUserDataArray;

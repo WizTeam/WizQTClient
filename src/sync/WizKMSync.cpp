@@ -209,7 +209,7 @@ bool WizKMSyncThread::prepareToken()
         return false;
     }
     //
-    m_info = WizToken::info();
+    m_info = WizToken::userInfo();
     //
     return true;
 }
@@ -319,10 +319,8 @@ bool WizKMSyncThread::syncAll()
         return false;
 
     if (m_db.kbGUID().isEmpty()) {
-        m_db.setKbGUID(WizToken::info().strKbGUID);
+        m_db.setKbGUID(WizToken::userInfo().strKbGUID);
     }
-
-    syncUserCert();
 
     ::WizSyncDatabase(m_info, m_pEvents, &m_db, m_bBackground);
 
@@ -344,7 +342,7 @@ bool WizKMSyncThread::quickSync()
 
         if (kbGuid.isEmpty() || m_db.kbGUID() == kbGuid)
         {
-            WizKMSync syncPrivate(&m_db, m_info, m_pEvents, FALSE, TRUE, NULL);
+            WizKMSync syncPrivate(&m_db, m_info, WIZKBINFO(), WIZKBVALUEVERSIONS(), m_pEvents, FALSE, TRUE, NULL);
             //
             if (syncPrivate.sync())
             {
@@ -360,13 +358,8 @@ bool WizKMSyncThread::quickSync()
                 //
                 WIZUSERINFO userInfo = m_info;
                 userInfo.strKbGUID = group.strGroupGUID;
-                userInfo.strDatabaseServer = group.strDatabaseServer;
-                if (userInfo.strDatabaseServer.isEmpty())
-                {
-                    userInfo.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
-                }
                 //
-                WizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
+                WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), m_pEvents, TRUE, TRUE, NULL);
                 //
                 if (syncGroup.sync())
                 {
@@ -400,8 +393,9 @@ bool WizKMSyncThread::resetGroups()
     if (!prepareToken())
         return false;
     //
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     server.setUserInfo(m_info);
+    server.setEvents(m_pEvents);
     //
     CWizBizDataArray bizs;
     if (!server.getBizList(bizs))
@@ -418,18 +412,6 @@ bool WizKMSyncThread::resetGroups()
     return true;
 }
 
-
-
-// FIXME: remove this to syncing flow
-void WizKMSyncThread::syncUserCert()
-{
-    QString strN, stre, strd, strHint;
-
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
-    if (server.getCert(m_db.getUserId(), m_db.getPassword(), strN, stre, strd, strHint)) {
-        m_db.setUserCert(strN, stre, strd, strHint);
-    }
-}
 
 bool WizKMSyncThread::needQuickSync()
 {

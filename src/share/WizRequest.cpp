@@ -7,20 +7,25 @@
 #include <QNetworkReply>
 
 #include "jsoncpp/json/json.h"
+#include "share/WizMisc.h"
+#include "utils/WizLogger.h"
 
 
-WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message)
+WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message, QString extCode)
     : returnCode(error)
 {
     switch (error) {
     case network: returnMessage = QObject::tr("Network error"); break;
     case json: returnMessage = QObject::tr("Response is not an valid json"); break;
     case server: returnMessage = QObject::tr("Server error"); break;
+    case format: returnMessage = QObject::tr("Json format error"); break;
     }
     //
     if (!message.isEmpty()) {
         returnMessage = message;
     }
+    //
+    externCode = extCode;
 }
 
 bool WizRequest::execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody)
@@ -63,12 +68,13 @@ bool WizRequest::execJsonRequest(const QString& url, QString method, const QByte
     }
 
     WizAutoTimeOutEventLoop loop(reply);
-    loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+    loop.setTimeoutWaitSeconds(60 * 60);
     loop.exec();
     //
-    if (loop.error() != QNetworkReply::NoError)
+    QNetworkReply::NetworkError err = loop.error();
+    if (err != QNetworkReply::NoError)
     {
-        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+        TOLOG3("Failed to exec json request, network error=%1, message=%2, url=%3", WizIntToStr(err), loop.errorString(), url);
         return false;
     }
     //
@@ -130,19 +136,41 @@ WIZSTANDARDRESULT WizRequest::isSucceededStandardJsonRequest(Json::Value& res)
     try {
         //
         Json::Value returnCode = res["returnCode"];
+        if (returnCode.isNull())
+        {
+            returnCode = res["return_code"];
+        }
+        //
         if (returnCode.asInt() != 200)
         {
             Json::Value returnMessage = res["returnMessage"];
-            qDebug() << "Can't upload note data, ret code=" << returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
-            return WIZSTANDARDRESULT(returnCode.asInt(), returnMessage.asString());
+            Json::Value externCodeValue = res["externCode"];
+            //
+            if (returnMessage.isNull()) {
+                returnMessage = res["return_message"];
+            }
+            //
+            std::string externCode;
+            if (externCodeValue.isString()) {
+                externCode = externCodeValue.asString();
+            } else if (externCodeValue.isInt()) {
+                externCode = WizIntToStr(externCodeValue.asInt()).toUtf8().constData();
+            }
+            //
+            TOLOG3("Can't exec request, ret code=%1, message=%2, externCode=%3",
+                   WizIntToStr(returnCode.asInt()),
+                   QString::fromStdString(returnMessage.asString()),
+                   QString::fromStdString(externCode));
+            //
+            return WIZSTANDARDRESULT(returnCode.asInt(), returnMessage.asString(), externCode);
         }
         //
-        return WIZSTANDARDRESULT(200, QString("OK"));
+        return WIZSTANDARDRESULT(200, QString("OK"), QString());
     }
     catch (std::exception& err)
     {
         qDebug() << "josn error: " << err.what();
-        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::json, QString::fromUtf8(err.what()));
+        return WIZSTANDARDRESULT(WIZSTANDARDRESULT::json, QString::fromUtf8(err.what()), "");
     }
 }
 

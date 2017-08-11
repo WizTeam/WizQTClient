@@ -159,6 +159,7 @@ public:
     virtual bool getModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
     virtual bool getModifiedTagList(CWizTagDataArray& arrayData);
     virtual bool getModifiedStyleList(CWizStyleDataArray& arrayData);
+    virtual bool getModifiedParamList(CWizDocumentParamDataArray& arrayData);
     virtual bool getModifiedDocumentList(CWizDocumentDataArray& arrayData);
     virtual bool getModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
     virtual bool getModifiedMessageList(CWizMessageDataArray& arrayData);
@@ -173,7 +174,8 @@ public:
     virtual bool onDownloadStyleList(const CWizStyleDataArray& arrayData);
     virtual bool onDownloadDocumentList(const CWizDocumentDataArray& arrayData);
     virtual bool onDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData);
-    virtual bool onDownloadMessages(const CWizUserMessageDataArray& arrayData);
+    virtual bool onDownloadMessageList(const CWizMessageDataArray& arrayData);
+    virtual bool onDownloadParamList(const CWizDocumentParamDataArray& arrayData);
 
     virtual bool updateObjectData(const QString& strDisplayName,
                                   const QString& strObjectGUID,
@@ -193,13 +195,16 @@ public:
 
     // upload
     virtual bool initDocumentData(const QString& strGUID,
-                                  WIZDOCUMENTDATAEX& data);
+                                  WIZDOCUMENTDATAEX& data,
+                                  bool forceUploadData);
 
     virtual bool initAttachmentData(const QString& strGUID,
                                     WIZDOCUMENTATTACHMENTDATAEX& data);
 
     virtual bool onUploadObject(const QString& strGUID,
                                 const QString& strObjectType);
+    virtual bool onUploadParam(const QString& strDocumentGuid, const QString& strName);
+
 
     // modify
     virtual bool modifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
@@ -209,6 +214,7 @@ public:
     virtual void setKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
     virtual bool onDownloadGroups(const CWizGroupDataArray& arrayGroup);
     virtual bool onDownloadBizs(const CWizBizDataArray& arrayBiz);
+    virtual bool onDownloadBizUsers(const QString& kbGuid, const CWizBizUserDataArray& arrayUser);
     virtual IWizSyncableDatabase* getGroupDatabase(const WIZGROUPDATA& group);
     virtual void closeGroupDatabase(IWizSyncableDatabase* pDatabase);
     virtual IWizSyncableDatabase* getPersonalDatabase();
@@ -279,7 +285,6 @@ public:
 
     virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
     virtual QString meta(const QString& strSection, const QString& strKey);
-    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) ;
 
     // end interface implementations
     bool onDownloadDocument(const WIZDOCUMENTDATAEX& data);
@@ -299,16 +304,14 @@ public:
     QString getFavorites();
     void setFavorites(const QString& favorites, qint64 nVersion);
 
-    void setBizUsers(const QString &strBizGUID, const QString& strUsers);
-    bool loadBizUsersFromJson(const QString &strBizGUID,
-                              const QString& strJsonRaw,
-                              CWizBizUserDataArray& arrayUser);
-
     void setFoldersPosModified();
     void setGroupTagsPosModified();
 
     //
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
+    //
+    virtual bool deleteDocumentFromLocal(const QString& strDocumentGuid);
+    virtual bool deleteAttachmentFromLocal(const QString& strAttachmentGuid);
 
 public:
     bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
@@ -369,7 +372,6 @@ public:
     static bool getJionedGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayJionedGroup);
 
     bool updateBizUser(const WIZBIZUSER& user);
-    bool updateBizUsers(const CWizBizUserDataArray& arrayUser);
     bool updateMessage(const WIZMESSAGEDATA& msg);
     bool updateMessages(const CWizMessageDataArray& arrayMsg);
     bool updateDeletedGuid(const WIZDELETEDGUIDDATA& data);
@@ -382,6 +384,8 @@ public:
     bool updateDocuments(const std::deque<WIZDOCUMENTDATAEX>& arrayDocument);
     bool updateAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
     bool updateAttachments(const CWizDocumentAttachmentDataArray& arrayAttachment);
+    //
+    bool setDocumentFlags(const QString& strDocumentGuid, const QString& strFlags);
 
     bool updateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
                             const QString& strURL, int nFlags, bool notifyDataModify = true);
@@ -424,6 +428,8 @@ public:
                                       QByteArray& arrayData);
     bool saveCompressedAttachmentData(const CString& strGUID,
                                       const QByteArray& arrayData);
+    bool modifyAttachmentDataMd5(const QString& strGUID, const QString& md5);
+
 
     static CString getRootLocation(const CString& strLocation);
     static CString getLocationName(const CString& strLocation);

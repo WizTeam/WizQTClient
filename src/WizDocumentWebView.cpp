@@ -192,22 +192,27 @@ bool WizDocumentWebView::onPasteCommand()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-    if (isEditing() && !clip->image().isNull()) {
-        // save clipboard image to
-        QString strImagePath = noteResourcesPath();
-        CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
-        if (!clip->image().save(strFileName)) {
-            TOLOG("ERROR: Can't save clipboard image to file");
-            return false;
-        }
+    if (isEditing())
+    {
+        if (!clip->image().isNull())
+        {
+            // save clipboard image to
+            QString strImagePath = noteResourcesPath();
+            CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
+            if (!clip->image().save(strFileName)) {
+                TOLOG("ERROR: Can't save clipboard image to file");
+                return false;
+            }
 
-        QString strHtml;
-        if (!WizImage2Html(strFileName, strHtml, strImagePath))
-            return false;
+            QString strHtml;
+            if (!WizImage2Html(strFileName, strHtml, strImagePath))
+                return false;
+            //
+            editorCommandExecuteInsertHtml(strHtml, true);
+            //
+            return true;
+        }
         //
-        editorCommandExecuteInsertHtml(strHtml, true);
-        //
-        return true;
     }
     //
     return false;
@@ -989,12 +994,13 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
             strCode += "WizEditor.off();";
             //
         } else {
-            strCode +=
-QString("WizEditor.off(null, function(){\n\
-    WizReader.highlight.on([%1]);\nconsole.log('highlight');\n\
-});").arg(keywords);
+            strCode += QString("WizEditor.off(null, function(){\n\
+                WizReader.highlight.on([%1]);\nconsole.log('highlight');\n\
+            });").arg(keywords);
         }
     }
+    //
+    qDebug() << strCode;
     //
     page()->runJavaScript(strCode);
 }
@@ -1116,21 +1122,7 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
         //
         QString strFileName = m_mapFile.value(data.strGUID);
         //
-        /*
-        CString strResourcePath = m_browser.GetResourceFilePath();
-        CString strResourcePathParam = strResourcePath;
-        strResourcePathParam.Replace("\\", "\\\\");
-        //
-        //
-        CString strScript = WizFormatString1(CString(
-            "WizEditor.clearWizDom();\n"
-            "WizEditor.img.saveRemote('%1');\n"
-            "WizEditor.getContentHtml()"), strResourcePathParam);
-            */
-        //
-        QString strScript =
-            "WizEditor.clearWizDom();\n"
-            "WizEditor.getContentHtml()";
+        QString strScript = "WizEditor.getContentHtml()";
         //
         page()->runJavaScript(strScript, [=](const QVariant& ret){
             //
@@ -1211,7 +1203,7 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 }
 
 
-void WizDocumentWebView::getAllEditorScriptAndStypeFileName(QStringList& arrayFile)
+void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)
 {
     QString strResourcePath = Utils::WizPathResolve::resourcesPath();
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
@@ -1219,26 +1211,42 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(QStringList& arrayFi
     QString strEditorJS = strHtmlEditorPath + "wizEditorForMac.js";
     QString strInit = strHtmlEditorPath + "editorHelper.js";
     //
-    arrayFile.empty();
-    arrayFile.push_back(strEditorJS);
-    arrayFile.push_back(strInit);
+    files.clear();
+    files[strEditorJS] = "";
+    files[strInit] = "";
+    //
+    /*
+     *
+     * 渐变式加载笔记，暂时不需要
+    QString tempCss = strHtmlEditorPath + "tempeditorstyle.css";
+    QString tempCssLoadOnly = strHtmlEditorPath + "tempeditorstyle_loadonly.css";
+    //
+    files[tempCss] = "wiz_unsave_style";
+    files[tempCssLoadOnly] = "wiz_style_for_load";
+    */
+
 }
 
 
 
-void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles)
+void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::map<QString, QString>& files)
 {
-    Q_ASSERT(!arrayFiles.empty());
-    for (auto it : arrayFiles)
+    Q_ASSERT(!files.empty());
+    for (std::map<QString, QString>::const_iterator it = files.begin(); it != files.end(); it++)
     {
-        Q_ASSERT(WizPathFileExists(it));
+        QString strFileName = it->first;
+        QString name = it->second;
         //
-        QString strFileName(it);
+        Q_ASSERT(WizPathFileExists(strFileName));
+        //
         QString strExt = Utils::WizMisc::extractFileExt(strFileName);
         if (0 == strExt.compare(".css", Qt::CaseInsensitive))
         {
-            QString strTag = WizFormatString1("<link rel=\"stylesheet\" type=\"text/css\" \
-href=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName);
+            if (name.isEmpty()) {
+                name = "wiz_inner_style";
+            }
+            //
+            QString strTag = WizFormatString2("<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName, name);
             //
             if (strHtml.indexOf(strTag) == -1)
             {
@@ -1247,9 +1255,12 @@ href=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName);
         }
         else if (0 == strExt.compare(".js", Qt::CaseInsensitive))
         {
-            QString	strTag = WizFormatString1(
-                    "<script type=\"text/javascript\" src=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\"></script>",
-                    strFileName);
+            if (name.isEmpty()) {
+                name = "wiz_inner_script";
+            }
+            QString	strTag = WizFormatString2(
+                    "<script type=\"text/javascript\" src=\"file:///%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\"></script>",
+                    strFileName, name);
             //
             if (strHtml.indexOf(strTag) == -1)
             {
@@ -1302,9 +1313,9 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
         view()->titleBar()->setEditorMode(m_currentEditorMode);
     }
     //
-    QStringList arrayFiles;
-    getAllEditorScriptAndStypeFileName(arrayFiles);
-    insertScriptAndStyleCore(strHtml, arrayFiles);
+    std::map<QString, QString> files;
+    getAllEditorScriptAndStypeFileName(files);
+    insertScriptAndStyleCore(strHtml, files);
     //
     replaceDefaultCss(strHtml);
     //
@@ -1357,6 +1368,11 @@ void WizDocumentWebView::setEditorMode(WizEditorMode editorMode)
 
     m_currentEditorMode = editorMode;
     //
+    if (m_currentEditorMode == modeEditor) {
+        m_timerAutoSave.start();
+    } else {
+        m_timerAutoSave.stop();
+    }
 }
 
 void WizDocumentWebView::trySaveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback)
@@ -1840,21 +1856,48 @@ void WizDocumentWebView::editorCommandExecuteRemoveFormat()
     editorCommandExecuteCommand("removeFormat");
 }
 
-
-void WizDocumentWebView::editorCommandExecuteFormatMatch()
+void WizDocumentWebView::editorCommandExecuteFormatPainterOn(bool multi)
 {
+    QString script = QString("WizEditor.formatPainter.on(%1);").arg(multi ? "true" : "false");
+    //
+    page()->runJavaScript(script, [=] (const QVariant& vRet) {
+        if (vRet.type() == QVariant::Bool) {
+            if (!vRet.toBool()) {
+                //
+                TOLOG("Can't stsart format painter");
+
+            }
+        }
+
+    });
+    //
+    WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
+    analyzer.logAction("formatPainter");
+}
+
+void WizDocumentWebView::editorCommandExecuteFormatPainterOff()
+{
+    QString script = QString("WizEditor.formatPainter.off();");
+    //
+    page()->runJavaScript(script, [=] (const QVariant& vRet) {
+        if (vRet.type() == QVariant::Bool) {
+            if (!vRet.toBool()) {
+                //
+                TOLOG("Can't stsart format painter");
+
+            }
+        }
+
+    });
+    //
+    WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
+    analyzer.logAction("formatPainter");
 }
 
 void WizDocumentWebView::editorCommandExecuteInsertCode()
 {
-    QString strSelectHtml = page()->selectedText();
-    WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app, this);
-    connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
-    dialog->setCode(strSelectHtml);
-    //dialog->exec();
-    dialog->show();
-    //dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
-
+    page()->runJavaScript("WizEditor.code.insertCode();");
+    //
     WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
     analyzer.logAction("insertCode");
 }
@@ -1935,6 +1978,7 @@ void WizDocumentWebView::isModified(std::function<void(bool modified)> callback)
 void WizDocumentWebView::setModified(bool b)
 {
     m_bContentsChanged = b;
+    page()->runJavaScript("WizEditor.setUnModified()");
 }
 
 void WizDocumentWebView::undo()

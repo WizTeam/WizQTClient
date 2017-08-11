@@ -2,6 +2,7 @@
 .wiz_toc_layer {
     background: #F9F9F5;
     padding: 20px 25px;
+    word-break: break-word;
 }
 
 .wiz_toc {

@@ -12,6 +12,8 @@
 #include "share/WizAnalyzer.h"
 #include "share/WizEventLoop.h"
 
+#include "utils/WizMisc.h"
+
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
 
@@ -25,13 +27,15 @@ void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count)
         2, //syncUploadTagList,
         2, //syncUploadStyleList,
         30, //syncUploadDocumentList,
+        1, //syncUploadParamList,
         10, //syncUploadAttachmentList,
         2, //syncDownloadTagList,
         2, //syncDownloadStyleList,
         5, //syncDownloadSimpleDocumentList,
         10, //syncDownloadFullDocumentList
+        1, //syncDownloadParamList
         5, //syncDownloadAttachmentList,
-        26, //syncDownloadObjectData
+        24, //syncDownloadObjectData
     };
     //
     //
@@ -65,22 +69,20 @@ int GetSyncStartProgress(WizKMSyncProgress progress)
 }
 
 
-WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
+WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
     : m_pDatabase(pDatabase)
-    , m_info(info)
+    , m_userInfo(userInfo)
     , m_pEvents(pEvents)
     , m_bGroup(bGroup)
-    , m_server(m_info, parent)
+    , m_server(userInfo, kbInfo, versions, parent)
     , m_bUploadOnly(bUploadOnly)
 {
-#ifdef _DEBUG
-    pEvents->onError(WizFormatString1("XmlRpcUrl: %1", info.strDatabaseServer));
-#endif
+    m_server.setEvents(m_pEvents);
 }
 
 bool WizKMSync::sync()
 {
-    QString strKbGUID = m_bGroup ? m_info.strKbGUID  : QString("");
+    QString strKbGUID = m_bGroup ? m_userInfo.strKbGUID  : QString("");
     m_pEvents->onBeginKb(strKbGUID);
 
     bool bRet = syncCore();
@@ -99,33 +101,21 @@ bool WizKMSync::syncCore()
         return FALSE;
 
     m_pEvents->onStatus(QObject::tr("Query server infomation"));
-    if (!m_bGroup)
-    {
-        if (m_server.wiz_getInfo())
-        {
-            m_pDatabase->setKbInfo("", m_server.kbInfo());
-        }
-    }
-    else
-    {
-        if (m_server.wiz_getInfo())
-        {
-            m_pDatabase->setKbInfo(m_info.strKbGUID, m_server.kbInfo());
-        }
-    }
     //
-    WIZOBJECTVERSION versionServer;
-    if (!m_server.wiz_getVersion(versionServer))
-    {
-        m_pEvents->onError(QObject::tr("Cannot get version information!"));
-        return FALSE;
-    }
+    //
+    if (!m_server.kb_getInfo())
+        return false;
+    //
+    QString kbInfoKey = m_bGroup ? m_userInfo.strKbGUID : "";
+    m_pDatabase->setKbInfo(kbInfoKey, m_server.kbInfo());
     //
     if (m_pEvents->isStop())
         return FALSE;
     //
+    WIZKBINFO info = m_server.kbInfo();
+    //
     m_pEvents->onStatus(QObject::tr("Query deleted objects list"));
-    if (!downloadDeletedList(versionServer.nDeletedGUIDVersion))
+    if (!downloadDeletedList(info.nDeletedGUIDVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download deleted objects list!"));
         return FALSE;
@@ -173,6 +163,16 @@ bool WizKMSync::syncCore()
         return FALSE;
     }
     //
+    if (m_pEvents->isStop())
+        return FALSE;
+    //
+    if (!uploadParamList()) {
+        m_pEvents->onError(QObject::tr("Cannot upload params!"));
+    }
+    //
+    if (m_pEvents->isStop())
+        return FALSE;
+    //
     //上传完笔记之后再上传文件夹等设置
     m_pEvents->onStatus(QObject::tr("Sync settings"));
     uploadKeys();
@@ -198,7 +198,7 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download tags"));
-    if (!downloadTagList(versionServer.nTagVersion))
+    if (!downloadTagList(info.nTagVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download tags!"));
         return FALSE;
@@ -208,7 +208,7 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download styles"));
-    if (!downloadStyleList(versionServer.nStyleVersion))
+    if (!downloadStyleList(info.nStyleVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download styles!"));
         return FALSE;
@@ -218,7 +218,7 @@ bool WizKMSync::syncCore()
         return FALSE;
     //
     m_pEvents->onStatus(QObject::tr("Download notes list"));
-    if (!downloadDocumentList(versionServer.nDocumentVersion))
+    if (!downloadDocumentList(info.nDocumentVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download notes list!"));
         return FALSE;
@@ -244,8 +244,14 @@ bool WizKMSync::syncCore()
     if (m_pEvents->isStop())
         return FALSE;
     //
+    m_pEvents->onStatus(QObject::tr("Download param list"));
+    if (!downloadParamList(info.nParamVersion))
+    {
+        m_pEvents->onError(QObject::tr("Cannot download param list!"));
+    }
+    //
     m_pEvents->onStatus(QObject::tr("Download attachments list"));
-    if (!downloadAttachmentList(versionServer.nAttachmentVersion))
+    if (!downloadAttachmentList(info.nAttachmentVersion))
     {
         m_pEvents->onError(QObject::tr("Cannot download attachments list!"));
         return FALSE;
@@ -257,7 +263,7 @@ bool WizKMSync::syncCore()
     //
     if (!m_bGroup)
     {
-        if (m_server.wiz_getInfo())
+        if (m_server.kb_getInfo())
         {
             m_pDatabase->setKbInfo("", m_server.kbInfo());
         }
@@ -442,6 +448,25 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUME
     return pDatabase->getModifiedAttachmentList(arrayData);
 }
 
+template <class TData>
+bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTPARAMDATA>& arrayData)
+{
+    return pDatabase->getModifiedParamList(arrayData);
+}
+
+
+template <class TData>
+bool onUploadObject(IWizSyncableDatabase* pDatabase, const TData& data, const QString& strObjectType)
+{
+    return pDatabase->onUploadObject(data.strGUID, strObjectType);
+}
+
+template <class TData>
+bool onUploadObject(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTPARAMDATA& data, const QString& strObjectType)
+{
+    return pDatabase->onUploadParam(data.strDocumentGuid, data.strName);
+}
+
 
 template <class TData>
 bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, WizKMSyncProgress progress)
@@ -467,7 +492,7 @@ bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, I
         it != arrayData.end();
         it++)
     {
-        pDatabase->onUploadObject(it->strGUID, strObjectType);
+        onUploadObject<TData>(pDatabase, *it, strObjectType);
     }
     //
     return TRUE;
@@ -505,21 +530,23 @@ bool WizKMSync::uploadStyleList()
 }
 
 
-template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, TData& data, int part)
+bool WizKMSync::uploadParamList()
 {
-    ATLASSERT(FALSE);
-    return FALSE;
+    if (m_bGroup)
+    {
+        if (!m_pDatabase->isGroupAuthor())	//need author
+            return TRUE;
+    }
+    //
+    return UploadSimpleList<WIZDOCUMENTPARAMDATA>("param", m_pEvents, m_pDatabase, m_server, syncUploadParamList);
 }
 
-template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data)
+bool InitDocumentData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data, bool forceUploadData)
 {
-    return pDatabase->initDocumentData(strObjectGUID, data);
+    return pDatabase->initDocumentData(strObjectGUID, data, forceUploadData);
 }
 
-template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data)
+bool InitAttachmentData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data)
 {
     return pDatabase->initAttachmentData(strObjectGUID, data);
 }
@@ -617,7 +644,7 @@ void SaveServerError(const WIZKBINFO& kbInfo, const WizKMDatabaseServer& server,
 
 
 
-bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress, bool forceUploadData)
 {
     QString strDisplayName;
 
@@ -632,38 +659,39 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         }
     }
     //
-    if (!InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local))
+    if (!InitDocumentData(pDatabase, local.strGUID, local, forceUploadData))
     {
         pEvents->onError(_TR("Cannot init object data!"));
+        TOLOG(_T("Cannot init object data!"));
         return FALSE;
     }
     //
     WizOleDateTime tLocalModified;
     tLocalModified = local.tModified;
     //
+    int maxFileSize = server.getMaxFileSize();
+    if (maxFileSize == 1)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
+        QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+        pEvents->setLastErrorMessage(error);
+        pEvents->onFreeServiceExpr();
+        return FALSE;
+    }
+    else if (maxFileSize == 2)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+        QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
+        pEvents->setLastErrorMessage(error);
+        pEvents->onVipServiceExpr();
+        return FALSE;
+    }
+    //
     //check data size
     if (!local.arrayData.isEmpty())
     {
-        int maxFileSize = server.getMaxFileSize();
-        if (maxFileSize == 1)
-        {
-            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
-            QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
-            pEvents->setLastErrorMessage(error);
-            pEvents->onFreeServiceExpr();
-            return FALSE;
-        }
-        else if (maxFileSize == 2)
-        {
-            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
-            QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
-            pEvents->setLastErrorMessage(error);
-            pEvents->onVipServiceExpr();
-            return FALSE;
-        }
-        //
         __int64 nDataSize = local.arrayData.size();
-        if (nDataSize > server.getMaxFileSize())
+        if (nDataSize > maxFileSize)
         {
             QString str;
             str = local.strTitle;
@@ -702,7 +730,8 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         {
             WIZDOCUMENTDATAEX local2 = local;
             local2.nDataChanged = 0;
-            InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local2);
+            bool forceUploadData = false;
+            InitDocumentData(pDatabase, local.strGUID, local2, forceUploadData);
             //
             WizOleDateTime tLocalModified2;
             tLocalModified2 = local2.tModified;
@@ -735,6 +764,43 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     return TRUE;
 }
 
+bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+{
+    bool forceUploadData = false;
+    server.clearJsonResult();
+    server.clearLocalError();
+    bool ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
+    if (ret)
+        return true;
+    //
+    if (server.lastJsonResult().externCode == "WizErrorUploadNoteData")
+    {
+        QString fileName = pDatabase->getDocumentFileName(local.strGUID);
+        if (WizPathFileExists(fileName) && Utils::WizMisc::getFileSize(fileName) > 0)
+        {
+            local.nDataChanged = 1;
+            forceUploadData = true;
+            ret = UploadDocumentCore(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress, forceUploadData);
+            if (ret)
+                return true;
+            //
+            if (server.lastLocalError() == "WizErrorInvalidZip")
+            {
+                ////无效的zip文件////
+                pDatabase->deleteDocumentFromLocal(local.strGUID);
+            }
+        }
+        else
+        {
+            ////本地没有数据，服务器也没有数据////
+            pDatabase->deleteDocumentFromLocal(local.strGUID);
+        }
+    }
+    //
+    return false;
+}
+
+
 bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     QString strDisplayName;
@@ -756,7 +822,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         }
     }
     //
-    if (!InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local))
+    if (!InitAttachmentData(pDatabase, local.strGUID, local))
     {
         pEvents->onError(_TR("Cannot init object data!"));
         return FALSE;
@@ -825,7 +891,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         if (-1 != nServerVersion)
         {
             WIZDOCUMENTATTACHMENTDATAEX local2 = local;
-            InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local2);
+            InitAttachmentData(pDatabase, local.strGUID, local2);
             //
             WizOleDateTime tLocalModified2;
             tLocalModified2 = local2.tDataModified;
@@ -982,6 +1048,8 @@ bool WizKMSync::uploadAttachmentList()
     //
     return UploadList<WIZDOCUMENTATTACHMENTDATAEX, false>(m_server.kbInfo(), m_pEvents, m_pDatabase, m_server, "attachment", syncUploadAttachmentList);
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 bool WizKMSync::downloadDeletedList(__int64 nServerVersion)
@@ -1009,6 +1077,12 @@ bool WizKMSync::downloadDocumentList(__int64 nServerVersion)
 bool WizKMSync::downloadAttachmentList(__int64 nServerVersion)
 {
     return downloadList<WIZDOCUMENTATTACHMENTDATAEX>(nServerVersion, "attachment", syncDownloadAttachmentList);
+}
+
+
+bool WizKMSync::downloadParamList(__int64 nServerVersion)
+{
+    return downloadList<WIZDOCUMENTPARAMDATA>(nServerVersion, "param", syncDownloadParamList);
 }
 
 
@@ -1066,9 +1140,17 @@ bool WizKMSync::downloadObjectData()
             ret.strKbGUID = data.strKbGUID;
             ret.strTitle = data.strDisplayName;
             QString fileName = m_pDatabase->getDocumentFileName(ret.strGUID);
+            m_server.clearJsonResult();
             if (!m_server.document_downloadData(data.strObjectGUID, ret, fileName))
             {
-                m_pEvents->onError(WizFormatString1("Cannot download note data from server: %1", data.strDisplayName));
+                if (m_server.lastJsonResult().externCode == "WizErrorNotExistsInDb")
+                {
+                    m_pDatabase->deleteDocumentFromLocal(ret.strGUID);
+                }
+                else
+                {
+                    m_pEvents->onError(WizFormatString1("Cannot download note data from server: %1", data.strDisplayName));
+                }
                 return false;
             }
             stream = ret.arrayData;
@@ -1079,9 +1161,17 @@ bool WizKMSync::downloadObjectData()
             ret.strGUID = data.strObjectGUID;
             ret.strKbGUID = data.strKbGUID;
             ret.strName = data.strDisplayName;
+            m_server.clearJsonResult();
             if (!m_server.attachment_downloadData(data.strDocumentGuid, data.strObjectGUID, ret))
             {
-                m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
+                if (m_server.lastJsonResult().externCode == "WizErrorNotExistsInDb")
+                {
+                    m_pDatabase->deleteAttachmentFromLocal(data.strObjectGUID);
+                }
+                else
+                {
+                    m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
+                }
                 return false;
             }
             stream = ret.arrayData;
@@ -1182,15 +1272,10 @@ bool WizDownloadDocumentsByGuids(IWizKMSyncEvents* pEvents, WizKMAccountsServer&
             return false;
         }
         //
-        if (!group.strDatabaseServer.isEmpty())
-        {
-            userInfo.strDatabaseServer = group.strDatabaseServer;
-        }
-        //
         userInfo.strKbGUID = group.strGroupGUID;
     }
     //
-    WizKMDatabaseServer serverDB(userInfo, server.parent());
+    WizKMDatabaseServer serverDB(userInfo);
     //
     pEvents->onStatus(_TR("Query notes information"));
     //
@@ -1212,13 +1297,15 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
 {
     __int64 nOldVersion = pDatabase->getObjectVersion("Messages");
     //
-    std::deque<WIZUSERMESSAGEDATA> arrayMessage;
-    server.getMessages(nOldVersion, arrayMessage);
+    std::deque<WIZMESSAGEDATA> arrayMessage;
+    if (!server.getMessages(nOldVersion, arrayMessage))
+        return false;
     //
     if (arrayMessage.empty())
-        return FALSE;
+    {
+        return true;
+    }
     //
-
     /*
     ////////
     ////准备群组信息////
@@ -1235,13 +1322,13 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
     ////按照群组分组笔记////
     */
     std::map<QString, CWizStdStringArray> mapKbGUIDDocuments;
-    for (WIZUSERMESSAGEDATA it : arrayMessage)
+    for (WIZMESSAGEDATA it : arrayMessage)
     {
-        if (!it.strKbGUID.isEmpty()
-            && !it.strDocumentGUID.isEmpty())
+        if (!it.kbGUID.isEmpty()
+            && !it.documentGUID.isEmpty())
         {
-            CWizStdStringArray& documents = mapKbGUIDDocuments[it.strKbGUID];
-            documents.push_back(it.strDocumentGUID);            
+            CWizStdStringArray& documents = mapKbGUIDDocuments[it.kbGUID];
+            documents.push_back(it.documentGUID);
         }
     }
     //
@@ -1267,14 +1354,8 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
         }
         //
         WIZUSERINFO userInfo = server.m_userInfo;
-        //
-        if (!group.strDatabaseServer.isEmpty())
-        {
-            userInfo.strDatabaseServer = group.strDatabaseServer;
-        }
-        //
         userInfo.strKbGUID = group.strGroupGUID;
-        WizKMDatabaseServer serverDB(userInfo, server.parent());
+        WizKMDatabaseServer serverDB(userInfo);
         //
         pEvents->onStatus(_TR("Query notes information"));
         //
@@ -1289,20 +1370,20 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
         pDatabase->closeGroupDatabase(pGroupDatabase);
     }
     //
-    __int64 nNewVersion = WizKMSync::getObjectsVersion<WIZUSERMESSAGEDATA>(nOldVersion, arrayMessage);
+    __int64 nNewVersion = WizKMSync::getObjectsVersion<WIZMESSAGEDATA>(nOldVersion, arrayMessage);
     //
-    pDatabase->onDownloadMessages(arrayMessage);
+    pDatabase->onDownloadMessageList(arrayMessage);
     pDatabase->setObjectVersion("Messages", nNewVersion);
 
-    for (WIZUSERMESSAGEDATA it : arrayMessage)
+    for (WIZMESSAGEDATA it : arrayMessage)
     {
-        if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
+        if (it.nReadStatus == 0 && it.nDeleteStatus == 0)
         {
             QList<QVariant> paramList;
             paramList.append(wizBubbleMessageCenter);
-            paramList.append(it.nMessageID);
+            paramList.append(it.nId);
             paramList.append(QObject::tr("New Message"));
-            paramList.append(it.strMessageText);
+            paramList.append(it.messageBody);
             pEvents->onBubbleNotification(paramList);
         }
     }
@@ -1482,15 +1563,6 @@ QString downloadFromUrl(const QString& strUrl)
 void syncGroupUsers(WizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
                     IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool background)
 {
-    QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
-    if (!strt.isEmpty()) {
-            if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
-#ifndef QT_DEBUG
-                return;
-#endif
-        }
-    }
-
     pEvents->onStatus(QObject::tr("Sync group users"));
 
     for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
@@ -1498,19 +1570,27 @@ void syncGroupUsers(WizKMAccountsServer& server, const CWizGroupDataArray& array
          it++)
     {
         const WIZGROUPDATA& g = *it;
-        if (!g.bizGUID.isEmpty())
+        if (!g.isBiz())
+            continue;
+        //
+        WIZKBINFO info = server.getKbInfo(g.strGroupGUID);
+        if (IWizSyncableDatabase* pGroupDatabase = pDatabase->getGroupDatabase(g))
         {
-            QString strUrl = WizCommonApiEntry::groupUsersUrl(server.getToken(), g.bizGUID, g.strGroupGUID);
-            QString strJsonRaw = downloadFromUrl(strUrl);            
-            if (!strJsonRaw.isEmpty())
-                pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
+            __int64 localVersion = pGroupDatabase->getObjectVersion("user");
+            if (localVersion < info.nUserVersion)
+            {
+                CWizBizUserDataArray arrayUser;
+                if (server.getBizUsers(g.bizGUID, g.strGroupGUID, arrayUser))
+                {
+                    pDatabase->onDownloadBizUsers(g.strGroupGUID, arrayUser);
+                    pGroupDatabase->setObjectVersion("user", info.nUserVersion);
+                }
+            }
         }
-
+        //
         if (pEvents->isStop())
             return;
     }
-
-    pDatabase->setMeta("SYNC_INFO", "DownloadGroupUsers", QDateTime::currentDateTime().toString());
 }
 
 bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
@@ -1520,12 +1600,9 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->onSyncProgress(0);
     pEvents->onStatus(QObject::tr("Connecting to server"));
 
-    QString syncUrl = WizCommonApiEntry::syncUrl();
-    if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
-        return false;
-
-    WizKMAccountsServer server(syncUrl);
+    WizKMAccountsServer server;
     server.setUserInfo(info);
+    server.setEvents(pEvents);
 
     pEvents->onSyncProgress(::GetSyncStartProgress(syncAccountLogin));
     pEvents->onStatus(QObject::tr("Signing in"));    
@@ -1562,11 +1639,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (server.getGroupList(arrayGroup))
     {
         pDatabase->onDownloadGroups(arrayGroup);
-        //
-        if (WizIsDayFirstSync(pDatabase))
-        {
-            syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
-        }
     }
     else
     {
@@ -1603,11 +1675,19 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->onStatus(QObject::tr("Upload modified messages"));
     WizUploadMessages(pEvents, server, pDatabase);
     //
+    server.initAllKbInfos();
+    server.initAllValueVersions();
+    //
+    syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+    //
     pEvents->onStatus(QObject::tr("----------sync private notes----------"));
     //
     {
         pEvents->setCurrentDatabase(0);
-        WizKMSync syncPrivate(pDatabase, server.m_userInfo, pEvents, FALSE, FALSE, NULL);
+        WizKMSync syncPrivate(pDatabase, server.m_userInfo,
+                              server.getKbInfo(server.m_userInfo.strKbGUID),
+                              server.getValueVersions(server.m_userInfo.strKbGUID),
+                              pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.sync())
         {
@@ -1655,11 +1735,13 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         }
         //
         WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
         //
-        WizKMSync syncGroup(pGroupDatabase, userInfo, pEvents, TRUE, FALSE, NULL);
+        WizKMSync syncGroup(pGroupDatabase, userInfo,
+                            server.getKbInfo(userInfo.strKbGUID),
+                            server.getValueVersions(server.m_userInfo.strKbGUID),
+                            pEvents, TRUE, FALSE, NULL);
         //
         if (syncGroup.sync())
         {
@@ -1687,7 +1769,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     {
         //pEvents->SetCurrentDatabase(0);
-        WizKMSync syncPrivate(pDatabase, server.m_userInfo, pEvents, FALSE, FALSE, NULL);
+        WizKMSync syncPrivate(pDatabase, server.m_userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.downloadObjectData())
         {
@@ -1723,11 +1805,10 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         }
         //
         WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
         //
-        WizKMSync syncGroup(pGroupDatabase, userInfo, pEvents, TRUE, FALSE, NULL);
+        WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, TRUE, FALSE, NULL);
         //
         if (syncGroup.downloadObjectData())
         {
@@ -1752,14 +1833,14 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
 
 bool WizUploadDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
 {
-    WizKMSync sync(pDatabase, info, pEvents, bGroup, TRUE, NULL);
+    WizKMSync sync(pDatabase, info, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, bGroup, TRUE, NULL);
     bool bRet = sync.sync();
     //
     return bRet;
 }
 bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
 {
-    WizKMSync sync(pDatabase, info, pEvents, bGroup, FALSE, NULL);
+    WizKMSync sync(pDatabase, info, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, bGroup, FALSE, NULL);
     bool bRet = sync.sync();
     if (bRet)
     {
@@ -1773,8 +1854,9 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
 bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
 {
     pEvents->onStatus(_TR("Quick download messages"));
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     server.setUserInfo(info);
+    server.setEvents(pEvents);
     /*
     ////获得群组信息////
     */
@@ -1793,7 +1875,7 @@ bool WizDownloadDocumentsByGuids(const WIZUSERINFO& info,
                                  const CWizStdStringArray& guids,
                                  CWizDocumentDataArray& arrayDocument)
 {
-    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer server;
     server.setUserInfo(info);
     /*
     ////获得群组信息////

@@ -76,7 +76,7 @@ public Q_SLOTS:
     void onCommentPageLoaded(bool ok);
     void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& note, bool bOk);
 
-    void on_commentUrlAcquired(QString GUID, QString url);
+    void on_commentTokenAcquired(QString token);
     void on_commentCountAcquired(QString GUID, int count);
 
     void onEditorChanged();

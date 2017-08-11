@@ -2,11 +2,14 @@
 #define WIZSERVICE_SYNC_P_H
 
 #include "WizKMServer.h"
+#include "utils/WizLogger.h"
+#include "share/WizMisc.h"
 
 class WizKMSync
 {
 public:
-    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info,
+    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo,
+              const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions,
                IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent);
 public:
     bool sync();
@@ -22,12 +25,14 @@ protected:
     bool downloadStyleList(__int64 nServerVersion);
     bool downloadDocumentList(__int64 nServerVersion);
     bool downloadAttachmentList(__int64 nServerVersion);
+    bool downloadParamList(__int64 nServerVersion);
 
     bool uploadDeletedList();
     bool uploadTagList();
     bool uploadStyleList();
     bool uploadDocumentList();
     bool uploadAttachmentList();
+    bool uploadParamList();
 
     bool uploadKeys();
     bool downloadKeys();
@@ -35,7 +40,7 @@ protected:
 
 private:
     IWizSyncableDatabase* m_pDatabase;
-    WIZUSERINFOBASE m_info;
+    WIZUSERINFOBASE m_userInfo;
     IWizKMSyncEvents* m_pEvents;
     bool m_bGroup;
     bool m_bUploadOnly;
@@ -99,7 +104,7 @@ private:
             //
             for (TData& data : arrayPageData)
             {
-                data.strKbGUID = m_info.strKbGUID;
+                data.strKbGUID = m_userInfo.strKbGUID;
             }
             //
             if (!onDownloadList<TData>(arrayPageData))
@@ -152,6 +157,11 @@ private:
     bool onDownloadList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
     {
         return m_pDatabase->onDownloadAttachmentList(arrayData);
+    }
+    template <class TData>
+    bool onDownloadList(const std::deque<WIZDOCUMENTPARAMDATA>& arrayData)
+    {
+        return m_pDatabase->onDownloadParamList(arrayData);
     }
 };
 

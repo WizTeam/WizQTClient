@@ -17,6 +17,7 @@ WizAutoTimeOutEventLoop::WizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject 
     , m_reply(pReply)
     , m_finished(false)
 {
+    m_url = pReply->request().url();
     connect(pReply, SIGNAL(finished()), SLOT(on_replyFinished()));
     connect(pReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));
     connect(pReply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(on_downloadProgress(qint64,qint64)));
@@ -129,6 +130,7 @@ void WizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 b
 {
     m_downloadBytes = bytesReceived;
 //    qDebug() << "download progress changed  " << bytesReceived << "  totoal  : " << bytesTotal;
+    emit downloadProgress(m_url, bytesReceived, bytesTotal);
 }
 
 void WizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTotal)

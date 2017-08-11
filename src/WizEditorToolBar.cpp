@@ -97,21 +97,21 @@ WizComboboxStyledItem* FontSizes()
 {
     static WizComboboxStyledItem fontItems[] =
     {
-        {"9", "9px", "", 14, false},
-        {"10", "10px", "", 14, false},
-        {"11", "11px", "", 14, false},
-        {"12", "12px", "", 14, false},
-        {"13", "13px", "", 14, false},
-        {"14", "14px", "", 14, false},
-        {"15", "15px", "", 14, false},
-        {"16", "16px", "", 14, false},
-        {"17", "17px", "", 14, false},
-        {"18", "18px", "", 14, false},
-        {"24", "24px", "", 14, false},
-        {"36", "36px", "", 14, false},
-        {"48", "48px", "", 14, false},
-        {"64", "64px", "", 14, false},
-        {"72", "72px", "", 14, false}
+        {"9", "9pt", "", 14, false},
+        {"10", "10pt", "", 14, false},
+        {"11", "11pt", "", 14, false},
+        {"12", "12pt", "", 14, false},
+        {"13", "13pt", "", 14, false},
+        {"14", "14pt", "", 14, false},
+        {"15", "15pt", "", 14, false},
+        {"16", "16pt", "", 14, false},
+        {"17", "17pt", "", 14, false},
+        {"18", "18pt", "", 14, false},
+        {"24", "24pt", "", 14, false},
+        {"36", "36pt", "", 14, false},
+        {"48", "48pt", "", 14, false},
+        {"64", "64pt", "", 14, false},
+        {"72", "72pt", "", 14, false}
     };
     return fontItems;
 }
@@ -475,7 +475,34 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
     p->restore();
 }
 
-class CWizToolButton : public QToolButton
+
+WizDblclickableToolButton::WizDblclickableToolButton(QWidget *parent)
+    : QToolButton(parent)
+{
+    m_tDblClicked = QDateTime::currentDateTime();
+}
+
+void WizDblclickableToolButton::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    QToolButton::mouseDoubleClickEvent(event);
+    m_tDblClicked = QDateTime::currentDateTime();
+    //
+    emit dblClicked();
+}
+
+void WizDblclickableToolButton::mouseReleaseEvent(QMouseEvent* event)
+{
+    QDateTime now = QDateTime::currentDateTime();
+    int seconds = now.toTime_t() - m_tDblClicked.toTime_t();
+    if (seconds < 1) {
+        event->ignore();
+    } else {
+        QToolButton::mouseReleaseEvent(event);
+    }
+}
+
+
+class CWizToolButton : public WizDblclickableToolButton
 {
 public:
     enum Position {
@@ -486,7 +513,7 @@ public:
     };
 
     CWizToolButton(QWidget* parent = 0)
-        : QToolButton(parent)
+        : WizDblclickableToolButton(parent)
         , m_colorHoverBorder("#c8dae8")
         , m_colorHoverFill("#e8f0f3")
         , m_colorSunkenBorder("#0072c4")
@@ -519,14 +546,14 @@ public:
 protected:
     virtual void leaveEvent(QEvent* event)
     {
-        QToolButton::leaveEvent(event);
+        WizDblclickableToolButton::leaveEvent(event);
 
         update();
     }
 
     virtual void enterEvent(QEvent* event)
     {
-        QToolButton::enterEvent(event);
+        WizDblclickableToolButton::enterEvent(event);
 
         update();
     }
@@ -542,8 +569,9 @@ protected:
         }
 #endif
         //
-        QToolButton::mouseReleaseEvent(ev);
+        WizDblclickableToolButton::mouseReleaseEvent(ev);
     }
+
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -1046,13 +1074,16 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     connect(m_comboFontSize, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontSize_indexChanged(const QString&)));
 
-    m_btnFormatMatch = new CWizToolButton(this);
-    m_btnFormatMatch->setIcon(::WizLoadSkinIcon(skin, "actionFormatMatch"));
-    //m_btnFormatMatch->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatMatch")).size());
-    m_btnFormatMatch->setToolTip(tr("Format Match"));
-    m_btnFormatMatch->setPosition(CWizToolButton::left);
-    connect(m_btnFormatMatch, SIGNAL(clicked()), SLOT(on_btnFormatMatch_clicked()));
-
+    m_btnFormatPainter = new CWizToolButton(this);
+    m_btnFormatPainter->setIcon(::WizLoadSkinIcon(skin, "formatter"));
+    //m_btnFormatPainter->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
+    m_btnFormatPainter->setToolTip(tr("Format Painter"));
+    m_btnFormatPainter->setCheckable(true);
+    m_btnFormatPainter->setChecked(false);
+    m_btnFormatPainter->setPosition(CWizToolButton::left);
+    connect(m_btnFormatPainter, SIGNAL(clicked(bool)), SLOT(on_btnFormatPainter_clicked(bool)));
+    connect(m_btnFormatPainter, SIGNAL(dblClicked()), SLOT(on_btnFormatPainter_dblClicked()));
+    //
     m_btnRemoveFormat = new CWizToolButton(this);
     m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat"));
     //m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
@@ -1349,10 +1380,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     QWidget*  moveableButtonContainer4 = createMoveAbleWidget(this);
     QHBoxLayout* moveableLayout4 = qobject_cast<QHBoxLayout*>(moveableButtonContainer4->layout());
     //
-    //not support in wizeditor
-    m_btnFormatMatch->setVisible(false);
-    //moveableLayout4->addWidget(m_btnFormatMatch);
-    //
+    moveableLayout4->addWidget(m_btnFormatPainter);
     moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
     moveableLayout4->addWidget(m_btnRemoveFormat);
     moveableLayout4->addSpacing(12);
@@ -1391,7 +1419,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_secondLineButtonContainer->setVisible(showExtraButtons);
     m_btnShowExtra->setChecked(showExtraButtons);
 
-    m_delayUpdateUITimer.setInterval(300);
+    m_delayUpdateUITimer.setInterval(100);
     connect(&m_delayUpdateUITimer, SIGNAL(timeout()), SLOT(on_delay_updateToolbar()));
 }
 
@@ -1426,7 +1454,11 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     //
     bool InsertOrderedList = QString::fromStdString(d["InsertOrderedList"].asString()) == "1";
     bool InsertUnorderedList = QString::fromStdString(d["InsertUnorderedList"].asString()) == "1";
+    //
     bool canInsertTable = QString::fromStdString(d["canCreateTable"].asString()) == "1";
+    bool canCreateCode = QString::fromStdString(d["canCreateCode"].asString()) == "1";
+    bool canCreateTodo = QString::fromStdString(d["canCreateTodo"].asString()) == "1";
+    int formatPainterStatus = QString::fromStdString(d["formatPainterStatus"].asString()).toInt();
 
     //
     bool blockFormatSetted = false;
@@ -1448,12 +1480,12 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     //
     m_comboFontFamily->setFontName(strFontName);
     //
-    strFontSize.remove("px");
-    int fontSizeInPx = wiz_ttoi(strFontSize);
-    if (0 != fontSizeInPx)
+    strFontSize.remove("pt");
+    int fontSizeInPt = wiz_ttoi(strFontSize);
+    if (0 != fontSizeInPt)
     {
-        CString strsFontsizeInPx = WizIntToStr(fontSizeInPx);
-        m_comboFontSize->setText(strsFontsizeInPx);
+        CString strsFontsizeInPt = WizIntToStr(fontSizeInPt);
+        m_comboFontSize->setText(strsFontsizeInPt);
     }
     else
     {
@@ -1475,7 +1507,11 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     m_btnOrderedList->setChecked(InsertOrderedList);
     m_btnUnorderedList->setChecked(InsertUnorderedList);
 
-    //m_btnTable->setEnabled(canInsertTable);
+    m_btnTable->setEnabled(canInsertTable);
+    m_btnInsertCode->setEnabled(canCreateCode);
+    m_btnCheckList->setEnabled(canCreateTodo);
+    m_btnFormatPainter->setEnabled(formatPainterStatus != 0);
+    m_btnFormatPainter->setChecked(formatPainterStatus == 2);
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
@@ -1522,6 +1558,9 @@ void initWebActions(QWebEnginePage* page)
         //
         QString text = actionObj->text();
         g_webActions[text] = a;
+        //
+        text = text.replace("&", "");
+        g_webActions[text] = a;
     }
 }
 //
@@ -1529,6 +1568,7 @@ QWebEnginePage::WebAction menuText2WebAction(QWebEnginePage* page, QString text)
 {
     initWebActions(page);
     //
+    text = text.replace("&", "");
     auto it = g_webActions.find(text);
     if (it == g_webActions.end())
         return QWebEnginePage::NoWebAction;
@@ -1572,6 +1612,9 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         case QWebEnginePage::Reload:
 #if QT_VERSION >= 0x050600
         case QWebEnginePage::DownloadImageToDisk:
+#endif
+#if QT_VERSION >= 0x050800
+        case QWebEnginePage::ViewSource:
 #endif
             menu->removeAction(action);
             break;
@@ -1775,7 +1818,7 @@ void WizEditorToolBar::on_fontDailogFontChanged(const QFont& font)
 
 void WizEditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> callback)
 {
-    m_editor->editorCommandQueryCommandValue("fontFamily", [=](const QString& familyName){
+    m_editor->editorCommandQueryCommandValue("fontFamily", [=](QString familyName){
         //
         m_editor->editorCommandQueryCommandState("bold", [=](int bold){
 
@@ -1783,7 +1826,7 @@ void WizEditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> c
 
                 m_editor->editorCommandQueryCommandState("underline", [=](int underline){
 
-                    m_editor->editorCommandQueryCommandValue("fontSize", [=](const QString& fontSize){
+                    m_editor->editorCommandQueryCommandValue("fontSize", [=](QString fontSize){
 
                         m_editor->editorCommandQueryCommandState("strikethrough", [=](int strikethrough){
                             //
@@ -1796,7 +1839,7 @@ void WizEditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> c
                             font.setUnderline(underline == 1);
                             //
                             QString size = fontSize;
-                            size.remove("px");
+                            size.remove("pt");
                             int sizeValue = size.toInt();
                             font.setPointSize(sizeValue == 0 ? m_app.userSettings().defaultFontSize() : sizeValue);
                             //
@@ -2427,13 +2470,29 @@ void WizEditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
     setFontPointSize(strSize);
 }
 
-void WizEditorToolBar::on_btnFormatMatch_clicked()
+void WizEditorToolBar::on_btnFormatPainter_clicked(bool checked)
 {
-    WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatMatch");
+    WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
     if (m_editor) {
-        m_editor->editorCommandExecuteFormatMatch();
+        if (checked) {
+            m_btnFormatPainter->setChecked(true);
+            m_editor->editorCommandExecuteFormatPainterOn(false);
+        } else {
+            m_btnFormatPainter->setChecked(false);
+            m_editor->editorCommandExecuteFormatPainterOff();
+        }
     }
 }
+void WizEditorToolBar::on_btnFormatPainter_dblClicked()
+{
+    qDebug() << "formatPainter dblClicked";
+    WizAnalyzer::getAnalyzer().logAction("editorToolBarFormatPainter");
+    if (m_editor) {
+        m_btnFormatPainter->setChecked(true);
+        m_editor->editorCommandExecuteFormatPainterOn(true);
+    }
+}
+
 
 void WizEditorToolBar::on_btnRemoveFormat_clicked()
 {
@@ -2664,3 +2723,4 @@ void WizEditorToolBar::on_editor_copyImageLink_triggered()
     QClipboard* clip = QApplication::clipboard();
     clip->setText(m_strImageSrc);
 }
+

@@ -326,12 +326,29 @@ COLORREF CppSQLite3Query::getColorField(int nField, COLORREF crNullValue /*= 0*/
 		return WizStringToColor(str);
 	}
 }
-COLORREF CppSQLite3Query::getColorField(const CString& szField, COLORREF crNullValue /*= 0*/)
+QColor CppSQLite3Query::getColorField2(const CString& szField, QColor crNullValue /*= 0*/)
 {
 	int nField = fieldIndex(szField);
-	return getColorField(nField, crNullValue);
+    return getColorField2(nField, crNullValue);
 }
 
+QColor CppSQLite3Query::getColorField2(int nField, QColor crNullValue /*= 0*/)
+{
+    CString str = getStringField(nField);
+    if (str.isEmpty())
+    {
+        return crNullValue;
+    }
+    else
+    {
+        return WizStringToColor2(str);
+    }
+}
+COLORREF CppSQLite3Query::getColorField(const CString& szField, COLORREF crNullValue /*= 0*/)
+{
+    int nField = fieldIndex(szField);
+    return getColorField(nField, crNullValue);
+}
 
 CString CppSQLite3Query::getStringField(int nField, const CString& szNullValue/*=""*/)
 {
@@ -794,6 +811,20 @@ bool CppSQLite3DB::tableExists(const CString& strTable)
     CString strSQL = WizFormatString1(_T("select count(*) from sqlite_master where type='table' and name='%1'"), strTable);
     int nRet = execScalar(strSQL);
 	return (nRet > 0);
+}
+
+bool CppSQLite3DB::columnExists(const CString& strTable, const CString& strColumn)
+{
+    try
+    {
+        CString strSQL = WizFormatString1("select * from %1 limit 0, 1", strTable);
+        CppSQLite3Query query = execQuery(strSQL);
+        return query.fieldIndex(strColumn) != -1;
+    }
+    catch (const CppSQLite3Exception& )
+    {
+        return false;
+    }
 }
 
 int CppSQLite3DB::execDML(const CString& strSQL)

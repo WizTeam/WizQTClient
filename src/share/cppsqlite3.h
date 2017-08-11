@@ -102,6 +102,9 @@ public:
     COLORREF getColorField(int nField, COLORREF crNullValue = 0);
     COLORREF getColorField(const CString& szField, COLORREF crNullValue = 0);
 
+    QColor getColorField2(int nField, QColor crNullValue = QColor());
+    QColor getColorField2(const CString& szField, QColor crNullValue = QColor());
+
     CString getStringField(int nField, const CString& szNullValue = "");
     CString getStringField(const CString& szField, const CString& szNullValue="");
     //
@@ -183,6 +186,7 @@ public:
     void close();
 
     bool tableExists(const CString& strTable);
+    bool columnExists(const CString& strTable, const CString& strColumn);
 
     int execDML(const CString& strSQL);
 

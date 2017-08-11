@@ -221,36 +221,6 @@ bool WizObjectDownloader::downloadDocument()
     //
     document.strKbGUID = m_data.strKbGUID;
 
-    // check update of attachment
-    WIZOBJECTVERSION versionServer;
-    ksServer.wiz_getVersion(versionServer);
-    __int64 nLocalVersion = db.getObjectVersion("attachment");
-    if (document.nAttachmentCount > 0 && nLocalVersion < versionServer.nAttachmentVersion)
-    {
-        //todo: wsj, 奇怪的逻辑，需要修复
-        /*
-        std::deque<WIZDOCUMENTATTACHMENTDATAEX> arrayRet;
-        ksServer.attachment_getList(50, nLocalVersion, arrayRet);
-        //
-        for(auto attach : arrayRet)
-        {
-            if (attach.strDocumentGUID != document.strGUID)
-                continue;
-
-            nPart = WIZKM_XMKRPC_ATTACHMENT_PART_INFO;
-            WIZDOCUMENTATTACHMENTDATAEX attachRet = attach;
-            attachRet.strKbGUID = db.kbGUID();
-            if (ksServer.attachment_downloadData(attach.strGUID, attachRet))
-            {
-//                qDebug() << "get attachment from server : " << attachRet.strName;
-                //
-                db.blockSignals(true);
-                db.UpdateAttachment(attachRet);
-                db.blockSignals(false);
-            }
-        }
-        */
-    }
     //
     bool ret = false;
     db.blockSignals(true);
@@ -271,10 +241,9 @@ bool WizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
         return false;
     }
 
-    info = WizToken::info();
+    info = WizToken::userInfo();
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }

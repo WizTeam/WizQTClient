@@ -84,7 +84,6 @@
 #include "sync/WizToken.h"
 
 #include "WizUserVerifyDialog.h"
-#include "WizNoteComments.h"
 #include "WizMobileFileReceiver.h"
 #include "WizDocTemplateDialog.h"
 #include "share/WizFileMonitor.h"
@@ -166,6 +165,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_trayMenu(nullptr)
     , m_mobileFileReceiver(nullptr)
     , m_bQuickDownloadMessageEnable(false)
+    , m_quiting(false)
 {
     WizGlobal::setMainWindow(this);
     WizKMSyncThread::setQuickThread(m_syncQuick);
@@ -272,8 +272,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     setupFullScreenMode(this);
 #endif
 
-    WizNoteComments::init();
-    //
     m_syncFull->start(QThread::IdlePriority);
     m_syncQuick->start(QThread::IdlePriority);
     //
@@ -376,6 +374,8 @@ void WizMainWindow::on_application_aboutToQuit()
 
 void WizMainWindow::cleanOnQuit()
 {
+    m_quiting = true;
+    //
     WizObjectDownloaderHost::instance()->waitForDone();
     WizKMSyncThread::setQuickThread(NULL);
     //
@@ -399,6 +399,8 @@ void WizMainWindow::cleanOnQuit()
     {
         m_mobileFileReceiver->waitForDone();
     }
+    //
+    WizQueuedThreadsShutdown();
 }
 
 WizSearcher*WizMainWindow::searcher()
@@ -625,9 +627,10 @@ void WizMainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 
 bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
 {
-    return WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode ||
+    return //WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode ||
             WIZKM_XMLRPC_ERROR_INVALID_USER == nErrorCode ||
-            WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode;
+            WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode ||
+            WIZKM_XMLRPC_ERROR_SYSTEM_ERROR == nErrorCode;
 }
 
 void WizMainWindow::on_TokenAcquired(const QString& strToken)
@@ -653,18 +656,15 @@ void WizMainWindow::on_TokenAcquired(const QString& strToken)
             m_settings->setPassword("");
 
             qDebug() << "username or password error, need relogin.";
-            WizMessageBox::warning(this, tr("Info"), tr("Username / password error. Please login again."));
+            if (nErrorCode == WIZKM_XMLRPC_ERROR_SYSTEM_ERROR)
+            {
+                WizMessageBox::warning(this, tr("Info"), WizToken::lastErrorMessage());
+            }
+            else
+            {
+                WizMessageBox::warning(this, tr("Info"), tr("Username / password error. Please login again."));
+            }
             on_actionLogout_triggered();
-
-//            if (!m_userVerifyDialog)
-//            {
-//                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
-//                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
-//            }
-
-//            m_userVerifyDialog->exec();
-//            m_userVerifyDialog->deleteLater();
-//            m_userVerifyDialog = nullptr;
         }
     }
 }
@@ -1103,9 +1103,23 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     WIZDOCUMENTDATA data;
     data.strKbGUID = kbGUID;
     //
+    data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
+    //  Journal {date}({week})
+    if (tmplData.strTitle.isEmpty())
+    {
+        data.strTitle = tmplData.strName;
+    }
+    else
+    {
+        WizOleDateTime dt;
+        data.strTitle.replace("{date}", dt.toLocalLongDate());
+        data.strTitle.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
+        QLocale local;
+        data.strTitle.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
+    }
+    //
     if (kbGUID.isEmpty())   //personal
     {
-        data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
         data.strLocation = tmplData.strFolder;
 
         if (data.strLocation.isEmpty())
@@ -1125,21 +1139,8 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
                 }
             }
         }
-        //  Journal {date}({week})
-        if (tmplData.strTitle.isEmpty())
-        {
-            data.strTitle = tmplData.strName;
-        }
-        else
-        {
-            WizOleDateTime dt;
-            data.strTitle.replace("{date}", dt.toLocalLongDate());
-            data.strTitle.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
-            QLocale local;
-            data.strTitle.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
-        }
     }
-    else
+    else        
     {
         data.strLocation = currLocation;
     }
@@ -1535,8 +1536,14 @@ void WizMainWindow::on_newNoteByExtraMenu_request()
 
 void WizMainWindow::windowActived()
 {
+    if (m_quiting)
+        return;
+    //
     static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
     if (!isBizUser || !m_bQuickDownloadMessageEnable)
+        return;
+    //
+    if (!m_syncFull)
         return;
 
     m_syncFull->quickDownloadMesages();
@@ -1558,10 +1565,20 @@ void WizMainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
  */
 void WizMainWindow::GetToken(const QString& strFunctionName)
 {
-    QString strToken = WizToken::token();
-    QString strExec = strFunctionName + QString("('%1')").arg(strToken);
-    qDebug() << "cpp get token callled : " << strExec;
-    m_doc->commentView()->page()->runJavaScript(strExec);
+    CString functionName(strFunctionName);
+    ::WizExecuteOnThread(WIZ_THREAD_NETWORK, [=] {
+        //
+        QString strToken = WizToken::token();
+        if (strToken.isEmpty())
+            return;
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+
+            QString strExec = functionName + QString("('%1')").arg(strToken);
+            qDebug() << "cpp get token callled : " << strExec;
+            m_doc->commentView()->page()->runJavaScript(strExec);
+        });
+    });
 }
 
 /**   web页面调用该方法，将页面的结果返回
@@ -1959,7 +1976,7 @@ QWidget* WizMainWindow::createNoteListView()
 //    m_labelDocumentsCount->setMargin(5);
 //    layoutActions->addWidget(m_labelDocumentsCount);
 //    connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
-//    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
+    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
 
 
 //    //sortBtn->setStyleSheet("padding-top:10px;");

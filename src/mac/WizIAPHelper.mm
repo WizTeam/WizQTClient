@@ -62,7 +62,7 @@
 @synthesize request = _request;
 
 - (void)requestProducts:(NSMutableSet *)productIdentifiers {
-    NSLog(@"identifiers : @%", productIdentifiers);
+    NSLog(@"identifiers : %@", productIdentifiers);
     self.request = [[[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiers] autorelease];
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     _request.delegate = self;

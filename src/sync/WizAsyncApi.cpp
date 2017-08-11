@@ -21,74 +21,6 @@ WizAsyncApi::~WizAsyncApi()
 {
 }
 
-void WizAsyncApi::login(const QString& strUserId, const QString& strPasswd)
-{
-    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-        login_impl(strUserId, strPasswd);
-    });
-}
-
-bool WizAsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
-{
-    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
-    bool ret = asServer.login(strUserId, strPasswd);
-    if (!ret) {
-        m_nErrorCode = asServer.getLastErrorCode();
-        m_strErrorMessage = asServer.getLastErrorMessage();
-    }
-
-    Q_EMIT loginFinished(asServer.getUserInfo());
-    return ret;
-}
-
-void WizAsyncApi::getToken(const QString& strUserId, const QString& strPasswd)
-{
-    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-        getToken_impl(strUserId, strPasswd);
-    });
-}
-
-bool WizAsyncApi::getToken_impl(const QString& strUserId, const QString& strPasswd)
-{
-    QString strToken;
-
-    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
-    bool ret = asServer.getToken(strUserId, strPasswd, strToken);
-    if (!ret) {
-        m_nErrorCode = asServer.getLastErrorCode();
-        m_strErrorMessage = asServer.getLastErrorMessage();
-    }
-
-    Q_EMIT getTokenFinished(strToken);
-    return ret;
-}
-
-void WizAsyncApi::keepAlive(const QString& strToken, const QString& strKbGUID)
-{
-    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-        keepAlive_impl(strToken, strKbGUID);
-    });
-}
-
-bool WizAsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
-{
-    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
-
-    WIZUSERINFO info;
-    info.strToken = strToken;
-    info.strKbGUID = strKbGUID;
-    asServer.setUserInfo(info);
-
-    bool ret = asServer.keepAlive(strToken);
-    if (!ret) {
-        m_nErrorCode = asServer.getLastErrorCode();
-        m_strErrorMessage = asServer.getLastErrorMessage();
-    }
-
-    Q_EMIT keepAliveFinished(ret);
-    return ret;
-}
-
 void WizAsyncApi::registerAccount(const QString& strUserId, const QString& strPasswd,
                                const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
@@ -100,7 +32,7 @@ void WizAsyncApi::registerAccount(const QString& strUserId, const QString& strPa
 bool WizAsyncApi::registerAccount_impl(const QString& strUserId, const QString& strPasswd,
                                     const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer;
 
     bool ret = aServer.createAccount(strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
     if (!ret) {
@@ -135,9 +67,9 @@ void WizAsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
         return;
     }
 
-    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer;
 
-    WIZUSERINFO info = WizToken::info();
+    WIZUSERINFO info = WizToken::userInfo();
     info.strToken = strToken;
     aServer.setUserInfo(info);
 
@@ -161,9 +93,9 @@ void WizAsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
         return;
     }
 
-    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer;
 
-    WIZUSERINFO info = WizToken::info();
+    WIZUSERINFO info = WizToken::userInfo();
     info.strToken = strToken;
     aServer.setUserInfo(info);
 
@@ -180,5 +112,4 @@ void WizAsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
         qDebug() << "[MessageStatus]Upload message delete status error :  " << m_nErrorCode << m_strErrorMessage;
     }
     //
-
 }

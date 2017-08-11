@@ -16,9 +16,6 @@ public:
     explicit WizAsyncApi(QObject *parent = 0);
     ~WizAsyncApi();
 
-    void login(const QString& strUserId, const QString& strPasswd);
-    void getToken(const QString& strUserId, const QString& strPasswd);
-    void keepAlive(const QString& strToken, const QString& strKbGUID);
     void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode,
                          const QString& strCaptchaID = "", const QString& strCaptcha = "");
     void setMessageReadStatus(const QString& ids, bool bRead);
@@ -32,17 +29,11 @@ private:
     QString m_strErrorMessage;
     QNetworkAccessManager* m_networkManager;
 
-    bool login_impl(const QString& strUserId, const QString& strPasswd);
-    bool getToken_impl(const QString& strUserId, const QString& strPasswd);
-    bool keepAlive_impl(const QString& strToken, const QString &strKbGUID);
     bool registerAccount_impl(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
     void setMessageReadStatus_impl(const QString& ids, bool bRead);
     void setMessageDeleteStatus_impl(const QString& ids, bool bDelete);
 
 Q_SIGNALS:
-    void loginFinished(const WIZUSERINFO& info);
-    void getTokenFinished(const QString& strToken);
-    void keepAliveFinished(bool bOk);
     void registerAccountFinished(bool bOk);    
     void uploadMessageReadStatusFinished(const QString& ids);
     void uploadMessageDeleteStatusFinished(const QString& ids);

@@ -16,14 +16,7 @@
 //    errorWizAllError
 //};
 
-//重新定义token无效的错误码，因为301已经被QT定义，在登录界面无法判断301是服务器还是QT
-//返回的网络错误。 此处使用客户端自定义的错误代码
-#define WIZKM_XMLRPC_ERROR_INVALID_TOKEN		-982
-#define WIZKM_XMLRPC_ERROR_PERMISSION_EXCEPTION		-981
-#define WIZKM_XMLRPC_ERROR_WIZ_ALL_ERROR		-980
-#define WIZKM_XMLRPC_ERROR_INVALID_USER			31001
-#define WIZKM_XMLRPC_ERROR_INVALID_PASSWORD		31002
-#define WIZKM_XMLRPC_ERROR_TOO_MANY_LOGINS		31004
+
 
 
 /* ------------------------- CWizXmlRpcValue ------------------------- */

@@ -58,14 +58,14 @@ void WizInitBizCertDialog::verifyCert()
         bool ret = false;
         QString error;
         //
-        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        WizKMAccountsServer asServer;
         if (asServer.login(userId, password))
         {
             QString n;
             QString e;
             QString encrypted_d;
             QString adminHint;
-            if (asServer.getAdminBizCert(asServer.getToken(), bizGuid, n, e, encrypted_d, adminHint))
+            if (asServer.getAdminBizCert(bizGuid, n, e, encrypted_d, adminHint))
             {
                 QString d;
                 if (WizAESDecryptBase64StringToString(adminPassword, encrypted_d, d) && !d.isEmpty())

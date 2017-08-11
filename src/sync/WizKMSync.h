@@ -3,9 +3,12 @@
 
 #include <QThread>
 #include <QMessageBox>
+#include <QWaitCondition>
+#include <QTimer>
 
 #include "WizSync.h"
 #include "WizKMServer.h"
+
 
 class WizDatabase;
 
@@ -112,8 +115,6 @@ private:
     bool downloadMesages();
     bool resetGroups();
 
-    void syncUserCert();
-    //
     bool peekQuickSyncKb(QString& kbGuid);
     //
     friend class CWizKMSyncThreadHelper;

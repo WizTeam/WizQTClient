@@ -16,6 +16,7 @@ set(wiznote_SOURCES_MAC
     mac/rmstore/RMStoreAppReceiptVerificator.mm
     mac/WizNotificationCenter.mm
     widgets/WizIAPDialog.cpp
+    mac/DTWebArchive.m
 )
 
 set(wiznote_HEADERS_MAC
@@ -31,6 +32,7 @@ set(wiznote_HEADERS_MAC
     mac/rmstore/RMStoreAppReceiptVerificator.h
     mac/WizNotificationCenter.h
     widgets/WizIAPDialog.h
+    mac/DTWebArchive.h
 )
 
 
@@ -151,7 +153,6 @@ set(wiznote_SOURCES
     WizProxyDialog.cpp
     WizCreateAccountDialog.cpp
     WizMainWindow.cpp
-    WizNoteComments.cpp
     WizCellButton.cpp
     WizTitleBar.cpp
     WizInfoBar.cpp
@@ -195,6 +196,7 @@ set(wiznote_SOURCES
     WizPositionDelegate.cpp
     main.cpp
     WizInitBizCertDialog.cpp
+    share/WizDocumentStyle.cpp
 )
 
 set(wiznote_HEADERS
@@ -277,8 +279,6 @@ set(wiznote_HEADERS
     WizProxyDialog.h
     WizCreateAccountDialog.h
     WizMainWindow.h
-    WizNoteComments.h
-    WizNoteComments_p.h
     WizCellButton.h
     WizTitleBar.h
     WizInfoBar.h
@@ -361,6 +361,7 @@ set(wiznote_HEADERS
     share/WizThreads.h
     share/WizThreads_p.h
     WizInitBizCertDialog.h
+    share/WizDocumentStyle.h
 )
 
 set(wiznote_FORMS

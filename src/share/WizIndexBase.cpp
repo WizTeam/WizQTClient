@@ -6,6 +6,7 @@
 #include "utils/WizLogger.h"
 #include "utils/WizPathResolve.h"
 
+#include "share/WizThreads.h"
 
 WizIndexBase::WizIndexBase(void)
     : m_bUpdating(false)
@@ -31,22 +32,23 @@ bool WizIndexBase::open(const CString& strFileName)
 
     try {
         m_db.open(strFileName);
+        //
+        for (int i = 0; i < TABLE_COUNT; i++) {
+            if (!checkTable(g_arrayTableName[i]))
+                return false;
+        }
         // upgrade table structure if table structure have been changed
         if (m_db.tableExists(TABLE_NAME_WIZ_META)) {
             int nVersion = getTableStructureVersion().toInt();
             if (nVersion < QString(WIZ_TABLE_STRUCTURE_VERSION).toInt()) {
                 updateTableStructure(nVersion);
+                setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
             }
         }
     } catch (const CppSQLite3Exception& e) {
         return logSQLException(e, "open database");
     }
 
-    for (int i = 0; i < TABLE_COUNT; i++) {
-        if (!checkTable(g_arrayTableName[i]))
-            return false;
-    }
-    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
 
     return true;
 }
@@ -143,24 +145,41 @@ bool WizIndexBase::updateTableStructure(int oldVersion)
 {
     qDebug() << "table structure version : " << oldVersion << "  update to version " << WIZ_TABLE_STRUCTURE_VERSION;
     if (oldVersion < 1) {
-        exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
+        if (!m_db.columnExists("WIZ_TAG", "TAG_POS")) {
+            exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
+        }
     }
     //
     if (oldVersion < 2) {
-        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
-        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
+        if (!m_db.columnExists("WIZ_MESSAGE", "DELETE_STATUS")) {
+            exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
+        }
+        if (!m_db.columnExists("WIZ_MESSAGE", "LOCAL_CHANGED")) {
+            exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
+        }
     }
 
     if (oldVersion < 3) {
-        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
+        if (!m_db.columnExists("WIZ_MESSAGE", "MESSAGE_NOTE")) {
+            exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
+        }
     }
     //
     if (oldVersion < 4) {
-        exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
-        exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
+        if (!m_db.columnExists("WIZ_DOCUMENT", "INFO_CHANGED")) {
+            exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
+        }
+        if (!m_db.columnExists("WIZ_DOCUMENT", "DATA_CHANGED")) {
+            exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
+        }
     }
     //
-    setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
+    if (oldVersion < 5) {
+        if (!m_db.columnExists("WIZ_DOCUMENT_PARAM", "WIZ_VERSION")) {
+            exec("ALTER TABLE 'WIZ_DOCUMENT_PARAM' ADD 'WIZ_VERSION' int default -1;");
+        }
+    }
+    //
     return true;
 }
 
@@ -351,8 +370,8 @@ bool WizIndexBase::sqlToStyleDataArray(const CString& strSQL, CWizStyleDataArray
             data.strGUID = query.getStringField(styleSTYLE_GUID);
             data.strName = query.getStringField(styleSTYLE_NAME);
             data.strDescription = query.getStringField(styleSTYLE_DESCRIPTION);
-            data.crTextColor = query.getColorField(styleSTYLE_TEXT_COLOR);
-            data.crBackColor = query.getColorField(styleSTYLE_BACK_COLOR);
+            data.crTextColor = query.getColorField2(styleSTYLE_TEXT_COLOR);
+            data.crBackColor = query.getColorField2(styleSTYLE_BACK_COLOR);
             data.bTextBold = query.getBoolField(styleSTYLE_TEXT_BOLD);
             data.nFlagIndex = query.getIntField(styleSTYLE_FLAG_INDEX);
             data.tModified = query.getTimeField(styleDT_MODIFIED);
@@ -420,6 +439,33 @@ bool WizIndexBase::sqlToDeletedGuidDataArray(const CString& strSQL, CWizDeletedG
     }
 }
 
+bool WizIndexBase::sqlToDocumentParamDataArray(const CString& strSQL,
+                            CWizDocumentParamDataArray& arrayParam)
+{
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            WIZDOCUMENTPARAMDATA data;
+            data.strKbGUID = kbGUID();
+            data.strDocumentGuid = query.getStringField(0);
+            data.strName = query.getStringField(1);
+            data.strValue = query.getStringField(2);
+            data.nVersion = query.getInt64Field(3);
+
+            arrayParam.push_back(data);
+            query.nextRow();
+        }
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return logSQLException(e, strSQL);
+    }
+}
+
+
 bool WizIndexBase::sqlToStringArray(const CString& strSQL, int nFieldIndex, CWizStdStringArray& arrayString)
 {
     try
@@ -441,10 +487,59 @@ bool WizIndexBase::sqlToStringArray(const CString& strSQL, int nFieldIndex, CWiz
 }
 
 
+bool WizIndexBase::initDocumentExFields(CWizDocumentDataArray& arrayDocument, const CWizStdStringArray& arrayGUID, const std::map<QString, int>& mapDocumentIndex)
+{
+    CString strDocumentGUIDs;
+    ::WizStringArrayToText(arrayGUID, strDocumentGUIDs, _T("\',\'"));
+    //
+    CString strParamSQL = WizFormatString1(_T("select DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE from WIZ_DOCUMENT_PARAM where (PARAM_NAME='DOCUMENT_FLAGS' or PARAM_NAME='RATE' or PARAM_NAME='SYSTEM_TAGS') and DOCUMENT_GUID in('%1')"), strDocumentGUIDs);
+    //
+    CppSQLite3Query queryParam = m_db.execQuery(strParamSQL);
+    //
+    while (!queryParam.eof())
+    {
+        CString strGUID = queryParam.getStringField(0);
+        CString strParamName = queryParam.getStringField(1);
+        //
+        std::map<QString, int>::const_iterator it = mapDocumentIndex.find(strGUID);
+        ATLASSERT(it != mapDocumentIndex.end());
+        if (it != mapDocumentIndex.end())
+        {
+            int index = it->second;
+            ATLASSERT(index >= 0 && index < int(arrayDocument.size()));
+            if (index >= 0 && index < int(arrayDocument.size()))
+            {
+                WIZDOCUMENTDATA& data = arrayDocument[index];
+                ATLASSERT(strGUID == data.strGUID);
+                if (strGUID == data.strGUID)
+                {
+                    if (strParamName == _T("DOCUMENT_FLAGS"))
+                    {
+                        int nFlags = queryParam.getIntField(2);
+                        data.nFlags = nFlags;
+                    }
+                    else if (strParamName == _T("RATE"))
+                    {
+                        int nRate = queryParam.getIntField(2);
+                        data.nRate = nRate;
+                    }
+                }
+            }
+        }
+        //
+        queryParam.nextRow();
+    }
+    //
+    return true;
+}
+
 bool WizIndexBase::sqlToDocumentDataArray(const CString& strSQL, CWizDocumentDataArray& arrayDocument)
 {
     try
     {
+        CWizStdStringArray arrayGUID;
+        std::map<QString, int> mapDocumentIndex;
+        //
         CppSQLite3Query query = m_db.execQuery(strSQL);
         while (!query.eof())
         {
@@ -474,10 +569,20 @@ bool WizIndexBase::sqlToDocumentDataArray(const CString& strSQL, CWizDocumentDat
             data.nVersion = query.getInt64Field(documentVersion);
             data.nInfoChanged = query.getIntField(documentINFO_CHANGED);
             data.nDataChanged = query.getIntField(documentDATA_CHANGED);
-
+            //
+            arrayGUID.push_back(data.strGUID);
             arrayDocument.push_back(data);
+            //
+            mapDocumentIndex[data.strGUID] = int(arrayDocument.size() - 1);
+            //
             query.nextRow();
         }
+        //
+        if (!arrayDocument.empty())
+        {
+            initDocumentExFields(arrayDocument, arrayGUID, mapDocumentIndex);
+        }
+        //
         return true;
     }
     catch (const CppSQLite3Exception& e)
@@ -570,7 +675,7 @@ bool WizIndexBase::sqlToBizUserDataArray(const QString& strSQL,
         while (!query.eof())
         {
             WIZBIZUSER data;
-            data.bizGUID = query.getStringField(userBIZ_GUID);
+            data.kbGUID = query.getStringField(userBIZ_GUID);
             data.userId = query.getStringField(userUSER_ID);
             data.userGUID = query.getStringField(userUSER_GUID);
             data.alias = query.getStringField(userUSER_ALIAS);
@@ -689,7 +794,7 @@ bool WizIndexBase::createUserEx(const WIZBIZUSER& data)
 {
     qDebug() << "create user, alias: " << data.alias;
 
-    Q_ASSERT(!data.bizGUID.isEmpty() && !data.userGUID.isEmpty());
+    Q_ASSERT(!data.kbGUID.isEmpty() && !data.userGUID.isEmpty());
 
     CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_USER,
                                               FIELD_LIST_WIZ_USER,
@@ -697,7 +802,7 @@ bool WizIndexBase::createUserEx(const WIZBIZUSER& data)
 
     CString strSQL;
     strSQL.format(strFormat,
-                  STR2SQL(data.bizGUID).utf16(),
+                  STR2SQL(data.kbGUID).utf16(),
                   STR2SQL(data.userId).utf16(),
                   STR2SQL(data.userGUID).utf16(),
                   STR2SQL(data.alias).utf16(),
@@ -719,14 +824,14 @@ bool WizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 {
     qDebug() << "modify user, alias: " << user.alias;
 
-    Q_ASSERT(!user.bizGUID.isEmpty() && !user.userGUID.isEmpty());
+    Q_ASSERT(!user.kbGUID.isEmpty() && !user.userGUID.isEmpty());
 
     // save old user info
     WIZBIZUSER userOld;
-    userFromGUID(user.bizGUID, user.userGUID, userOld);
+    userFromGUID(user.kbGUID, user.userGUID, userOld);
 
     CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
-    strWhere = strWhere.arg(STR2SQL(user.bizGUID)).arg(STR2SQL(user.userGUID));
+    strWhere = strWhere.arg(STR2SQL(user.kbGUID)).arg(STR2SQL(user.userGUID));
 
     CString strFormat = formatUpdateSQLByWhere(TABLE_NAME_WIZ_USER,
                                               FIELD_LIST_WIZ_USER_MODIFY,
@@ -744,7 +849,7 @@ bool WizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 
     // read new user info
     WIZBIZUSER userNew;
-    userFromGUID(user.bizGUID, user.userGUID, userNew);
+    userFromGUID(user.kbGUID, user.userGUID, userNew);
 
     if (!m_bUpdating) {
         emit userModified(userOld, userNew);
@@ -1238,6 +1343,31 @@ bool WizIndexBase::deleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 
     return true;
 }
+
+bool WizIndexBase::updateDocumentParam(const WIZDOCUMENTPARAMDATA& data)
+{
+    QString strFormat = "replace into %1 (%2) values (%3)";
+    strFormat = strFormat.arg(TABLE_NAME_WIZ_DOCUMENT_PARAM, FIELD_LIST_WIZ_DOCUMENT_PARAM, PARAM_LIST_WIZ_DOCUMENT_PARAM);
+    //
+    CString sql;
+    sql.format(strFormat,
+               STR2SQL(data.strDocumentGuid).utf16(),
+               STR2SQL(data.strName.toUpper()).utf16(),
+               STR2SQL(data.strValue).utf16(),
+               WizInt64ToStr(data.nVersion).utf16()
+               );
+    //
+    if (!execSQL(sql))
+        return false;
+    //
+    WIZDOCUMENTPARAMDATA tmp = data;
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+        emit documentParamModified(tmp);
+    });
+    //
+    return true;
+}
+
 
 bool WizIndexBase::getAllTags(CWizTagDataArray& arrayTag)
 {

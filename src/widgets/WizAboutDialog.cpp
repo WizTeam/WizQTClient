@@ -60,7 +60,7 @@ WizAboutDialog::WizAboutDialog(QWidget *parent)
     textCredits->setHtml(strHtml);
 
     QLabel* labelCopyright = new QLabel(this);
-    labelCopyright->setText(tr("<span style=\"font-size:10px\">Copy Right 2011-2015 Wiz inc. All rights reserved</span>"));
+    labelCopyright->setText(tr("<span style=\"font-size:10px\">Copyright 2011-2017 Beijing Wozhi Technology Co., Ltd. All rights reserved.</span>"));
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 10, 0, 10);

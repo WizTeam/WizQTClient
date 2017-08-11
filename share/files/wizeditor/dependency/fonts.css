@@ -1,10 +1,10 @@
 @font-face {
     font-family: 'wizEditorIcons';
-    src:    url('fonts/wizEditorIcons.eot?7s1yir');
-    src:    url('fonts/wizEditorIcons.eot?7s1yir#iefix') format('embedded-opentype'),
-    url('fonts/wizEditorIcons.ttf?7s1yir') format('truetype'),
-    url('fonts/wizEditorIcons.woff?7s1yir') format('woff'),
-    url('fonts/wizEditorIcons.svg?7s1yir#wizEditorIcons') format('svg');
+    src:    url('fonts/wizEditorIcons.eot?heg7bc');
+    src:    url('fonts/wizEditorIcons.eot?heg7bc#iefix') format('embedded-opentype'),
+    url('fonts/wizEditorIcons.ttf?heg7bc') format('truetype'),
+    url('fonts/wizEditorIcons.woff?heg7bc') format('woff'),
+    url('fonts/wizEditorIcons.svg?heg7bc#wizEditorIcons') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -62,4 +62,7 @@
 }
 .icon-more.editor-icon:before {
     content: "\e10d";
+}
+.icon-down_arrow.editor-icon:before {
+    content: "\e10e";
 }
