@@ -62,6 +62,7 @@ public:
     bool isSortedByAccessDate();
 
     int documentCount() const;
+    void clearAllItems();
 
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 

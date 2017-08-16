@@ -2136,7 +2136,7 @@ void WizMainWindow::on_btnMarkDocumentsRead_triggered()
         db.setGroupDocumentsReaded();
     }
 
-    m_documents->clear();
+    m_documents->clearAllItems();
 }
 
 //void MainWindow::on_documents_hintChanged(const QString& strHint)
@@ -3082,7 +3082,7 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
 
-            m_documents->clear();
+            m_documents->clearAllItems();
             m_documents->setDocuments(arrayDocument, true);
             //
         });
