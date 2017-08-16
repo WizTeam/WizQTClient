@@ -212,6 +212,7 @@ public:
     // info and groups
     virtual void setUserInfo(const WIZUSERINFO& info);
     virtual void setKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
+    virtual QString getGroupName();
     virtual bool onDownloadGroups(const CWizGroupDataArray& arrayGroup);
     virtual bool onDownloadBizs(const CWizBizDataArray& arrayBiz);
     virtual bool onDownloadBizUsers(const QString& kbGuid, const CWizBizUserDataArray& arrayUser);

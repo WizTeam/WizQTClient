@@ -78,6 +78,8 @@ struct IWizSyncableDatabase
 
     virtual void setKbInfo(const QString& strKBGUID, const WIZKBINFO& info) = 0;
     virtual void setUserInfo(const WIZUSERINFO& info) = 0;
+    //
+    virtual QString getGroupName() = 0;
 
     virtual bool isGroup() = 0;
     virtual bool hasBiz() = 0;
@@ -199,8 +201,8 @@ public:
     virtual void onStorageLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void onBizServiceExpr(IWizSyncableDatabase* pDatabase) {}
     virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase) {}
-    virtual void onFreeServiceExpr() {}
-    virtual void onVipServiceExpr() {}
+    virtual void onFreeServiceExpr(QString groupName) {}
+    virtual void onVipServiceExpr(QString groupName) {}
     virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone) {}
     virtual void onBeginKb(const QString& strKbGUID) {}
     virtual void onEndKb(const QString& strKbGUID) {}

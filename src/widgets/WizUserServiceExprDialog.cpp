@@ -20,10 +20,14 @@ WizUserServiceExprDialog::WizUserServiceExprDialog(QWidget *parent)
     ui->buttonBox->button(QDialogButtonBox::Help)->setText(QObject::tr("Help"));
 }
 
-void WizUserServiceExprDialog::setUserInfo(bool free, bool biz)
+void WizUserServiceExprDialog::setUserInfo(bool free, bool biz, QString groupName)
 {
     QString text;
-    if (biz)
+    if (!groupName.isEmpty())
+    {
+        text = tr("The personal group %1 has expired and can not be uploaded. Please contact the group creator to upgrade to the VIP or upgrade to the team service!").arg(groupName);
+    }
+    else if (biz)
     {
         if (free)
         {
@@ -46,13 +50,16 @@ void WizUserServiceExprDialog::setUserInfo(bool free, bool biz)
         }
     }
     //
-    if (free)
+    if (groupName.isEmpty())
     {
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Upgrade to VIP"));
-    }
-    else
-    {
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Renew VIP"));
+        if (free)
+        {
+            ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Upgrade to VIP"));
+        }
+        else
+        {
+            ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Renew VIP"));
+        }
     }
     //
     ui->labelMessage->setText(text);
