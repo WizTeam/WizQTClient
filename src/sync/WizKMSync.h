@@ -27,8 +27,8 @@ class WizKMSyncEvents : public QObject , public IWizKMSyncEvents
     virtual void onStorageLimit(IWizSyncableDatabase* pDatabase);
     virtual void onBizServiceExpr(IWizSyncableDatabase* pDatabase);
     virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase);
-    virtual void onFreeServiceExpr(QString groupName);
-    virtual void onVipServiceExpr(QString groupName);
+    virtual void onFreeServiceExpr(WIZGROUPDATA group);
+    virtual void onVipServiceExpr(WIZGROUPDATA group);
     virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone);
     virtual void onBeginKb(const QString& strKbGUID);
     virtual void onEndKb(const QString& strKbGUID);
@@ -37,8 +37,8 @@ Q_SIGNALS:
     void messageReady(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
-    void promptFreeServiceExpr(QString groupName);
-    void promptVipServiceExpr(QString groupName);
+    void promptFreeServiceExpr(WIZGROUPDATA group);
+    void promptVipServiceExpr(WIZGROUPDATA group);
 };
 
 
@@ -125,8 +125,8 @@ Q_SIGNALS:
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
-    void promptFreeServiceExpr(QString groupName);
-    void promptVipServiceExpr(QString groupName);
+    void promptFreeServiceExpr(WIZGROUPDATA group);
+    void promptVipServiceExpr(WIZGROUPDATA group);
 };
 
 class WizKMWaitAndPauseSyncHelper

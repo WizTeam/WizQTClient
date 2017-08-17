@@ -20,14 +20,21 @@ WizUserServiceExprDialog::WizUserServiceExprDialog(QWidget *parent)
     ui->buttonBox->button(QDialogButtonBox::Help)->setText(QObject::tr("Help"));
 }
 
-void WizUserServiceExprDialog::setUserInfo(bool free, bool biz, QString groupName)
+void WizUserServiceExprDialog::setUserInfo(bool free, bool isBizUser, WIZGROUPDATA group)
 {
     QString text;
-    if (!groupName.isEmpty())
+    if (group.isGroup())
     {
-        text = tr("The personal group %1 has expired and can not be uploaded. Please contact the group creator to upgrade to the VIP or upgrade to the team service!").arg(groupName);
+        if (group.isBiz())
+        {
+            text = tr("Team service of [%1] has expired, temporarily unable to sync the new and edited notes and attachments, please renew on time.").arg(group.strGroupName);
+        }
+        else
+        {
+            text = tr("The personal group [%1] has expired and can not be uploaded. Please contact the group creator to upgrade to the VIP or upgrade to the team service!").arg(group.strGroupName);
+        }
     }
-    else if (biz)
+    else if (isBizUser)
     {
         if (free)
         {
@@ -50,7 +57,7 @@ void WizUserServiceExprDialog::setUserInfo(bool free, bool biz, QString groupNam
         }
     }
     //
-    if (groupName.isEmpty())
+    if (!group.isGroup())
     {
         if (free)
         {

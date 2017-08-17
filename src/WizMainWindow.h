@@ -233,7 +233,7 @@ private:
     QWidget* createNoteListView();
     QWidget* createMessageListView();
     //
-    void promptServiceExpr(bool free, QString groupName);
+    void promptServiceExpr(bool free, WIZGROUPDATA group);
 
 public:
     // CWizDocument passthrough methods
@@ -384,8 +384,8 @@ public Q_SLOTS:
 
     void on_syncProcessLog(const QString& strMsg);
     void on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg);
-    void on_promptFreeServiceExpr(QString groupName);
-    void on_promptVipServiceExpr(QString groupName);
+    void on_promptFreeServiceExpr(WIZGROUPDATA group);
+    void on_promptVipServiceExpr(WIZGROUPDATA group);
     void on_bubbleNotification_request(const QVariant& param);
 
     void on_TokenAcquired(const QString& strToken);

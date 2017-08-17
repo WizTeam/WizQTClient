@@ -1189,6 +1189,17 @@ QString WizDatabase::getGroupName()
     return group.strGroupName;
 }
 
+WIZGROUPDATA WizDatabase::getGroupInfo()
+{
+    if (!isGroup())
+        return WIZGROUPDATA();
+
+    WizDatabase* personDb = personalDatabase();
+    WIZGROUPDATA data;
+    personDb->getGroupData(kbGUID(), data);
+    return data;
+}
+
 
 void WizDatabase::setUserInfo(const WIZUSERINFO& userInfo)
 {
