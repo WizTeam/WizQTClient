@@ -1,4 +1,4 @@
-﻿#ifndef WIZKMSYNC_H
+#ifndef WIZKMSYNC_H
 #define WIZKMSYNC_H
 
 #include <QThread>
@@ -6,6 +6,7 @@
 #include <QWaitCondition>
 #include <QTimer>
 #include <QMutex>
+
 #include "WizSync.h"
 #include "WizKMServer.h"
 
