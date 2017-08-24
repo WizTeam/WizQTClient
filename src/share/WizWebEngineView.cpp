@@ -314,3 +314,23 @@ void WizWebEngineViewContainerDialog::keyPressEvent(QKeyEvent* ev)
     QDialog::keyPressEvent(ev);
 }
 
+void WizWebEngineView::wheelEvent(QWheelEvent *event)
+{
+    qreal factor = 0;
+
+    if (event->modifiers()==Qt::ControlModifier) {
+        factor = zoomFactor();
+        if (event->delta() > 0) {
+            //放大
+            factor += 0.1;
+            factor = (factor > 5.0)?5.0:factor;
+        } else {
+            //缩小
+            factor -= 0.1;
+            factor = (factor < 0.5)?0.5:factor;
+        }
+        setZoomFactor(factor);
+    } else {
+        event->ignore();
+    }
+}

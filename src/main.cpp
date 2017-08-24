@@ -75,7 +75,7 @@ void installOnLinux()
     ::WizEnsurePathExists(applicationsPath);
     //
     QString iconsBasePath = QDir::homePath() + "/.local/share/icons/hicolor/";
-    ::WizEnsurePathExists(applicationsPath);
+    ::WizEnsurePathExists(iconsBasePath);
     //
     CWizStdStringArray arrayIconSize;
     arrayIconSize.push_back("16");
