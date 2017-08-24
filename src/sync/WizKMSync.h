@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QWaitCondition>
 #include <QTimer>
+#include <QMutex>
 
 #include "WizSync.h"
 #include "WizKMServer.h"
