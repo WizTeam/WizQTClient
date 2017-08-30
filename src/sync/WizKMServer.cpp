@@ -523,7 +523,7 @@ bool WizKMAccountsServer::createAccount(const QString& strUserName, const QStrin
     params["productName"] = "WizNoteQT";
     if (!strCaptchaID.isEmpty())
     {
-        params["captchIid"] = strCaptchaID.toStdString();
+        params["captchaId"] = strCaptchaID.toStdString();
         params["captcha"] = strCaptcha.toStdString();
     }
     //
