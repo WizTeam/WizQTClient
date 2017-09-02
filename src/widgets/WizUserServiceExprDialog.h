@@ -2,7 +2,7 @@
 #define WIZUSERSERVICEEXPRDIALOG_H
 
 #include <QDialog>
-
+#include "share/WizObject.h"
 
 namespace Ui {
 class WizUserServiceExprDialog;
@@ -16,7 +16,7 @@ class WizUserServiceExprDialog : public QDialog
 public:
     explicit WizUserServiceExprDialog(QWidget *parent);
     //
-    void setUserInfo(bool free, bool biz);
+    void setUserInfo(bool free, bool isBizUser, WIZGROUPDATA group);
 public Q_SLOTS:
     void helpClicked();
     void okClicked();

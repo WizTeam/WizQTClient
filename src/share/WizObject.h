@@ -497,6 +497,10 @@ struct WIZGROUPDATA
     WIZGROUPDATA(const WIZGROUPDATA& data);
     bool fromJson(const Json::Value& value);
     //
+    bool isGroup() const
+    {
+        return !strGroupGUID.isEmpty();
+    }
     bool isBiz() const
     {
         return !bizGUID.isEmpty();
@@ -561,7 +565,7 @@ struct WIZGROUPDATA
     bool bEncryptData;
 };
 
-
+Q_DECLARE_METATYPE(WIZGROUPDATA)
 
 const UINT WIZ_BIZROLE_OWNER			= 0;
 const UINT WIZ_BIZROLE_ADMIN			= 10;

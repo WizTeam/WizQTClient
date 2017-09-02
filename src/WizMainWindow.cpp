@@ -170,6 +170,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     WizGlobal::setMainWindow(this);
     WizKMSyncThread::setQuickThread(m_syncQuick);
     //
+    qRegisterMetaType<WIZGROUPDATA>("WIZGROUPDATA");
+    //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
 #ifdef Q_OS_LINUX
@@ -200,16 +202,16 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_syncFull, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_syncFull, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
-    connect(m_syncFull, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
-    connect(m_syncFull, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    connect(m_syncFull, SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)), SLOT(on_promptFreeServiceExpr(WIZGROUPDATA)));
+    connect(m_syncFull, SIGNAL(promptVipServiceExpr(WIZGROUPDATA)), SLOT(on_promptVipServiceExpr(WIZGROUPDATA)));
 
     connect(m_syncFull, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_syncFull, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_syncFull, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
 
-    connect(m_syncQuick, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
-    connect(m_syncQuick, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    connect(m_syncQuick, SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)), SLOT(on_promptFreeServiceExpr(WIZGROUPDATA)));
+    connect(m_syncQuick, SIGNAL(promptVipServiceExpr(WIZGROUPDATA)), SLOT(on_promptVipServiceExpr(WIZGROUPDATA)));
     //
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
@@ -2136,7 +2138,7 @@ void WizMainWindow::on_btnMarkDocumentsRead_triggered()
         db.setGroupDocumentsReaded();
     }
 
-    m_documents->clear();
+    m_documents->clearAllItems();
 }
 
 //void MainWindow::on_documents_hintChanged(const QString& strHint)
@@ -2300,7 +2302,7 @@ void WizMainWindow::on_promptMessage_request(int nType, const QString& strTitle,
 
 
 
-void WizMainWindow::promptServiceExpr(bool free)
+void WizMainWindow::promptServiceExpr(bool free, WIZGROUPDATA group)
 {
     static int lastPrompt = 0;
     if (lastPrompt != 0)
@@ -2320,26 +2322,26 @@ void WizMainWindow::promptServiceExpr(bool free)
     lastPrompt = WizGetTickCount();
 
     WizDatabase& db = m_dbMgr.db("");
-    bool biz = db.hasBiz();
+    bool isBizUser = db.hasBiz();
     //
     WizUserServiceExprDialog dlg(NULL);
-    dlg.setUserInfo(free, biz);
-    if (0 != dlg.exec())
+    dlg.setUserInfo(free, isBizUser, group);
+    if (0 != dlg.exec() && !group.isGroup())
     {
         showVipUpgradePage();
     }
     in  = false;
 }
 
-void WizMainWindow::on_promptFreeServiceExpr()
+void WizMainWindow::on_promptFreeServiceExpr(WIZGROUPDATA group)
 {
-    promptServiceExpr(true);
+    promptServiceExpr(true, group);
 }
 
 
-void WizMainWindow::on_promptVipServiceExpr()
+void WizMainWindow::on_promptVipServiceExpr(WIZGROUPDATA group)
 {
-    promptServiceExpr(false);
+    promptServiceExpr(false, group);
 }
 
 
@@ -3082,7 +3084,7 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
 
-            m_documents->clear();
+            m_documents->clearAllItems();
             m_documents->setDocuments(arrayDocument, true);
             //
         });

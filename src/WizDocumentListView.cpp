@@ -283,8 +283,7 @@ void WizDocumentListView::resizeEvent(QResizeEvent* event)
 void WizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument, bool searchResult /*= false*/)
 {
     //reset
-    clear();
-    m_sectionItems.clear();
+    clearAllItems();
     //
     m_searchResult = searchResult;
 
@@ -1361,6 +1360,13 @@ int WizDocumentListView::documentCount() const
     }
     return result;
 }
+
+void WizDocumentListView::clearAllItems()
+{
+    clear();
+    m_sectionItems.clear();
+}
+
 
 void WizDocumentListView::on_itemSelectionChanged()
 {

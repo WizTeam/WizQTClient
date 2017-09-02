@@ -930,6 +930,7 @@ QString WizDocumentWebView::getHighlightKeywords()
     texts.push_back(doc.strHighlightText);
     texts.push_back(doc.strHighlightTitle);
     //
+    std::set<QString> lowerCaseKeywords;
     std::set<QString> keywords;
     for (auto it : texts)
     {
@@ -945,7 +946,12 @@ QString WizDocumentWebView::getHighlightKeywords()
                 break;
             //
             QString keyword = text.mid(start, end - start);
-            keywords.insert("'" + keyword + "'");
+            QString lower = keyword.toLower();
+            if (lowerCaseKeywords.find(lower) == lowerCaseKeywords.end())
+            {
+                lowerCaseKeywords.insert(lower);
+                keywords.insert("'" + keyword + "'");
+            }
             //
             begin = end + 5;
         }
@@ -1203,13 +1209,20 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 }
 
 
+//#define DEBUG_EDITOR
+
 void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)
 {
     QString strResourcePath = Utils::WizPathResolve::resourcesPath();
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
-    QString strEditorJS = strHtmlEditorPath + "wizEditorForMac.js";
-    QString strInit = strHtmlEditorPath + "editorHelper.js";
+#ifdef DEBUG_EDITOR
+    QString strEditorJS = "http://192.168.1.73:8080/libs/wizEditor/wizEditorForMac.js";
+    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
+#else
+    QString strEditorJS = "file:///" +  strHtmlEditorPath + "wizEditorForMac.js";
+    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
+#endif
     //
     files.clear();
     files[strEditorJS] = "";
@@ -1218,8 +1231,8 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     /*
      *
      * 渐变式加载笔记，暂时不需要
-    QString tempCss = strHtmlEditorPath + "tempeditorstyle.css";
-    QString tempCssLoadOnly = strHtmlEditorPath + "tempeditorstyle_loadonly.css";
+    QString tempCss = "file:///" + strHtmlEditorPath + "tempeditorstyle.css";
+    QString tempCssLoadOnly = "file:///" + strHtmlEditorPath + "tempeditorstyle_loadonly.css";
     //
     files[tempCss] = "wiz_unsave_style";
     files[tempCssLoadOnly] = "wiz_style_for_load";
@@ -1234,19 +1247,32 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::m
     Q_ASSERT(!files.empty());
     for (std::map<QString, QString>::const_iterator it = files.begin(); it != files.end(); it++)
     {
-        QString strFileName = it->first;
+        QString url = it->first;
+        QString strFileName = QUrl(url).toLocalFile();
         QString name = it->second;
         //
-        Q_ASSERT(WizPathFileExists(strFileName));
+#ifndef DEBUG_EDITOR
+        if (!strFileName.isEmpty())
+        {
+            Q_ASSERT(WizPathFileExists(strFileName));
+        }
+#endif
         //
         QString strExt = Utils::WizMisc::extractFileExt(strFileName);
+        if (strExt.isEmpty())
+        {
+            strExt = Utils::WizMisc::extractFileExt(url);
+        }
+        //
         if (0 == strExt.compare(".css", Qt::CaseInsensitive))
         {
             if (name.isEmpty()) {
                 name = "wiz_inner_style";
             }
             //
-            QString strTag = WizFormatString2("<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName, name);
+            QString strTag = WizFormatString2(
+                        "<link rel=\"stylesheet\" type=\"text/css\" href=\"%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\">",
+                        url, name);
             //
             if (strHtml.indexOf(strTag) == -1)
             {
@@ -1259,8 +1285,8 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::m
                 name = "wiz_inner_script";
             }
             QString	strTag = WizFormatString2(
-                    "<script type=\"text/javascript\" src=\"file:///%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\"></script>",
-                    strFileName, name);
+                    "<script type=\"text/javascript\" src=\"%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\"></script>",
+                    url, name);
             //
             if (strHtml.indexOf(strTag) == -1)
             {

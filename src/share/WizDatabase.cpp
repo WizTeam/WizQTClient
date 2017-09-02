@@ -1177,6 +1177,30 @@ void WizDatabase::setKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
     setMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_N", info.nTrafficUsage);
 }
 
+QString WizDatabase::getGroupName()
+{
+    if (!isGroup())
+        return "";
+
+    WizDatabase* personDb = personalDatabase();
+
+    WIZGROUPDATA group;
+    personDb->getGroupData(kbGUID(), group);
+    return group.strGroupName;
+}
+
+WIZGROUPDATA WizDatabase::getGroupInfo()
+{
+    if (!isGroup())
+        return WIZGROUPDATA();
+
+    WizDatabase* personDb = personalDatabase();
+    WIZGROUPDATA data;
+    personDb->getGroupData(kbGUID(), data);
+    return data;
+}
+
+
 void WizDatabase::setUserInfo(const WIZUSERINFO& userInfo)
 {
     setMeta(g_strDatabaseInfoSection, "KBGUID", userInfo.strKbGUID);
