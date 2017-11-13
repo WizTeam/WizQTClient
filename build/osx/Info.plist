@@ -38,6 +38,8 @@
 	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
