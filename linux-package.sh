@@ -1,27 +1,34 @@
 # compile
-mkdir ../WizQTClient-Release-Linux
-rm -rf ../WizQTClient-Release-Linux/*
+readonly currentDir=$(pwd)
+readonly releaseDir="$currentDir/../WizNote"
+readonly releaseTmpDir="$currentDir/../WizQTClient-Release-Linux"
 
-cd ../WizQTClient-Release-Linux
+rm -rf "$releaseTmpDir"
+mkdir "$releaseTmpDir"
 
-cmake -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
-make -j5
+# find QtPath
+QtPath=$(locate libQt5Widgets.so | grep ".*/Qt[0-9].*/[0-9].*/gcc.[0-9]*" -o | sed -n "1p")
 
-cd ..
-rm -rf WizNote
-mkdir WizNote
-cd WizNote
+cd "$releaseTmpDir"
+
+# specify QtPath
+cmake -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release $currentDir \
+    -DCMAKE_PREFIX_PATH=$QtPath && make -j5
+
+rm -rf "$releaseDir"
+mkdir "$releaseDir"
+cd "$releaseDir"
 mkdir bin
 cd bin
 
-cp ../../WizQTClient-Release-Linux/bin/WizNote ./
+cp $releaseTmpDir/src/WizNote ./
 cp /usr/lib/x86_64-linux-gnu/libQtWebKit.so.4 ./
 cp /usr/lib/x86_64-linux-gnu/libQtGui.so.4 ./
 cp /usr/lib/x86_64-linux-gnu//libQtXml.so.4 ./
 cp /usr/lib/x86_64-linux-gnu/libQtNetwork.so.4 ./
 cp /usr/lib/x86_64-linux-gnu/libQtCore.so.4 ./
 
-cd ..
+cd "$releaseDir"
 mkdir lib
 cd lib
 mkdir wiznote
@@ -29,17 +36,17 @@ cd wiznote
 mkdir plugins
 cd plugins
 
-cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libextensionsystem.so ./
-cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libaggregation.so ./
-cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libCore.so ./
+#No these three file
+#cp $releaseTmpDir/lib/wiznote/plugins/libextensionsystem.so ./
+#cp $releaseTmpDir/lib/wiznote/plugins/libaggregation.so ./
+#cp $releaseTmpDir/lib/wiznote/plugins/libCore.so ./
 
-cd ..
-cd ..
-cd ..
+cd "$releaseDir"
 
-cp -R ../WizQTClient-Release-Linux/share ./
+cp -R $releaseTmpDir/share ./
 #cp ../WizQTClient/start-WizNote.sh ./
 ln -s bin/WizNote WizNote
 cd ..
 rm -f ./WizNote.tar.gz
+rm -rf "$releaseTmpDir"
 tar -zcvf ./WizNote.tar.gz WizNote
