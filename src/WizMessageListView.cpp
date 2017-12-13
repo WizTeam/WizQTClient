@@ -18,6 +18,7 @@
 
 #include "utils/WizStyleHelper.h"
 #include "utils/WizMisc.h"
+#include "utils/WizPinyin.h"
 #include "sync/WizAvatarHost.h"
 #include "sync/WizAsyncApi.h"
 #include "sync/WizApiEntry.h"
@@ -1439,23 +1440,8 @@ bool WizSenderSelectorItem::operator<(const QListWidgetItem& other) const
         return true;
     if (pOther->itemID().isEmpty())
         return false;
-
-    static bool isChinese = Utils::WizMisc::isChinese();
-    if (isChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(m_text);
-            QByteArray arrOther = pCodec->fromUnicode(pOther->itemText());
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            return strThisA.compare(strOtherA.c_str()) < 0;
-        }
-    }
-
-    return m_text.localeAwareCompare(pOther->itemText()) < 0;
+    //
+    return WizToolsSmartCompare(m_text, pOther->itemText()) < 0;
 }
 
 void WizClickableLabel::mouseReleaseEvent(QMouseEvent* ev)

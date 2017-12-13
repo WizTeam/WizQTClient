@@ -128,22 +128,12 @@ bool WizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
     QString strThis = text(0).toLower();
     QString strOther = pOther->text(0).toLower();
     //
-    static bool isSimpChinese = Utils::WizMisc::isChinese();
-    if (isSimpChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(strThis);
-            QByteArray arrOther = pCodec->fromUnicode(strOther);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            return strThisA.compare(strOtherA.c_str()) < 0;
-        }
-    }
+    bool ret = WizToolsSmartCompare(strThis, strOther) < 0;
     //
-    return strThis.compare(strOther) < 0;
+    if (strThis == "drds_ks" && strOther[0] == 'h') {
+        qDebug() << ret;
+    }
+    return ret;
 }
 
 QVariant WizCategoryViewItemBase::data(int column, int role) const
@@ -1744,7 +1734,8 @@ bool WizCategoryViewGroupRootItem::operator<(const QTreeWidgetItem& other) const
         return QTreeWidgetItem::operator <(other);
 
     const WizCategoryViewGroupRootItem* pItem = dynamic_cast<const WizCategoryViewGroupRootItem*>(&other);
-    return Utils::WizMisc::localeAwareCompare(m_group.strGroupName, pItem->m_group.strGroupName);
+    //
+    return WizToolsSmartCompare(m_group.strGroupName, pItem->m_group.strGroupName) < 0;
 }
 
 bool WizCategoryViewGroupRootItem::isAdmin(WizDatabase& db)

@@ -57,6 +57,7 @@
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
 #include "utils/WizMisc.h"
+#include "utils/WizPinyin.h"
 #include "widgets/WizFramelessWebDialog.h"
 #include "widgets/WizScreenShotWidget.h"
 #include "widgets/WizImageButton.h"
@@ -167,6 +168,11 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_bQuickDownloadMessageEnable(false)
     , m_quiting(false)
 {
+#ifdef QT_DEBUG
+    int ret = WizToolsSmartCompare("H", "d");
+    qDebug() << ret;
+#endif
+
     WizGlobal::setMainWindow(this);
     WizKMSyncThread::setQuickThread(m_syncQuick);
     //
@@ -1309,22 +1315,7 @@ bool caseInsensitiveLessThan(QAction* action1, QAction* action2) {
     const QString k1 = action1->text().toLower();
     const QString k2 = action2->text().toLower();
 
-    static bool isSimpChinese = Utils::WizMisc::isChinese();
-    if (isSimpChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(k1);
-            QByteArray arrOther = pCodec->fromUnicode(k2);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            return strThisA.compare(strOtherA.c_str()) < 0;
-        }
-    }
-    //
-    return  k1.compare(k2) < 0;
+    return WizToolsSmartCompare(k1, k2) < 0;
 }
 
 

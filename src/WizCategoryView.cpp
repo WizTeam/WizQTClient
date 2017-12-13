@@ -3244,9 +3244,11 @@ void WizCategoryView::init()
 
     for (int i = 0; i < topLevelItemCount(); ++i)
     {
-        if (dynamic_cast<WizCategoryViewBizGroupRootItem*>(topLevelItem(i)))
+        if (WizCategoryViewBizGroupRootItem* pItem = dynamic_cast<WizCategoryViewBizGroupRootItem*>(topLevelItem(i)))
         {
-            topLevelItem(i)->sortChildren(0, Qt::AscendingOrder);
+            int childCount = pItem->childCount();
+            qDebug() << childCount;
+            pItem->sortChildren(0, Qt::AscendingOrder);
         }
     }
     //
