@@ -4,7 +4,7 @@ rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 
-cmake -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
+cmake -Wno-dev -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
 make -j5
 
 cd ..
@@ -14,7 +14,7 @@ cd WizNote
 mkdir bin
 cd bin
 
-cp ../../WizQTClient-Release-Linux/bin/WizNote ./
+cp ../../WizQTClient-Release-Linux/src/WizNote ./
 cp /usr/lib/x86_64-linux-gnu/libQtWebKit.so.4 ./
 cp /usr/lib/x86_64-linux-gnu/libQtGui.so.4 ./
 cp /usr/lib/x86_64-linux-gnu//libQtXml.so.4 ./
