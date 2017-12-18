@@ -2241,13 +2241,6 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
 {
     m_animateSync->stopPlay();
     //
-    if (S_OK != nErrorCode)
-    {
-        if (isNetworkError) {
-            m_tray->showMessage(tr("Sync failed"), tr("Network error: %1").arg(nErrorCode));
-            return;
-        }
-    }
 
     //
     if (isXMLRpcErrorCodeRelatedWithUserAccount(nErrorCode))
@@ -2266,6 +2259,17 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
         //当用户的企业付费到期并且有待上传的内容的时候，进行弹框提示
         WizMessageBox::information(this, tr("Info"), strErrorMsg);
     }
+    else
+    {
+        if (isNetworkError) {
+            m_tray->showMessage(tr("Sync failed"), tr("Network error: %1").arg(nErrorCode));
+            return;
+        } else {
+            m_tray->showMessage(tr("Sync failed"), tr("Server error: %1").arg(nErrorCode));
+            return;
+        }
+    }
+    //
 
     m_documents->viewport()->update();
     m_category->updateGroupsData();
