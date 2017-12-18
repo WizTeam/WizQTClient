@@ -893,6 +893,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
     , m_objectsTotalSize(0)
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
+    TOLOG1("sync type: %1", isUseNewSync() ? "new" : "old");
 }
 
 WizKMDatabaseServer::~WizKMDatabaseServer()

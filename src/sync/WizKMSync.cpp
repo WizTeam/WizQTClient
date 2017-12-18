@@ -309,6 +309,8 @@ public:
 
 bool WizKMSyncThread::syncAll()
 {
+    TOLOG2("client version: %1(%2)", WIZ_CLIENT_TYPE, WIZ_CLIENT_VERSION);
+    //
     m_bNeedSyncAll = false;
     //
     CWizKMSyncThreadHelper helper(this, true);

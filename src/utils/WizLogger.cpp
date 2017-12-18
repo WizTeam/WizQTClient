@@ -41,6 +41,9 @@ void WizLogger::messageHandler(QtMsgType type, const QMessageLogContext& context
         return;
 #endif
 
+    if (type == QtWarningMsg && msg.startsWith("Property") && msg.indexOf("has no notify signal") != -1)
+        return;
+
     logger()->saveToLogFile(msg);
     logger()->addToBuffer(msg);
 
@@ -124,6 +127,8 @@ WizLogger* WizLogger::logger()
 
 void WizLogger::writeLog(const QString& strMsg)
 {
+    if (strMsg.startsWith("[WARNING]: Property "))
+        return;
     logger()->saveToLogFile(strMsg);
     logger()->addToBuffer(strMsg);
 
