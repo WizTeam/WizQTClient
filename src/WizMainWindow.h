@@ -379,7 +379,7 @@ public Q_SLOTS:
 
     void on_syncLogined();
     void on_syncStarted(bool syncAll);
-    void on_syncDone(int nErrorcode, const QString& strErrorMsg, bool isBackground);
+    void on_syncDone(int nErrorcode, bool isNetworkError, const QString& strErrorMsg, bool isBackground);
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);

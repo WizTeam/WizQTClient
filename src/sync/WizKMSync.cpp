@@ -205,7 +205,7 @@ bool WizKMSyncThread::prepareToken()
     QString token = WizToken::token();
     if (token.isEmpty())
     {
-        Q_EMIT syncFinished(WizToken::lastErrorCode(), WizToken::lastErrorMessage(), isBackground());
+        Q_EMIT syncFinished(WizToken::lastErrorCode(), WizToken::lastIsNetworkError(), WizToken::lastErrorMessage(), isBackground());
         return false;
     }
     //
@@ -301,6 +301,7 @@ public:
     ~CWizKMSyncThreadHelper()
     {
         Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->getLastErrorCode()
+                                       , m_pThread->m_pEvents->isNetworkError()
                                        , m_pThread->m_pEvents->getLastErrorMessage()
                                        , m_pThread->isBackground());
         m_pThread->m_pEvents->clearLastErrorMessage();

@@ -181,6 +181,7 @@ public:
     {
         m_bStop = false;
         m_nLastError = 0;
+        m_bIsNetworkError = false;
     }
 
     virtual void onSyncProgress(int pos) {}
@@ -191,6 +192,8 @@ public:
     virtual void setStop(bool b) { m_bStop = b; }
     virtual bool isStop() const { return m_bStop; }
     virtual void setLastErrorCode(int nErrorCode) { m_nLastError = nErrorCode; }
+    virtual bool isNetworkError() const { return m_bIsNetworkError; }
+    virtual void setIsNetworkError(bool networkError) { m_bIsNetworkError = networkError; }
     virtual int getLastErrorCode() const { return m_nLastError; }
     virtual void setLastErrorMessage(const QString& message) { m_strLastErrorMessage = message; }
     virtual QString getLastErrorMessage() const { return m_strLastErrorMessage; }
@@ -216,6 +219,7 @@ public:
 private:
     bool m_bStop;
     int m_nLastError;
+    bool m_bIsNetworkError;
     QString m_strLastErrorMessage;
 };
 

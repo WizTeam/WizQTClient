@@ -122,7 +122,7 @@ private:
 
 Q_SIGNALS:
     void syncStarted(bool syncAll);
-    void syncFinished(int nErrorCode, const QString& strErrorMesssage, bool isBackground);
+    void syncFinished(int nErrorCode, bool isNetworkError, const QString& strErrorMesssage, bool isBackground);
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);

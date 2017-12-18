@@ -214,7 +214,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_syncFull, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_syncFull, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
-    connect(m_syncFull, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
+    connect(m_syncFull, SIGNAL(syncFinished(int, bool, QString, bool)), SLOT(on_syncDone(int, bool, QString, bool)));
 
     connect(m_syncQuick, SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)), SLOT(on_promptFreeServiceExpr(WIZGROUPDATA)));
     connect(m_syncQuick, SIGNAL(promptVipServiceExpr(WIZGROUPDATA)), SLOT(on_promptVipServiceExpr(WIZGROUPDATA)));
@@ -2237,9 +2237,17 @@ void WizMainWindow::on_syncStarted(bool syncAll)
     }
 }
 
-void WizMainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool isBackground)
+void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QString& strErrorMsg, bool isBackground)
 {
     m_animateSync->stopPlay();
+    //
+    if (S_OK != nErrorCode)
+    {
+        if (isNetworkError) {
+            m_tray->showMessage(tr("Sync failed"), tr("Network error: %1").arg(nErrorCode));
+            return;
+        }
+    }
 
     //
     if (isXMLRpcErrorCodeRelatedWithUserAccount(nErrorCode))

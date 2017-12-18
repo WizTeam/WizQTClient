@@ -322,6 +322,7 @@ void WizKMApiServerBase::onApiError()
     if (m_pEvents)
     {
         m_pEvents->setLastErrorCode(m_lastError.returnCode);
+        m_pEvents->setIsNetworkError(m_lastError.isNetworkError());
         m_pEvents->setLastErrorMessage(m_lastError.returnMessage);
     }
     //
