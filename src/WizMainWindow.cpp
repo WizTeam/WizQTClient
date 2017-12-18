@@ -1609,6 +1609,11 @@ void WizMainWindow::copyLink(const QString& link)
     Utils::WizMisc::copyTextToClipboard(link);
 }
 
+void WizMainWindow::onClickedImage(const QString& src, const QString& list)
+{
+
+}
+
 #ifndef Q_OS_MAC
 void WizMainWindow::layoutTitleBar()
 {
@@ -3206,6 +3211,12 @@ void WizMainWindow::on_category_itemSelectionChanged()
         return;
     } else {
         oldItem = currentItem;
+    }
+    //
+    if (WizCategoryViewTrashItem* pItem = dynamic_cast<WizCategoryViewTrashItem *>(currentItem))
+    {
+        m_category->on_action_deleted_recovery();
+        return;
     }
 
     QTreeWidgetItem* categoryItem = category->currentItem();

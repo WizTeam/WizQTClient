@@ -481,6 +481,7 @@ public:
     Q_INVOKABLE void SetDialogResult(int nResult);
     Q_INVOKABLE void AppStoreIAP();
     Q_INVOKABLE void copyLink(const QString& link);
+    Q_INVOKABLE void onClickedImage(const QString& src, const QString& list);
 
 private:
     void syncAllData();
