@@ -560,6 +560,9 @@ void WizDocumentWebView::onTimerAutoSaveTimout()
 
 void WizDocumentWebView::onTitleEdited(QString strTitle)
 {
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
+    mainWindow->titleChanged();
+    //
     WIZDOCUMENTDATA document = view()->note();
     document.strTitle = strTitle;
     // Only sync when contents unchanged. If contents changed would sync after document saved.
@@ -1961,12 +1964,25 @@ void WizDocumentWebView::editorCommandExecuteScreenShot()
 
 void WizDocumentWebView::saveAsPDF()
 {
+    CString strTitle = view()->note().strTitle;
+    WizMakeValidFileNameNoPath(strTitle);
+    static QString strInitPath = QDir::homePath();
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    //
     QString strFileName = QFileDialog::getSaveFileName(this, QString(),
-                                                       QDir::homePath() + "/untitled.pdf", tr("PDF Files (*.pdf)"));
+                                                       strInitFileName,
+                                                       tr("PDF Files (*.pdf)"));
+    //
+    if (strFileName.isEmpty())
+        return;
+    //
+    strInitPath = Utils::WizMisc::extractFilePath(strFileName);
+    //
     if (::WizPathFileExists(strFileName))
     {
         ::WizDeleteFile(strFileName);
     }
+    //
     QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
     double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
     double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
@@ -1986,6 +2002,38 @@ void WizDocumentWebView::saveAsHtml(const QString& strDirPath)
     db.exportToHtmlFile(doc, strDirPath);    
 }
 
+void WizDocumentWebView::saveAsMarkdown()
+{
+    CString strTitle = view()->note().strTitle;
+    WizMakeValidFileNameNoPath(strTitle);
+    static QString strInitPath = QDir::homePath();
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    //
+    QString strFileName = QFileDialog::getSaveFileName(this, QString(),
+                                                       strInitFileName,
+                                                       tr("Markdown Files (*.md)"));
+    //
+    if (strFileName.isEmpty())
+        return;
+    //
+    strInitPath = Utils::WizMisc::extractFilePath(strFileName);
+    //
+    if (::WizPathFileExists(strFileName))
+    {
+        ::WizDeleteFile(strFileName);
+    }
+    /*
+     因为存在内置的表格，todo，图片，导致无法正常输出成标准的markdown
+    */
+    page()->runJavaScript(QString("WizEditor.getMarkdownSource();"), [=](const QVariant& vModified){
+        //
+        QString source = vModified.toString();
+        //
+        ::WizSaveUnicodeTextToUtf8File(strFileName, source, false);
+
+    });
+
+}
 
 void WizDocumentWebView::isModified(std::function<void(bool modified)> callback)
 {

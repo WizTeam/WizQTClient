@@ -289,6 +289,7 @@ public Q_SLOTS:
     void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
+    void on_actionSaveAsMarkdown_triggered();
     void on_actionImportFile_triggered();
     void on_actionPrintMargin_triggered();
 
@@ -441,6 +442,7 @@ public Q_SLOTS:
     //
     void locateDocument(const WIZDOCUMENTDATA& data);
     void locateDocument(const QString& strKbGuid, const QString& strGuid);
+    void titleChanged();
 
     //
     void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);

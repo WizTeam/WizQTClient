@@ -733,14 +733,10 @@ void WizMainWindow::on_viewMessage_requestNormal(QVariant messageData)
 {
     if (messageData.type() == QVariant::Bool)
     {
-        if (messageData.toBool())   //network error
-        {
-
-        }
-        else    //server error
-        {
-
-        }
+        QString strUrl = WizApiEntry::standardCommandUrl("link");
+        strUrl = strUrl + "&site=wiznote";
+        strUrl += "&name=mac-sync-error-solution";
+        QDesktopServices::openUrl(QUrl(strUrl));
     }
 }
 
@@ -2284,10 +2280,10 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
         QVariant param(isNetworkError);
 
         if (isNetworkError) {
-            m_tray->showMessage(tr("Sync failed"), tr("Network error: %1").arg(nErrorCode), icon, delay, param);
+            m_tray->showMessage(tr("Sync failed"), tr("Bad network connection, can not sync now. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
             return;
         } else {
-            m_tray->showMessage(tr("Sync failed"), tr("Server error: %1").arg(nErrorCode), icon, delay, param);
+            m_tray->showMessage(tr("Sync failed"), tr("There is something wrong with sync service. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
             return;
         }
     }
@@ -3053,6 +3049,16 @@ void WizMainWindow::on_actionSaveAsHtml_triggered()
     WizGetAnalyzer().logAction("MenuBarSaveAsHtml");
 }
 
+
+void WizMainWindow::on_actionSaveAsMarkdown_triggered()
+{
+    if (WizDocumentWebView* editor = getActiveEditor())
+    {
+        editor->saveAsMarkdown();
+    }
+    WizGetAnalyzer().logAction("MenuBarSaveAsMarkdown");
+}
+
 void WizMainWindow::on_actionImportFile_triggered()
 {
     if (m_category)
@@ -3456,7 +3462,16 @@ void WizMainWindow::viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistor
     if (addToHistory) {
         m_history->addHistory(data);
     }
+    //
+    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_MARKDOWN)->setEnabled(WizIsMarkdownNote(data));
+    //
 }
+
+void WizMainWindow::titleChanged()
+{
+    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_MARKDOWN)->setEnabled(WizIsMarkdownNote(m_doc->note()));
+}
+
 
 void WizMainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 {
