@@ -1193,6 +1193,12 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
 void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, const QString& title, const QString& info,
                                   const QString& abs, bool bFocused, bool bSelected, QColor textColor)
 {
+    QString newTitle = title;
+    newTitle = newTitle.replace("<", "&lt;");
+    newTitle = newTitle.replace(">", "&gt;");
+    newTitle = newTitle.replace("&lt;em&gt;", "<em>");
+    newTitle = newTitle.replace("&lt;/em&gt;", "</em>");
+    //
     if (bFocused || bSelected) {
         textColor = QColor();
     }
@@ -1215,7 +1221,7 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     QString titleHtmlColorHtml = "<font color='" + titleHtmlColor + "'>";
     QString titleHtmlColorHtmlEnd = "</font>";
     //
-    QString title2 = "<div style='font-size:14px;line-height:130%'>" + titleHtmlColorHtml + title + titleHtmlColorHtmlEnd + "</div>";
+    QString title2 = "<div style='font-size:14px;line-height:130%'>" + titleHtmlColorHtml + newTitle + titleHtmlColorHtmlEnd + "</div>";
     //
     QString info2 = infoHtmlColorHtml + info + infoHtmlColorHtmlEnd;
     QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
