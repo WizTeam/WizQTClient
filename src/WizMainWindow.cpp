@@ -101,6 +101,8 @@
 #include "widgets/WizExecutingActionDialog.h"
 #include "widgets/WizUserServiceExprDialog.h"
 
+#include "share/jsoncpp/json/json.h"
+
 #define MAINWINDOW  "MainWindow"
 
 
@@ -1623,9 +1625,43 @@ void WizMainWindow::copyLink(const QString& link)
 
 void WizMainWindow::onClickedImage(const QString& src, const QString& list)
 {
+    Json::Value d;
+    Json::Reader reader;
+    if (reader.parse(list.toUtf8().constData(), d))
+    {
+        CWizStdStringArray files;
+        if (d.isArray())
+        {
+            for (int i = 0; i < d.size(); i++)
+            {
+                QString file = QString::fromStdString(d[i].asString());
+                files.push_back(file);
+            }
+        }
+        //
+        if (!files.empty())
+        {
+            QStringList sl;
+            sl << "-a";
+            sl << "Preview";
+            for (auto it = files.begin(); it != files.end(); it++)
+            {
+                QString fileUrl = *it;
+                QUrl url(fileUrl);
+                QString path = url.toLocalFile();
+                sl << "\"" + path + "\"";
+            }
+            //
+            QProcess process;
+            process.start("open", sl);
+            //
+            return;
+        }
+    }
+    //
+
     QUrl url = QUrl(src);
     QDesktopServices::openUrl(url);
-
 }
 
 #ifndef Q_OS_MAC

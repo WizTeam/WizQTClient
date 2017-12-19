@@ -2041,6 +2041,7 @@ void WizCategoryView::on_newFolder_inputText_changed(const QString& text)
     {
         if (!WizIsValidFileNameNoPath(text))
         {
+            dialog->setErrorMessage(tr("Invalid folder name"));
             dialog->setOKButtonEnable(false);
             return;
         }
@@ -2058,10 +2059,13 @@ void WizCategoryView::on_newFolder_inputText_changed(const QString& text)
         if (m_dbMgr.db().isFolderExists(strLocation))
         {
             dialog->setOKButtonEnable(false);
+            dialog->setErrorMessage(tr("Folder has already exists"));
             return;
         }
 
         dialog->setOKButtonEnable(true);
+        dialog->setErrorMessage(tr(""));
+
     }
 }
 
