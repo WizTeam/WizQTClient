@@ -729,6 +729,7 @@ WizAttachmentListViewItem::WizAttachmentListViewItem(const WIZDOCUMENTATTACHMENT
     , m_loadState(Unkonwn)
     , m_loadProgress(0)
 {
+    setToolTip(att.strName);
 }
 
 QString WizAttachmentListViewItem::detailText(const WizAttachmentListView* view) const
