@@ -427,6 +427,7 @@ public Q_SLOTS:
     void showTrayIconMenu();
     void on_viewMessage_request(qint64 messageID);
     void on_viewMessage_request(const WIZMESSAGEDATA& msg);
+    void on_viewMessage_requestNormal(QVariant messageData);
     //
     void on_dockMenuAction_triggered();
     //

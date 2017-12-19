@@ -728,6 +728,22 @@ void WizMainWindow::on_viewMessage_request(qint64 messageID)
     m_msgList->selectMessage(messageID);
 }
 
+
+void WizMainWindow::on_viewMessage_requestNormal(QVariant messageData)
+{
+    if (messageData.type() == QVariant::Bool)
+    {
+        if (messageData.toBool())   //network error
+        {
+
+        }
+        else    //server error
+        {
+
+        }
+    }
+}
+
 void WizMainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
 {
     WIZDOCUMENTDATA doc;
@@ -1611,6 +1627,8 @@ void WizMainWindow::copyLink(const QString& link)
 
 void WizMainWindow::onClickedImage(const QString& src, const QString& list)
 {
+    QUrl url = QUrl(src);
+    QDesktopServices::openUrl(url);
 
 }
 
@@ -2261,11 +2279,15 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
     }
     else
     {
+        QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Critical;
+        int delay = 30 * 1000;
+        QVariant param(isNetworkError);
+
         if (isNetworkError) {
-            m_tray->showMessage(tr("Sync failed"), tr("Network error: %1").arg(nErrorCode));
+            m_tray->showMessage(tr("Sync failed"), tr("Network error: %1").arg(nErrorCode), icon, delay, param);
             return;
         } else {
-            m_tray->showMessage(tr("Sync failed"), tr("Server error: %1").arg(nErrorCode));
+            m_tray->showMessage(tr("Sync failed"), tr("Server error: %1").arg(nErrorCode), icon, delay, param);
             return;
         }
     }
@@ -3816,6 +3838,8 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 
     connect(m_tray, SIGNAL(viewMessageRequest(qint64)),
             SLOT(on_viewMessage_request(qint64)));
+    connect(m_tray, SIGNAL(viewMessageRequestNormal(QVariant)),
+            SLOT(on_viewMessage_requestNormal(QVariant)));
     //
     //
     trayIcon->setContextMenu(m_trayMenu);
