@@ -295,6 +295,24 @@ bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev)
                 web->page()->triggerAction(QWebEnginePage::SelectAll);
                 return true;
             }
+            else if (ev->modifiers()&Qt::KeyboardModifier::ControlModifier && ev->key() == Qt::Key_Up)
+            {
+                //放大
+                qreal factor = web->zoomFactor();
+                factor += 0.1;
+                factor = (factor > 5.0) ? 5.0 : factor;
+                web->setZoomFactor(factor);
+                return true;
+            }
+            else if (ev->modifiers()&Qt::KeyboardModifier::ControlModifier && ev->key() == Qt::Key_Down)
+            {
+                //缩小
+                qreal factor = web->zoomFactor();
+                factor -= 0.1;
+                factor = (factor < 0.5) ? 0.5 : factor;
+                web->setZoomFactor(factor);
+                return true;
+            }
         }
     }
     return false;
