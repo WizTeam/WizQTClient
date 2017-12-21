@@ -202,6 +202,11 @@ void WizWebEngineView::innerLoadFinished(bool ret)
     //
     if (ret)
     {
+        // 页面加载时设置合适的缩放比例
+        qreal zFactor = (1.0*WizSmartScaleUI(100)) / 100;
+        setZoomFactor(zFactor);
+        //
+
         if (m_server && m_server->isListening()
                 && m_clientWrapper
                 && m_channel)
