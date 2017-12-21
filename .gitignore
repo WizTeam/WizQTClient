@@ -5,3 +5,10 @@ CMakeLists.txt.user*
 !macos-package/.DS_Store
 *.autosave
 .idea/*
+CMakeCache.txt
+Makefile
+*.cmake
+/install_manifest.txt
+CMakeFiles/
+/share/wiznote/
+/src/__/
