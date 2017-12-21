@@ -1625,6 +1625,7 @@ void WizMainWindow::copyLink(const QString& link)
 
 void WizMainWindow::onClickedImage(const QString& src, const QString& list)
 {
+
     Json::Value d;
     Json::Reader reader;
     if (reader.parse(list.toUtf8().constData(), d))
@@ -1641,19 +1642,44 @@ void WizMainWindow::onClickedImage(const QString& src, const QString& list)
         //
         if (!files.empty())
         {
-            QStringList sl;
-            sl << "-a";
-            sl << "Preview";
+            files.insert(files.begin(), src);
+            //
+            CWizStdStringArray sl;
+            sl.push_back("open");
+            sl.push_back("-a");
+            sl.push_back("Preview");
+            //
+            QString workingPath;
+            //
             for (auto it = files.begin(); it != files.end(); it++)
             {
                 QString fileUrl = *it;
                 QUrl url(fileUrl);
                 QString path = url.toLocalFile();
-                sl << "\"" + path + "\"";
+                //
+                if (workingPath.isEmpty())
+                {
+                    workingPath = Utils::WizMisc::extractFilePath(path);
+                }
+                else
+                {
+                    QString currentPath = Utils::WizMisc::extractFilePath(path);
+                    if (currentPath != workingPath)
+                    {
+                        continue;
+                    }
+                }
+                //
+                QString fileName = Utils::WizMisc::extractFileName(path);
+                sl.push_back("\"" + fileName + "\"");
             }
             //
-            QProcess process;
-            process.start("open", sl);
+            CString commandLine;
+            WizStringArrayToText(sl, commandLine, " ");
+            //
+            QProcess* process = new QProcess(this);
+            process->setWorkingDirectory(workingPath);
+            process->start(commandLine);
             //
             return;
         }

@@ -8481,7 +8481,7 @@ var ENV = {
                 ENV.client.type.isWin = true;
                 ENV.client.sendCmdToWiznote = function (cmd, options) {
                     if (cmd == CONST.CLIENT_EVENT.WizReaderClickImg) {
-                        ENV.win.external.onClickedImage(options.src, options.imgList);
+                        ENV.win.external.OnClickedImage(options.src, JSON.stringify(options.imgList));
                     }
                 }
             } else if (type.indexOf('ios') > -1) {
@@ -8518,7 +8518,7 @@ var ENV = {
                 ENV.client.type.isAndroid = true;
                 ENV.client.sendCmdToWiznote = function (cmd, options) {
                     if (cmd == CONST.CLIENT_EVENT.WizReaderClickImg) {
-                        ENV.win.WizNote.onClickImg(options.src, options.imgList);
+                        ENV.win.WizNote.onClickImg(options.src, options.imgList.join(','));
                     } else if (cmd == CONST.CLIENT_EVENT.WizEditorClickImg) {
                         ENV.win.WizNote.onEditorClickImage(options.src);
                     }
@@ -13971,7 +13971,9 @@ domUtils.fixFontSize = function () {
         size = domUtils.getFontSizeRem(result[1], {
             useRootSize: true
         });
-        dom.style.fontSize = size;
+        if (!domUtils.isTag(dom, 'html')) {
+          dom.style.fontSize = size;
+        }
     }
 };
 
@@ -17505,7 +17507,7 @@ function clickImgForRead(e) {
 
     ENV.client.sendCmdToWiznote(CONST.CLIENT_EVENT.WizReaderClickImg, {
         src: target.src,
-        imgList: ENV.client.type.isAndroid ? imgUtils.getAll(true).join(',') : null
+        imgList: ENV.client.type.isIOS ? null : imgUtils.getAll(true)
     });
     utils.stopEvent(e);
     return false;
@@ -26844,8 +26846,10 @@ var ENV = require('../common/env'),
 
 var TodoStyleMap = {};
 var ImgFile = {
-  todoChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjY1OTU4MUZCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjY1OTU4MjBCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGNjU5NTgxREJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpGNjU5NTgxRUJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqkphX0AAAJZSURBVHjaYvz//z/DQAImhgEGLNu2bYNzCj+7jpgQaAdiUNz/Z4EKqAJxRz/vbhcgzUeBwSBDE4AhuQiPh6cCcQY8CoBYHYhPALEAFXxWiMdyViCeD8TRSGLdIAe0QS3/BcSlQLwEaMg7Kgc5BxCvAmJfJLGlQFwOcoALVKAMaPEkGsQ3LxBvBGJHJLF9QJwESwOwOF9MA8uFgRiUzcyQxM4AcRA0xBlYkCSoHeySQLwbiLWRxO4AsRcQf0ROhLQAikC8B4iVkMReA7EnlCZYDtQDcT+Z5QTIx0fQLP8CTYB3MEpCHJY3QNlyQBwDxN+JtNwEiHdA4x4GQHHtD8QniS0JxZHYoMSyF4hFiLDcAZq6hdEKpiSoONFFcS6aBksgPgbEKngs94Gmdl408SpofiepLvgL9TlyfIGK6uNAbIFFfSQQrwNiTjTxLlDxjiwALOoZia2MPkJT7EckMRFoyAQhiYHK9CXQYpYBrZSrwGJuPym14R2oZX+RxEC+XA3E+aBiFIinYTEDXsqh+b4Vqo9gLkA3LBdqEbKjJ+BQfxq5lMOSHshqD0yHYkIAFGLeaNFGtQZJLr6shKuUo6YDsOUMGPiMq5SjdpMMW84AxXUArlKOFm1C5JxBsJQjqlVMhh5YzuAnVMrRygEMROYKogDj1q1bYQUGI42b4ij2eHl5YaQBIRpaLoQvEX6CsmNp6IAUpIYJhgP2INVeeUAsSEWLBaFmNkP5u7A5oBqIPwAxGxBPhDZO/1MJv4OayQa1oxqbA25A6/l10FKN2uAz1GwLqF0oACDAAGu/mbMal6iXAAAAAElFTkSuQmCC',
-  todoUnChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDcyODY1Q0NCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDcyODY1Q0RCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpENzI4NjVDQUJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpENzI4NjVDQkJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXYwTEAAAD5SURBVHjaYvz//z/DQAImhgEGA+4Alm3bttHdUi8vL4wQUAXitUD8EYj/Uxl/hJqtijUEgFgdiE8AsQCNPMwHxEFA7ATEFkB8Ez0NtEEt/wXE+UAsDMSMVMJCUDN/Qe1owxYCLlB2GRBPorLv30PN5ATiDiB2w5YL+KDsxTRMd7OhNA++bPiOhg54N1oQjTpg1AGjDhh1wKgDRh0w6oAh4QAhGtojhM8Bn6DsWBo6IAVKf8HmgD1QdhcQ5wGxIBUtFoSa2Qzl78LmgGog/gDEbEA8EdqApFav6B3UTDaoHdXYHHAD2mNZB8SfaRD8n6FmW0DtQgEAAQYAS2BO8CD/bL4AAAAASUVORK5CYII='
+  // todoChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjY1OTU4MUZCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjY1OTU4MjBCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGNjU5NTgxREJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpGNjU5NTgxRUJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqkphX0AAAJZSURBVHjaYvz//z/DQAImhgEGLNu2bYNzCj+7jpgQaAdiUNz/Z4EKqAJxRz/vbhcgzUeBwSBDE4AhuQiPh6cCcQY8CoBYHYhPALEAFXxWiMdyViCeD8TRSGLdIAe0QS3/BcSlQLwEaMg7Kgc5BxCvAmJfJLGlQFwOcoALVKAMaPEkGsQ3LxBvBGJHJLF9QJwESwOwOF9MA8uFgRiUzcyQxM4AcRA0xBlYkCSoHeySQLwbiLWRxO4AsRcQf0ROhLQAikC8B4iVkMReA7EnlCZYDtQDcT+Z5QTIx0fQLP8CTYB3MEpCHJY3QNlyQBwDxN+JtNwEiHdA4x4GQHHtD8QniS0JxZHYoMSyF4hFiLDcAZq6hdEKpiSoONFFcS6aBksgPgbEKngs94Gmdl408SpofiepLvgL9TlyfIGK6uNAbIFFfSQQrwNiTjTxLlDxjiwALOoZia2MPkJT7EckMRFoyAQhiYHK9CXQYpYBrZSrwGJuPym14R2oZX+RxEC+XA3E+aBiFIinYTEDXsqh+b4Vqo9gLkA3LBdqEbKjJ+BQfxq5lMOSHshqD0yHYkIAFGLeaNFGtQZJLr6shKuUo6YDsOUMGPiMq5SjdpMMW84AxXUArlKOFm1C5JxBsJQjqlVMhh5YzuAnVMrRygEMROYKogDj1q1bYQUGI42b4ij2eHl5YaQBIRpaLoQvEX6CsmNp6IAUpIYJhgP2INVeeUAsSEWLBaFmNkP5u7A5oBqIPwAxGxBPhDZO/1MJv4OayQa1oxqbA25A6/l10FKN2uAz1GwLqF0oACDAAGu/mbMal6iXAAAAAElFTkSuQmCC',
+  todoChecked: 'data:text/xml;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUYxRkNCNDRFNUYzMTFFN0I3MjU4OUZFNDhFRjQzMjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUYxRkNCNDVFNUYzMTFFN0I3MjU4OUZFNDhFRjQzMjQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5RjFGQ0I0MkU1RjMxMUU3QjcyNTg5RkU0OEVGNDMyNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5RjFGQ0I0M0U1RjMxMUU3QjcyNTg5RkU0OEVGNDMyNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PoB3J04AAAJhSURBVHja7JjLK0RRHMdnhFiM55RsFJGFrcSOGguDaHZCSRY2Q7PwiAUlj1gMCkvF2FDKZpLXSh7xB1jMf6AmY5RSGt9Tv6vjdO5j7twzzcKvPt07v+ae873n/B5nxp1KpVy5ZHmuHLOcE5QvOqLR6O99KNmZLR2rYFYqiKwBrIU9lz5cSzKYiAXoCF7swGCHdsC47grBGsEDKHPgzUMGYgrAPhjkfBsyQSsk5gtMgQgGjTu8RUXgGPRyviMwIxPko+s0hGwriBcPOAMdnO8GjLItlgnSYuZQgZhKljeghfM9gwDtiG5QM3N6m6rBJWjifDHgBwmjoFZhteAK1HG+V9BF17QL4wII2yykbEVuBTEfFNAx08KoI2aR7mvAEPi0KKYZnFPsaMZipQ882m0dVdw9C75r4LXwXDtlT6VQKEfJb7uXBYUB2sAdqDd4poeyySP456jeZNRcv2llYkJruQetku8PgFNQLPjXWTviHWhNbrvdPkEZkeB8Xlq5AOdjPSlCbcElVOFZybjhTI4fMZr8m/OxVTgBk6zsg13JmL9VWFidZXou7SwTBw/SxPxLbep8/4mvwpJ4cuSAtkdYWdFuYZuVnRiDRqmrV4VVCpJlnmZJvSqs+kwtyzwWK/16VTgbh3w+80yrsK1Dvg3TMq/UrApnS5DLYtZZMrf4yxU/gzSHW/EZ6c88fr/fNIYqFIqpSCeo3+k6rFDQGHdQMxV0xXXnCVDuoJByGnOJPl9YETQP3kAh2KLDfsoh4jRmIc0xb0XQC51zTqnqOm1JGruV5jLOsv+/Y/4FpWk/AgwACweeMaBPu0MAAAAASUVORK5CYII=',
+  // todoUnChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDcyODY1Q0NCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDcyODY1Q0RCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpENzI4NjVDQUJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpENzI4NjVDQkJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXYwTEAAAD5SURBVHjaYvz//z/DQAImhgEGA+4Alm3bttHdUi8vL4wQUAXitUD8EYj/Uxl/hJqtijUEgFgdiE8AsQCNPMwHxEFA7ATEFkB8Ez0NtEEt/wXE+UAsDMSMVMJCUDN/Qe1owxYCLlB2GRBPorLv30PN5ATiDiB2w5YL+KDsxTRMd7OhNA++bPiOhg54N1oQjTpg1AGjDhh1wKgDRh0w6oAh4QAhGtojhM8Bn6DsWBo6IAVKf8HmgD1QdhcQ5wGxIBUtFoSa2Qzl78LmgGog/gDEbEA8EdqApFav6B3UTDaoHdXYHHAD2mNZB8SfaRD8n6FmW0DtQgEAAQYAS2BO8CD/bL4AAAAASUVORK5CYII='
+  todoUnChecked: 'data:text/xml;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QjlFNzg2NjRFNUYzMTFFN0IyNkY5NzZGNEEyNTU3NEYiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QjlFNzg2NjVFNUYzMTFFN0IyNkY5NzZGNEEyNTU3NEYiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCOUU3ODY2MkU1RjMxMUU3QjI2Rjk3NkY0QTI1NTc0RiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCOUU3ODY2M0U1RjMxMUU3QjI2Rjk3NkY0QTI1NTc0RiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PohRJcgAAAEHSURBVHja7JgxCsJAEEWNSEAQ0XgG8QrWIhYp7e2stRMhpRDETltLe8sU4gE8guIdokQrm/UHvoUWZsVdEJmBx5AUMy87m5DEUUrlfinyuR8LEcqKwuuJKIrSVAdT0AZlwz0TsAVjcPR9/70QogF2oGJpEdIL7IIWaIJD1shCytzAENSAYwiPNW/sEWaOjGNKYwQWhlfnxJpFbomOzqZ+7JmVxb27ZC59cpfFFoVieQ6JkAiJkAiJkAiJkAj9gZBnsa/3iVDC3LMo1Ge+6ghtmWdgAKoGRaqsOeHxRkcoAGfggjlfyJUhYtZ02SPQEdrzi3INLhbGdWHtJns9hSP/h0Toy7gLMABy5T6ChFra5QAAAABJRU5ErkJggg=='
 };
 
 var CSS = {
@@ -26856,7 +26860,7 @@ var CSS = {
   '.wiz-todo-unchecked {text-decoration: initial;}' +
   '.wiz-todo-checked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoChecked + ')}' +
   '.wiz-todo-unchecked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoUnChecked + ')}' +
-  '.wiz-todo-checkbox {border-radius:0;position:relative;top:0px;border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:1px 10px 5px 5px;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;background-position:5px;box-sizing:initial;}' +
+  '.wiz-todo-checkbox {border-radius:0;position:relative;top:-1px;vertical-align:middle;border:0;background-color:transparent;outline:none;width:18px !important; height:18px !important; cursor:default; padding:0px 10px 0px 5px;-webkit-user-select: none;background-size:18px;background-repeat:no-repeat;background-position:5px;box-sizing:initial;}' +
   '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' +
   '.wiz-todo-completed-info {padding-left: 20px;}' +
   //单独出来主要为了兼容旧的 todoList
@@ -26888,6 +26892,7 @@ var todoStyle = {
       var imgUnChecked = ENV.doc.createElement('img');
       imgChecked.src = ImgFile.todoChecked;
       imgUnChecked.src = ImgFile.todoUnChecked;
+      tmpTag.setAttribute('contenteditable', 'false');
       domUtils.css(tmpTag, {
         width: 0,
         height: 0,
@@ -26971,1090 +26976,1103 @@ module.exports = todoStyle;
  * todolist 基本工具包
  */
 var ENV = require('../common/env'),
-    CONST = require('../common/const'),
-    Lang = require('../common/lang'),
-    LANG = Lang.getLang(),
-    base64 = require('../common/base64'),
-    wizStyle = require('../common/wizStyle'),
-    utils = require('../common/utils'),
-    domUtils = require('../domUtils/domExtend'),
-    rangeUtils = require('../rangeUtils/rangeExtend'),
-    historyUtils = require('../common/historyUtils'),
-    todoStyle = require('./todoStyle');
+  CONST = require('../common/const'),
+  Lang = require('../common/lang'),
+  LANG = Lang.getLang(),
+  base64 = require('../common/base64'),
+  wizStyle = require('../common/wizStyle'),
+  utils = require('../common/utils'),
+  domUtils = require('../domUtils/domExtend'),
+  rangeUtils = require('../rangeUtils/rangeExtend'),
+  historyUtils = require('../common/historyUtils'),
+  todoStyle = require('./todoStyle');
+
+// 1像素 的透明图片
+var checkboxImg = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
 
 var todoUtils = {
-    addUserInfo: function (main, isChecked, todoId, todoRoute) {
-        if (!main) {
-            return;
-        }
-
-        var userGuid, userName, avatarUrl, dt,
-            userHtml, span, child, next, i;
-
-        userGuid = todoUtils.deleteUserInfo(main.parentNode);
-        if (!isChecked) {
-            todoStyle.removeUnUsedTodoStyle(userGuid);
-            return;
-        }
-
-        userGuid = todoRoute.getUserGuid();
-        userName = todoRoute.getUserAlias();
-        avatarUrl = todoRoute.getUserAvatarFileName(CONST.CSS.TODO_LIST.IMG_WIDTH);
-        dt = todoUtils.getTime();
-        todoUtils.setUserAvatarStyle(userGuid, avatarUrl);
-        userHtml = todoUtils.getUserInfoHtml(userGuid, userName, dt);
-
-        span = ENV.doc.createElement('span');
-        domUtils.addClass(span, CONST.CLASS.TODO_USER_INFO);
-        span.innerHTML = userHtml;
-        span.setAttribute(CONST.ATTR.TODO_ID, todoId);
-
-        for (i = main.childNodes.length - 1; i >= 0; i--) {
-            child = main.childNodes[i];
-            if (domUtils.isTag(child, 'br')) {
-                main.removeChild(child);
-            }
-        }
-        next = main.nextElementSibling;
-        while (next) {
-            if (todoUtils.isMain(next)) {
-                main.parentElement.insertBefore(span, next);
-                break;
-            }
-            if (domUtils.isTag(next, 'br')) {
-                main.parentElement.insertBefore(span, next);
-                break;
-            }
-            next = next.nextElementSibling;
-        }
-        if (!next) {
-            main.parentElement.appendChild(span);
-        }
-        if (!span.hasChildNodes()) {
-            span.appendChild(ENV.doc.createElement('br'));
-        }
-        rangeUtils.setRange(span, span.childNodes.length);
-    },
-    /**
-     * 判断 dom 是否可以当作 main 容器
-     * @param dom
-     * @returns {boolean}
-     */
-    canBeContainer: function (dom) {
-        return !domUtils.isTag(dom, ['body', 'blockquote', 'td', 'th']) && domUtils.isBlock(dom);
-    },
-    canCreateTodo: function () {
-        var range = rangeUtils.getRange();
-        if (!range) {
-            return false;
-        }
-
-        if (domUtils.getParentByClass(range.startContainer, CONST.CLASS.CODE_CONTAINER, true)) {
-            // CodeMirror 内
-            return false;
-        }
-
-        var rangeList = rangeUtils.getRangeDomList({
-            noSplit: true
-        });
-
-        // 判断当前光标范围内是否只有一个 块结构，否则不做任何操作
-        var start = domUtils.getBlockParent(rangeList.startDom, true) || ENV.doc.body,
-        end = null;
-        if (!range.collapsed && rangeList.endDom !== rangeList.startDom) {
-            end = domUtils.getBlockParent(rangeList.endDom, true) || ENV.doc.body;
-            if (end !== start) {
-                return false;
-            }
-        } else if (range.collapsed && start === ENV.doc.body) {
-            start = ENV.doc.body.childNodes[0];
-        }
-
-        return {
-            rangeList: rangeList,
-            start: start,
-            end: end
-        };
-    },
-    cancelTodo: function (container, noSetRange) {
-        if (!container) {
-            return;
-        }
-        var range = rangeUtils.getRange(), start, startOffset,
-            main, todoFirst, userGuid;
-        start = range ? range.startContainer : null;
-        startOffset = range ? range.startOffset : 0;
-        main = todoUtils.getMainInDom(container);
-        userGuid = todoUtils.deleteUserInfo(container);
-        todoStyle.removeUnUsedTodoStyle(userGuid);
-        todoFirst = todoUtils.deleteMain(main);
-        todoFirst = todoFirst ? todoFirst.start : null;
-        domUtils.removeClass(container, CONST.CLASS.TODO_LAYER);
-        if (!todoFirst) {
-            todoFirst = ENV.doc.createElement('br');
-            container.appendChild(todoFirst);
-        }
-        if (!noSetRange) {
-            if (!start || !start.parentNode) {
-                start = todoFirst;
-                startOffset = 0;
-            }
-            rangeUtils.setRange(start, startOffset);
-        }
-        //修正 todoList style
-        todoUtils.checkTodoStyle(false);
-    },
-    check: function (main, isChecked) {
-        if (isChecked) {
-            domUtils.removeClass(main, CONST.CLASS.TODO_UNCHECKED);
-            domUtils.addClass(main, CONST.CLASS.TODO_CHECKED);
-        } else {
-            domUtils.removeClass(main, CONST.CLASS.TODO_CHECKED);
-            domUtils.addClass(main, CONST.CLASS.TODO_UNCHECKED);
-        }
-        var check = todoUtils.getCheckbox(main);
-        var state = isChecked ? 'checked' : 'unchecked';
-        check.setAttribute(CONST.ATTR.TODO_CHECK, state);
-    },
-    checkTodo: function (checkbox, todoRoute) {
-        var result = {
-            checkbox: null,
-            checked: false
-        };
-
-        historyUtils.saveSnap(false);
-
-        var main = todoUtils.getMainFromChild(checkbox),
-            isChecked;
-        if (!main || main.children[0] != checkbox) {
-            todoUtils.fixCheckbox(checkbox, false);
-        }
-
-        isChecked = checkbox.getAttribute(CONST.ATTR.TODO_CHECK) !== 'checked';
-        todoUtils.check(main, isChecked);
-        result.checkbox = checkbox;
-        result.checked = isChecked;
-
-        if (!todoRoute.isPersonalDocument()) {
-            todoUtils.addUserInfo(main, isChecked, checkbox.id, todoRoute);
-        }
-
-        return result;
-    },
-    checkTodoStyle: function (isForced) {
-        var todoObj = ENV.doc.querySelector('.' + CONST.CLASS.TODO_CHECKBOX);
-        if (todoObj) {
-            todoStyle.insertTodoStyle(isForced);
-        } else {
-            todoStyle.removeTodoStyle();
-        }
-    },
-    clearBlock: function (dom) {
-        if (!dom || (dom.nodeType !== 1 && dom.nodeType !== 3 && dom.nodeType !== 11)) {
-            return false;
-        }
-        var child, i;
-        for (i = 0; i < dom.childNodes.length; i++) {
-            child = dom.childNodes[i];
-            if (todoUtils.clearBlock(child) && child != dom.childNodes[i]) {
-                i--;
-            }
-        }
-
-        var isFragment = dom.nodeType == 11,
-            // isMain = isFragment ? false : todoUtils.isMain(dom),
-            isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
-            isBlock = isFragment ? false : domUtils.isBlock(dom);
-        if (isBlock && domUtils.isEmptyDom(dom)) {
-            //为保证 样式 正常传递， 不能随便 removeChild
-            if (dom.children.length > 0) {
-                domUtils.peelDom(dom);
-            } else {
-                domUtils.remove(dom);
-                return true;
-            }
-        } else if (isBlock || isTodoTag) {
-            domUtils.peelDom(dom);
-        }
-        return false;
-    },
-    /**
-     * 清理 TodoList 的 class
-     * @param dom
-     */
-    clearTodoClass: function (dom) {
-        if (!dom) {
-            return;
-        }
-        domUtils.removeClass(dom,
-            [CONST.CLASS.TODO_ACCOUNT, CONST.CLASS.TODO_AVATAR,
-                CONST.CLASS.TODO_DATE, CONST.CLASS.TODO_LAYER,
-                CONST.CLASS.TODO_MAIN, CONST.CLASS.TODO_CHECKED,
-                CONST.CLASS.TODO_UNCHECKED, CONST.CLASS.TODO_USER_INFO]);
-    },
-    /**
-     * 复制 todo
-     * @param container
-     * @param todoRoute
-     * @returns {*}
-     */
-    cloneTodo: function (container) {
-        if (!container) {
-            return null;
-        }
-        var _container, _main, _last,
-            main, last;
-        _container = domUtils.clone(container, true);
-        main = todoUtils.getMainInDom(container);
-        if (!main) {
-            return null;
-        }
-        _main = domUtils.clone(main, true);
-        domUtils.removeClass(_main, CONST.CLASS.TODO_CHECKED);
-        domUtils.addClass(_main, CONST.CLASS.TODO_UNCHECKED);
-
-        var tmp = main, _tmp = _main;
-        while (tmp && tmp.childNodes && tmp.childNodes.length) {
-            last = tmp.childNodes[tmp.childNodes.length - 1];
-
-            // 复制 todolist 时， 不复制 块级元素、自闭和标签
-            while (!!last &&
-            ((last.nodeType === 3 && last.nodeValue.replace(CONST.FILL_CHAR_REG, '').length === 0) ||
-            domUtils.isBlock(last) ||
-            domUtils.isSelfClosingTag(last))) {
-                last = last.previousSibling;
-            }
-
-            if (!last || todoUtils.isCheckbox(last)) {
-                _last = ENV.doc.createTextNode('');
-                last = null;
-            } else {
-                _last = domUtils.clone(last, true);
-            }
-            _tmp.appendChild(_last);
-            _tmp = _last;
-            tmp = last;
-        }
-        _container.appendChild(_main);
-        //使用 setTodo 方式设置 todo
-
-        rangeUtils.setRange(_main, 1);
-        return _container;
-    },
-    deleteMain: function (main) {
-        return domUtils.peelDom(main, function (dom) {
-            return (!todoUtils.isMain(dom) && !todoUtils.isCheckbox(dom))
-        });
-    },
-    deleteUserInfo: function (container) {
-        var userGuid = '';
-        var main = todoUtils.getMainInDom(container);
-
-        var userAvatar = container.querySelector('.' + CONST.CLASS.TODO_AVATAR),
-            userClass = userAvatar ? userAvatar.className : '',
-            guidReg = new RegExp('^(.*' + CONST.CLASS.TODO_USER_AVATAR + ')([^ ]*)(.*)$', 'i');
-
-        if (userClass.indexOf(CONST.CLASS.TODO_USER_AVATAR) > -1) {
-            userGuid = userClass.replace(guidReg, '$2');
-        }
-
-        var nextSib = main ? main.nextElementSibling : container.firstChild,
-            tmpNode;
-        while (nextSib) {
-            if (todoUtils.isMain(nextSib)) {
-                break;
-            }
-            if (todoUtils.isUserInfo(nextSib)) {
-                tmpNode = nextSib;
-                nextSib = nextSib.nextElementSibling;
-                container.removeChild(tmpNode);
-                continue;
-            }
-            nextSib = nextSib.nextElementSibling;
-        }
-        return userGuid;
-    },
-    /**
-     * 修正 dom 异常的 checkbox & 由于 execCommand 生成列表时造成的 dom 异常
-     * @param checkItem
-     * @param isForOld
-     */
-    fixCheckbox: function (checkItem, isForOld) {
-        if (!checkItem) {
-            return;
-        }
-        // 修正缺失 的 id
-        if (!checkItem.id) {
-            checkItem.id = todoUtils.getCheckId();
-        }
-        // 清理多余样式（主要避免 粘贴操作带来的影响）
-        domUtils.attr(checkItem, {
-            'contenteditable': 'false',
-            'type': 'button',
-            'style': null
-        });
-
-        if (!isForOld && todoUtils.getMainFromChild(checkItem)) {
-            return;
-        }
-
-        var container = domUtils.getBlockParent(checkItem),
-            canBeContainer = todoUtils.canBeContainer(container),
-            main = ENV.doc.createElement('span'),
-            newContainer, next, tmpNext,
-            stopInsert = false, dom;
-        main.className = (isForOld ? CONST.CLASS.TODO_LABEL_OLD : CONST.CLASS.TODO_MAIN) + ' ' + CONST.CLASS.TODO_UNCHECKED;
-
-        newContainer = ENV.doc.createElement(canBeContainer ? container.tagName : 'div');
-        if (canBeContainer) {
-            domUtils.after(newContainer, container);
-        } else {
-            domUtils.before(newContainer, checkItem);
-        }
-        newContainer.appendChild(main);
-
-        next = checkItem;
-        while (next) {
-            tmpNext = next.nextSibling;
-            if (domUtils.isBlock(next)) {
-                if (canBeContainer) {
-                    stopInsert = true;
-                    dom = newContainer.nextSibling;
-                } else {
-                    break;
-                }
-            }
-            if (stopInsert) {
-                domUtils.before(next, dom);
-            } else if (todoUtils.isUserInfo(next)) {
-                domUtils.after(next, main);
-            } else {
-                main.appendChild(next);
-            }
-            next = tmpNext;
-        }
-
-        domUtils.addClass(newContainer, CONST.CLASS.TODO_LAYER);
-        // 主要用于修正 将 todoList 设置为 ul/ol 时产生的 错误
-        var layer = todoUtils.getContainerFromChild(newContainer.parentNode);
-        if (layer) {
-            domUtils.removeClass(layer, CONST.CLASS.TODO_LAYER);
-        }
-
-        //避免 产生多余的 列表行
-        if (canBeContainer && domUtils.isEmptyDom(container)) {
-            domUtils.remove(container);
-        }
-    },
-    /**
-     * 清理 main 内多余 dom （主要针对 特殊字符 or <br> 结尾的dom）
-     * @param main
-     */
-    fixMain: function (main) {
-        if (!main) {
-            return;
-        }
-        var last = domUtils.getLastDeepChild(main),
-            check = todoUtils.getCheckbox(main),
-            parent, i;
-
-        // 不存在 checkbox 的 main 删除 main class
-        if (!check) {
-            domUtils.removeClass(main, CONST.CLASS.TODO_MAIN);
-        }
-
-        // 清理多余样式（主要避免 粘贴操作带来的影响）
-        domUtils.attr(main, {'style': null});
-
-        //保证 main 的 parent 就是 layer
-        parent = todoUtils.getContainerFromChild(main);
-        if (parent && parent != main && parent !== main.parentNode) {
-            try {
-                parent.appendChild(main);
-            } catch(e) {
-                console.error(e);
-            }
-
-        }
-
-        //处理 被嵌套的 main
-        var subMainList = main.querySelectorAll('.' + CONST.CLASS.TODO_MAIN);
-        for (i = subMainList.length - 1; i >= 0; i--) {
-            domUtils.after(subMainList[i], main);
-        }
-        if (domUtils.isEmptyDom(main) && main.parentNode) {
-            domUtils.remove(main);
-        }
-
-        if (last == check) {
-            return;
-        }
-
-        if ((last.nodeType !== 1 && last.nodeType !== 3) ||
-            (last.nodeType == 1 && domUtils.isTag(last, 'br')) ||
-            (last.nodeType === 3 && last.nodeValue.replace(CONST.FILL_CHAR_REG, '').length === 0)) {
-            parent = last.parentNode;
-            while (parent != main && parent.childNodes.length == 1) {
-                last = parent;
-                parent = parent.parentNode;
-            }
-            domUtils.remove(last);
-
-            //避免 br & 特殊符号等元素同时存在，所以需要逐一过滤
-            todoUtils.fixMain(main);
-        }
-    },
-    /**
-     * 修正 todoList 被嵌套 & 缺失 id 等 的问题
-     * @param targetTodo //可以指定 todoItem 修正
-     */
-    fixNewTodo: function (targetTodo) {
-        var i,
-            container,
-            todoList, todoItem,
-            subTodoList, subTodoItem, subParent,
-            checkList, checkItem,
-            mainList, mainItem,
-            start, last, next;
-
-        container = targetTodo ? targetTodo : ENV.doc;
-
-        // 处理那些被嵌套的 todoList（错误的 Dom 结构）
-        todoList = container.querySelectorAll('.' + CONST.CLASS.TODO_LAYER);
-        for (i = 0; i < todoList.length; i++) {
-            todoItem = todoList[i];
-
-            // 清理多余样式（主要避免 粘贴操作带来的影响）
-            domUtils.attr(todoItem, {'style': null});
-
-            //清理里面无内容的 Layer
-            fixEmptyLayer(todoItem);
-
-            subTodoList = todoItem.querySelectorAll('.' + CONST.CLASS.TODO_LAYER);
-            if (subTodoList.length === 0) {
-                continue;
-            }
-
-            subTodoItem = subTodoList[0];
-            subParent = subTodoItem.parentNode;
-            if (todoUtils.isTodoTag(subParent) || todoUtils.isLayer(subParent)) {
-                start = subTodoItem;
-            } else {
-                start = subParent;
-            }
-            last = todoItem;
-
-            if (last === start) {
-                continue;
-            }
-
-            while (next = start.nextSibling) {
-                domUtils.after(next, last);
-                last = next;
-            }
-            domUtils.after(start, todoItem);
-
-            // 不存在 checkbox 的 Layer 删除 Layer class
-            fixEmptyLayer(todoItem);
-        }
-
-        //修正 Main
-        mainList = container.querySelectorAll('.' + CONST.CLASS.TODO_MAIN);
-        for (i = 0; i < mainList.length; i++) {
-            mainItem = mainList[i];
-            todoUtils.fixMain(mainItem);
-        }
-
-        // 修正 checkbox
-        checkList = container.querySelectorAll('.' + CONST.CLASS.TODO_CHECKBOX);
-        for (i = 0; i < checkList.length; i++) {
-            checkItem = checkList[i];
-            todoUtils.fixCheckbox(checkItem, false);
-        }
-
-        function fixEmptyLayer(_container) {
-            if (domUtils.isEmptyDom(_container)) {
-                domUtils.remove(_container);
-                return;
-            }
-
-            // 不存在 checkbox 的 Layer 删除 Layer class
-            var checkItem = todoUtils.getCheckbox(_container);
-            if (!checkItem) {
-                domUtils.removeClass(todoItem, CONST.CLASS.TODO_LAYER);
-            }
-        }
-    },
-    getCheckbox: function (main) {
-        if (!main) {
-            return null;
-        }
-        return main.querySelector('.' + CONST.CLASS.TODO_CHECKBOX);
-    },
-    getCheckId: function () {
-        return 'wiz_todo_' + Date.now() + '_' + Math.floor((Math.random() * 1000000) + 1);
-    },
-    getContainerFromChild: function (child) {
-        if (!child) {
-            return null;
-        }
-        return domUtils.getParentByFilter(child, function (dom) {
-            return todoUtils.isLayer(dom);
-        }, true);
-    },
-    getMainByCaret: function () {
-        var range = rangeUtils.getRange();
-        if (!range) {
-            return null;
-        }
-
-        var start = rangeUtils.getRangeDetail(range.startContainer, range.startOffset);
-        return todoUtils.getMainFromChild(start.container);
-        //
-        // var p = domUtils.getParentByFilter(start, function (dom) {
-        //     return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
-        // }, true);
-        // if (!p || !p.hasChildNodes()) {
-        //     return null;
-        // }
-        // return todoUtils.getMainInDom(p);
-    },
-    getMainFromChild: function (dom) {
-        if (!dom) {
-            return null;
-        }
-        return domUtils.getParentByFilter(dom, function (dom) {
-            return domUtils.hasClass(dom, CONST.CLASS.TODO_MAIN);
-        }, true);
-    },
-    getMainHtml: function () {
-        var str = '<span class="' + CONST.CLASS.TODO_MAIN + ' ' + CONST.CLASS.TODO_UNCHECKED + '">' +
-            '<input type="button" contenteditable="false" readonly id="%1" class="' + CONST.CLASS.TODO_CHECKBOX + ' ' + CONST.CLASS.IMG_NOT_DRAG + '" ' +
-            CONST.ATTR.TODO_CHECK + '="unchecked" />' +
-            '</span>';
-        str = str.replace('%1', todoUtils.getCheckId());
-        return str;
-    },
-    getMainInDom: function (dom) {
-        if (!dom || !dom.hasChildNodes())
-            return null;
-        if (todoUtils.isMain(dom)) {
-            return dom;
-        }
-        if (todoUtils.isLayer(dom)) {
-            return dom.querySelector('.' + CONST.CLASS.TODO_MAIN);
-        }
-        return null;
-    },
-    getUserInfoInDom: function (dom) {
-        return dom.querySelector('.' + CONST.CLASS.TODO_USER_INFO);
-    },
-    getUserInfoHtml: function (userGuid, userName, dt) {
-        var html = '<span class="' + CONST.CLASS.TODO_ACCOUNT + '">' +
-            '<input disabled readonly class="%1" />' +
-            '%2, ' +
-            '</span>' +
-            '<span class="' + CONST.CLASS.TODO_DATE + '">%3.</span>';
-        var avatarClass = CONST.CLASS.TODO_USER_AVATAR + base64.encode(userGuid);
-        return html.replace('%1', CONST.CLASS.IMG_NOT_DRAG + ' ' + CONST.CLASS.TODO_AVATAR + ' ' + avatarClass)
-            .replace('%2', userName)
-            .replace('%3', dt);
-    },
-    getTime: function () {
-        var dt = new Date();
-        var dateStr, timeStr;
-        timeStr = getNum(dt.getHours()) + ':' + getNum(dt.getMinutes());
-
-        if (LANG.version == 'en') {
-            dateStr = LANG.Month[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear() + ' at ' + timeStr;
-        } else {
-            dateStr = dt.getFullYear() + LANG.Date.Year + (dt.getMonth() + 1) + LANG.Date.Month + dt.getDate() + LANG.Date.Day + ' ' + timeStr;
-        }
-        return dateStr;
-
-        function getNum(num) {
-            return (num < 10 ? '0' : '') + num;
-        }
-    },
-    insertToMain: function (doms, main) {
-        if (!doms || !main) {
-            return;
-        }
-        var i, dom, last = null;
-        for (i = doms.length - 1; i >= 0; i--) {
-            dom = doms[i];
-            todoUtils.clearTodoClass(dom);
-            main.insertBefore(dom, last);
-            last = dom;
-        }
-    },
-    /**
-     * 判断 光标是否处于 checkbox 后面
-     * @returns {*}
-     */
-    isCaretAfterCheckbox: function () {
-        var range = rangeUtils.getRange();
-        if (!range) {
-            return false;
-        }
-        var start, prev, main, str;
-
-        main = todoUtils.getMainByCaret();
-        if (!main) {
-            return false;
-        }
-        if (range.collapsed) {
-            start = rangeUtils.getRangeDetail(range.startContainer, range.startOffset);
-            if (start.container.nodeType === 3 && start.offset > 0) {
-                str = start.container.nodeValue.substr(0, start.offset);
-                if (!utils.isEmpty(str)) {
-                    return false;
-                }
-            }
-
-            if (start.isEnd) {
-                prev = start.container;
-            } else {
-                prev = domUtils.getPreviousNode(start.container, false, main);
-            }
-            return todoUtils.isCheckbox(prev);
-        }
-        return false;
-    },
-    /**
-     * 判断 光标是否处于 main 最前面
-     * （collapsed = false 时，以 end 为准）
-     * @returns {*}
-     */
-    isCaretBeforeCheckbox: function () {
-        var result = {
-            enable: false,
-            checkbox: null
-        };
-        var range = rangeUtils.getRange();
-
-        if (!range) {
-            return result;
-        }
-        var caretDom = range.endContainer;
-        if (caretDom.nodeType === 1) {
-            caretDom = caretDom.childNodes[range.endOffset];
-        } else if (caretDom.nodeType === 3 && domUtils.isEmptyDom(caretDom)
-            && range.endOffset == caretDom.nodeValue.length && !todoUtils.getContainerFromChild(caretDom)) {
-            // 如果 textNode 本身已经在 todoContainer 以内 则不进行处理
-            caretDom = domUtils.getNextNode(caretDom, false);
-            if (caretDom) {
-                caretDom = domUtils.getParentByFilter(caretDom, function (dom) {
-                    return todoUtils.isLayer(dom);
-                }, true);
-            }
-        }
-
-        if (todoUtils.isLayer(caretDom) || todoUtils.isMain(caretDom)) {
-            result.enable = true;
-            result.checkbox = todoUtils.getCheckbox(caretDom);
-        } else if (todoUtils.isCheckbox(caretDom)) {
-            result.enable = true;
-            result.checkbox = caretDom;
-        }
-        if (!result.checkbox) {
-            // 不存在 checkbox 的 layer 不当做 todoList
-            result.enable = false;
-        }
-        return result
-    },
-    /**
-     * 判断 dom 是否为 todoList 的 checkbox
-     * @param dom
-     * @returns {*|boolean}
-     */
-    isCheckbox: function (dom) {
-        return domUtils.hasClass(dom, CONST.CLASS.TODO_CHECKBOX);
-    },
-    isEmptyContainer: function (container) {
-        if (!container) {
-            return true;
-        }
-        var childNodes = container.childNodes,
-            i, child;
-
-        for (i = 0; i < childNodes.length; i++) {
-            child = childNodes[i];
-            if (todoUtils.isMain(child)) {
-                if (!todoUtils.isEmptyMain(child)) {
-                    return false;
-                }
-            } else if (!domUtils.isEmptyDom(child)) {
-                return false;
-            }
-        }
-        return true;
-    },
-    isEmptyMain: function (main) {
-        if (!main) {
-            return true;
-        }
-        var childNodes = main.childNodes,
-            i, child;
-
-        for (i = 0; i < childNodes.length; i++) {
-            child = childNodes[i];
-            if (!todoUtils.isCheckbox(child) && !domUtils.isEmptyDom(child)) {
-                return false;
-            }
-        }
-        return true;
-    },
-    /**
-     * 判断 dom 是否为 todoList 的 main
-     * @param dom
-     * @returns {*|boolean}
-     */
-    isMain: function (dom) {
-        return domUtils.hasClass(dom, CONST.CLASS.TODO_MAIN);
-    },
-    isLayer: function (dom) {
-        return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
-    },
-    /**
-     * 判断 dom 是否为 todoList 内特殊 dom
-     * @param dom
-     * @returns {boolean}
-     */
-    isTodoTag: function (dom) {
-        if (!dom) {
-            return false;
-        }
-        return todoUtils.isMain(dom) ||
-            todoUtils.isUserInfo(dom) ||
-            domUtils.hasClass(dom, CONST.CLASS.TODO_ACCOUNT) ||
-            domUtils.hasClass(dom, CONST.CLASS.TODO_DATE);
-    },
-    /**
-     * 判断 dom 是否为 用户信息
-     * @param dom
-     * @returns {*|boolean}
-     */
-    isUserInfo: function (dom) {
-        return domUtils.hasClass(dom, CONST.CLASS.TODO_USER_INFO);
-    },
-    setTodo: function (container, todoRoute) {
-        var rangeList, start, end,
-            mainHtml, main, userInfo, tmpDom,
-            mainChildren = [], child, i, j;
-
-        if (container) {
-            //允许指定 容器直接设置 todoList
-            start = container;
-        } else {
-            var canCreate = todoUtils.canCreateTodo();
-            if (canCreate === false) {
-                return null;
-            }
-
-            rangeList = canCreate.rangeList;
-            start = canCreate.start;
-            // end = canCreate.end;
-
-            // rangeList = rangeUtils.getRangeDomList({
-            //     noSplit: true
-            // });
-
-            // 如果 start 为 body，则将 startDom 用 div 嵌套
-            start = domUtils.packageByDiv(start);
-
-            // start = domUtils.getBlockParent(rangeList.startDom, true) || ENV.doc.body;
-            //
-            // if (!range.collapsed && rangeList.endDom != rangeList.startDom) {
-            //     end = domUtils.getBlockParent(rangeList.endDom, true) || ENV.doc.body;
-            //     if (end != start) {
-            //         return null;
-            //     }
-            // }
-            if (start !== ENV.doc.body) {
-                // 修正 块元素的父节点内 已经存在其他块元素的情况
-                var areaStart = domUtils.getPrevBlock(start);
-                var areaEnd = domUtils.getNextBlock(start);
-                if (areaEnd && areaEnd !== start) {
-                    domUtils.splitDomBeforeSub(start, areaEnd);
-                    if (domUtils.isTag(areaEnd, 'br')) {
-                        domUtils.remove(areaEnd);
-                    }
-                }
-                if (areaStart && areaStart !== areaEnd && areaStart !== start) {
-                    start = domUtils.splitDomBeforeSub(start, areaStart);
-                    if (domUtils.isTag(areaStart, 'br')) {
-                        domUtils.remove(areaStart);
-                    } else {
-                        domUtils.before(areaStart, start);
-                    }
-                }
-            }
-        }
-
-        // 首先清理 start 内的 block
-        for (i = 0, j = start.childNodes.length; i < j; i++) {
-            child = start.childNodes[i];
-            if (domUtils.isBlock(child)) {
-                domUtils.splitDomBeforeSub(start, child);
-                break;
-            }
-            mainChildren.push(child);
-        }
-
-        //判断当前行是否已经是 todoList 结构，如果是，则取消 todoList 结构
-        main = todoUtils.getMainInDom(start);
-        userInfo = todoUtils.getUserInfoInDom(start);
-        var hasCheckbox = !!todoUtils.getCheckbox(main);
-        if (main || userInfo) {
-            todoUtils.cancelTodo(start);
-        }
-        if (hasCheckbox) {
-            return null;
-        }
-
-        mainHtml = todoUtils.getMainHtml();
-        tmpDom = ENV.doc.createElement('div');
-        domUtils.addClass(tmpDom, CONST.CLASS.TODO_LAYER);
-        if (!todoUtils.canBeContainer(start)) {
-            mainHtml = '<div class="' + CONST.CLASS.TODO_LAYER + '">' + mainHtml + '</div>';
-        } else {
-            domUtils.addClass(start, CONST.CLASS.TODO_LAYER);
-        }
-        tmpDom.innerHTML = mainHtml;
-        main = todoUtils.getMainInDom(tmpDom);
-        end = main.lastChild;
-
-        todoUtils.insertToMain(mainChildren, main);
-
-        while (tmpDom.lastChild) {
-            start.insertBefore(tmpDom.lastChild, start.firstChild);
-        }
-
-        if (domUtils.isSelfClosingTag(end)) {
-            rangeUtils.setRange(end.parentNode, domUtils.getIndex(end) + 1);
-        } else {
-            rangeUtils.setRange(end, domUtils.getEndOffset(end));
-        }
-
-        //通知客户端笔记被修改
-        todoRoute.setDocumentType(CONST.TYPE.TODO);
-
-        //修正 todoList style
-        todoUtils.checkTodoStyle(false);
-
-        return main;
-    },
-    setUserAvatarStyle: function (userGuid, avatarUrl) {
-        var guid = base64.encode(userGuid);
-        var sId = CONST.ID.TODO_AVATAR_STYLE + guid;
-        var sClass = CONST.CLASS.TODO_USER_AVATAR + guid;
-        var style = ENV.doc.getElementById(sId);
-        if (style) {
-            return;
-        } else {
-            style = ENV.win.parent.document.getElementById(sId);
-            if (style) {
-                wizStyle.insertStyle({id: sId}, style.innerHTML);
-                return;
-            }
-        }
-        domUtils.convertImageToBase64(avatarUrl, 50, 50, function (baseStr) {
-            //有可能同时点击多个 todoList
-            var style = ENV.doc.getElementById(sId);
-            if (style) {
-                return;
-            }
-            wizStyle.insertStyle({id: sId}, '.' + sClass + '{background-image:url(' + baseStr + ');}');
-        });
-    },
-    oldPatch: {
-        fixImg: function (img) {
-            if (!img) {
-                return;
-            }
-            var iObj = ENV.doc.createElement('input');
-            iObj.className = img.className;
-            domUtils.attr(iObj, {
-                'type': 'button'
-            });
-            domUtils.removeClass(iObj, CONST.CLASS.TODO_CHECK_IMG_OLD);
-            domUtils.addClass(iObj, CONST.CLASS.TODO_CHECKBOX);
-            iObj.readOnly = true;
-            if (img.id) {
-                iObj.id = img.id;
-            }
-            if (img.getAttribute('state')) {
-                iObj.setAttribute(CONST.ATTR.TODO_CHECK, img.getAttribute('state'))
-            }
-            var parent = img.parentNode;
-            parent.insertBefore(iObj, img);
-            parent.removeChild(img);
-        },
-        fixLabel: function (label) {
-            if (label) {
-                domUtils.removeClass(label, CONST.CLASS.TODO_LABEL_OLD);
-                domUtils.addClass(label, CONST.CLASS.TODO_MAIN);
-                if (domUtils.hasClass(label, CONST.CLASS.TODO_CHECKED_OLD)) {
-                    domUtils.removeClass(label, CONST.CLASS.TODO_CHECKED_OLD);
-                    domUtils.addClass(label, CONST.CLASS.TODO_CHECKED);
-                } else if (domUtils.hasClass(label, CONST.CLASS.TODO_UNCHECKED_OLD)) {
-                    domUtils.removeClass(label, CONST.CLASS.TODO_UNCHECKED_OLD);
-                    domUtils.addClass(label, CONST.CLASS.TODO_UNCHECKED);
-                }
-            }
-
-            if (!label || domUtils.isTag(label, 'span')) {
-                return;
-            }
-            var parent = label.parentNode;
-            if (!parent) {
-                return;
-            }
-            var span = ENV.doc.createElement('span');
-            span.className = label.className;
-            while (label.firstChild) {
-                span.appendChild(label.firstChild);
-            }
-            parent.insertBefore(span, label);
-            parent.removeChild(label);
-        },
-        /**
-         * 初始化 todoList 主要用于修正旧版本的 todoList 样式
-         * 保证每个 todoItem 占一行
-         */
-        fixOldTodo: function () {
-            var i, j, subLabelList, subLabel, container, subContainer,
-                checkImgList, checkImg, labelList, label, tailList, tail;
-
-            //修正未被 label 封装的 checkImg
-            checkImgList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_CHECK_IMG_OLD);
-            for (i = checkImgList.length - 1; i >= 0; i--) {
-                checkImg = checkImgList[i];
-                label = todoUtils.oldPatch.getLabelFromChild(checkImg);
-                if (!label || label.children[0] !== checkImg) {
-                    todoUtils.fixCheckbox(checkImg, true);
-                }
-                //将 image 转换为 i
-                todoUtils.oldPatch.fixImg(checkImg);
-            }
-
-            //处理那些被嵌套的 todoList（错误的 Dom 结构）
-            labelList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_LABEL_OLD);
-            for (i = 0; i < labelList.length; i++) {
-                label = labelList[i];
-                container = todoUtils.oldPatch.packageTodo(label);
-                domUtils.addClass(container, CONST.CLASS.TODO_LAYER);
-                subLabelList = container.querySelectorAll('.' + CONST.CLASS.TODO_LABEL_OLD);
-                for (j = subLabelList.length - 1; j > 0; j--) {
-                    subLabel = subLabelList[j];
-                    subContainer = todoUtils.oldPatch.packageTodo(subLabel);
-                    domUtils.after(subContainer, container);
-                }
-                //修正 用户信息
-                todoUtils.oldPatch.fixUserInfo(label);
-            }
-
-            //将 label 全部替换为 span
-            labelList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_LABEL_OLD);
-            for (i = labelList.length - 1; i >= 0; i--) {
-                todoUtils.oldPatch.fixLabel(labelList[i]);
-            }
-
-            //清理 Tail
-            tailList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_TAIL_OLD);
-            for (i = tailList.length - 1; i >= 0; i--) {
-                tail = tailList[i];
-                if (domUtils.isEmptyDom(tail)) {
-                    domUtils.remove(tail);
-                } else {
-                    domUtils.removeClass(CONST.CLASS.TODO_TAIL_OLD);
-                }
-            }
-        },
-        fixUserInfo: function (label) {
-            var parent = label.parentNode,
-                check = todoUtils.oldPatch.getCheckImg(label),
-                id = check ? check.id : '',
-                childNodes = parent.childNodes,
-                child, i, firstUserInfo = false;
-            for (i = 0; i < childNodes.length; i++) {
-                child = childNodes[i];
-                if (domUtils.hasClass(child, CONST.CLASS.TODO_USER_INFO)) {
-                    if (!firstUserInfo) {
-                        firstUserInfo = true;
-                        child.setAttribute(CONST.ATTR.TODO_ID, id);
-                    } else {
-                        parent.removeChild(child);
-                        i--;
-                    }
-                }
-            }
-        },
-        getCheckImg: function (label) {
-            if (!label) {
-                return null;
-            }
-            return label.querySelector('.' + CONST.CLASS.TODO_CHECK_IMG_OLD);
-        },
-        getLabelFromChild: function (dom) {
-            if (!dom) {
-                return null;
-            }
-            return domUtils.getParentByFilter(dom, function (dom) {
-                return domUtils.hasClass(dom, CONST.CLASS.TODO_LABEL_OLD);
-            }, true);
-        },
-        isFirstLabel: function (label) {
-            if (!label) {
-                return false;
-            }
-            var parent = label.parentNode,
-                childNodes = parent.childNodes,
-                i, child;
-
-            for (i = 0; i < childNodes.length; i++) {
-                child = childNodes[i];
-                if (child === label) {
-                    return true;
-                } else if (!domUtils.isEmptyDom(child)) {
-                    return false;
-                }
-            }
-            return false;
-        },
-        /**
-         * 给 todoItem 打包
-         * @param label
-         * @returns {*}
-         */
-        packageTodo: function (label) {
-            if (!label) {
-                return null;
-            }
-            var parent = label.parentNode;
-
-            if (parent !== ENV.doc.body && todoUtils.oldPatch.isFirstLabel(label)) {
-                //如果 label 是首元素，则直接返回 label 的父元素
-                return parent;
-            }
-
-            // 如果 label 不是首元素，则 对齐进行打包
-            var check = todoUtils.oldPatch.getCheckImg(label),
-                id = check ? check.id : '',
-                userInfo = id ? parent.querySelector('span[' + CONST.ATTR.TODO_ID + '=' + id + ']') : null,
-                next = label.nextSibling, tmpNext;
-            var container = ENV.doc.createElement('div');
-            container.appendChild(label);
-            while (next) {
-                tmpNext = next.nextSibling;
-                container.appendChild(next);
-                next = (next === userInfo) ? null : tmpNext;
-            }
-            parent.insertBefore(container, tmpNext);
-            return container;
-        }
+  addUserInfo: function (main, isChecked, todoId, todoRoute) {
+    if (!main) {
+      return;
     }
+
+    var userGuid, userName, avatarUrl, dt,
+      userHtml, span, child, next, i;
+
+    userGuid = todoUtils.deleteUserInfo(main.parentNode);
+    if (!isChecked) {
+      todoStyle.removeUnUsedTodoStyle(userGuid);
+      return;
+    }
+
+    userGuid = todoRoute.getUserGuid();
+    userName = todoRoute.getUserAlias();
+    avatarUrl = todoRoute.getUserAvatarFileName(CONST.CSS.TODO_LIST.IMG_WIDTH);
+    dt = todoUtils.getTime();
+    todoUtils.setUserAvatarStyle(userGuid, avatarUrl);
+    userHtml = todoUtils.getUserInfoHtml(userGuid, userName, dt);
+
+    span = ENV.doc.createElement('span');
+    domUtils.addClass(span, CONST.CLASS.TODO_USER_INFO);
+    span.innerHTML = userHtml;
+    span.setAttribute(CONST.ATTR.TODO_ID, todoId);
+
+    for (i = main.childNodes.length - 1; i >= 0; i--) {
+      child = main.childNodes[i];
+      if (domUtils.isTag(child, 'br')) {
+        main.removeChild(child);
+      }
+    }
+    next = main.nextElementSibling;
+    while (next) {
+      if (todoUtils.isMain(next)) {
+        main.parentElement.insertBefore(span, next);
+        break;
+      }
+      if (domUtils.isTag(next, 'br')) {
+        main.parentElement.insertBefore(span, next);
+        break;
+      }
+      next = next.nextElementSibling;
+    }
+    if (!next) {
+      main.parentElement.appendChild(span);
+    }
+    if (!span.hasChildNodes()) {
+      span.appendChild(ENV.doc.createElement('br'));
+    }
+    rangeUtils.setRange(span, span.childNodes.length);
+  },
+  /**
+   * 判断 dom 是否可以当作 main 容器
+   * @param dom
+   * @returns {boolean}
+   */
+  canBeContainer: function (dom) {
+    return !domUtils.isTag(dom, ['body', 'blockquote', 'td', 'th']) && domUtils.isBlock(dom);
+  },
+  canCreateTodo: function () {
+    var range = rangeUtils.getRange();
+    if (!range) {
+      return false;
+    }
+
+    if (domUtils.getParentByClass(range.startContainer, CONST.CLASS.CODE_CONTAINER, true)) {
+      // CodeMirror 内
+      return false;
+    }
+
+    var rangeList = rangeUtils.getRangeDomList({
+      noSplit: true
+    });
+
+    // 判断当前光标范围内是否只有一个 块结构，否则不做任何操作
+    var start = domUtils.getBlockParent(rangeList.startDom, true) || ENV.doc.body,
+      end = null;
+    if (!range.collapsed && rangeList.endDom !== rangeList.startDom) {
+      end = domUtils.getBlockParent(rangeList.endDom, true) || ENV.doc.body;
+      if (end !== start) {
+        return false;
+      }
+    } else if (range.collapsed && start === ENV.doc.body) {
+      start = ENV.doc.body.childNodes[0];
+    }
+
+    return {
+      rangeList: rangeList,
+      start: start,
+      end: end
+    };
+  },
+  cancelTodo: function (container, noSetRange) {
+    if (!container) {
+      return;
+    }
+    var range = rangeUtils.getRange(), start, startOffset,
+      main, todoFirst, userGuid;
+    start = range ? range.startContainer : null;
+    startOffset = range ? range.startOffset : 0;
+    main = todoUtils.getMainInDom(container);
+    userGuid = todoUtils.deleteUserInfo(container);
+    todoStyle.removeUnUsedTodoStyle(userGuid);
+    todoFirst = todoUtils.deleteMain(main);
+    todoFirst = todoFirst ? todoFirst.start : null;
+    domUtils.removeClass(container, CONST.CLASS.TODO_LAYER);
+    if (!todoFirst) {
+      todoFirst = ENV.doc.createElement('br');
+      container.appendChild(todoFirst);
+    }
+    if (!noSetRange) {
+      if (!start || !start.parentNode) {
+        start = todoFirst;
+        startOffset = 0;
+      }
+      rangeUtils.setRange(start, startOffset);
+    }
+    //修正 todoList style
+    todoUtils.checkTodoStyle(false);
+  },
+  check: function (main, isChecked) {
+    if (isChecked) {
+      domUtils.removeClass(main, CONST.CLASS.TODO_UNCHECKED);
+      domUtils.addClass(main, CONST.CLASS.TODO_CHECKED);
+    } else {
+      domUtils.removeClass(main, CONST.CLASS.TODO_CHECKED);
+      domUtils.addClass(main, CONST.CLASS.TODO_UNCHECKED);
+    }
+    var check = todoUtils.getCheckbox(main);
+    var state = isChecked ? 'checked' : 'unchecked';
+    check.setAttribute(CONST.ATTR.TODO_CHECK, state);
+  },
+  checkTodo: function (checkbox, todoRoute) {
+    var result = {
+      checkbox: null,
+      checked: false
+    };
+
+    historyUtils.saveSnap(false);
+
+    var main = todoUtils.getMainFromChild(checkbox),
+      isChecked;
+    if (!main || main.children[0] != checkbox) {
+      todoUtils.fixCheckbox(checkbox, false);
+    }
+
+    isChecked = checkbox.getAttribute(CONST.ATTR.TODO_CHECK) !== 'checked';
+    todoUtils.check(main, isChecked);
+    result.checkbox = checkbox;
+    result.checked = isChecked;
+
+    if (!todoRoute.isPersonalDocument()) {
+      todoUtils.addUserInfo(main, isChecked, checkbox.id, todoRoute);
+    }
+
+    return result;
+  },
+  checkTodoStyle: function (isForced) {
+    var todoObj = ENV.doc.querySelector('.' + CONST.CLASS.TODO_CHECKBOX);
+    if (todoObj) {
+      todoStyle.insertTodoStyle(isForced);
+    } else {
+      todoStyle.removeTodoStyle();
+    }
+  },
+  clearBlock: function (dom) {
+    if (!dom || (dom.nodeType !== 1 && dom.nodeType !== 3 && dom.nodeType !== 11)) {
+      return false;
+    }
+    var child, i;
+    for (i = 0; i < dom.childNodes.length; i++) {
+      child = dom.childNodes[i];
+      if (todoUtils.clearBlock(child) && child != dom.childNodes[i]) {
+        i--;
+      }
+    }
+
+    var isFragment = dom.nodeType == 11,
+      // isMain = isFragment ? false : todoUtils.isMain(dom),
+      isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
+      isBlock = isFragment ? false : domUtils.isBlock(dom);
+    if (isBlock && domUtils.isEmptyDom(dom)) {
+      //为保证 样式 正常传递， 不能随便 removeChild
+      if (dom.children.length > 0) {
+        domUtils.peelDom(dom);
+      } else {
+        domUtils.remove(dom);
+        return true;
+      }
+    } else if (isBlock || isTodoTag) {
+      domUtils.peelDom(dom);
+    }
+    return false;
+  },
+  /**
+   * 清理 TodoList 的 class
+   * @param dom
+   */
+  clearTodoClass: function (dom) {
+    if (!dom) {
+      return;
+    }
+    domUtils.removeClass(dom,
+      [CONST.CLASS.TODO_ACCOUNT, CONST.CLASS.TODO_AVATAR,
+        CONST.CLASS.TODO_DATE, CONST.CLASS.TODO_LAYER,
+        CONST.CLASS.TODO_MAIN, CONST.CLASS.TODO_CHECKED,
+        CONST.CLASS.TODO_UNCHECKED, CONST.CLASS.TODO_USER_INFO]);
+  },
+  /**
+   * 复制 todo
+   * @param container
+   * @param todoRoute
+   * @returns {*}
+   */
+  cloneTodo: function (container) {
+    if (!container) {
+      return null;
+    }
+    var _container, _main, _last,
+      main, last;
+    _container = domUtils.clone(container, true);
+    main = todoUtils.getMainInDom(container);
+    if (!main) {
+      return null;
+    }
+    _main = domUtils.clone(main, true);
+    domUtils.removeClass(_main, CONST.CLASS.TODO_CHECKED);
+    domUtils.addClass(_main, CONST.CLASS.TODO_UNCHECKED);
+
+    var tmp = main, _tmp = _main;
+    while (tmp && tmp.childNodes && tmp.childNodes.length) {
+      last = tmp.childNodes[tmp.childNodes.length - 1];
+
+      // 复制 todolist 时， 不复制 块级元素、自闭和标签
+      while (!!last &&
+      ((last.nodeType === 3 && last.nodeValue.replace(CONST.FILL_CHAR_REG, '').length === 0) ||
+        domUtils.isBlock(last) ||
+        domUtils.isSelfClosingTag(last))) {
+        last = last.previousSibling;
+      }
+
+      if (!last || todoUtils.isCheckbox(last)) {
+        _last = ENV.doc.createTextNode('');
+        last = null;
+      } else {
+        _last = domUtils.clone(last, true);
+      }
+      _tmp.appendChild(_last);
+      _tmp = _last;
+      tmp = last;
+    }
+    _container.appendChild(_main);
+    //使用 setTodo 方式设置 todo
+
+    rangeUtils.setRange(_main, 1);
+    return _container;
+  },
+  deleteMain: function (main) {
+    return domUtils.peelDom(main, function (dom) {
+      return (!todoUtils.isMain(dom) && !todoUtils.isCheckbox(dom))
+    });
+  },
+  deleteUserInfo: function (container) {
+    var userGuid = '';
+    var main = todoUtils.getMainInDom(container);
+
+    var userAvatar = container.querySelector('.' + CONST.CLASS.TODO_AVATAR),
+      userClass = userAvatar ? userAvatar.className : '',
+      guidReg = new RegExp('^(.*' + CONST.CLASS.TODO_USER_AVATAR + ')([^ ]*)(.*)$', 'i');
+
+    if (userClass.indexOf(CONST.CLASS.TODO_USER_AVATAR) > -1) {
+      userGuid = userClass.replace(guidReg, '$2');
+    }
+
+    var nextSib = main ? main.nextElementSibling : container.firstChild,
+      tmpNode;
+    while (nextSib) {
+      if (todoUtils.isMain(nextSib)) {
+        break;
+      }
+      if (todoUtils.isUserInfo(nextSib)) {
+        tmpNode = nextSib;
+        nextSib = nextSib.nextElementSibling;
+        container.removeChild(tmpNode);
+        continue;
+      }
+      nextSib = nextSib.nextElementSibling;
+    }
+    return userGuid;
+  },
+  /**
+   * 修正 dom 异常的 checkbox & 由于 execCommand 生成列表时造成的 dom 异常
+   * @param checkItem
+   * @param isForOld
+   */
+  fixCheckbox: function (checkItem, isForOld) {
+    if (!checkItem) {
+      return;
+    }
+    // 修正缺失 的 id
+    if (!checkItem.id) {
+      checkItem.id = todoUtils.getCheckId();
+    }
+    // 清理多余样式（主要避免 粘贴操作带来的影响）
+    domUtils.attr(checkItem, {
+      'style': null
+    });
+
+    //1、ios 端 对于 input type=text 操作异常，
+    //2、如果换成 type=button 必须添加 contenteditable = false ；但这样又导致光标上下移动时行为异常
+    //3、必须使用自闭和标签，否则会导致可以在 checkbox 内输入内容
+    // 因此必须重新使用 img 作为 checkbox 的容器
+    if (domUtils.isTag(checkItem, 'input')) {
+      let img = ENV.doc.createElement('img');
+      img.id = checkItem.id;
+      img.className = checkItem.className;
+      img.src = checkboxImg;
+      img.setAttribute(CONST.ATTR.TODO_CHECK, checkItem.getAttribute(CONST.ATTR.TODO_CHECK));
+      domUtils.before(img, checkItem);
+      domUtils.remove(checkItem);
+      checkItem = img;
+    }
+
+    if (!isForOld && todoUtils.getMainFromChild(checkItem)) {
+      return;
+    }
+
+    var container = domUtils.getBlockParent(checkItem),
+      canBeContainer = todoUtils.canBeContainer(container),
+      main = ENV.doc.createElement('span'),
+      newContainer, next, tmpNext,
+      stopInsert = false, dom;
+    main.className = (isForOld ? CONST.CLASS.TODO_LABEL_OLD : CONST.CLASS.TODO_MAIN) + ' ' + CONST.CLASS.TODO_UNCHECKED;
+
+    newContainer = ENV.doc.createElement(canBeContainer ? container.tagName : 'div');
+    if (canBeContainer) {
+      domUtils.after(newContainer, container);
+    } else {
+      domUtils.before(newContainer, checkItem);
+    }
+    newContainer.appendChild(main);
+
+    next = checkItem;
+    while (next) {
+      tmpNext = next.nextSibling;
+      if (domUtils.isBlock(next)) {
+        if (canBeContainer) {
+          stopInsert = true;
+          dom = newContainer.nextSibling;
+        } else {
+          break;
+        }
+      }
+      if (stopInsert) {
+        domUtils.before(next, dom);
+      } else if (todoUtils.isUserInfo(next)) {
+        domUtils.after(next, main);
+      } else {
+        main.appendChild(next);
+      }
+      next = tmpNext;
+    }
+
+    domUtils.addClass(newContainer, CONST.CLASS.TODO_LAYER);
+    // 主要用于修正 将 todoList 设置为 ul/ol 时产生的 错误
+    var layer = todoUtils.getContainerFromChild(newContainer.parentNode);
+    if (layer) {
+      domUtils.removeClass(layer, CONST.CLASS.TODO_LAYER);
+    }
+
+    //避免 产生多余的 列表行
+    if (canBeContainer && domUtils.isEmptyDom(container)) {
+      domUtils.remove(container);
+    }
+  },
+  /**
+   * 清理 main 内多余 dom （主要针对 特殊字符 or <br> 结尾的dom）
+   * @param main
+   */
+  fixMain: function (main) {
+    if (!main) {
+      return;
+    }
+    var last = domUtils.getLastDeepChild(main),
+      check = todoUtils.getCheckbox(main),
+      parent, i;
+
+    // 不存在 checkbox 的 main 删除 main class
+    if (!check) {
+      domUtils.removeClass(main, CONST.CLASS.TODO_MAIN);
+    }
+
+    // 清理多余样式（主要避免 粘贴操作带来的影响）
+    domUtils.attr(main, {'style': null});
+
+    //保证 main 的 parent 就是 layer
+    parent = todoUtils.getContainerFromChild(main);
+    if (parent && parent != main && parent !== main.parentNode) {
+      try {
+        parent.appendChild(main);
+      } catch (e) {
+        console.error(e);
+      }
+
+    }
+
+    //处理 被嵌套的 main
+    var subMainList = main.querySelectorAll('.' + CONST.CLASS.TODO_MAIN);
+    for (i = subMainList.length - 1; i >= 0; i--) {
+      domUtils.after(subMainList[i], main);
+    }
+    if (domUtils.isEmptyDom(main) && main.parentNode) {
+      domUtils.remove(main);
+    }
+
+    if (last == check) {
+      return;
+    }
+
+    if ((last.nodeType !== 1 && last.nodeType !== 3) ||
+      (last.nodeType == 1 && domUtils.isTag(last, 'br')) ||
+      (last.nodeType === 3 && last.nodeValue.replace(CONST.FILL_CHAR_REG, '').length === 0)) {
+      parent = last.parentNode;
+      while (parent != main && parent.childNodes.length == 1) {
+        last = parent;
+        parent = parent.parentNode;
+      }
+      domUtils.remove(last);
+
+      //避免 br & 特殊符号等元素同时存在，所以需要逐一过滤
+      todoUtils.fixMain(main);
+    }
+  },
+  /**
+   * 修正 todoList 被嵌套 & 缺失 id 等 的问题
+   * @param targetTodo //可以指定 todoItem 修正
+   */
+  fixNewTodo: function (targetTodo) {
+    var i,
+      container,
+      todoList, todoItem,
+      subTodoList, subTodoItem, subParent,
+      checkList, checkItem,
+      mainList, mainItem,
+      start, last, next;
+
+    container = targetTodo ? targetTodo : ENV.doc;
+
+    // 处理那些被嵌套的 todoList（错误的 Dom 结构）
+    todoList = container.querySelectorAll('.' + CONST.CLASS.TODO_LAYER);
+    for (i = 0; i < todoList.length; i++) {
+      todoItem = todoList[i];
+
+      // 清理多余样式（主要避免 粘贴操作带来的影响）
+      domUtils.attr(todoItem, {'style': null});
+
+      //清理里面无内容的 Layer
+      fixEmptyLayer(todoItem);
+
+      subTodoList = todoItem.querySelectorAll('.' + CONST.CLASS.TODO_LAYER);
+      if (subTodoList.length === 0) {
+        continue;
+      }
+
+      subTodoItem = subTodoList[0];
+      subParent = subTodoItem.parentNode;
+      if (todoUtils.isTodoTag(subParent) || todoUtils.isLayer(subParent)) {
+        start = subTodoItem;
+      } else {
+        start = subParent;
+      }
+      last = todoItem;
+
+      if (last === start) {
+        continue;
+      }
+
+      while (next = start.nextSibling) {
+        domUtils.after(next, last);
+        last = next;
+      }
+      domUtils.after(start, todoItem);
+
+      // 不存在 checkbox 的 Layer 删除 Layer class
+      fixEmptyLayer(todoItem);
+    }
+
+    //修正 Main
+    mainList = container.querySelectorAll('.' + CONST.CLASS.TODO_MAIN);
+    for (i = 0; i < mainList.length; i++) {
+      mainItem = mainList[i];
+      todoUtils.fixMain(mainItem);
+    }
+
+    // 修正 checkbox
+    checkList = container.querySelectorAll('.' + CONST.CLASS.TODO_CHECKBOX);
+    for (i = 0; i < checkList.length; i++) {
+      checkItem = checkList[i];
+      todoUtils.fixCheckbox(checkItem, false);
+    }
+
+    function fixEmptyLayer(_container) {
+      if (domUtils.isEmptyDom(_container)) {
+        domUtils.remove(_container);
+        return;
+      }
+
+      // 不存在 checkbox 的 Layer 删除 Layer class
+      var checkItem = todoUtils.getCheckbox(_container);
+      if (!checkItem) {
+        domUtils.removeClass(todoItem, CONST.CLASS.TODO_LAYER);
+      }
+    }
+  },
+  getCheckbox: function (main) {
+    if (!main) {
+      return null;
+    }
+    return main.querySelector('.' + CONST.CLASS.TODO_CHECKBOX);
+  },
+  getCheckId: function () {
+    return 'wiz_todo_' + Date.now() + '_' + Math.floor((Math.random() * 1000000) + 1);
+  },
+  getContainerFromChild: function (child) {
+    if (!child) {
+      return null;
+    }
+    return domUtils.getParentByFilter(child, function (dom) {
+      return todoUtils.isLayer(dom);
+    }, true);
+  },
+  getMainByCaret: function () {
+    var range = rangeUtils.getRange();
+    if (!range) {
+      return null;
+    }
+
+    var start = rangeUtils.getRangeDetail(range.startContainer, range.startOffset);
+    return todoUtils.getMainFromChild(start.container);
+    //
+    // var p = domUtils.getParentByFilter(start, function (dom) {
+    //     return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
+    // }, true);
+    // if (!p || !p.hasChildNodes()) {
+    //     return null;
+    // }
+    // return todoUtils.getMainInDom(p);
+  },
+  getMainFromChild: function (dom) {
+    if (!dom) {
+      return null;
+    }
+    return domUtils.getParentByFilter(dom, function (dom) {
+      return domUtils.hasClass(dom, CONST.CLASS.TODO_MAIN);
+    }, true);
+  },
+  getMainHtml: function () {
+    var str = '<span class="' + CONST.CLASS.TODO_MAIN + ' ' + CONST.CLASS.TODO_UNCHECKED + '">' +
+      '<img src="' + checkboxImg + '" id="%1" class="' + CONST.CLASS.TODO_CHECKBOX + ' ' + CONST.CLASS.IMG_NOT_DRAG + '" ' +
+      CONST.ATTR.TODO_CHECK + '="unchecked" />' +
+      '</span>';
+    str = str.replace('%1', todoUtils.getCheckId());
+    return str;
+  },
+  getMainInDom: function (dom) {
+    if (!dom || !dom.hasChildNodes())
+      return null;
+    if (todoUtils.isMain(dom)) {
+      return dom;
+    }
+    if (todoUtils.isLayer(dom)) {
+      return dom.querySelector('.' + CONST.CLASS.TODO_MAIN);
+    }
+    return null;
+  },
+  getUserInfoInDom: function (dom) {
+    return dom.querySelector('.' + CONST.CLASS.TODO_USER_INFO);
+  },
+  getUserInfoHtml: function (userGuid, userName, dt) {
+    var html = '<span class="' + CONST.CLASS.TODO_ACCOUNT + '">' +
+      '<input disabled readonly class="%1" />' +
+      '%2, ' +
+      '</span>' +
+      '<span class="' + CONST.CLASS.TODO_DATE + '">%3.</span>';
+    var avatarClass = CONST.CLASS.TODO_USER_AVATAR + base64.encode(userGuid);
+    return html.replace('%1', CONST.CLASS.IMG_NOT_DRAG + ' ' + CONST.CLASS.TODO_AVATAR + ' ' + avatarClass)
+      .replace('%2', userName)
+      .replace('%3', dt);
+  },
+  getTime: function () {
+    var dt = new Date();
+    var dateStr, timeStr;
+    timeStr = getNum(dt.getHours()) + ':' + getNum(dt.getMinutes());
+
+    if (LANG.version == 'en') {
+      dateStr = LANG.Month[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear() + ' at ' + timeStr;
+    } else {
+      dateStr = dt.getFullYear() + LANG.Date.Year + (dt.getMonth() + 1) + LANG.Date.Month + dt.getDate() + LANG.Date.Day + ' ' + timeStr;
+    }
+    return dateStr;
+
+    function getNum(num) {
+      return (num < 10 ? '0' : '') + num;
+    }
+  },
+  insertToMain: function (doms, main) {
+    if (!doms || !main) {
+      return;
+    }
+    var i, dom, last = null;
+    for (i = doms.length - 1; i >= 0; i--) {
+      dom = doms[i];
+      todoUtils.clearTodoClass(dom);
+      main.insertBefore(dom, last);
+      last = dom;
+    }
+  },
+  /**
+   * 判断 光标是否处于 checkbox 后面
+   * @returns {*}
+   */
+  isCaretAfterCheckbox: function () {
+    var range = rangeUtils.getRange();
+    if (!range) {
+      return false;
+    }
+    var start, prev, main, str;
+
+    main = todoUtils.getMainByCaret();
+    if (!main) {
+      return false;
+    }
+    if (range.collapsed) {
+      start = rangeUtils.getRangeDetail(range.startContainer, range.startOffset);
+      if (start.container.nodeType === 3 && start.offset > 0) {
+        str = start.container.nodeValue.substr(0, start.offset);
+        if (!utils.isEmpty(str)) {
+          return false;
+        }
+      }
+
+      if (start.isEnd) {
+        prev = start.container;
+      } else {
+        prev = domUtils.getPreviousNode(start.container, false, main);
+      }
+      return todoUtils.isCheckbox(prev);
+    }
+    return false;
+  },
+  /**
+   * 判断 光标是否处于 main 最前面
+   * （collapsed = false 时，以 end 为准）
+   * @returns {*}
+   */
+  isCaretBeforeCheckbox: function () {
+    var result = {
+      enable: false,
+      checkbox: null
+    };
+    var range = rangeUtils.getRange();
+
+    if (!range) {
+      return result;
+    }
+    var caretDom = range.endContainer;
+    if (caretDom.nodeType === 1) {
+      caretDom = caretDom.childNodes[range.endOffset];
+    } else if (caretDom.nodeType === 3 && domUtils.isEmptyDom(caretDom)
+      && range.endOffset == caretDom.nodeValue.length && !todoUtils.getContainerFromChild(caretDom)) {
+      // 如果 textNode 本身已经在 todoContainer 以内 则不进行处理
+      caretDom = domUtils.getNextNode(caretDom, false);
+      if (caretDom) {
+        caretDom = domUtils.getParentByFilter(caretDom, function (dom) {
+          return todoUtils.isLayer(dom);
+        }, true);
+      }
+    }
+
+    if (todoUtils.isLayer(caretDom) || todoUtils.isMain(caretDom)) {
+      result.enable = true;
+      result.checkbox = todoUtils.getCheckbox(caretDom);
+    } else if (todoUtils.isCheckbox(caretDom)) {
+      result.enable = true;
+      result.checkbox = caretDom;
+    }
+    if (!result.checkbox) {
+      // 不存在 checkbox 的 layer 不当做 todoList
+      result.enable = false;
+    }
+    return result
+  },
+  /**
+   * 判断 dom 是否为 todoList 的 checkbox
+   * @param dom
+   * @returns {*|boolean}
+   */
+  isCheckbox: function (dom) {
+    return domUtils.hasClass(dom, CONST.CLASS.TODO_CHECKBOX);
+  },
+  isEmptyContainer: function (container) {
+    if (!container) {
+      return true;
+    }
+    var childNodes = container.childNodes,
+      i, child;
+
+    for (i = 0; i < childNodes.length; i++) {
+      child = childNodes[i];
+      if (todoUtils.isMain(child)) {
+        if (!todoUtils.isEmptyMain(child)) {
+          return false;
+        }
+      } else if (!domUtils.isEmptyDom(child)) {
+        return false;
+      }
+    }
+    return true;
+  },
+  isEmptyMain: function (main) {
+    if (!main) {
+      return true;
+    }
+    var childNodes = main.childNodes,
+      i, child;
+
+    for (i = 0; i < childNodes.length; i++) {
+      child = childNodes[i];
+      if (!todoUtils.isCheckbox(child) && !domUtils.isEmptyDom(child)) {
+        return false;
+      }
+    }
+    return true;
+  },
+  /**
+   * 判断 dom 是否为 todoList 的 main
+   * @param dom
+   * @returns {*|boolean}
+   */
+  isMain: function (dom) {
+    return domUtils.hasClass(dom, CONST.CLASS.TODO_MAIN);
+  },
+  isLayer: function (dom) {
+    return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
+  },
+  /**
+   * 判断 dom 是否为 todoList 内特殊 dom
+   * @param dom
+   * @returns {boolean}
+   */
+  isTodoTag: function (dom) {
+    if (!dom) {
+      return false;
+    }
+    return todoUtils.isMain(dom) ||
+      todoUtils.isUserInfo(dom) ||
+      domUtils.hasClass(dom, CONST.CLASS.TODO_ACCOUNT) ||
+      domUtils.hasClass(dom, CONST.CLASS.TODO_DATE);
+  },
+  /**
+   * 判断 dom 是否为 用户信息
+   * @param dom
+   * @returns {*|boolean}
+   */
+  isUserInfo: function (dom) {
+    return domUtils.hasClass(dom, CONST.CLASS.TODO_USER_INFO);
+  },
+  setTodo: function (container, todoRoute) {
+    var rangeList, start, end,
+      mainHtml, main, userInfo, tmpDom,
+      mainChildren = [], child, i, j;
+
+    if (container) {
+      //允许指定 容器直接设置 todoList
+      start = container;
+    } else {
+      var canCreate = todoUtils.canCreateTodo();
+      if (canCreate === false) {
+        return null;
+      }
+
+      rangeList = canCreate.rangeList;
+      start = canCreate.start;
+      // end = canCreate.end;
+
+      // rangeList = rangeUtils.getRangeDomList({
+      //     noSplit: true
+      // });
+
+      // 如果 start 为 body，则将 startDom 用 div 嵌套
+      start = domUtils.packageByDiv(start);
+
+      // start = domUtils.getBlockParent(rangeList.startDom, true) || ENV.doc.body;
+      //
+      // if (!range.collapsed && rangeList.endDom != rangeList.startDom) {
+      //     end = domUtils.getBlockParent(rangeList.endDom, true) || ENV.doc.body;
+      //     if (end != start) {
+      //         return null;
+      //     }
+      // }
+      if (start !== ENV.doc.body) {
+        // 修正 块元素的父节点内 已经存在其他块元素的情况
+        var areaStart = domUtils.getPrevBlock(start);
+        var areaEnd = domUtils.getNextBlock(start);
+        if (areaEnd && areaEnd !== start) {
+          domUtils.splitDomBeforeSub(start, areaEnd);
+          if (domUtils.isTag(areaEnd, 'br')) {
+            domUtils.remove(areaEnd);
+          }
+        }
+        if (areaStart && areaStart !== areaEnd && areaStart !== start) {
+          start = domUtils.splitDomBeforeSub(start, areaStart);
+          if (domUtils.isTag(areaStart, 'br')) {
+            domUtils.remove(areaStart);
+          } else {
+            domUtils.before(areaStart, start);
+          }
+        }
+      }
+    }
+
+    // 首先清理 start 内的 block
+    for (i = 0, j = start.childNodes.length; i < j; i++) {
+      child = start.childNodes[i];
+      if (domUtils.isBlock(child)) {
+        domUtils.splitDomBeforeSub(start, child);
+        break;
+      }
+      mainChildren.push(child);
+    }
+
+    //判断当前行是否已经是 todoList 结构，如果是，则取消 todoList 结构
+    main = todoUtils.getMainInDom(start);
+    userInfo = todoUtils.getUserInfoInDom(start);
+    var hasCheckbox = !!todoUtils.getCheckbox(main);
+    if (main || userInfo) {
+      todoUtils.cancelTodo(start);
+    }
+    if (hasCheckbox) {
+      return null;
+    }
+
+    mainHtml = todoUtils.getMainHtml();
+    tmpDom = ENV.doc.createElement('div');
+    domUtils.addClass(tmpDom, CONST.CLASS.TODO_LAYER);
+    if (!todoUtils.canBeContainer(start)) {
+      mainHtml = '<div class="' + CONST.CLASS.TODO_LAYER + '">' + mainHtml + '</div>';
+    } else {
+      domUtils.addClass(start, CONST.CLASS.TODO_LAYER);
+    }
+    tmpDom.innerHTML = mainHtml;
+    main = todoUtils.getMainInDom(tmpDom);
+    end = main.lastChild;
+
+    todoUtils.insertToMain(mainChildren, main);
+
+    while (tmpDom.lastChild) {
+      start.insertBefore(tmpDom.lastChild, start.firstChild);
+    }
+
+    if (domUtils.isSelfClosingTag(end)) {
+      rangeUtils.setRange(end.parentNode, domUtils.getIndex(end) + 1);
+    } else {
+      rangeUtils.setRange(end, domUtils.getEndOffset(end));
+    }
+
+    //通知客户端笔记被修改
+    todoRoute.setDocumentType(CONST.TYPE.TODO);
+
+    //修正 todoList style
+    todoUtils.checkTodoStyle(false);
+
+    return main;
+  },
+  setUserAvatarStyle: function (userGuid, avatarUrl) {
+    var guid = base64.encode(userGuid);
+    var sId = CONST.ID.TODO_AVATAR_STYLE + guid;
+    var sClass = CONST.CLASS.TODO_USER_AVATAR + guid;
+    var style = ENV.doc.getElementById(sId);
+    if (style) {
+      return;
+    } else {
+      style = ENV.win.parent.document.getElementById(sId);
+      if (style) {
+        wizStyle.insertStyle({id: sId}, style.innerHTML);
+        return;
+      }
+    }
+    domUtils.convertImageToBase64(avatarUrl, 50, 50, function (baseStr) {
+      //有可能同时点击多个 todoList
+      var style = ENV.doc.getElementById(sId);
+      if (style) {
+        return;
+      }
+      wizStyle.insertStyle({id: sId}, '.' + sClass + '{background-image:url(' + baseStr + ');}');
+    });
+  },
+  oldPatch: {
+    fixImg: function (img) {
+      if (!img) {
+        return;
+      }
+      var iObj = ENV.doc.createElement('img');
+      iObj.className = img.className;
+      iObj.src = checkboxImg;
+      domUtils.removeClass(iObj, CONST.CLASS.TODO_CHECK_IMG_OLD);
+      domUtils.addClass(iObj, CONST.CLASS.TODO_CHECKBOX);
+      if (img.id) {
+        iObj.id = img.id;
+      }
+      if (img.getAttribute('state')) {
+        iObj.setAttribute(CONST.ATTR.TODO_CHECK, img.getAttribute('state'))
+      }
+      var parent = img.parentNode;
+      parent.insertBefore(iObj, img);
+      parent.removeChild(img);
+    },
+    fixLabel: function (label) {
+      if (label) {
+        domUtils.removeClass(label, CONST.CLASS.TODO_LABEL_OLD);
+        domUtils.addClass(label, CONST.CLASS.TODO_MAIN);
+        if (domUtils.hasClass(label, CONST.CLASS.TODO_CHECKED_OLD)) {
+          domUtils.removeClass(label, CONST.CLASS.TODO_CHECKED_OLD);
+          domUtils.addClass(label, CONST.CLASS.TODO_CHECKED);
+        } else if (domUtils.hasClass(label, CONST.CLASS.TODO_UNCHECKED_OLD)) {
+          domUtils.removeClass(label, CONST.CLASS.TODO_UNCHECKED_OLD);
+          domUtils.addClass(label, CONST.CLASS.TODO_UNCHECKED);
+        }
+      }
+
+      if (!label || domUtils.isTag(label, 'span')) {
+        return;
+      }
+      var parent = label.parentNode;
+      if (!parent) {
+        return;
+      }
+      var span = ENV.doc.createElement('span');
+      span.className = label.className;
+      while (label.firstChild) {
+        span.appendChild(label.firstChild);
+      }
+      parent.insertBefore(span, label);
+      parent.removeChild(label);
+    },
+    /**
+     * 初始化 todoList 主要用于修正旧版本的 todoList 样式
+     * 保证每个 todoItem 占一行
+     */
+    fixOldTodo: function () {
+      var i, j, subLabelList, subLabel, container, subContainer,
+        checkImgList, checkImg, labelList, label, tailList, tail;
+
+      //修正未被 label 封装的 checkImg
+      checkImgList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_CHECK_IMG_OLD);
+      for (i = checkImgList.length - 1; i >= 0; i--) {
+        checkImg = checkImgList[i];
+        label = todoUtils.oldPatch.getLabelFromChild(checkImg);
+        if (!label || label.children[0] !== checkImg) {
+          todoUtils.fixCheckbox(checkImg, true);
+        }
+        //将 image 转换为 i
+        todoUtils.oldPatch.fixImg(checkImg);
+      }
+
+      //处理那些被嵌套的 todoList（错误的 Dom 结构）
+      labelList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_LABEL_OLD);
+      for (i = 0; i < labelList.length; i++) {
+        label = labelList[i];
+        container = todoUtils.oldPatch.packageTodo(label);
+        domUtils.addClass(container, CONST.CLASS.TODO_LAYER);
+        subLabelList = container.querySelectorAll('.' + CONST.CLASS.TODO_LABEL_OLD);
+        for (j = subLabelList.length - 1; j > 0; j--) {
+          subLabel = subLabelList[j];
+          subContainer = todoUtils.oldPatch.packageTodo(subLabel);
+          domUtils.after(subContainer, container);
+        }
+        //修正 用户信息
+        todoUtils.oldPatch.fixUserInfo(label);
+      }
+
+      //将 label 全部替换为 span
+      labelList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_LABEL_OLD);
+      for (i = labelList.length - 1; i >= 0; i--) {
+        todoUtils.oldPatch.fixLabel(labelList[i]);
+      }
+
+      //清理 Tail
+      tailList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_TAIL_OLD);
+      for (i = tailList.length - 1; i >= 0; i--) {
+        tail = tailList[i];
+        if (domUtils.isEmptyDom(tail)) {
+          domUtils.remove(tail);
+        } else {
+          domUtils.removeClass(CONST.CLASS.TODO_TAIL_OLD);
+        }
+      }
+    },
+    fixUserInfo: function (label) {
+      var parent = label.parentNode,
+        check = todoUtils.oldPatch.getCheckImg(label),
+        id = check ? check.id : '',
+        childNodes = parent.childNodes,
+        child, i, firstUserInfo = false;
+      for (i = 0; i < childNodes.length; i++) {
+        child = childNodes[i];
+        if (domUtils.hasClass(child, CONST.CLASS.TODO_USER_INFO)) {
+          if (!firstUserInfo) {
+            firstUserInfo = true;
+            child.setAttribute(CONST.ATTR.TODO_ID, id);
+          } else {
+            parent.removeChild(child);
+            i--;
+          }
+        }
+      }
+    },
+    getCheckImg: function (label) {
+      if (!label) {
+        return null;
+      }
+      return label.querySelector('.' + CONST.CLASS.TODO_CHECK_IMG_OLD);
+    },
+    getLabelFromChild: function (dom) {
+      if (!dom) {
+        return null;
+      }
+      return domUtils.getParentByFilter(dom, function (dom) {
+        return domUtils.hasClass(dom, CONST.CLASS.TODO_LABEL_OLD);
+      }, true);
+    },
+    isFirstLabel: function (label) {
+      if (!label) {
+        return false;
+      }
+      var parent = label.parentNode,
+        childNodes = parent.childNodes,
+        i, child;
+
+      for (i = 0; i < childNodes.length; i++) {
+        child = childNodes[i];
+        if (child === label) {
+          return true;
+        } else if (!domUtils.isEmptyDom(child)) {
+          return false;
+        }
+      }
+      return false;
+    },
+    /**
+     * 给 todoItem 打包
+     * @param label
+     * @returns {*}
+     */
+    packageTodo: function (label) {
+      if (!label) {
+        return null;
+      }
+      var parent = label.parentNode;
+
+      if (parent !== ENV.doc.body && todoUtils.oldPatch.isFirstLabel(label)) {
+        //如果 label 是首元素，则直接返回 label 的父元素
+        return parent;
+      }
+
+      // 如果 label 不是首元素，则 对齐进行打包
+      var check = todoUtils.oldPatch.getCheckImg(label),
+        id = check ? check.id : '',
+        userInfo = id ? parent.querySelector('span[' + CONST.ATTR.TODO_ID + '=' + id + ']') : null,
+        next = label.nextSibling, tmpNext;
+      var container = ENV.doc.createElement('div');
+      container.appendChild(label);
+      while (next) {
+        tmpNext = next.nextSibling;
+        container.appendChild(next);
+        next = (next === userInfo) ? null : tmpNext;
+      }
+      parent.insertBefore(container, tmpNext);
+      return container;
+    }
+  }
 };
 
 module.exports = todoUtils;
