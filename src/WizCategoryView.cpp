@@ -2106,6 +2106,7 @@ void WizCategoryView::on_action_user_newTag()
                                                           tr("Please input tag name: "),
                                                           "", window());
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newTag_confirmed(int)));
+    connect(dialog, SIGNAL(textChanged(QString)), SLOT(on_newTag_inputText_changed(QString)));
 
     dialog->exec();
 }
@@ -2154,6 +2155,41 @@ void WizCategoryView::on_action_user_newTag_confirmed(int result)
     }
 }
 
+
+void WizCategoryView::on_newTag_inputText_changed(const QString& text)
+{
+    WIZTAGDATA parentTag;
+
+    if (WizCategoryViewTagItem* p = currentCategoryItem<WizCategoryViewTagItem>()) {
+        parentTag = p->tag();
+    }
+
+    if (WizLineInputDialog* dialog = qobject_cast<WizLineInputDialog*>(sender()))
+    {
+        QString strTagNames = text;
+        QStringList sl = strTagNames.split(';');
+        QStringList::const_iterator it;
+        for (it = sl.begin(); it != sl.end(); it++) {
+            CString strTagName = *it;
+
+            CWizTagDataArray arrayTag;
+            if (m_dbMgr.db().tagByName(strTagName, arrayTag)) {
+                for (WIZTAGDATA tagNew : arrayTag) {
+                    if (tagNew.strParentGUID == parentTag.strGUID) {
+                        dialog->setErrorMessage(tr("Tag has already exists"));
+                        dialog->setOKButtonEnable(false);
+                        return;
+
+                    }
+                }
+            }
+        }
+
+        dialog->setOKButtonEnable(true);
+        dialog->setErrorMessage(tr(""));
+    }
+}
+
 void WizCategoryView::on_action_group_newFolder()
 {
     ::WizGetAnalyzer().logAction("categoryMenuNewGroupFolder");
@@ -2162,6 +2198,7 @@ void WizCategoryView::on_action_group_newFolder()
                                                           "", window());
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_group_newFolder_confirmed(int)));
+    connect(dialog, SIGNAL(textChanged(QString)), SLOT(on_group_newFolder_inputText_changed(QString)));
 
     dialog->exec();
 }
@@ -2203,6 +2240,52 @@ void WizCategoryView::on_action_group_newFolder_confirmed(int result)
 
         WIZTAGDATA tagNew;
         m_dbMgr.db(strKbGUID).createTag(parentTag.strGUID, strTagName, "", tagNew);
+    }
+}
+
+
+void WizCategoryView::on_group_newFolder_inputText_changed(const QString& text)
+{
+    WIZTAGDATA parentTag;
+    QString strKbGUID;
+
+    if (WizCategoryViewGroupRootItem* pRoot = currentCategoryItem<WizCategoryViewGroupRootItem>()) {
+        strKbGUID = pRoot->kbGUID();
+    }
+
+    if (WizCategoryViewGroupItem* p = currentCategoryItem<WizCategoryViewGroupItem>()) {
+        strKbGUID = p->kbGUID();
+        parentTag = p->tag();
+    }
+
+    if (strKbGUID.isEmpty()) {
+        Q_ASSERT(0);
+        return;
+    }
+
+    if (WizLineInputDialog* dialog = qobject_cast<WizLineInputDialog*>(sender()))
+    {
+        QString strTagNames = text;
+        QStringList sl = strTagNames.split(';');
+        QStringList::const_iterator it;
+        for (it = sl.begin(); it != sl.end(); it++) {
+            CString strTagName = *it;
+
+            CWizTagDataArray arrayTag;
+            if (m_dbMgr.db(strKbGUID).tagByName(strTagName, arrayTag)) {
+                for (WIZTAGDATA tagNew : arrayTag) {
+                    if (tagNew.strParentGUID == parentTag.strGUID) {
+                        dialog->setErrorMessage(tr("Foler has already exists"));
+                        dialog->setOKButtonEnable(false);
+                        return;
+
+                    }
+                }
+            }
+        }
+
+        dialog->setOKButtonEnable(true);
+        dialog->setErrorMessage(tr(""));
     }
 }
 
