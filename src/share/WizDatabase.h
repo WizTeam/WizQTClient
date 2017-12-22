@@ -482,9 +482,9 @@ public:
 
     bool extractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
     bool encryptDocument(WIZDOCUMENTDATA& document);
-    bool compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler);
+    bool compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFolder);
     bool compressFolderToZiwFile(WIZDOCUMENTDATA& document, \
-                                const QString& strFileFoler, const QString& strZiwFileName);
+                                const QString& strFileFolder, const QString& strZiwFileName);
     bool cancelDocumentEncryption(WIZDOCUMENTDATA& document);
 
     bool isFileAccessible(const WIZDOCUMENTDATA& document);

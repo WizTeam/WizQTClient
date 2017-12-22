@@ -240,6 +240,7 @@ public:
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
     WizDocumentView* documentView() const;
+    WizDocumentListView* documentList() const { return m_documents; }
     WizKMSyncThread* fullSync() const { return m_syncFull; }
     WizKMSyncThread* quickSync() const { return m_syncQuick; }
     void quickSyncKb(const QString& kbGuid);

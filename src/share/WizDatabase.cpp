@@ -4409,13 +4409,13 @@ bool WizDatabase::encryptDocument(WIZDOCUMENTDATA& document)
 }
 
 bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA &document, \
-                                           const QString& strFileFoler)
+                                           const QString& strFileFolder)
 {
     QString strFileName = getDocumentFileName(document.strGUID);
-    return compressFolderToZiwFile(document, strFileFoler, strFileName);
+    return compressFolderToZiwFile(document, strFileFolder, strFileName);
 }
 
-bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler,
+bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFolder,
                                           const QString& strZiwFileName)
 {
     QFile::remove(strZiwFileName);
@@ -4424,14 +4424,14 @@ bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QStri
     //
     if (!document.nProtected)
     {
-        bool bZip = ::WizFolder2Zip(strFileFoler, strZiwFileName);
+        bool bZip = ::WizFolder2Zip(strFileFolder, strZiwFileName);
         if (!bZip)
             return false;
     }
     else
     {
         CString strTempFile = Utils::WizPathResolve::tempPath() + document.strGUID + "-decrypted";
-        bool bZip = ::WizFolder2Zip(strFileFoler, strTempFile);
+        bool bZip = ::WizFolder2Zip(strFileFolder, strTempFile);
         if (!bZip)
             return false;
 

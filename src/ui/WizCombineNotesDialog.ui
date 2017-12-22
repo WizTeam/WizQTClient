@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>545</width>
-    <height>401</height>
+    <height>403</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -79,12 +79,9 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_3"/>
-   </item>
-   <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>TextLabel</string>
+      <string>New note title:</string>
      </property>
     </widget>
    </item>
@@ -94,7 +91,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Splitter</string>
+      <string>Splitter HTML:</string>
      </property>
     </widget>
    </item>
@@ -117,6 +114,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>listNotes</tabstop>
+  <tabstop>btnMoveUp</tabstop>
+  <tabstop>btnMoveDown</tabstop>
+  <tabstop>btnPreview</tabstop>
+  <tabstop>editNewTitle</tabstop>
+  <tabstop>editSplitter</tabstop>
+  <tabstop>btnAddTitle</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -99,6 +99,7 @@ public:
 
     const WizDocumentListViewItemData& itemData() { return m_data; }
     const WIZDOCUMENTDATA& document() const { return m_data.doc; }
+    WIZDOCUMENTDATA& document() { return m_data.doc; }
     int itemType() const { return m_data.nType; }
     int documentSize() const;
     QString documentLocation() const;

@@ -19,6 +19,7 @@
 #include "core/WizNoteManager.h"
 
 #include "WizMainWindow.h"
+#include "WizDocumentListView.h"
 
 
 WizCombineNotesDialog::WizCombineNotesDialog(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& documents, QWidget *parent /* = 0 */)
@@ -102,7 +103,7 @@ void WizCombineNotesDialog::currentRowChanged(int currentRow)
     }
 }
 
-bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& arrayDocument, QString splitter, bool addTitle, QString& strResultFileName);
+bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& arrayDocument, QString splitter, bool addTitle, QString& strResultFileName, CWizDocumentAttachmentDataArray& arrayAttachment, QString& strError);
 
 CWizDocumentDataArray WizCombineNotesDialog::getResultDocuments()
 {
@@ -120,7 +121,14 @@ CWizDocumentDataArray WizCombineNotesDialog::getResultDocuments()
 void WizCombineNotesDialog::preview()
 {
     QString strResultFileName;
-    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, getResultDocuments(), ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName);
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    QString strError;
+    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, getResultDocuments(), ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName, arrayAttachment, strError);
+    if (!ret)
+    {
+        WizMessageBox::critical(this, tr("Failed to combine note: %1").arg(strError));
+        return;
+    }
     QDesktopServices::openUrl(QUrl::fromLocalFile(strResultFileName));
 }
 
@@ -140,9 +148,12 @@ void WizCombineNotesDialog::accept()
     }
     //
     QString strResultFileName;
-    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, getResultDocuments(), ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName);
-    if (!ret) {
-        WizMessageBox::critical(this, tr("Info"), tr("Failled to combine notes"));
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    QString strError;
+    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, getResultDocuments(), ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName, arrayAttachment, strError);
+    if (!ret)
+    {
+        WizMessageBox::critical(this, tr("Failed to combine note: %1").arg(strError));
         return;
     }
     //
@@ -164,6 +175,39 @@ void WizCombineNotesDialog::accept()
     {
         WizMessageBox::critical(this, tr("Info"), tr("Failed to create new data"));
         return;
+    }
+    //
+    for (auto att: arrayAttachment)
+    {
+        WizDatabase& db = m_dbMgr.db(att.strKbGUID);
+        //
+        WIZDOCUMENTATTACHMENTDATA attRet;
+        if (!db.addAttachment(doc, db.getAttachmentFileName(att.strGUID), attRet))
+        {
+            WizMessageBox::critical(this, tr("Info"), tr("Failed to add attachment"));
+            return;
+        }
+        //
+        attRet.strName = att.strName;
+        db.updateAttachment(attRet);
+    }
+
+    //
+    if (WizMainWindow* mainWindow = WizMainWindow::instance())
+    {
+        if (WizDocumentListView* list = mainWindow->documentList())
+        {
+            int index = list->documentIndexFromGUID(doc.strGUID);
+            if (index != -1)
+            {
+                WizDocumentListViewDocumentItem* pItem = list->documentItemAt(index);
+                pItem->document().tCreated = pItem->document().tCreated.addSecs(-5);
+            } else {
+                doc.tCreated = doc.tCreated.addSecs(-5);    //避免自动进入编辑模式
+            }
+            //
+            list->addAndSelectDocument(doc);
+        }
     }
     //
     QDialog::accept();
@@ -353,7 +397,7 @@ void WizHTMLInsertTextBeforeBody(QString lpszText, CString& strHTML)
     }
 }
 
-bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& arrayDocument, QString splitter, bool addTitle, QString& strResultFileName)
+bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& arrayDocument, QString splitter, bool addTitle, QString& strResultFileName, CWizDocumentAttachmentDataArray& arrayAttachment, QString& strError)
 {
     QString strTempPath = Utils::WizPathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
     ::WizEnsurePathExists(strTempPath);
@@ -366,19 +410,46 @@ bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocume
         WIZDOCUMENTDATA doc = arrayDocument[i];
         //
         WizDatabase& db = dbMgr.db(doc.strKbGUID);
+        if (!db.isDocumentDownloaded(doc.strGUID))
+        {
+            strError = QObject::tr("Note has not been downloaded");
+            return false;
+        }
         //
         if (!db.documentToHtmlFile(doc, strTempPath))
+        {
+            strError = QObject::tr("Failed to get note data");
             return false;
+        }
         //
         QString htmlFileName = strTempPath + "index.html";
         if (!QFileInfo::exists(htmlFileName))
+        {
+            strError = QObject::tr("Failed to get note data");
             return false;
+        }
         //
         QString html;
         if (!WizLoadUnicodeTextFromFile(htmlFileName, html))
+        {
+            strError = QObject::tr("Failed to read note data");
             return false;
+        }
         //
         htmls.push_back(html);
+        //
+        CWizDocumentAttachmentDataArray atts;
+        db.getDocumentAttachments(doc.strGUID, atts);
+        for (WIZDOCUMENTATTACHMENTDATA att : atts)
+        {
+            if (!db.isAttachmentDownloaded(att.strGUID))
+            {
+                strError = QObject::tr("Note attachment %1 has not been downloaded").arg(att.strName);
+                return false;
+            }
+            //
+            arrayAttachment.push_back(att);
+        }
     }
     //
     CString strAllHTML;
@@ -389,9 +460,8 @@ bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocume
         WIZDOCUMENTDATA doc = arrayDocument[i];
         if (-1 != WizStrStrI_Pos(html, CString(_T("<frameset"))))
         {
-            TOLOG(_T("Cannot combine html because html contains frame set"));
-            //
-            return FALSE;
+            strError = QObject::tr("Cannot combine html because html contains frame set");
+            return false;
         }
         //
         CString strTitle = doc.strTitle;
@@ -405,7 +475,10 @@ bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocume
         }
         //
         if (!WizCombineHtmlText(strAllHTML, html))
-            return FALSE;
+        {
+            strError = QObject::tr("Cannot combine html");
+            return false;
+        }
         //
         if (i < nCount - 1)
         {
@@ -418,7 +491,13 @@ bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocume
     //
     strResultFileName = strTempPath + "index.html";
     //
-    return ::WizSaveUnicodeTextToUtf8File(strResultFileName, strAllHTML);
+    bool ret = ::WizSaveUnicodeTextToUtf8File(strResultFileName, strAllHTML);
+    if (!ret)
+    {
+        strError = QObject::tr("Cannot save note html");
+        return false;
+    }
+    return true;
 }
 
 
