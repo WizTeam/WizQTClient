@@ -10,8 +10,15 @@
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
 #include "share/WizMisc.h"
+#include "share/WizHtml2Zip.h"
+#include "share/WizSettings.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizLogger.h"
+#include "utils/WizMisc.h"
+#include "share/WizMessageBox.h"
+#include "core/WizNoteManager.h"
+
+#include "WizMainWindow.h"
 
 
 WizCombineNotesDialog::WizCombineNotesDialog(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& documents, QWidget *parent /* = 0 */)
@@ -28,7 +35,7 @@ WizCombineNotesDialog::WizCombineNotesDialog(WizDatabaseManager& dbMgr, const CW
         QListWidgetItem* item = new QListWidgetItem(document.strTitle);
         QVariant data;
         data.setValue(new WIZDOCUMENTDATA(document));
-        item->setData(0, data);
+        item->setData(Qt::UserRole, data);
         item->setText(document.strTitle);
         //
         ui->listNotes->addItem(item);
@@ -37,12 +44,34 @@ WizCombineNotesDialog::WizCombineNotesDialog(WizDatabaseManager& dbMgr, const CW
     ui->btnMoveUp->setEnabled(false);
     ui->btnMoveDown->setEnabled(false);
     //
+    if (WizMainWindow* mainWindow = WizMainWindow::instance())
+    {
+        WizUserSettings& settings = mainWindow->userSettings();
+        QString splitter = settings.get("CombineNote", "splitter");
+        if (splitter == "<!--none-->")
+        {
+            splitter = "";
+        }
+        else if (splitter.isEmpty())
+        {
+            splitter = "<hr />";
+        }
+        //
+        ui->editSplitter->setText(splitter);
+        ui->btnAddTitle->setChecked(settings.get("CombineNote", "addTitle") == "1");
+    }
+    //
+    ui->editNewTitle->setText(documents[0].strTitle);
+    //
+    //
     m_timer = new QTimer(this);
     m_timer->setInterval(1000);
 
     connect(ui->btnPreview, SIGNAL(clicked(bool)), SLOT(preview()));
-    connect(m_timer, SIGNAL(timeout()), SLOT(checkButtonStatusTimeout()));
     connect(ui->listNotes, SIGNAL(currentRowChanged(int)), SLOT(currentRowChanged(int)));
+    //
+    //
+    connect(m_timer, SIGNAL(timeout()), SLOT(checkButtonStatusTimeout()));
     m_timer->start();
 }
 
@@ -51,11 +80,6 @@ WizCombineNotesDialog::~WizCombineNotesDialog()
     delete ui;
 }
 
-void WizCombineNotesDialog::accept()
-{
-    //
-    QDialog::accept();
-}
 
 void WizCombineNotesDialog::checkButtonStatusTimeout()
 {
@@ -80,13 +104,70 @@ void WizCombineNotesDialog::currentRowChanged(int currentRow)
 
 bool WizKMCombineDocumentsToHtmlFile(WizDatabaseManager& dbMgr, const CWizDocumentDataArray& arrayDocument, QString splitter, bool addTitle, QString& strResultFileName);
 
+CWizDocumentDataArray WizCombineNotesDialog::getResultDocuments()
+{
+    CWizDocumentDataArray ret;
+    for (int i = 0; i < ui->listNotes->count(); i++)
+    {
+        QListWidgetItem* item = ui->listNotes->item(i);
+        QVariant data = item->data(Qt::UserRole);
+        WIZDOCUMENTDATA* doc = data.value<WIZDOCUMENTDATA *>();
+        ret.push_back(*doc);
+    }
+    return ret;
+}
+
 void WizCombineNotesDialog::preview()
 {
     QString strResultFileName;
-    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, m_documents, ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName);
+    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, getResultDocuments(), ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName);
     QDesktopServices::openUrl(QUrl::fromLocalFile(strResultFileName));
 }
 
+void WizCombineNotesDialog::accept()
+{
+    if (WizMainWindow* mainWindow = WizMainWindow::instance())
+    {
+        WizUserSettings& settings = mainWindow->userSettings();
+        QString splitter = ui->editSplitter->text();
+        if (splitter.isEmpty())
+        {
+            splitter = "<!--none-->";
+        }
+        settings.set("CombineNote", "splitter", splitter);
+        //
+        settings.set("CombineNote", "addTitle", ui->btnAddTitle->isChecked() ? "1" : "0");
+    }
+    //
+    QString strResultFileName;
+    bool ret = WizKMCombineDocumentsToHtmlFile(m_dbMgr, getResultDocuments(), ui->editSplitter->text(), ui->btnAddTitle->isChecked(), strResultFileName);
+    if (!ret) {
+        WizMessageBox::critical(this, tr("Info"), tr("Failled to combine notes"));
+        return;
+    }
+    //
+    QString folder = Utils::WizMisc::extractFilePath(strResultFileName);
+    QString strZiwFileName = folder + WizGenGUIDLowerCaseLetterOnly() + ".ziw";
+    bool bZip = ::WizFolder2Zip(folder, strZiwFileName);
+    if (!bZip)
+    {
+        WizMessageBox::critical(this, tr("Info"), tr("Failled to compress notes data"));
+        return;
+    }
+    //
+    WIZDOCUMENTDATA doc = m_documents[0];
+    doc.strGUID.clear();
+    doc.strTitle = ui->editNewTitle->text();
+    //
+    WizNoteManager noteManager(m_dbMgr);
+    if (!noteManager.createNoteByTemplate(doc, WIZTAGDATA(), strZiwFileName))
+    {
+        WizMessageBox::critical(this, tr("Info"), tr("Failed to create new data"));
+        return;
+    }
+    //
+    QDialog::accept();
+}
 
 
 ptrdiff_t WizStrRStrI_Pos(const CString& strText, const CString& strFind, ptrdiff_t nEnd = -1)

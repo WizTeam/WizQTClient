@@ -25,6 +25,8 @@ public:
     CWizDocumentDataArray m_documents;
     QTimer* m_timer;
     WizDatabaseManager& m_dbMgr;
+private:
+    CWizDocumentDataArray getResultDocuments();
 public:
     virtual void accept();
 signals:

@@ -82,6 +82,16 @@
     <layout class="QVBoxLayout" name="verticalLayout_3"/>
    </item>
    <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="editNewTitle"/>
+   </item>
+   <item>
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Splitter</string>
