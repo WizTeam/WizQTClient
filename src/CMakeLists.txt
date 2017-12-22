@@ -186,6 +186,7 @@ set(wiznote_SOURCES
     WizDocTemplateDialog.cpp
     WizMobileFileReceiver.cpp
     WizWebEngineInjectObject.cpp
+    WizCombineNotesDialog.cpp
 
     WizOEMSettings.cpp    
     mac/WizSearchWidget_mm.cpp
@@ -362,6 +363,7 @@ set(wiznote_HEADERS
     share/WizThreads_p.h
     WizInitBizCertDialog.h
     share/WizDocumentStyle.h
+    WizCombineNotesDialog.h
 )
 
 set(wiznote_FORMS
@@ -387,6 +389,7 @@ set(wiznote_FORMS
     ui/WizExecutingActionDialog.ui
     ui/WizInitBizCertDialog.ui
     ui/WizUserServiceExprDialog.ui
+    ui/WizCombineNotesDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

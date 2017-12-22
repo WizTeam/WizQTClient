@@ -25,6 +25,7 @@
 #include "WizNoteStyle.h"
 #include "WizTagListWidget.h"
 #include "WizCategoryView.h"
+#include "WizCombineNotesDialog.h"
 
 #include "sync/WizKMSync.h"
 
@@ -35,6 +36,7 @@
 #define WIZACTION_LIST_LOCATE   QObject::tr("Locate")
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
+#define WIZACTION_LIST_COMBINE     QObject::tr("Combine notes...")
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move to...")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy to...")
 #define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version History...")
@@ -186,7 +188,7 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     m_menuDocument->addAction(WIZACTION_LIST_TAGS, this,
                               SLOT(on_action_selectTags()));
     m_menuDocument->addSeparator();
-
+    //
     m_menuDocument->addAction(tr("Open in new Window"), this,
                               SLOT(on_action_showDocumentInFloatWindow()));
     m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT_LINK, this,
@@ -218,6 +220,9 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
                               SLOT(on_action_encryptDocument()));
     m_menuDocument->addAction(WIZACTION_LIST_CANCEL_ENCRYPTION, this,
                               SLOT(on_action_cancelEncryption()));
+    //
+    m_menuDocument->addAction(WIZACTION_LIST_COMBINE, this,
+                              SLOT(on_action_combineNote()));
 
     m_menuDocument->addSeparator();
     QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
@@ -867,6 +872,7 @@ void WizDocumentListView::resetPermission()
     bool bDeleted = isDocumentsWithDeleted(arrayDocument);
     bool bCanEdit = isDocumentsAllCanDelete(arrayDocument);
     bool bAlwaysOnTop = isDocumentsAlwaysOnTop(arrayDocument);
+    bool bMulti = arrayDocument.size() > 1;
 
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
@@ -882,6 +888,8 @@ void WizDocumentListView::resetPermission()
 
     // disable delete if permission is not enough
     findAction(WIZACTION_LIST_DELETE)->setEnabled(bCanEdit);
+
+    findAction(WIZACTION_LIST_COMBINE)->setEnabled(bCanEdit && bMulti);
 
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setEnabled(bCanEdit);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setChecked(bAlwaysOnTop);
@@ -1973,7 +1981,13 @@ void WizDocumentListView::on_action_cancelEncryption()
     });
 }
 
-
+void WizDocumentListView::on_action_combineNote()
+{
+    CWizDocumentDataArray documents;
+    getSelectedDocuments(documents);
+    WizCombineNotesDialog dialog(m_dbMgr, documents, NULL);
+    dialog.exec();
+}
 
 void WizDocumentListView::on_action_alwaysOnTop()
 {
