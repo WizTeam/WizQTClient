@@ -1999,7 +1999,26 @@ void WizDocumentWebView::saveAsHtml(const QString& strDirPath)
 {
     const WIZDOCUMENTDATA& doc = view()->note();
     WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.exportToHtmlFile(doc, strDirPath);    
+    db.exportToHtmlFile(doc, strDirPath);
+    //
+    if (WizIsMarkdownNote(doc))
+    {
+        QString strScript = QString("WizReader.getContentHtml()");
+        page()->runJavaScript(strScript, [=](const QVariant& vRet) {
+            //
+            QString strHtml = vRet.toString();
+            //
+            if (!strHtml.isEmpty())
+            {
+                CString path = strDirPath;
+                path = Utils::WizMisc::addBackslash2(path);
+                path += "index.html";
+                ::WizSaveUnicodeTextToUtf8File(path, strHtml, true);
+            }
+            //
+        });
+
+    }
 }
 
 void WizDocumentWebView::saveAsMarkdown()
