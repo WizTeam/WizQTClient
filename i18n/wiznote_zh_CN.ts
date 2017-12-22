@@ -2050,6 +2050,42 @@ Password hint: %1</source>
         <source>Json format error</source>
         <translation>Json格式错误</translation>
     </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="415"/>
+        <source>Note has not been downloaded</source>
+        <translation>笔记还没有下载</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="421"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="428"/>
+        <source>Failed to get note data</source>
+        <translation>获取笔记数据失败</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="435"/>
+        <source>Failed to read note data</source>
+        <translation>读取笔记数据失败</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="447"/>
+        <source>Note attachment %1 has not been downloaded</source>
+        <translation>笔记附件 %1 还没有下载</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="463"/>
+        <source>Cannot combine html because html contains frame set</source>
+        <translation>不能合并html，因为html包含frame set</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="479"/>
+        <source>Cannot combine html</source>
+        <translation>不能合并html</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="497"/>
+        <source>Cannot save note html</source>
+        <translation>不能保存笔记html</translation>
+    </message>
 </context>
 <context>
     <name>WizAboutDialog</name>
@@ -2633,26 +2669,32 @@ Password hint: %1</source>
         <translation>添加笔记标题</translation>
     </message>
     <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="145"/>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="154"/>
         <location filename="../src/WizCombineNotesDialog.cpp" line="165"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="176"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="187"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="145"/>
-        <source>Failled to combine notes</source>
-        <translation>合并笔记失败</translation>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="129"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="156"/>
+        <source>Failed to combine note: %1</source>
+        <translation>不能合并笔记:%1</translation>
     </message>
     <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="154"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="165"/>
         <source>Failled to compress notes data</source>
         <translation>压缩笔记数据失败</translation>
     </message>
     <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="165"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="176"/>
         <source>Failed to create new data</source>
         <translation>创建新笔记失败</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="187"/>
+        <source>Failed to add attachment</source>
+        <translation>添加附件失败</translation>
     </message>
 </context>
 <context>

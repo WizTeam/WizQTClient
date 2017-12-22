@@ -2447,6 +2447,42 @@ Password hint: %1</source>
         <source>Json format error</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="415"/>
+        <source>Note has not been downloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="421"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="428"/>
+        <source>Failed to get note data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="435"/>
+        <source>Failed to read note data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="447"/>
+        <source>Note attachment %1 has not been downloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="463"/>
+        <source>Cannot combine html because html contains frame set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="479"/>
+        <source>Cannot combine html</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="497"/>
+        <source>Cannot save note html</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QuaGzipFile</name>
@@ -3074,25 +3110,31 @@ Password hint: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="145"/>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="154"/>
         <location filename="../src/WizCombineNotesDialog.cpp" line="165"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="176"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="187"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
     </message>
     <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="145"/>
-        <source>Failled to combine notes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/WizCombineNotesDialog.cpp" line="154"/>
-        <source>Failled to compress notes data</source>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="129"/>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="156"/>
+        <source>Failed to combine note: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/WizCombineNotesDialog.cpp" line="165"/>
+        <source>Failled to compress notes data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="176"/>
         <source>Failed to create new data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizCombineNotesDialog.cpp" line="187"/>
+        <source>Failed to add attachment</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
