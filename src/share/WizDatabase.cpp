@@ -3141,34 +3141,6 @@ bool WizDatabase::setDocumentFlags(const QString& strDocumentGuid, const QString
     return setDocumentParam(strDocumentGuid, TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS, strFlags);
 }
 
-void removeUnusedImages(const QString& mainHtml, const QString& strResourcePath)
-{
-    CWizStdStringArray files;
-    ::WizEnumFiles(strResourcePath, "*.htm;*.html;*.js;*.css", files, 0);
-    QString allText = mainHtml;
-    for (auto file : files)
-    {
-        QString text;
-        if (::WizLoadUnicodeTextFromFile(file, text))
-        {
-            allText += text;
-        }
-    }
-    //
-    CWizStdStringArray images;
-    ::WizEnumFiles(strResourcePath, "*.png;*.jpg;*.bmp;*.gif;*.jpeg", images, 0);
-    //
-    for (auto imageFileName : images)
-    {
-        QString imageName = Utils::WizMisc::extractFileName(imageFileName);
-        if (!allText.contains(imageName, Qt::CaseInsensitive))
-        {
-            WizDeleteFile(imageFileName);
-        }
-    }
-}
-
-
 bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
                                       const QString& strURL,
@@ -3184,9 +3156,6 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
     //
-    //如果同时保存多个数据，有可能导致较早的笔记保存将新假的图片删除。因此暂时禁止这个功能，等以后有好的办法。
-    //removeUnusedImages(strProcessedHtml, strResourcePath);
-
     if (isEncryptAllData())
         data.nProtected = 1;
     //

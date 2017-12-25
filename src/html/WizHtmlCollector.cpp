@@ -1,7 +1,4 @@
 ﻿#include "WizHtmlCollector.h"
-#include "../share/WizHtml2Zip.h"
-#include "../share/WizObjectDataDownloader.h"
-#include "utils/WizMisc.h"
 #include "WizMainWindow.h"
 #include <QEventLoop>
 #include <QFile>
@@ -9,6 +6,11 @@
 #include <QDebug>
 #include <QNetworkCacheMetaData>
 #include <QNetworkDiskCache>
+
+#include "../share/WizHtml2Zip.h"
+#include "../share/WizObjectDataDownloader.h"
+#include "utils/WizMisc.h"
+#include "utils/WizLogger.h"
 
 bool WizHtmlFileMap::lookup(const QString& strUrl, QString& strFileName)
 {
@@ -198,8 +200,8 @@ void WizHtmlCollector::processImgTagValue(WizHtmlTag* pTag, const QString& strAt
         return;
 
     QUrl url(strValue);
-    QString strShme = url.scheme().toLower();
-    if (strShme == "http" || strShme == "https" || strShme == "ftp")
+    QString strScheme = url.scheme().toLower();
+    if (strScheme == "http" || strScheme == "https" || strScheme == "ftp")
     {
         QString strFileName;
         if (loadImageFromCache(url, strFileName))
@@ -220,6 +222,26 @@ void WizHtmlCollector::processImgTagValue(WizHtmlTag* pTag, const QString& strAt
             m_files.add(strAbsFile, strFile, eType, false);
             pTag->setValueToName(strAttributeName, toResourceFileName(strFile));
             return;
+        }
+    }
+    else if (strScheme == "file")
+    {
+        QString resourcePath = m_url.toLocalFile();
+        Utils::WizMisc::addBackslash(resourcePath);
+        QString filepath = url.toLocalFile();
+        if (!filepath.startsWith(resourcePath))
+        {
+            if (QFile::exists(filepath))
+            {
+                QString destFile = resourcePath + ::WizGenGUIDLowerCaseLetterOnly() + Utils::WizMisc::extractFileExt(filepath);
+                if (QFile::copy(filepath, destFile))
+                {
+                    m_files.add(QUrl::fromLocalFile(destFile).toString(), destFile, WIZHTMLFILEDATA::typeResource, false);
+                    pTag->setValueToName(strAttributeName, toResourceFileName(destFile));
+                    return;
+                }
+            }
+
         }
     }
 
@@ -403,9 +425,57 @@ bool WizHtmlCollector::html2Zip(const QString& strExtResourcePath, \
     CString strRet;
     ::WizStringArrayToText(m_ret, strRet, "");
 
-    CWizStdStringArray arrayAllResource;
-    arrayAllResource.assign(files.begin(), files.end());
 
+    //remove unused images
+    QString allText = strRet;
+    for (auto file : files)
+    {
+        QString ext = Utils::WizMisc::extractFileExt(file);
+        ext = ext.toLower();
+        if (ext == ".html"
+                || ext == ".htm"
+                || ext == ".js"
+                || ext == ".css")
+        {
+            QString text;
+            if (::WizLoadUnicodeTextFromFile(file, text))
+            {
+                allText += text;
+            }
+        }
+    }
+    //
+    std::set<QString> retFiles;
+    for (auto file: files)
+    {
+        QString ext = Utils::WizMisc::extractFileExt(file);
+        ext = ext.toLower();
+        if (ext == ".png"
+                || ext == ".jpg"
+                || ext == ".bmp"
+                || ext == ".gif"
+                || ext == ".jpeg"
+                || ext == ".webp")
+        {
+            QString imageName = Utils::WizMisc::extractFileName(file);
+            if (allText.contains(imageName, Qt::CaseInsensitive))
+            {
+                retFiles.insert(file);
+            }
+            else
+            {
+                DEBUG_TOLOG1("%1 has been deleted, remove it", imageName);
+            }
+        }
+        else
+        {
+            retFiles.insert(file);
+        }
+    }
+    //
+    CWizStdStringArray arrayAllResource;
+    arrayAllResource.assign(retFiles.begin(), retFiles.end());
+    //
     return WizHtml2Zip(strRet, arrayAllResource, strZipFileName);
 }
 
