@@ -1,6 +1,6 @@
 # compile
 mkdir ../WizQTClient-Release-Linux
-rm -rf ../WizQTClient-Release-Linux/*
+#rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 
@@ -47,6 +47,6 @@ cd ..
 cp ../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
 cd ..
 
-linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage
+./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.3/5.9.3/gcc_64/bin/qmake
 
 
