@@ -22,7 +22,6 @@ cd ..
 cp -R ../../WizQTClient-Release-Linux/share ./
 
 cd ..
-cp ./../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
 
 mkdir logo
 cd logo
@@ -45,6 +44,9 @@ cp ../../../WizQTClient/build/common/logo/wiznote512.png 512x512/wiznote.png
 cd ..
 cd ..
 
-linuxdeployqt ./wiznote.desktop -verbose=1 -appimage
+cp ../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
+cd ..
+
+linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage
 
 
