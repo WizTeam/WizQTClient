@@ -1,6 +1,6 @@
 # compile
-#mkdir ../WizQTClient-Release-Linux
-#rm -rf ../WizQTClient-Release-Linux/*
+mkdir ../WizQTClient-Release-Linux
+rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 

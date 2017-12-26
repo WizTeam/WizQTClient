@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=WizNote
+Comment=cloud based note-taking application
+Exec=./WizNote/bin/WizNote
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=wiznote
+Categories=KDE;Qt;
+Name[en]=wiznote
