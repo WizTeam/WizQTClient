@@ -35,6 +35,8 @@ private slots:
     void checkButtonStatusTimeout();
     void currentRowChanged(int currentRow);
     void preview();
+    void moveUp();
+    void moveDown();
 
 private:
     Ui::WizCombineNotesDialog *ui;

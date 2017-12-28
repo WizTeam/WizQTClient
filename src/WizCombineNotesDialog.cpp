@@ -71,6 +71,9 @@ WizCombineNotesDialog::WizCombineNotesDialog(WizDatabaseManager& dbMgr, const CW
     connect(ui->btnPreview, SIGNAL(clicked(bool)), SLOT(preview()));
     connect(ui->listNotes, SIGNAL(currentRowChanged(int)), SLOT(currentRowChanged(int)));
     //
+    connect(ui->btnMoveUp, SIGNAL(clicked(bool)), SLOT(moveUp()));
+    connect(ui->btnMoveDown, SIGNAL(clicked(bool)), SLOT(moveDown()));
+    //
     //
     connect(m_timer, SIGNAL(timeout()), SLOT(checkButtonStatusTimeout()));
     m_timer->start();
@@ -130,6 +133,26 @@ void WizCombineNotesDialog::preview()
         return;
     }
     QDesktopServices::openUrl(QUrl::fromLocalFile(strResultFileName));
+}
+
+void WizCombineNotesDialog::moveUp()
+{
+    int currIndex = ui->listNotes->currentRow();
+    QListWidgetItem *current = ui->listNotes->takeItem(currIndex);
+
+    ui->listNotes->insertItem(currIndex - 1, current);
+    //
+    ui->listNotes->setCurrentRow(currIndex - 1);
+}
+
+void WizCombineNotesDialog::moveDown()
+{
+    int currIndex = ui->listNotes->currentRow();
+    QListWidgetItem *current = ui->listNotes->takeItem(currIndex);
+
+    ui->listNotes->insertItem(currIndex + 1, current);
+    //
+    ui->listNotes->setCurrentRow(currIndex + 1);
 }
 
 void WizCombineNotesDialog::accept()
