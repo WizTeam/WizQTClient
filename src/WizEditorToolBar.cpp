@@ -1534,6 +1534,7 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
 #define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
 #define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
 #define WIZEDITOR_ACTION_PASTE_PLAIN    QObject::tr("Paste plain text")
+#define WIZEDITOR_ACTION_REMOVE_LINK    QObject::tr("Remove link")
 
 
 void WizEditorToolBar::setDelegate(WizDocumentWebView* editor)
@@ -1600,6 +1601,7 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     bool editing = m_editor->isEditing();
     //
     bool hasPasteMenu = false;
+    bool hasLinkMenu = false;
     //
     QList<QAction*> actions = menu->actions();
     for (QAction* action : actions)
@@ -1629,6 +1631,16 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         case QWebEnginePage::Paste:
             hasPasteMenu = true;
             break;
+        case QWebEnginePage::OpenLinkInThisWindow:
+        case QWebEnginePage::OpenLinkInNewWindow:
+        case QWebEnginePage::OpenLinkInNewTab:
+        case QWebEnginePage::DownloadLinkToDisk:
+            menu->removeAction(action);
+            hasLinkMenu = true;
+            break;
+        case QWebEnginePage::CopyLinkToClipboard:
+            hasLinkMenu = true;
+            break;
         default:
             break;
         }
@@ -1655,6 +1667,11 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 
             menu->addAction(WIZEDITOR_ACTION_PASTE, this, SLOT(on_editor_paste_triggered()));
             menu->addAction(WIZEDITOR_ACTION_PASTE_PLAIN, this, SLOT(on_editor_pastePlain_triggered()));
+        }
+        //
+        if (hasLinkMenu)
+        {
+            menu->addAction(WIZEDITOR_ACTION_REMOVE_LINK, this, SLOT(on_editor_removeLink_triggered()));
         }
     }
     //

@@ -1999,7 +1999,26 @@ void WizDocumentWebView::saveAsHtml(const QString& strDirPath)
 {
     const WIZDOCUMENTDATA& doc = view()->note();
     WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.exportToHtmlFile(doc, strDirPath);    
+    db.exportToHtmlFile(doc, strDirPath);
+    //
+    if (WizIsMarkdownNote(doc))
+    {
+        QString strScript = QString("WizReader.getContentHtml()");
+        page()->runJavaScript(strScript, [=](const QVariant& vRet) {
+            //
+            QString strHtml = vRet.toString();
+            //
+            if (!strHtml.isEmpty())
+            {
+                CString path = strDirPath;
+                path = Utils::WizMisc::addBackslash2(path);
+                path += "index.html";
+                ::WizSaveUnicodeTextToUtf8File(path, strHtml, true);
+            }
+            //
+        });
+
+    }
 }
 
 void WizDocumentWebView::saveAsMarkdown()
@@ -2103,11 +2122,11 @@ QString WizDocumentWebView::getCurrentNoteHtml()
 }
 
 
-void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, \
+void copyFileToFolder(const QString& strFileFolder, const QString& strIndexFile, \
                          const QStringList& strResourceList)
 {
     //copy index file
-    QString strFolderIndex = strFileFoler + "index.html";
+    QString strFolderIndex = strFileFolder + "index.html";
     if (strIndexFile != strFolderIndex)
     {
         QFile::remove(strFolderIndex);
@@ -2115,7 +2134,7 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
     }
 
     //copy resources to temp folder
-    QString strResourcePath = strFileFoler + "index_files/";
+    QString strResourcePath = strFileFolder + "index_files/";
     for (int i = 0; i < strResourceList.count(); i++)
     {
         if (QFile::exists(strResourceList.at(i)))

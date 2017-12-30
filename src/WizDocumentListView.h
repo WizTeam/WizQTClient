@@ -197,6 +197,7 @@ public Q_SLOTS:
     void on_action_deleteDocument();
     void on_action_encryptDocument();
     void on_action_cancelEncryption();
+    void on_action_combineNote();
     void on_action_alwaysOnTop();
     void on_action_addToShortcuts();
 

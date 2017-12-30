@@ -2275,7 +2275,7 @@ void WizCategoryView::on_group_newFolder_inputText_changed(const QString& text)
             if (m_dbMgr.db(strKbGUID).tagByName(strTagName, arrayTag)) {
                 for (WIZTAGDATA tagNew : arrayTag) {
                     if (tagNew.strParentGUID == parentTag.strGUID) {
-                        dialog->setErrorMessage(tr("Foler has already exists"));
+                        dialog->setErrorMessage(tr("Folder has already exists"));
                         dialog->setOKButtonEnable(false);
                         return;
 

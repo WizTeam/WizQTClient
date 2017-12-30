@@ -3141,34 +3141,6 @@ bool WizDatabase::setDocumentFlags(const QString& strDocumentGuid, const QString
     return setDocumentParam(strDocumentGuid, TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS, strFlags);
 }
 
-void removeUnusedImages(const QString& mainHtml, const QString& strResourcePath)
-{
-    CWizStdStringArray files;
-    ::WizEnumFiles(strResourcePath, "*.htm;*.html;*.js;*.css", files, 0);
-    QString allText = mainHtml;
-    for (auto file : files)
-    {
-        QString text;
-        if (::WizLoadUnicodeTextFromFile(file, text))
-        {
-            allText += text;
-        }
-    }
-    //
-    CWizStdStringArray images;
-    ::WizEnumFiles(strResourcePath, "*.png;*.jpg;*.bmp;*.gif;*.jpeg", images, 0);
-    //
-    for (auto imageFileName : images)
-    {
-        QString imageName = Utils::WizMisc::extractFileName(imageFileName);
-        if (!allText.contains(imageName, Qt::CaseInsensitive))
-        {
-            WizDeleteFile(imageFileName);
-        }
-    }
-}
-
-
 bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
                                       const QString& strURL,
@@ -3184,9 +3156,6 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
     //
-    //如果同时保存多个数据，有可能导致较早的笔记保存将新假的图片删除。因此暂时禁止这个功能，等以后有好的办法。
-    //removeUnusedImages(strProcessedHtml, strResourcePath);
-
     if (isEncryptAllData())
         data.nProtected = 1;
     //
@@ -4409,13 +4378,13 @@ bool WizDatabase::encryptDocument(WIZDOCUMENTDATA& document)
 }
 
 bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA &document, \
-                                           const QString& strFileFoler)
+                                           const QString& strFileFolder)
 {
     QString strFileName = getDocumentFileName(document.strGUID);
-    return compressFolderToZiwFile(document, strFileFoler, strFileName);
+    return compressFolderToZiwFile(document, strFileFolder, strFileName);
 }
 
-bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler,
+bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFolder,
                                           const QString& strZiwFileName)
 {
     QFile::remove(strZiwFileName);
@@ -4424,14 +4393,14 @@ bool WizDatabase::compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QStri
     //
     if (!document.nProtected)
     {
-        bool bZip = ::WizFolder2Zip(strFileFoler, strZiwFileName);
+        bool bZip = ::WizFolder2Zip(strFileFolder, strZiwFileName);
         if (!bZip)
             return false;
     }
     else
     {
         CString strTempFile = Utils::WizPathResolve::tempPath() + document.strGUID + "-decrypted";
-        bool bZip = ::WizFolder2Zip(strFileFoler, strTempFile);
+        bool bZip = ::WizFolder2Zip(strFileFolder, strTempFile);
         if (!bZip)
             return false;
 

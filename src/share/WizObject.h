@@ -367,6 +367,8 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
     bool isAlwaysOnTop() const { return nFlags & wizDocumentAlwaysOnTop; }
 };
 
+Q_DECLARE_METATYPE(WIZDOCUMENTDATA*)
+
 struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 {
     WIZDOCUMENTDATAEX();
