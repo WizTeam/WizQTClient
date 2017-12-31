@@ -12,3 +12,11 @@ Makefile
 CMakeFiles/
 /share/wiznote/
 /src/__/
+/src/ui_*.h
+/src/wiznote_*.qm
+/src/qrc_wiznote.cpp
+/src/WizNote
+/src/WizNote_autogen/
+/lib/quazip/libquazip.a
+/lib/quazip/quazip_autogen/
+/lib/cryptopp/libcryptlib.a
