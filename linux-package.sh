@@ -45,7 +45,14 @@ cd ..
 cd ..
 
 cp ../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
+cd ./WizNote
+mkdir plugins
+cd ./plugins/
+mkdir platforminputcontexts
+cd ../..
+cp /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
 cd ..
+
 
 ./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.3/5.9.3/gcc_64/bin/qmake
 
