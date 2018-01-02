@@ -1452,7 +1452,7 @@ void WizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
                                                       const QString& arg2 /* = QString() */,
                                                       const QString& arg3 /* = QString() */)
 {
-    QString strExec = QString("document.execCommand('%1'").arg(strCommand);
+    QString strExec = QString("WizEditor.execCommand('%1'").arg(strCommand);
     if (!arg1.isEmpty()) {
         strExec += ", " + arg1;
     }
