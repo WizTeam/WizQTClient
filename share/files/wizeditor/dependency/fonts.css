@@ -1,68 +1,137 @@
 @font-face {
-    font-family: 'wizEditorIcons';
-    src:    url('fonts/wizEditorIcons.eot?heg7bc');
-    src:    url('fonts/wizEditorIcons.eot?heg7bc#iefix') format('embedded-opentype'),
-    url('fonts/wizEditorIcons.ttf?heg7bc') format('truetype'),
-    url('fonts/wizEditorIcons.woff?heg7bc') format('woff'),
-    url('fonts/wizEditorIcons.svg?heg7bc#wizEditorIcons') format('svg');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'wizEditorIcons';
+  src: url('fonts/wizEditorIcons.eot?pulzyt');
+  src: url('fonts/wizEditorIcons.eot?pulzyt#iefix') format('embedded-opentype'),
+  url('fonts/wizEditorIcons.ttf?pulzyt') format('truetype'),
+  url('fonts/wizEditorIcons.woff?pulzyt') format('woff'),
+  url('fonts/wizEditorIcons.svg?pulzyt#wizEditorIcons') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 .editor-icon {
-    /* use !important to prevent issues with browser extensions that change fonts */
-    font-family: 'wizEditorIcons' !important;
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'wizEditorIcons' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 
-    /* Better Font Rendering =========== */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .icon-merge.editor-icon:before {
-    content: "\e101";
+  content: "\e101";
 }
+
 .icon-insert.editor-icon:before {
-    content: "\e102";
+  content: "\e102";
 }
+
 .icon-box.editor-icon:before {
-    content: "\e103";
+  content: "\e103";
 }
+
 .icon-inner_box.editor-icon:before {
-    content: "\e104";
+  content: "\e104";
 }
+
 .icon-oblique_line.editor-icon:before {
-    content: "\e105";
+  content: "\e105";
 }
+
 .icon-align.editor-icon:before {
-    content: "\e106";
+  content: "\e106";
 }
+
 .icon-align_left.editor-icon:before {
-    content: "\e107";
+  content: "\e107";
 }
+
 .icon-align_center.editor-icon:before {
-    content: "\e108";
+  content: "\e108";
 }
+
 .icon-align_right.editor-icon:before {
-    content: "\e109";
+  content: "\e109";
 }
+
 .icon-valign_bottom.editor-icon:before {
-    content: "\e10a";
+  content: "\e10a";
 }
+
 .icon-valign_middle.editor-icon:before {
-    content: "\e10b";
+  content: "\e10b";
 }
+
 .icon-valign_top.editor-icon:before {
-    content: "\e10c";
+  content: "\e10c";
 }
+
 .icon-more.editor-icon:before {
-    content: "\e10d";
+  content: "\e10d";
 }
+
 .icon-down_arrow.editor-icon:before {
-    content: "\e10e";
+  content: "\e10e";
+}
+
+.icon-undo.editor-icon:before {
+  content: "\e900";
+}
+
+.icon-redo.editor-icon:before {
+  content: "\e901";
+}
+
+.icon-quotes.editor-icon:before {
+  content: "\e902";
+}
+
+.icon-list_ol.editor-icon:before {
+  content: "\e903";
+}
+
+.icon-list_ul.editor-icon:before {
+  content: "\e904";
+}
+
+.icon-link.editor-icon:before {
+  content: "\e905";
+}
+
+.icon-eye.editor-icon:before {
+  content: "\e906";
+}
+
+.icon-question.editor-icon:before {
+  content: "\e907";
+}
+
+.icon-bold.editor-icon:before {
+  content: "\e908";
+}
+
+.icon-underline.editor-icon:before {
+  content: "\e909";
+}
+
+.icon-italic.editor-icon:before {
+  content: "\e90a";
+}
+
+.icon-table.editor-icon:before {
+  content: "\e90b";
+}
+
+.icon-code.editor-icon:before {
+  content: "\e90c";
+}
+
+.icon-image.editor-icon:before {
+  content: "\e90d";
 }
