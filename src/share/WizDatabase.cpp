@@ -4293,7 +4293,7 @@ bool WizDatabase::documentToHtmlFile(const WIZDOCUMENTDATA& document,
     return WizPathFileExists(strTempHtmlFileName);
 }
 
-bool WizDatabase::exportToHtmlFile(const WIZDOCUMENTDATA& document, const QString& strPath)
+bool WizDatabase::exportToHtmlFile(const WIZDOCUMENTDATA& document, const QString& strIndexFileName)
 {
     QString strTempPath = Utils::WizPathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
     if (!extractZiwFileToFolder(document, strTempPath))
@@ -4303,18 +4303,20 @@ bool WizDatabase::exportToHtmlFile(const WIZDOCUMENTDATA& document, const QStrin
     QString strTempHtmlFileName = strTempPath + "index.html";
     if (!WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText))
         return false;
+    //
+    QString fileTitle = Utils::WizMisc::extractFileTitle(strIndexFileName);
 
-    QString strResFolder = document.strTitle.toHtmlEscaped() + "_files/";
+    QString strResFolder = fileTitle.toHtmlEscaped() + "_files/";
     strText.replace("index_files/", strResFolder);
 
-    QString strIndexFile = strPath + document.strTitle + ".html";
-    if (!WizSaveUnicodeTextToUtf8File(strIndexFile, strText))
+    if (!WizSaveUnicodeTextToUtf8File(strIndexFileName, strText))
         return false;
 
+    QString strPath = Utils::WizMisc::extractFilePath(strIndexFileName);
     bool bCoverIfExists = true;
     if (!WizCopyFolder(strTempPath + "index_files/", strPath + strResFolder, bCoverIfExists))
         return false;
-
+    //
     return true;
 }
 

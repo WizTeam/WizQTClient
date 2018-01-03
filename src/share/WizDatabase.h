@@ -477,8 +477,8 @@ public:
                                 QString& strFullPathFileName);
     bool documentToHtmlFile(const WIZDOCUMENTDATA& document, \
                             const QString& strPath);
-    bool exportToHtmlFile(const WIZDOCUMENTDATA& document, \
-                            const QString& strPath);
+    bool exportToHtmlFile(const WIZDOCUMENTDATA& document, \                            
+                          const QString& strIndexFileName);
 
     bool extractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
     bool encryptDocument(WIZDOCUMENTDATA& document);

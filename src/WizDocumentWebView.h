@@ -205,7 +205,7 @@ public:
     //
     void saveAsPDF();
     void saveAsMarkdown();
-    void saveAsHtml(const QString& strDirPath);
+    void saveAsHtml();
     void shareNoteByEmail();
     void shareNoteByLink();
     //

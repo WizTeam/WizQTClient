@@ -1995,25 +1995,45 @@ void WizDocumentWebView::saveAsPDF()
     page()->printToPdf(strFileName, layout);
 }
 
-void WizDocumentWebView::saveAsHtml(const QString& strDirPath)
+void WizDocumentWebView::saveAsHtml()
 {
+    CString strTitle = view()->note().strTitle;
+    WizMakeValidFileNameNoPath(strTitle);
+    strTitle = Utils::WizMisc::extractFileTitle(strTitle);
+    //
+    static QString strInitPath = QDir::homePath();
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    //
+    QString strIndexFileName = QFileDialog::getSaveFileName(this, QString(),
+                                                       strInitFileName,
+                                                       tr("Html Files (*.html)"));
+    //
+    if (strIndexFileName.isEmpty())
+        return;
+    //
+    strInitPath = Utils::WizMisc::extractFilePath(strIndexFileName);
+    //
     const WIZDOCUMENTDATA& doc = view()->note();
     WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.exportToHtmlFile(doc, strDirPath);
+    //
+    if (!db.exportToHtmlFile(doc, strIndexFileName)) {
+        return;
+    }
     //
     if (WizIsMarkdownNote(doc))
     {
-        QString strScript = QString("WizReader.getContentHtml()");
+        QString strScript = QString("WizReader.getRenderDocument();");
         page()->runJavaScript(strScript, [=](const QVariant& vRet) {
             //
             QString strHtml = vRet.toString();
             //
             if (!strHtml.isEmpty())
             {
-                CString path = strDirPath;
-                path = Utils::WizMisc::addBackslash2(path);
-                path += "index.html";
-                ::WizSaveUnicodeTextToUtf8File(path, strHtml, true);
+                QString fileTitle = Utils::WizMisc::extractFileTitle(strIndexFileName);
+                QString resourcePath = fileTitle + "_files/";
+                strHtml.replace("index_files/", resourcePath);
+                //
+                ::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtml, true);
             }
             //
         });
@@ -2028,27 +2048,34 @@ void WizDocumentWebView::saveAsMarkdown()
     static QString strInitPath = QDir::homePath();
     QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
     //
-    QString strFileName = QFileDialog::getSaveFileName(this, QString(),
+    QString strIndexFileName = QFileDialog::getSaveFileName(this, QString(),
                                                        strInitFileName,
                                                        tr("Markdown Files (*.md)"));
     //
-    if (strFileName.isEmpty())
+    if (strIndexFileName.isEmpty())
         return;
     //
-    strInitPath = Utils::WizMisc::extractFilePath(strFileName);
+    strInitPath = Utils::WizMisc::extractFilePath(strIndexFileName);
     //
-    if (::WizPathFileExists(strFileName))
+    if (::WizPathFileExists(strIndexFileName))
     {
-        ::WizDeleteFile(strFileName);
+        ::WizDeleteFile(strIndexFileName);
+    }
+    //
+    const WIZDOCUMENTDATA& doc = view()->note();
+    WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    //
+    if (!db.exportToHtmlFile(doc, strIndexFileName)) {
+        return;
     }
     /*
      因为存在内置的表格，todo，图片，导致无法正常输出成标准的markdown
     */
-    page()->runJavaScript(QString("WizEditor.getMarkdownSource();"), [=](const QVariant& vModified){
+    page()->runJavaScript(QString("WizEditor.getMarkdownSrc({unEscapeHtml: true});"), [=](const QVariant& vModified){
         //
         QString source = vModified.toString();
         //
-        ::WizSaveUnicodeTextToUtf8File(strFileName, source, false);
+        ::WizSaveUnicodeTextToUtf8File(strIndexFileName, source, false);
 
     });
 

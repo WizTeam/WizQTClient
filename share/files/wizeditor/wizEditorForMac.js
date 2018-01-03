@@ -2295,8 +2295,8 @@ const WizDocument = function (documentOptions, coreCallback) {
 
         return domUtils.getContentHtml(options);
       },
-      getMarkdownSrc: () => {
-        return markdownRender.getMarkdownSrcForEditor();
+      getMarkdownSrc: (options) => {
+        return markdownRender.getMarkdownSrcForEditor(options);
       },
       /**
        * 在光标位置插入 base64 格式的html
@@ -2578,6 +2578,7 @@ const WizDocument = function (documentOptions, coreCallback) {
         if (env.readonly === true) {
           return;
         }
+        options = options || {};
         if (options.noteType) {
           // 兼容旧代码
           options.reader = {type: options.noteType};
@@ -2645,6 +2646,10 @@ const WizDocument = function (documentOptions, coreCallback) {
       },
       closeDocument: () => {
         return todoCore.closeDocument();
+      },
+      getRenderDocument: () => {
+        amend.hideAmendInfo();
+        return domUtils.getRenderDocument();
       },
       getWordCount: () => {
         let text = env.body.innerText ? env.body.innerText : '';
@@ -3874,6 +3879,45 @@ const DomUtils = function () {
       imgFullPathReg = new RegExp('(<[^<>]*src[ ]*=[ ]*("|\'))' + env.options.indexFilesFullPath.escapeRegex(), 'ig');
       content = content.replace(imgFullPathReg, '$1' + env.options.indexFilesPath + '/');
     }
+    return docType + content;
+  };
+  /**
+   * 获取当前页面的HTML （专门用于 Reader 在渲染后使用）
+   */
+  this.getRenderDocument = () => {
+    env.event.call(CONST.EVENT.BEFORE_GET_DOCHTML, null);
+
+    let content, docType = '';
+    if (env.options.container && env.options.noFrame) {
+        content = env.body.innerHTML;
+    } else {
+      docType = this.getDocType(env.doc);
+      content = env.doc.documentElement.outerHTML;
+    }
+
+    content = this.removeByTagFromHtml(content, CONST.TAG.TMP_TAG);
+    content = this.peelTagFromHtml(content, CONST.TAG.TMP_PLUGIN_TAG);
+
+    // 移除 注释内容
+    content = content.replace(/<!--(.|\n)*?(-->)/g, '');
+    // 移除 script
+    content = content.replace(/<script[^<>]*\/>/ig, '')
+      .replace(/<script[^<>]*>(((?!<\/script>).)|(\r?\n))*<\/script>/ig, '');
+
+    // 需要处理 CodeMirror 内 的隐藏占位区域，否则会把内容当作摘要
+    content = content.replace(/(<div class="CodeMirror-measure">)<pre><span>xxxxxxxxxx<\/span><\/pre>/ig, '$1');
+
+    content = this.hideTableFromHtml(content);
+    content = this.hideCodeFromHtml(content);
+
+    //过滤其他插件
+    if (env.win.WizTemplate) {
+      content = env.win.WizTemplate.hideTemplateFormHtml(content);
+    }
+
+    // 恢复图片 index_files 的路径
+    let imgFullPathReg = new RegExp('(<[^<>]*src[ ]*=[ ]*("|\'))' + env.options.indexFilesFullPath.escapeRegex(), 'ig');
+    content = content.replace(imgFullPathReg, '$1' + env.options.indexFilesPath + '/');
     return docType + content;
   };
 
@@ -6809,7 +6853,7 @@ const HistoryUtils = function() {
       }
       rangeUtils.caretFocus();
     } catch (e) {
-
+      console.error(e);
     }
 
   };
@@ -7394,7 +7438,13 @@ const MarkdownRender = function (mdOptions) {
             return src;
           }
           return env.options.reader.markdownPlugIn.imgSrcFilter(src);
-        }
+        },
+        customBlockGamut: (text) => {
+          if (!env.options.reader.markdownPlugIn.customBlockGamut) {
+            return text;
+          }
+          return env.options.reader.markdownPlugIn.customBlockGamut(text);
+        },
       });
       let replaceMath = (text) => {
         text = text.replace(/@@(\d+)@@/g, (match, n) => {
@@ -7599,7 +7649,6 @@ const MarkdownRender = function (mdOptions) {
           ++idMap[id];
           id += '-' + idMap[id];
         }
-        console.log(idMap);
         let n = parseInt(item.tagName.charAt(1), 10);
         let $item = mdWin.$(item);
         $item.attr('id', id);
@@ -7690,14 +7739,20 @@ const MarkdownRender = function (mdOptions) {
     xssFilter: xssUtils.xssFilter
   };
 
-  this.getMarkdownSrcForEditor = () => {
+  this.getMarkdownSrcForEditor = (options) => {
     // 必须首先把 code 保存到 textarea 内部
     codeUtils.saveToText();
 
+    options = options || {};
+
     let tmp = env.doc.createElement('div');
-    // 必须首先将之前的文本 < > 进行替换，
-    // 否则 文本的 < > 会与 后面 markdownPreProcess 方法内处理的 脚本混淆
-    tmp.innerHTML = env.body.innerHTML.replace(/&/g, '&amp;');
+    let html = env.body.innerHTML;
+    if (!options.unEscapeHtml) {
+      // 必须首先将之前的文本 < > 进行替换，
+      // 否则 文本的 < > 会与 后面 markdownPreProcess 方法内处理的 脚本混淆
+      html = html.replace(/&/g, '&amp;');
+    }
+    tmp.innerHTML = html;
 
     domUtils.css(tmp, {
       opacity: 0,
@@ -17090,7 +17145,7 @@ const ToolbarMarkdown = function () {
       env.body.setAttribute('contenteditable', 'false');
       domUtils.addClass(previewContainer, CONST.CLASS.EDITOR_PREVIEW_SHOW);
       markdownRender.do({
-        documentSrc: markdownRender.getMarkdownSrcForEditor(),
+        documentSrc: markdownRender.getMarkdownSrcForEditor({unEscapeHtml: false}),
         container: previewContainer
       }, () => {
 
@@ -24099,6 +24154,7 @@ function getDefaultEnv(dependencyUrl, version) {
         noAmend: false,
         markdownPlugIn: {
           imgSrcFilter: null,
+          customBlockGamut: null,
         },
         callback: {
           markdown: null,
@@ -24865,6 +24921,10 @@ else
 
       text = pluginHooks.postBlockGamut(text, blockGamutHookCallback);
 
+      // 2018-01-03 wiz：增加自定义规则入口
+      if (OPTIONS.customBlockGamut) {
+        text = OPTIONS.customBlockGamut(text);
+      }
       // We already ran _HashHTMLBlocks() before, in Markdown(), but that
       // was to escape raw HTML in the original Markdown source. This time,
       // we're escaping the markup we've just created, so that we don't wrap
@@ -29551,6 +29611,7 @@ const WizDocument = require('./WizDocument');
 let wizDocument, core, coreCallback;
 let wizEditor = {
   init: (options) => {
+    options = options || {};
     if (!options.editor) {
       options.editor = {};
     }
@@ -29747,6 +29808,7 @@ let wizEditor = {
       return wizReader;
     };
     wizReader.closeDocument = wizDocument.reader.closeDocument;
+    wizReader.getRenderDocument = wizDocument.reader.getRenderDocument;
     wizReader.getWordCount = wizDocument.reader.getWordCount;
     wizReader.insertCustomStyle = (id, customCss, isTemp) => {
       wizDocument.insertCustomStyle(id, customCss, isTemp);
@@ -29828,11 +29890,11 @@ let setCoreCallback = WizEditor.setCoreCallback;
 
 const coreCallback = (core) => {
   let env = core.env;
-  let todoClientRoute = core.require.todoClientRoute;
+  let todoRouteForClient = core.require.todoRouteForClient;
 
   //捕获 Mac 端初始化结束
   env.win.initForWebEngine = function() {
-    todoClientRoute.setQtEditor();
+    todoRouteForClient.setQtEditor();
   };
 
 };

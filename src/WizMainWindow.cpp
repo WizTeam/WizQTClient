@@ -3099,14 +3099,7 @@ void WizMainWindow::on_actionSaveAsHtml_triggered()
 {
     if (WizDocumentWebView* editor = getActiveEditor())
     {
-        QString strPath = QFileDialog::getExistingDirectory(0, tr("Open Directory"),
-                                                           QDir::homePath(),
-                                                            QFileDialog::ShowDirsOnly
-                                                            | QFileDialog::DontResolveSymlinks);
-        if (!strPath.isEmpty())
-        {
-            editor->saveAsHtml(strPath + "/");
-        }
+        editor->saveAsHtml();
     }
     WizGetAnalyzer().logAction("MenuBarSaveAsHtml");
 }
