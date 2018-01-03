@@ -2075,10 +2075,13 @@ void WizDocumentWebView::saveAsMarkdown()
         //
         QString source = vModified.toString();
         //
+        QString fileTitle = Utils::WizMisc::extractFileTitle(strIndexFileName);
+
+        QString strResFolder = fileTitle.toHtmlEscaped() + "_files/";
+        source.replace("index_files/", strResFolder);
+        //
         ::WizSaveUnicodeTextToUtf8File(strIndexFileName, source, false);
-
     });
-
 }
 
 void WizDocumentWebView::isModified(std::function<void(bool modified)> callback)

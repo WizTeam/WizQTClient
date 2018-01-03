@@ -3869,15 +3869,13 @@ const DomUtils = function () {
     // 清理特殊字符
     content = utils.replaceSpecialChar(content);
 
-    let editingImgReg, imgFullPathReg;
     if (!isSaveTemp) {
       // Android 编辑图片时，临时保存页面，不能去掉 Editing 标识，否则无法替换 img 的 src
-      editingImgReg = new RegExp('(<img[^<>]*)( ' + CONST.ATTR.IMG_EDITING + '=(\'|")1\\3)', 'ig');
+      let editingImgReg = new RegExp('(<img[^<>]*)( ' + CONST.ATTR.IMG_EDITING + '=(\'|")1\\3)', 'ig');
       content = content.replace(editingImgReg, '$1');
 
       // 恢复图片 index_files 的路径
-      imgFullPathReg = new RegExp('(<[^<>]*src[ ]*=[ ]*("|\'))' + env.options.indexFilesFullPath.escapeRegex(), 'ig');
-      content = content.replace(imgFullPathReg, '$1' + env.options.indexFilesPath + '/');
+      content = this.restoreImgPath(content);
     }
     return docType + content;
   };
@@ -3916,9 +3914,16 @@ const DomUtils = function () {
     }
 
     // 恢复图片 index_files 的路径
-    let imgFullPathReg = new RegExp('(<[^<>]*src[ ]*=[ ]*("|\'))' + env.options.indexFilesFullPath.escapeRegex(), 'ig');
-    content = content.replace(imgFullPathReg, '$1' + env.options.indexFilesPath + '/');
+    content = this.restoreImgPath(content);
     return docType + content;
+  };
+
+  /**
+   * 恢复图片 index_files 的路径
+   */
+  this.restoreImgPath = (content) => {
+    let imgFullPathReg = new RegExp('(<[^<>]*src[ ]*=[ ]*("|\'))' + env.options.indexFilesFullPath.escapeRegex(), 'ig');
+    return content.replace(imgFullPathReg, '$1' + env.options.indexFilesPath + '/');
   };
 
   /**
@@ -7333,6 +7338,7 @@ const MarkdownRender = function (mdOptions) {
 
   let isMathJax = false;
   let mathJaxRender;
+  let markdownSrc = '';
 
   let defaultCB = () => {
     mdWin.prettyPrint();
@@ -7417,11 +7423,6 @@ const MarkdownRender = function (mdOptions) {
 
       // 替换unicode160的空格为unicode为32的空格，否则pagedown无法识别
       return text.replace(/\u00a0/g, " ");
-    },
-    getMarkdownSrc: (container) => {
-      let $body = container ? container : mdContainer;
-      Render.markdownPreProcess($body);
-      return Render.tocReady(Render.getBodyTxt($body));
     },
     markdownConvert: () => {
       const SPLIT = /(\$\$?|\\(?:begin|end){[a-z]*\*?}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
@@ -7528,7 +7529,8 @@ const MarkdownRender = function (mdOptions) {
       };
 
       try {
-        let text = Render.getMarkdownSrc(mdContainer);
+        let text = this.getMarkdownSrc(mdContainer);
+        markdownSrc = text;
         // 判断代码段数量，超过 50个不使用 codeMirror
         const codeReg = /^```/gm;
         let codeCount = text.match(codeReg);
@@ -7745,8 +7747,19 @@ const MarkdownRender = function (mdOptions) {
 
     options = options || {};
 
-    let tmp = env.doc.createElement('div');
+    let src;
+    if (env.readonly) {
+      src = markdownSrc;
+      if (!options.unEscapeHtml) {
+        src = src.replace(/>/g, "&gt;").replace(/</g, "&lt;");
+      }
+
+      src = domUtils.restoreImgPath(src);
+      return src;
+    }
+
     let html = env.body.innerHTML;
+    let tmp = env.doc.createElement('div');
     if (!options.unEscapeHtml) {
       // 必须首先将之前的文本 < > 进行替换，
       // 否则 文本的 < > 会与 后面 markdownPreProcess 方法内处理的 脚本混淆
@@ -7763,7 +7776,7 @@ const MarkdownRender = function (mdOptions) {
       height: '1px',
       overflow: 'hidden'
     });
-    mdContainer.appendChild(tmp);
+    env.body.appendChild(tmp);
 
     codeUtils.clearCodeForMarkdown(tmp);
 
@@ -7773,14 +7786,17 @@ const MarkdownRender = function (mdOptions) {
       domUtils.remove(wizTmpList[i]);
     }
 
-    let src = this.getMarkdownSrc(tmp);
-    mdContainer.removeChild(tmp);
+    src = this.getMarkdownSrc(tmp);
+    src = domUtils.restoreImgPath(src);
+    env.body.removeChild(tmp);
     tmp = null;
     return src;
   };
 
   this.getMarkdownSrc = (container) => {
-    return Render.getMarkdownSrc(container);
+    let $body = container ? container : mdContainer;
+    Render.markdownPreProcess($body);
+    return Render.tocReady(Render.getBodyTxt($body));
   };
 
   this.do = (_options, callback) => {
@@ -7898,7 +7914,8 @@ const MathJaxRender = function (mjOptions) {
     if (loadController.loading) {
       return;
     }
-    if (!mjWin.MathJax) {
+    // TODO MathJax 代码每次切换 编辑、阅读后，必须要重新加载，否则会导致 渲染失败
+    // if (!mjWin.MathJax) {
       loadController.loading = true;
       scriptLoader.appendJsCode(mjDoc, 'MathJax = null', 'text/javascript');
       scriptLoader.appendJsCode(mjDoc, config, 'text/x-mathjax-config');
@@ -7908,9 +7925,9 @@ const MathJaxRender = function (mjOptions) {
           loadController.loading = false;
           loadController.callback();
         });
-    } else {
-      loadController.callback();
-    }
+    // } else {
+    //   loadController.callback();
+    // }
   };
   let mathJaxStart = (_callback) => {
     mjWin.MathJax.Hub.Queue(["Typeset", mjWin.MathJax.Hub, mjContainer, () => {
@@ -16594,10 +16611,10 @@ const ToolbarMarkdown = function () {
       icon: 'list_ul'
     },
     {id: _id.split},
-    // {
-    //   id: _id.image,
-    //   icon: 'image'
-    // },
+    {
+      id: _id.image,
+      icon: 'image'
+    },
     {
       id: _id.table,
       icon: 'table'
