@@ -1848,17 +1848,33 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
     QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg)"));
     if (strImgFileList.isEmpty())
         return;
+    //
+    QString strImagePath = noteResourcesPath();
 
+    CWizStdStringArray files;
     foreach (QString strImgFile, strImgFileList)
     {
-        insertImage(strImgFile);
+        QString destImageFileName = strImagePath + ::WizGenGUIDLowerCaseLetterOnly()
+                + Utils::WizMisc::extractFileExt(strImgFile);
+        //
+        if (QFile::copy(strImgFile, destImageFileName))
+        {
+            files.push_back(destImageFileName);
+        }
         //
         initPath = Utils::WizMisc::extractFilePath(strImgFile);
     }
+    //
+    CString param;
+    WizStringArrayToText(files, param, "*");
+    //
+    QString script = QString("WizEditor.img.insertByPath('%1');").arg(param);
+    page()->runJavaScript(script);
 
     WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
     analyzer.logAction("insertImage");
 }
+
 
 void WizDocumentWebView::editorCommandExecuteInsertDate()
 {
