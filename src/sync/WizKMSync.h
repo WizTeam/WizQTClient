@@ -1,10 +1,11 @@
-﻿#ifndef WIZKMSYNC_H
+#ifndef WIZKMSYNC_H
 #define WIZKMSYNC_H
 
 #include <QThread>
 #include <QMessageBox>
 #include <QWaitCondition>
 #include <QTimer>
+#include <QMutex>
 
 #include "WizSync.h"
 #include "WizKMServer.h"
@@ -27,8 +28,8 @@ class WizKMSyncEvents : public QObject , public IWizKMSyncEvents
     virtual void onStorageLimit(IWizSyncableDatabase* pDatabase);
     virtual void onBizServiceExpr(IWizSyncableDatabase* pDatabase);
     virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase);
-    virtual void onFreeServiceExpr();
-    virtual void onVipServiceExpr();
+    virtual void onFreeServiceExpr(WIZGROUPDATA group);
+    virtual void onVipServiceExpr(WIZGROUPDATA group);
     virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone);
     virtual void onBeginKb(const QString& strKbGUID);
     virtual void onEndKb(const QString& strKbGUID);
@@ -37,8 +38,8 @@ Q_SIGNALS:
     void messageReady(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
-    void promptFreeServiceExpr();
-    void promptVipServiceExpr();
+    void promptFreeServiceExpr(WIZGROUPDATA group);
+    void promptVipServiceExpr(WIZGROUPDATA group);
 };
 
 
@@ -121,12 +122,12 @@ private:
 
 Q_SIGNALS:
     void syncStarted(bool syncAll);
-    void syncFinished(int nErrorCode, const QString& strErrorMesssage, bool isBackground);
+    void syncFinished(int nErrorCode, bool isNetworkError, const QString& strErrorMesssage, bool isBackground);
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
-    void promptFreeServiceExpr();
-    void promptVipServiceExpr();
+    void promptFreeServiceExpr(WIZGROUPDATA group);
+    void promptVipServiceExpr(WIZGROUPDATA group);
 };
 
 class WizKMWaitAndPauseSyncHelper

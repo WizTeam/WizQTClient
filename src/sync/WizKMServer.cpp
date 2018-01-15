@@ -322,6 +322,7 @@ void WizKMApiServerBase::onApiError()
     if (m_pEvents)
     {
         m_pEvents->setLastErrorCode(m_lastError.returnCode);
+        m_pEvents->setIsNetworkError(m_lastError.isNetworkError());
         m_pEvents->setLastErrorMessage(m_lastError.returnMessage);
     }
     //
@@ -523,7 +524,7 @@ bool WizKMAccountsServer::createAccount(const QString& strUserName, const QStrin
     params["productName"] = "WizNoteQT";
     if (!strCaptchaID.isEmpty())
     {
-        params["captchIid"] = strCaptchaID.toStdString();
+        params["captchaId"] = strCaptchaID.toStdString();
         params["captcha"] = strCaptcha.toStdString();
     }
     //
@@ -893,6 +894,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
     , m_objectsTotalSize(0)
 {
     //m_userInfo.strKbServer = "http://localhost:4001";
+    TOLOG1("sync type: %1", isUseNewSync() ? "new" : "old");
 }
 
 WizKMDatabaseServer::~WizKMDatabaseServer()

@@ -10,6 +10,9 @@ enum {
 };
 
 int WizToolsChinese2PinYin(QString text, unsigned int flags, QString& strTextResult);
+bool WizToolsIsChinese2(QString str);
+
+int WizToolsSmartCompare(QString text1, QString text2);
 
 
 #endif // PINYIN_H

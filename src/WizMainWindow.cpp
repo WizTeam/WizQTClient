@@ -57,6 +57,7 @@
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
 #include "utils/WizMisc.h"
+#include "utils/WizPinyin.h"
 #include "widgets/WizFramelessWebDialog.h"
 #include "widgets/WizScreenShotWidget.h"
 #include "widgets/WizImageButton.h"
@@ -99,6 +100,8 @@
 #include "share/WizWebEngineView.h"
 #include "widgets/WizExecutingActionDialog.h"
 #include "widgets/WizUserServiceExprDialog.h"
+
+#include "share/jsoncpp/json/json.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -167,8 +170,15 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_bQuickDownloadMessageEnable(false)
     , m_quiting(false)
 {
+#ifdef QT_DEBUG
+    int ret = WizToolsSmartCompare("H", "d");
+    qDebug() << ret;
+#endif
+
     WizGlobal::setMainWindow(this);
     WizKMSyncThread::setQuickThread(m_syncQuick);
+    //
+    qRegisterMetaType<WIZGROUPDATA>("WIZGROUPDATA");
     //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -200,16 +210,16 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_syncFull, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_syncFull, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
-    connect(m_syncFull, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
-    connect(m_syncFull, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    connect(m_syncFull, SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)), SLOT(on_promptFreeServiceExpr(WIZGROUPDATA)));
+    connect(m_syncFull, SIGNAL(promptVipServiceExpr(WIZGROUPDATA)), SLOT(on_promptVipServiceExpr(WIZGROUPDATA)));
 
     connect(m_syncFull, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_syncFull, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
-    connect(m_syncFull, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
+    connect(m_syncFull, SIGNAL(syncFinished(int, bool, QString, bool)), SLOT(on_syncDone(int, bool, QString, bool)));
 
-    connect(m_syncQuick, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
-    connect(m_syncQuick, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    connect(m_syncQuick, SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)), SLOT(on_promptFreeServiceExpr(WIZGROUPDATA)));
+    connect(m_syncQuick, SIGNAL(promptVipServiceExpr(WIZGROUPDATA)), SLOT(on_promptVipServiceExpr(WIZGROUPDATA)));
     //
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
@@ -718,6 +728,18 @@ void WizMainWindow::on_viewMessage_request(qint64 messageID)
     WizCategoryViewMessageItem* pItem = dynamic_cast<WizCategoryViewMessageItem*>(pBase);
     showMessageList(pItem);
     m_msgList->selectMessage(messageID);
+}
+
+
+void WizMainWindow::on_viewMessage_requestNormal(QVariant messageData)
+{
+    if (messageData.type() == QVariant::Bool)
+    {
+        QString strUrl = WizApiEntry::standardCommandUrl("link");
+        strUrl = strUrl + "&site=wiznote";
+        strUrl += "&name=mac-sync-error-solution";
+        QDesktopServices::openUrl(QUrl(strUrl));
+    }
 }
 
 void WizMainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
@@ -1307,22 +1329,7 @@ bool caseInsensitiveLessThan(QAction* action1, QAction* action2) {
     const QString k1 = action1->text().toLower();
     const QString k2 = action2->text().toLower();
 
-    static bool isSimpChinese = Utils::WizMisc::isChinese();
-    if (isSimpChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(k1);
-            QByteArray arrOther = pCodec->fromUnicode(k2);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            return strThisA.compare(strOtherA.c_str()) < 0;
-        }
-    }
-    //
-    return  k1.compare(k2) < 0;
+    return WizToolsSmartCompare(k1, k2) < 0;
 }
 
 
@@ -1614,6 +1621,73 @@ void WizMainWindow::AppStoreIAP()
 void WizMainWindow::copyLink(const QString& link)
 {
     Utils::WizMisc::copyTextToClipboard(link);
+}
+
+void WizMainWindow::onClickedImage(const QString& src, const QString& list)
+{
+
+    Json::Value d;
+    Json::Reader reader;
+    if (reader.parse(list.toUtf8().constData(), d))
+    {
+        CWizStdStringArray files;
+        if (d.isArray())
+        {
+            for (int i = 0; i < d.size(); i++)
+            {
+                QString file = QString::fromStdString(d[i].asString());
+                files.push_back(file);
+            }
+        }
+        //
+        if (!files.empty())
+        {
+            files.insert(files.begin(), src);
+            //
+            CWizStdStringArray sl;
+            sl.push_back("open");
+            sl.push_back("-a");
+            sl.push_back("Preview");
+            //
+            QString workingPath;
+            //
+            for (auto it = files.begin(); it != files.end(); it++)
+            {
+                QString fileUrl = *it;
+                QUrl url(fileUrl);
+                QString path = url.toLocalFile();
+                //
+                if (workingPath.isEmpty())
+                {
+                    workingPath = Utils::WizMisc::extractFilePath(path);
+                }
+                else
+                {
+                    QString currentPath = Utils::WizMisc::extractFilePath(path);
+                    if (currentPath != workingPath)
+                    {
+                        continue;
+                    }
+                }
+                //
+                QString fileName = Utils::WizMisc::extractFileName(path);
+                sl.push_back("\"" + fileName + "\"");
+            }
+            //
+            CString commandLine;
+            WizStringArrayToText(sl, commandLine, " ");
+            //
+            QProcess* process = new QProcess(this);
+            process->setWorkingDirectory(workingPath);
+            process->start(commandLine);
+            //
+            return;
+        }
+    }
+    //
+
+    QUrl url = QUrl(src);
+    QDesktopServices::openUrl(url);
 }
 
 #ifndef Q_OS_MAC
@@ -2136,7 +2210,7 @@ void WizMainWindow::on_btnMarkDocumentsRead_triggered()
         db.setGroupDocumentsReaded();
     }
 
-    m_documents->clear();
+    m_documents->clearAllItems();
 }
 
 //void MainWindow::on_documents_hintChanged(const QString& strHint)
@@ -2239,9 +2313,10 @@ void WizMainWindow::on_syncStarted(bool syncAll)
     }
 }
 
-void WizMainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool isBackground)
+void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QString& strErrorMsg, bool isBackground)
 {
     m_animateSync->stopPlay();
+    //
 
     //
     if (isXMLRpcErrorCodeRelatedWithUserAccount(nErrorCode))
@@ -2260,6 +2335,21 @@ void WizMainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool
         //当用户的企业付费到期并且有待上传的内容的时候，进行弹框提示
         WizMessageBox::information(this, tr("Info"), strErrorMsg);
     }
+    else
+    {
+        QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Critical;
+        int delay = 30 * 1000;
+        QVariant param(isNetworkError);
+
+        if (isNetworkError) {
+            m_tray->showMessage(tr("Sync failed"), tr("Bad network connection, can not sync now. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
+            return;
+        } else {
+            m_tray->showMessage(tr("Sync failed"), tr("There is something wrong with sync service. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
+            return;
+        }
+    }
+    //
 
     m_documents->viewport()->update();
     m_category->updateGroupsData();
@@ -2300,7 +2390,7 @@ void WizMainWindow::on_promptMessage_request(int nType, const QString& strTitle,
 
 
 
-void WizMainWindow::promptServiceExpr(bool free)
+void WizMainWindow::promptServiceExpr(bool free, WIZGROUPDATA group)
 {
     static int lastPrompt = 0;
     if (lastPrompt != 0)
@@ -2320,26 +2410,26 @@ void WizMainWindow::promptServiceExpr(bool free)
     lastPrompt = WizGetTickCount();
 
     WizDatabase& db = m_dbMgr.db("");
-    bool biz = db.hasBiz();
+    bool isBizUser = db.hasBiz();
     //
     WizUserServiceExprDialog dlg(NULL);
-    dlg.setUserInfo(free, biz);
-    if (0 != dlg.exec())
+    dlg.setUserInfo(free, isBizUser, group);
+    if (0 != dlg.exec() && !group.isGroup())
     {
         showVipUpgradePage();
     }
     in  = false;
 }
 
-void WizMainWindow::on_promptFreeServiceExpr()
+void WizMainWindow::on_promptFreeServiceExpr(WIZGROUPDATA group)
 {
-    promptServiceExpr(true);
+    promptServiceExpr(true, group);
 }
 
 
-void WizMainWindow::on_promptVipServiceExpr()
+void WizMainWindow::on_promptVipServiceExpr(WIZGROUPDATA group)
 {
-    promptServiceExpr(false);
+    promptServiceExpr(false, group);
 }
 
 
@@ -3009,16 +3099,19 @@ void WizMainWindow::on_actionSaveAsHtml_triggered()
 {
     if (WizDocumentWebView* editor = getActiveEditor())
     {
-        QString strPath = QFileDialog::getExistingDirectory(0, tr("Open Directory"),
-                                                           QDir::homePath(),
-                                                            QFileDialog::ShowDirsOnly
-                                                            | QFileDialog::DontResolveSymlinks);
-        if (!strPath.isEmpty())
-        {
-            editor->saveAsHtml(strPath + "/");
-        }
+        editor->saveAsHtml();
     }
     WizGetAnalyzer().logAction("MenuBarSaveAsHtml");
+}
+
+
+void WizMainWindow::on_actionSaveAsMarkdown_triggered()
+{
+    if (WizDocumentWebView* editor = getActiveEditor())
+    {
+        editor->saveAsMarkdown();
+    }
+    WizGetAnalyzer().logAction("MenuBarSaveAsMarkdown");
 }
 
 void WizMainWindow::on_actionImportFile_triggered()
@@ -3082,7 +3175,7 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
 
-            m_documents->clear();
+            m_documents->clearAllItems();
             m_documents->setDocuments(arrayDocument, true);
             //
         });
@@ -3213,6 +3306,12 @@ void WizMainWindow::on_category_itemSelectionChanged()
         return;
     } else {
         oldItem = currentItem;
+    }
+    //
+    if (WizCategoryViewTrashItem* pItem = dynamic_cast<WizCategoryViewTrashItem *>(currentItem))
+    {
+        m_category->on_action_deleted_recovery();
+        return;
     }
 
     QTreeWidgetItem* categoryItem = category->currentItem();
@@ -3418,7 +3517,16 @@ void WizMainWindow::viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistor
     if (addToHistory) {
         m_history->addHistory(data);
     }
+    //
+    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_MARKDOWN)->setEnabled(WizIsMarkdownNote(data));
+    //
 }
+
+void WizMainWindow::titleChanged()
+{
+    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_MARKDOWN)->setEnabled(WizIsMarkdownNote(m_doc->note()));
+}
+
 
 void WizMainWindow::locateDocument(const WIZDOCUMENTDATA& data)
 {
@@ -3800,6 +3908,8 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 
     connect(m_tray, SIGNAL(viewMessageRequest(qint64)),
             SLOT(on_viewMessage_request(qint64)));
+    connect(m_tray, SIGNAL(viewMessageRequestNormal(QVariant)),
+            SLOT(on_viewMessage_requestNormal(QVariant)));
     //
     //
     trayIcon->setContextMenu(m_trayMenu);

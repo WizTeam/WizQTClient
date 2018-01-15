@@ -48,6 +48,12 @@ void WizLineInputDialog::setOKButtonEnable(bool enable)
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enable);
 }
+
+void WizLineInputDialog::setErrorMessage(QString message)
+{
+    ui->labelError->setText(message);
+}
+
 void WizLineInputDialog::accept()
 {
     if (m_okHandler)

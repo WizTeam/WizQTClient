@@ -28,6 +28,7 @@ public:
 
     static QString lastErrorMessage();
     static int lastErrorCode();
+    static bool lastIsNetworkError();
 
 Q_SIGNALS:
     void tokenAcquired(QString strToken);

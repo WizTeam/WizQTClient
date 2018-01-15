@@ -560,6 +560,9 @@ void WizDocumentWebView::onTimerAutoSaveTimout()
 
 void WizDocumentWebView::onTitleEdited(QString strTitle)
 {
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
+    mainWindow->titleChanged();
+    //
     WIZDOCUMENTDATA document = view()->note();
     document.strTitle = strTitle;
     // Only sync when contents unchanged. If contents changed would sync after document saved.
@@ -930,6 +933,7 @@ QString WizDocumentWebView::getHighlightKeywords()
     texts.push_back(doc.strHighlightText);
     texts.push_back(doc.strHighlightTitle);
     //
+    std::set<QString> lowerCaseKeywords;
     std::set<QString> keywords;
     for (auto it : texts)
     {
@@ -945,7 +949,12 @@ QString WizDocumentWebView::getHighlightKeywords()
                 break;
             //
             QString keyword = text.mid(start, end - start);
-            keywords.insert("'" + keyword + "'");
+            QString lower = keyword.toLower();
+            if (lowerCaseKeywords.find(lower) == lowerCaseKeywords.end())
+            {
+                lowerCaseKeywords.insert(lower);
+                keywords.insert("'" + keyword + "'");
+            }
             //
             begin = end + 5;
         }
@@ -1203,13 +1212,20 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 }
 
 
+//#define DEBUG_EDITOR
+
 void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)
 {
     QString strResourcePath = Utils::WizPathResolve::resourcesPath();
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
-    QString strEditorJS = strHtmlEditorPath + "wizEditorForMac.js";
-    QString strInit = strHtmlEditorPath + "editorHelper.js";
+#ifdef DEBUG_EDITOR
+    QString strEditorJS = "http://192.168.1.73:8080/libs/wizEditor/wizEditorForMac.js";
+    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
+#else
+    QString strEditorJS = "file:///" +  strHtmlEditorPath + "wizEditorForMac.js";
+    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
+#endif
     //
     files.clear();
     files[strEditorJS] = "";
@@ -1218,8 +1234,8 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     /*
      *
      * 渐变式加载笔记，暂时不需要
-    QString tempCss = strHtmlEditorPath + "tempeditorstyle.css";
-    QString tempCssLoadOnly = strHtmlEditorPath + "tempeditorstyle_loadonly.css";
+    QString tempCss = "file:///" + strHtmlEditorPath + "tempeditorstyle.css";
+    QString tempCssLoadOnly = "file:///" + strHtmlEditorPath + "tempeditorstyle_loadonly.css";
     //
     files[tempCss] = "wiz_unsave_style";
     files[tempCssLoadOnly] = "wiz_style_for_load";
@@ -1234,19 +1250,32 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::m
     Q_ASSERT(!files.empty());
     for (std::map<QString, QString>::const_iterator it = files.begin(); it != files.end(); it++)
     {
-        QString strFileName = it->first;
+        QString url = it->first;
+        QString strFileName = QUrl(url).toLocalFile();
         QString name = it->second;
         //
-        Q_ASSERT(WizPathFileExists(strFileName));
+#ifndef DEBUG_EDITOR
+        if (!strFileName.isEmpty())
+        {
+            Q_ASSERT(WizPathFileExists(strFileName));
+        }
+#endif
         //
         QString strExt = Utils::WizMisc::extractFileExt(strFileName);
+        if (strExt.isEmpty())
+        {
+            strExt = Utils::WizMisc::extractFileExt(url);
+        }
+        //
         if (0 == strExt.compare(".css", Qt::CaseInsensitive))
         {
             if (name.isEmpty()) {
                 name = "wiz_inner_style";
             }
             //
-            QString strTag = WizFormatString2("<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName, name);
+            QString strTag = WizFormatString2(
+                        "<link rel=\"stylesheet\" type=\"text/css\" href=\"%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\">",
+                        url, name);
             //
             if (strHtml.indexOf(strTag) == -1)
             {
@@ -1259,8 +1288,8 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::m
                 name = "wiz_inner_script";
             }
             QString	strTag = WizFormatString2(
-                    "<script type=\"text/javascript\" src=\"file:///%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\"></script>",
-                    strFileName, name);
+                    "<script type=\"text/javascript\" src=\"%1\" name=\"%2\" wiz_style=\"unsave\" charset=\"utf-8\"></script>",
+                    url, name);
             //
             if (strHtml.indexOf(strTag) == -1)
             {
@@ -1423,7 +1452,7 @@ void WizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
                                                       const QString& arg2 /* = QString() */,
                                                       const QString& arg3 /* = QString() */)
 {
-    QString strExec = QString("document.execCommand('%1'").arg(strCommand);
+    QString strExec = QString("WizEditor.execCommand('%1'").arg(strCommand);
     if (!arg1.isEmpty()) {
         strExec += ", " + arg1;
     }
@@ -1819,17 +1848,33 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
     QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg)"));
     if (strImgFileList.isEmpty())
         return;
+    //
+    QString strImagePath = noteResourcesPath();
 
+    CWizStdStringArray files;
     foreach (QString strImgFile, strImgFileList)
     {
-        insertImage(strImgFile);
+        QString destImageFileName = strImagePath + ::WizGenGUIDLowerCaseLetterOnly()
+                + Utils::WizMisc::extractFileExt(strImgFile);
+        //
+        if (QFile::copy(strImgFile, destImageFileName))
+        {
+            files.push_back(destImageFileName);
+        }
         //
         initPath = Utils::WizMisc::extractFilePath(strImgFile);
     }
+    //
+    CString param;
+    WizStringArrayToText(files, param, "*");
+    //
+    QString script = QString("WizEditor.img.insertByPath('%1');").arg(param);
+    page()->runJavaScript(script);
 
     WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
     analyzer.logAction("insertImage");
 }
+
 
 void WizDocumentWebView::editorCommandExecuteInsertDate()
 {
@@ -1935,12 +1980,25 @@ void WizDocumentWebView::editorCommandExecuteScreenShot()
 
 void WizDocumentWebView::saveAsPDF()
 {
+    CString strTitle = view()->note().strTitle;
+    WizMakeValidFileNameNoPath(strTitle);
+    static QString strInitPath = QDir::homePath();
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    //
     QString strFileName = QFileDialog::getSaveFileName(this, QString(),
-                                                       QDir::homePath() + "/untitled.pdf", tr("PDF Files (*.pdf)"));
+                                                       strInitFileName,
+                                                       tr("PDF Files (*.pdf)"));
+    //
+    if (strFileName.isEmpty())
+        return;
+    //
+    strInitPath = Utils::WizMisc::extractFilePath(strFileName);
+    //
     if (::WizPathFileExists(strFileName))
     {
         ::WizDeleteFile(strFileName);
     }
+    //
     QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
     double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
     double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
@@ -1953,13 +2011,94 @@ void WizDocumentWebView::saveAsPDF()
     page()->printToPdf(strFileName, layout);
 }
 
-void WizDocumentWebView::saveAsHtml(const QString& strDirPath)
+void WizDocumentWebView::saveAsHtml()
 {
+    CString strTitle = view()->note().strTitle;
+    WizMakeValidFileNameNoPath(strTitle);
+    strTitle = Utils::WizMisc::extractFileTitle(strTitle);
+    //
+    static QString strInitPath = QDir::homePath();
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    //
+    QString strIndexFileName = QFileDialog::getSaveFileName(this, QString(),
+                                                       strInitFileName,
+                                                       tr("Html Files (*.html)"));
+    //
+    if (strIndexFileName.isEmpty())
+        return;
+    //
+    strInitPath = Utils::WizMisc::extractFilePath(strIndexFileName);
+    //
     const WIZDOCUMENTDATA& doc = view()->note();
     WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.exportToHtmlFile(doc, strDirPath);    
+    //
+    if (!db.exportToHtmlFile(doc, strIndexFileName)) {
+        return;
+    }
+    //
+    if (WizIsMarkdownNote(doc))
+    {
+        QString strScript = QString("WizReader.getRenderDocument();");
+        page()->runJavaScript(strScript, [=](const QVariant& vRet) {
+            //
+            QString strHtml = vRet.toString();
+            //
+            if (!strHtml.isEmpty())
+            {
+                QString fileTitle = Utils::WizMisc::extractFileTitle(strIndexFileName);
+                QString resourcePath = fileTitle + "_files/";
+                strHtml.replace("index_files/", resourcePath);
+                //
+                ::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtml, true);
+            }
+            //
+        });
+
+    }
 }
 
+void WizDocumentWebView::saveAsMarkdown()
+{
+    CString strTitle = view()->note().strTitle;
+    WizMakeValidFileNameNoPath(strTitle);
+    static QString strInitPath = QDir::homePath();
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    //
+    QString strIndexFileName = QFileDialog::getSaveFileName(this, QString(),
+                                                       strInitFileName,
+                                                       tr("Markdown Files (*.md)"));
+    //
+    if (strIndexFileName.isEmpty())
+        return;
+    //
+    strInitPath = Utils::WizMisc::extractFilePath(strIndexFileName);
+    //
+    if (::WizPathFileExists(strIndexFileName))
+    {
+        ::WizDeleteFile(strIndexFileName);
+    }
+    //
+    const WIZDOCUMENTDATA& doc = view()->note();
+    WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    //
+    if (!db.exportToHtmlFile(doc, strIndexFileName)) {
+        return;
+    }
+    /*
+     因为存在内置的表格，todo，图片，导致无法正常输出成标准的markdown
+    */
+    page()->runJavaScript(QString("WizEditor.getMarkdownSrc({unEscapeHtml: true});"), [=](const QVariant& vModified){
+        //
+        QString source = vModified.toString();
+        //
+        QString fileTitle = Utils::WizMisc::extractFileTitle(strIndexFileName);
+
+        QString strResFolder = fileTitle.toHtmlEscaped() + "_files/";
+        source.replace("index_files/", strResFolder);
+        //
+        ::WizSaveUnicodeTextToUtf8File(strIndexFileName, source, false);
+    });
+}
 
 void WizDocumentWebView::isModified(std::function<void(bool modified)> callback)
 {
@@ -2029,11 +2168,11 @@ QString WizDocumentWebView::getCurrentNoteHtml()
 }
 
 
-void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, \
+void copyFileToFolder(const QString& strFileFolder, const QString& strIndexFile, \
                          const QStringList& strResourceList)
 {
     //copy index file
-    QString strFolderIndex = strFileFoler + "index.html";
+    QString strFolderIndex = strFileFolder + "index.html";
     if (strIndexFile != strFolderIndex)
     {
         QFile::remove(strFolderIndex);
@@ -2041,7 +2180,7 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
     }
 
     //copy resources to temp folder
-    QString strResourcePath = strFileFoler + "index_files/";
+    QString strResourcePath = strFileFolder + "index_files/";
     for (int i = 0; i < strResourceList.count(); i++)
     {
         if (QFile::exists(strResourceList.at(i)))

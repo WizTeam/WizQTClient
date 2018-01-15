@@ -15,6 +15,9 @@
 #include <QtCore/qset.h>
 #include <QtCore/qcontiguouscache.h>
 
+#include "share/WizMisc.h"
+
+
 class QBuffer;
 class WizInfo;
 

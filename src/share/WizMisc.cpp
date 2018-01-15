@@ -3014,6 +3014,7 @@ bool WizURLDownloadToData(const QString& url, QByteArray& data, QObject* receive
 
         if (loop.error() != QNetworkReply::NoError)
         {
+            TOLOG2("Failed to download data: %1, %2", WizIntToStr(loop.error()), loop.errorString());
             return false;
         }
 

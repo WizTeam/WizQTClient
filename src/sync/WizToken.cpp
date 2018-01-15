@@ -13,6 +13,7 @@
 
 WizTokenPrivate::WizTokenPrivate(WizToken* token)
     : m_bProcessing(false)
+    , m_bLastIsNetworkError(false)
     , m_mutex(new QMutex(QMutex::Recursive))
     , q(token)
 
@@ -42,6 +43,7 @@ QString WizTokenPrivate::token()
         {
             m_lastErrorCode = asServer.getLastErrorCode();
             m_lastErrorMessage = asServer.getLastErrorMessage();
+            m_bLastIsNetworkError = asServer.isNetworkError();
             return QString();
         }
     }
@@ -74,6 +76,7 @@ QString WizTokenPrivate::token()
             {
                 m_lastErrorCode = asServer.getLastErrorCode();
                 m_lastErrorMessage = asServer.getLastErrorMessage();
+                m_bLastIsNetworkError = asServer.isNetworkError();
                 return QString();
             }
         }
@@ -159,6 +162,13 @@ QString WizTokenPrivate::lastErrorMessage() const
     return m_lastErrorMessage;
 }
 
+bool WizTokenPrivate::lastIsNetworkError() const
+{
+    QMutexLocker locker(m_mutex);
+    Q_UNUSED(locker);
+    //
+    return m_bLastIsNetworkError;
+}
 
 static WizTokenPrivate* d = 0;
 static WizToken* m_instance = 0;
@@ -234,6 +244,12 @@ QString WizToken::lastErrorMessage()
     return d->lastErrorMessage();
 }
 
+bool WizToken::lastIsNetworkError()
+{
+    Q_ASSERT(m_instance);
+
+    return d->lastIsNetworkError();
+}
 int WizToken::lastErrorCode()
 {
     Q_ASSERT(m_instance);

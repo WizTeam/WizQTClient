@@ -6,6 +6,7 @@
 
 #include "../share/WizQtHelper.h"
 #include "../share/WizMisc.h"
+#include "WizMisc.h"
 
 
 struct WIZCHINESEWORDPINYINDATA
@@ -218,6 +219,69 @@ int WizToolsChinese2PinYin(QString text, UINT flags, QString& strTextResult)
     int ret = WizToolsChinese2PinYin(buffer, flags, strTextResult);
     delete [] buffer;
     return ret;
+}
+int WizToolsChinese2PinYin(QString text, UINT flags, QString splitter, QString& strTextResult)
+{
+    int len = text.length() + 1;
+    wchar_t* buffer = new wchar_t[len];
+    memset(buffer, 0, len * sizeof(wchar_t));
+    text.toWCharArray(buffer);
+    int ret = WizToolsChinese2PinYinEx(buffer, flags, splitter.toUtf8(), strTextResult);
+    delete [] buffer;
+    return ret;
+}
+
+QString WizToolsChinese2PinYin(QString str)
+{
+    QString pinyin;
+    WizToolsChinese2PinYin(str, 0, "", pinyin);
+    return pinyin;
+}
+
+bool WizToolsIsChinese(QString str)
+{
+    if (str.isEmpty())
+        return false;
+    //
+    QString pinyin;
+    WizToolsChinese2PinYin(str, WIZ_C2P_FIRST_LETTER_ONLY, "", pinyin);
+    if (pinyin.isEmpty())
+        return false;
+    //
+    return pinyin[0] != str[0];
+}
+
+int WizToolsSmartCompare(QString text1, QString text2)
+{
+    static bool isChinese = Utils::WizMisc::isChinese();
+
+    if (text1.isEmpty() && text2.isEmpty()) {
+        return 0;
+    } else if (text1.isEmpty()) {
+        return -1;
+    } else if (text2.isEmpty()) {
+        return 1;
+    }
+    //
+    //
+    if (isChinese) {
+        //
+        bool chinese1 = WizToolsIsChinese(text1);
+        bool chinese2 = WizToolsIsChinese(text2);
+        if (chinese1 && chinese2) {
+            QString chineseStr1 = WizToolsChinese2PinYin(text1);
+            QString chineseStr2 = WizToolsChinese2PinYin(text2);
+            return chineseStr1.compare(chineseStr2, Qt::CaseInsensitive);
+        } else if (chinese1) {
+            return 1;
+        } else if (chinese2) {
+            return -1;
+        } else {
+            return text1.compare(text2, Qt::CaseInsensitive);
+        }
+    } else {
+        return text1.compare(text2, Qt::CaseInsensitive);
+    }
 }
 
 

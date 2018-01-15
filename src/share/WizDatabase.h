@@ -212,6 +212,8 @@ public:
     // info and groups
     virtual void setUserInfo(const WIZUSERINFO& info);
     virtual void setKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
+    virtual QString getGroupName();
+    virtual WIZGROUPDATA getGroupInfo();
     virtual bool onDownloadGroups(const CWizGroupDataArray& arrayGroup);
     virtual bool onDownloadBizs(const CWizBizDataArray& arrayBiz);
     virtual bool onDownloadBizUsers(const QString& kbGuid, const CWizBizUserDataArray& arrayUser);
@@ -475,14 +477,14 @@ public:
                                 QString& strFullPathFileName);
     bool documentToHtmlFile(const WIZDOCUMENTDATA& document, \
                             const QString& strPath);
-    bool exportToHtmlFile(const WIZDOCUMENTDATA& document, \
-                            const QString& strPath);
+    bool exportToHtmlFile(const WIZDOCUMENTDATA& document,
+                          const QString& strIndexFileName);
 
     bool extractZiwFileToFolder(const WIZDOCUMENTDATA& document, const QString& strFolder);
     bool encryptDocument(WIZDOCUMENTDATA& document);
-    bool compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler);
+    bool compressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFolder);
     bool compressFolderToZiwFile(WIZDOCUMENTDATA& document, \
-                                const QString& strFileFoler, const QString& strZiwFileName);
+                                const QString& strFileFolder, const QString& strZiwFileName);
     bool cancelDocumentEncryption(WIZDOCUMENTDATA& document);
 
     bool isFileAccessible(const WIZDOCUMENTDATA& document);

@@ -19,11 +19,12 @@ public:
 public slots:
     void onMessageClicked();
     void showMessage(const QString &title, const QString &msg,
-                     QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information, int msecs = 10000);
+                     QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information, int msecs = 10000, const QVariant& param = QVariant());
     void showMessage(const QVariant& param);
 
 signals:
     void viewMessageRequest(qint64 messageID);
+    void viewMessageRequestNormal(QVariant messageData);
 
 
 private:

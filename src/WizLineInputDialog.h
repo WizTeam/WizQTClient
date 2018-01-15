@@ -25,6 +25,7 @@ public:
     QString input();
 
     void setOKButtonEnable(bool enable);
+    void setErrorMessage(QString message);
     //
     void setOKHandler(std::function<bool(QString)> handler) { m_okHandler = handler; }
 

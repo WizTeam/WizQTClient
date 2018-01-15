@@ -4,42 +4,56 @@ rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 
-cmake -DWIZNOTE_USE_QT5=NO -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
-make -j5
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.9.3/5.9.3/gcc_64  ../WizQTClient && \
+make -j2
 
 cd ..
-rm -rf WizNote
+rm -rf Package
+mkdir Package
+cd Package
 mkdir WizNote
 cd WizNote
 mkdir bin
 cd bin
 
-cp ../../WizQTClient-Release-Linux/bin/WizNote ./
-cp /usr/lib/x86_64-linux-gnu/libQtWebKit.so.4 ./
-cp /usr/lib/x86_64-linux-gnu/libQtGui.so.4 ./
-cp /usr/lib/x86_64-linux-gnu//libQtXml.so.4 ./
-cp /usr/lib/x86_64-linux-gnu/libQtNetwork.so.4 ./
-cp /usr/lib/x86_64-linux-gnu/libQtCore.so.4 ./
+cp ../../../WizQTClient-Release-Linux/src/WizNote ./
 
 cd ..
-mkdir lib
-cd lib
-mkdir wiznote
-cd wiznote
+cp -R ../../WizQTClient-Release-Linux/share ./
+
+cd ..
+
+mkdir logo
+cd logo
+mkdir hicolor
+cd hicolor
+mkdir 16x16
+mkdir 32x32
+mkdir 64x64
+mkdir 128x128
+mkdir 256x256
+mkdir 512x512
+
+cp ../../../WizQTClient/build/common/logo/wiznote16.png 16x16/wiznote.png
+cp ../../../WizQTClient/build/common/logo/wiznote32.png 32x32/wiznote.png
+cp ../../../WizQTClient/build/common/logo/wiznote64.png 64x64/wiznote.png
+cp ../../../WizQTClient/build/common/logo/wiznote128.png 128x128/wiznote.png
+cp ../../../WizQTClient/build/common/logo/wiznote256.png 256x256/wiznote.png
+cp ../../../WizQTClient/build/common/logo/wiznote512.png 512x512/wiznote.png
+
+cd ..
+cd ..
+
+cp ../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
+cd ./WizNote
 mkdir plugins
-cd plugins
-
-cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libextensionsystem.so ./
-cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libaggregation.so ./
-cp ../../../../WizQTClient-Release-Linux/lib/wiznote/plugins/libCore.so ./
-
-cd ..
-cd ..
+cd ./plugins/
+mkdir platforminputcontexts
+cd ../..
+cp /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
 cd ..
 
-cp -R ../WizQTClient-Release-Linux/share ./
-#cp ../WizQTClient/start-WizNote.sh ./
-ln -s bin/WizNote WizNote
-cd ..
-rm -f ./WizNote.tar.gz
-tar -zcvf ./WizNote.tar.gz WizNote
+
+./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.3/5.9.3/gcc_64/bin/qmake
+
+

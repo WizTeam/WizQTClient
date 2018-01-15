@@ -23,10 +23,10 @@ WizTrayIcon::~WizTrayIcon()
 {
 }
 
-void WizTrayIcon::showMessage(const QString& title, const QString& msg, QSystemTrayIcon::MessageIcon icon, int msecs)
+void WizTrayIcon::showMessage(const QString& title, const QString& msg, QSystemTrayIcon::MessageIcon icon, int msecs, const QVariant& param)
 {
     m_messageType = wizBubbleNormal;
-    m_messageData.clear();
+    m_messageData = param;
     QSystemTrayIcon::showMessage(title, msg, icon, msecs);
 }
 
@@ -56,6 +56,10 @@ void WizTrayIcon::onMessageClicked()
     {
         qint64 id = m_messageData.toLongLong();
         emit viewMessageRequest(id);
+    }
+    else if (m_messageType == wizBubbleNormal)
+    {
+        emit viewMessageRequestNormal(m_messageData);
     }
 }
 

@@ -204,7 +204,8 @@ public:
     void editorCommandExecutePastePlainText();
     //
     void saveAsPDF();
-    void saveAsHtml(const QString& strDirPath);
+    void saveAsMarkdown();
+    void saveAsHtml();
     void shareNoteByEmail();
     void shareNoteByLink();
     //

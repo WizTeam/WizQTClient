@@ -11,6 +11,7 @@
 #include <QTextCodec>
 
 #include "WizDef.h"
+#include "WizPinyin.h"
 
 namespace Utils {
 
@@ -226,6 +227,9 @@ void WizMisc::copyTextToClipboard(const QString& text)
 
 bool WizMisc::isChinese()
 {
+#ifdef QT_DEBUG
+    return true;
+#endif
     return isSimpChinese() || isTraditionChinese();
 }
 
@@ -255,22 +259,7 @@ bool WizMisc::isTraditionChinese()
 
 bool WizMisc::localeAwareCompare(const QString& s1, const QString& s2)
 {
-    static bool isCh = isChinese();
-    if (isCh)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(s1);
-            QByteArray arrOther = pCodec->fromUnicode(s2);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            return strThisA.compare(strOtherA.c_str()) < 0;
-        }
-    }
-    //
-    return s1.compare(s2) < 0;
+    return WizToolsSmartCompare(s1, s2) < 0;
 }
 
 int WizMisc::getVersionCode()

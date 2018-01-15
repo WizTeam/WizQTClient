@@ -374,8 +374,10 @@ public Q_SLOTS:
     void on_action_user_newFolder_confirmed(int result);
     void on_action_user_newTag();
     void on_action_user_newTag_confirmed(int result);
+    void on_newTag_inputText_changed(const QString& text);
     void on_action_group_newFolder();
     void on_action_group_newFolder_confirmed(int result);
+    void on_group_newFolder_inputText_changed(const QString& text);
 
     void on_action_moveItem();
     void on_action_user_moveFolder();

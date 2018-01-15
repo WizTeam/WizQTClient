@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>326</width>
-    <height>136</height>
+    <height>145</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -38,6 +38,13 @@
    </item>
    <item>
     <widget class="QLineEdit" name="editInput"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelError">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

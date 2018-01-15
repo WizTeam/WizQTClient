@@ -76,14 +76,14 @@ void WizKMSyncEvents::onBizNoteCountLimit(IWizSyncableDatabase* pDatabase)
     // FIXME
     Q_UNUSED(pDatabase);
 }
-void WizKMSyncEvents::onFreeServiceExpr()
+void WizKMSyncEvents::onFreeServiceExpr(WIZGROUPDATA group)
 {
-    emit promptFreeServiceExpr();
+    emit promptFreeServiceExpr(group);
 }
 
-void WizKMSyncEvents::onVipServiceExpr()
+void WizKMSyncEvents::onVipServiceExpr(WIZGROUPDATA group)
 {
-    emit promptVipServiceExpr();
+    emit promptVipServiceExpr(group);
 }
 
 void WizKMSyncEvents::onUploadDocument(const QString& strDocumentGUID, bool bDone)
@@ -133,8 +133,8 @@ WizKMSyncThread::WizKMSyncThread(WizDatabase& db, bool quickOnly, QObject* paren
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
     connect(m_pEvents, SIGNAL(promptMessageRequest(int, QString, QString)), SIGNAL(promptMessageRequest(int, QString, QString)));
     connect(m_pEvents, SIGNAL(bubbleNotificationRequest(const QVariant&)), SIGNAL(bubbleNotificationRequest(const QVariant&)));
-    connect(m_pEvents, SIGNAL(promptFreeServiceExpr()), SIGNAL(promptFreeServiceExpr()));
-    connect(m_pEvents, SIGNAL(promptVipServiceExpr()), SIGNAL(promptVipServiceExpr()));
+    connect(m_pEvents, SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)), SIGNAL(promptFreeServiceExpr(WIZGROUPDATA)));
+    connect(m_pEvents, SIGNAL(promptVipServiceExpr(WIZGROUPDATA)), SIGNAL(promptVipServiceExpr(WIZGROUPDATA)));
 
     m_timer.setSingleShot(true);
     connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));
@@ -205,7 +205,7 @@ bool WizKMSyncThread::prepareToken()
     QString token = WizToken::token();
     if (token.isEmpty())
     {
-        Q_EMIT syncFinished(WizToken::lastErrorCode(), WizToken::lastErrorMessage(), isBackground());
+        Q_EMIT syncFinished(WizToken::lastErrorCode(), WizToken::lastIsNetworkError(), WizToken::lastErrorMessage(), isBackground());
         return false;
     }
     //
@@ -301,6 +301,7 @@ public:
     ~CWizKMSyncThreadHelper()
     {
         Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->getLastErrorCode()
+                                       , m_pThread->m_pEvents->isNetworkError()
                                        , m_pThread->m_pEvents->getLastErrorMessage()
                                        , m_pThread->isBackground());
         m_pThread->m_pEvents->clearLastErrorMessage();
@@ -309,6 +310,8 @@ public:
 
 bool WizKMSyncThread::syncAll()
 {
+    TOLOG2("client version: %1(%2)", WIZ_CLIENT_TYPE, WIZ_CLIENT_VERSION);
+    //
     m_bNeedSyncAll = false;
     //
     CWizKMSyncThreadHelper helper(this, true);
