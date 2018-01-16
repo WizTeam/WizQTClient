@@ -764,6 +764,10 @@ bool WizKMAccountsServer::getMessages(__int64 nStartVersion, CWizMessageDataArra
     //
     QString urlPath = "/messages";
     QString strUrl = WizCommonApiEntry::messageServerUrl() + urlPath;
+    if (!strUrl.startsWith("http")) {
+        TOLOG("Failed to get message server");
+        return false;
+    }
     //
     while (1)
     {
