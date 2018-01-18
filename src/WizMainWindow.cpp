@@ -736,9 +736,20 @@ void WizMainWindow::on_viewMessage_requestNormal(QVariant messageData)
     if (messageData.type() == QVariant::Bool)
     {
         QString strUrl = WizApiEntry::standardCommandUrl("link");
+        if (!strUrl.startsWith("http")) {
+            return;
+        }
         strUrl = strUrl + "&site=wiznote";
         strUrl += "&name=mac-sync-error-solution";
         QDesktopServices::openUrl(QUrl(strUrl));
+    }
+    else if (messageData.type() == QVariant::Int)
+    {
+        if (WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR == messageData
+                || WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR == messageData)
+        {
+            showVipUpgradePage();
+        }
     }
 }
 
@@ -2345,7 +2356,21 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
             m_tray->showMessage(tr("Sync failed"), tr("Bad network connection, can not sync now. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
             return;
         } else {
-            m_tray->showMessage(tr("Sync failed"), tr("There is something wrong with sync service. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
+            //
+            QString message = tr("There is something wrong with sync service. Please try again later. (code: %1)").arg(nErrorCode);
+            if (WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR == nErrorCode) {
+                message = QObject::tr("VIP service of has expired, please renew to VIP.");
+                param = QVariant((int)nErrorCode);
+            } else if (WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR == nErrorCode) {
+                message = QObject::tr("User service of has expired, please upgrade to VIP.");
+                param = QVariant((int)nErrorCode);
+            } else if (WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR == nErrorCode) {
+                message = WizFormatString0(QObject::tr("Your {p} business service has expired."));
+            } else if (WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT == nErrorCode) {
+                message = WizFormatString0(QObject::tr("Group notes count limit exceeded!"));
+            }
+            //
+            m_tray->showMessage(tr("Sync failed"), message, icon, delay, param);
             return;
         }
     }
