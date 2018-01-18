@@ -1022,6 +1022,12 @@ void WizKMDatabaseServer::onDocumentObjectDownloadProgress(QUrl url, qint64 down
         totalDownloadedSize += it.second;
     }
     //
+    if (totalDownloadedSize < 0) {
+        totalDownloadedSize = 0;
+    } else if (totalDownloadedSize > m_objectsTotalSize) {
+        totalDownloadedSize = m_objectsTotalSize;
+    }
+    //
     emit downloadProgress(m_objectsTotalSize, totalDownloadedSize);
 }
 
@@ -1145,7 +1151,7 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
         totalDownloadSize += res.size;
     }
     //
-    m_objectsTotalSize =totalDownloadSize;
+    m_objectsTotalSize = totalDownloadSize;
     //
     for (auto res : serverResources)
     {
