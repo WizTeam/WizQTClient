@@ -57,6 +57,10 @@ public:
                          const CWizStdStringArray& arrayTagGUID,
                          bool bReset = true);
 
+    bool setDocumentTags2(WIZDOCUMENTDATA& data,
+                         const CWizStdStringArray& arrayTagGUID,
+                         bool bReset = true);
+
     bool setDocumentTagsText(WIZDOCUMENTDATA& data, const CString& strTagsText);
 
     bool deleteDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGUID);

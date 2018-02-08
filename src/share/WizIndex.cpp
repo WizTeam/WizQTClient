@@ -890,6 +890,7 @@ bool WizIndex::updateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 {
     data.nInfoChanged = 1;
 	data.nVersion = -1;
+    data.tModified = WizGetCurrentTime();   //记录最后修改时间
 
 	return modifyDocumentInfoEx(data);
 }
@@ -1043,6 +1044,67 @@ bool WizIndex::setDocumentTags(WIZDOCUMENTDATA& data,
 	}
 
     return true;
+}
+
+
+bool WizIndex::setDocumentTags2(WIZDOCUMENTDATA& data,
+                                const CWizStdStringArray& arrayTagGUID,
+                                bool bReset /* = true */)
+{
+    CWizStdStringArray arrayTagOld;
+    if (getDocumentTags(data.strGUID, arrayTagOld)) {
+        if (WizKMStringArrayIsEqual<CString>(arrayTagOld, arrayTagGUID))
+            return true;
+    }
+
+    //delete old tags
+    {
+        CString strFormat = formatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_TAG,
+                                                  "DOCUMENT_GUID");
+
+        CString strSQL;
+        strSQL.format(strFormat,
+            STR2SQL(data.strGUID).utf16()
+            );
+
+        if (!execSQL(strSQL))
+            return false;
+    }
+
+    //
+    //add new tags
+    {
+        CWizStdStringArray::const_iterator it;
+        for (it = arrayTagGUID.begin(); it != arrayTagGUID.end(); it++) {
+            //
+            QString strTagGUID = *it;
+            if (strTagGUID.isEmpty()) {
+                continue;
+            }
+
+            CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT_TAG,
+                                                      FIELD_LIST_WIZ_DOCUMENT_TAG,
+                                                      PARAM_LIST_WIZ_DOCUMENT_TAG);
+
+            CString strSQL;
+            strSQL.format(strFormat,
+                STR2SQL(data.strGUID).utf16(),
+                STR2SQL(strTagGUID).utf16()
+                );
+
+            if (!execSQL(strSQL))
+                return false;
+        }
+        //
+    }
+    //
+    bool bRet = true;
+    if (bReset)
+        bRet = updateDocumentInfoMD5(data);
+
+    Q_EMIT documentTagModified(data);
+
+    return bRet;
 }
 
 bool WizIndex::getDocumentTags(const CString& strDocumentGUID, CWizStdStringArray& arrayTagGUID)

@@ -329,7 +329,7 @@ void WizWebEngineView::wheelEvent(QWheelEvent *event)
             factor -= 0.1;
             factor = (factor < 0.5)?0.5:factor;
         }
-        setZoomFactor(factor);
+        //setZoomFactor(factor);
     } else {
         event->ignore();
     }

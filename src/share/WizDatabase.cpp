@@ -269,17 +269,12 @@ bool WizDocument::moveTo(WizDatabase& targetDB, const WIZTAGDATA& targetTag)
             WizFolder folder(m_db, m_db.getDefaultNoteLocation());
             moveTo(&folder);
         }
-
-        CWizTagDataArray arrayTag;
-        m_db.getDocumentTags(m_data.strGUID, arrayTag);
-        if (arrayTag.size() > 0)
-        {
-            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
-            {
-                removeTag(*it);
-            }
-        }
-        return addTag(targetTag);
+        //
+        CWizStdStringArray tags;
+        tags.push_back(targetTag.strGUID);
+        //
+        bool ret = m_db.setDocumentTags2(m_data, tags, true);
+        return ret;
     }
 
     //
