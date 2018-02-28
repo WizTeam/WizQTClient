@@ -20,6 +20,7 @@
 #include <QUndoStack>
 #include <QDesktopServices>
 #include <QNetworkDiskCache>
+#include <QWebEngineProfile>
 
 #ifdef Q_OS_MAC
 #include <QMacPasteboardMime>
@@ -167,8 +168,14 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
     addToJavaScriptWindowObject("WizQtEditor", this);
 
-
     connect(this, SIGNAL(loadFinishedEx(bool)), SLOT(onEditorLoadFinished(bool)));
+    //
+    //
+    if (m_app.userSettings().isEnableSpellCheck()) {
+        QWebEngineProfile *profile = page->profile();
+        profile->setSpellCheckEnabled(true);
+        profile->setSpellCheckLanguages({"en-US"});
+    }
 }
 
 WizDocumentWebView::~WizDocumentWebView()
@@ -691,6 +698,18 @@ void WizDocumentWebView::editorResetFont()
         reloadNoteData(data);
     });
 }
+
+void WizDocumentWebView::editorResetSpellCheck()
+{
+    QWebEngineProfile *profile = page()->profile();
+    if (m_app.userSettings().isEnableSpellCheck()) {
+        profile->setSpellCheckEnabled(true);
+        profile->setSpellCheckLanguages({"en-US"});
+    } else {
+        profile->setSpellCheckEnabled(false);
+    }
+}
+
 
 void WizDocumentWebView::editorFocus()
 {
