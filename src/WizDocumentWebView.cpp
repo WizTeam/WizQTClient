@@ -1983,7 +1983,7 @@ void WizDocumentWebView::saveAsPDF()
     CString strTitle = view()->note().strTitle;
     WizMakeValidFileNameNoPath(strTitle);
     static QString strInitPath = QDir::homePath();
-    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + Utils::WizMisc::extractFileTitle(strTitle);
     //
     QString strFileName = QFileDialog::getSaveFileName(this, QString(),
                                                        strInitFileName,
@@ -2018,7 +2018,7 @@ void WizDocumentWebView::saveAsHtml()
     strTitle = Utils::WizMisc::extractFileTitle(strTitle);
     //
     static QString strInitPath = QDir::homePath();
-    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + strTitle;
+    QString strInitFileName = Utils::WizMisc::addBackslash2(strInitPath) + Utils::WizMisc::extractFileTitle(strTitle);
     //
     QString strIndexFileName = QFileDialog::getSaveFileName(this, QString(),
                                                        strInitFileName,
