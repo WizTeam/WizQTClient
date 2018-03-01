@@ -4,7 +4,7 @@ rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.9.3/5.9.3/gcc_64  ../WizQTClient && \
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.9.4/5.9.4/gcc_64  ../WizQTClient && \
 make -j2
 
 cd ..
@@ -54,6 +54,6 @@ cp /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatformi
 cd ..
 
 
-./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.3/5.9.3/gcc_64/bin/qmake
+./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.4/5.9.4/gcc_64/bin/qmake
 
 
