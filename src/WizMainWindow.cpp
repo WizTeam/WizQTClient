@@ -3448,6 +3448,9 @@ void WizMainWindow::on_options_settingsChanged(WizOptionsType type)
     case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);
         break;
+    case wizoptionsSpellCheck:
+        m_doc->web()->editorResetSpellCheck();
+        break;
     default:
         break;
     }

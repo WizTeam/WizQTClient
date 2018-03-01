@@ -84,6 +84,9 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
             ui->radioAuto->setChecked(true);
             break;
     }
+    //
+    ui->spellCheck->setChecked(userSettings().isEnableSpellCheck());
+    connect(ui->spellCheck, SIGNAL(toggled(bool)), this, SLOT(on_enableSpellCheck(bool)));
 
     // syncing tab
     int nInterval = userSettings().syncInterval();
@@ -525,3 +528,8 @@ void WizPreferenceWindow::useNewSyncClicked(bool checked)
 
 }
 
+void WizPreferenceWindow::on_enableSpellCheck(bool checked)
+{
+    userSettings().setEnableSpellCheck(checked);
+    Q_EMIT settingsChanged(wizoptionsSpellCheck);
+}
