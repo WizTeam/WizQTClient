@@ -4,7 +4,7 @@ rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.9.4/5.9.4/gcc_64  ../WizQTClient && \
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.9.3/5.9.3/gcc_64  ../WizQTClient && \
 make -j2
 
 cd ..
@@ -17,6 +17,8 @@ mkdir bin
 cd bin
 
 cp ../../../WizQTClient-Release-Linux/src/WizNote ./
+mkdir qtwebengine_dictionaries
+cp -R ../../../WizQTClient/share/qtwebengine_dictionaries ./
 
 cd ..
 cp -R ../../WizQTClient-Release-Linux/share ./
@@ -47,13 +49,17 @@ cd ..
 cp ../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
 cd ./WizNote
 mkdir plugins
+mkdir lib
 cd ./plugins/
 mkdir platforminputcontexts
 cd ../..
 cp /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
+cp /lib/x86_64-linux-gnu/libssl.so.1.0.0 ./WizNote/lib/
+cp /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 ./WizNote/lib/
+
 cd ..
 
 
-./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.4/5.9.4/gcc_64/bin/qmake
+./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.9.3/5.9.3/gcc_64/bin/qmake
 
 
