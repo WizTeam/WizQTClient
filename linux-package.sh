@@ -53,7 +53,7 @@ mkdir lib
 cd ./plugins/
 mkdir platforminputcontexts
 cd ../..
-cp /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
+#cp ../WizQTClient/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
 cp /lib/x86_64-linux-gnu/libssl.so.1.0.0 ./WizNote/lib/
 cp /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 ./WizNote/lib/
 
