@@ -30,7 +30,7 @@ WizTagBar::WizTagBar(WizExplorerApp& app, QWidget *parent)
     , m_tagList(nullptr)
 {
     int nHeight = Utils::WizStyleHelper::tagBarHeight() - 4;
-    setFixedHeight(nHeight);
+    setFixedHeight(WizSmartScaleUI(nHeight));
 
 //    setStyleSheet("font-size: 11px; color: #646464;");
     setFocusPolicy(Qt::ClickFocus);
@@ -45,8 +45,11 @@ WizTagBar::WizTagBar(WizExplorerApp& app, QWidget *parent)
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->setSpacing(6);
+
+    QString strStyle;
+    strStyle += "font-size: " + QString::number(WizSmartScaleUI(12)) + "px; color: #A2A2A2;";
     m_label = new QLabel(tr("Tag"), this);
-    m_label->setStyleSheet("font-size:12px; color:#A2A2A2;");
+    m_label->setStyleSheet(strStyle);
     hLayout->addWidget(m_label);
     m_btnAdd = new QToolButton(this);
     hLayout->addWidget(m_btnAdd);
@@ -57,7 +60,7 @@ WizTagBar::WizTagBar(WizExplorerApp& app, QWidget *parent)
     m_btnMore->setVisible(false);
     m_lineEdit = new WizTagLineEdit(this);
     QFont f = m_lineEdit->font();
-    f.setPixelSize(12);
+    f.setPixelSize(WizSmartScaleUI(12));
     m_lineEdit->setFont(f);
     hLayout->addWidget(m_lineEdit);
     hLayout->addStretch();
@@ -581,14 +584,16 @@ void WizTagItem::setSelected(bool b)
 QSize WizTagItem::sizeHint() const
 {
     QFont f;
+    f.setPixelSize(WizSmartScaleUI(11));
     QFontMetrics fm(f);
-    QSize sz(fm.width(m_tagName) + TAGITEM_MARGIN * 2, TAGITEM_HEIGHT);
+    QSize sz(fm.width(m_tagName) + TAGITEM_MARGIN * 2, fm.height() + WizSmartScaleUI(2));
     return sz;
 }
 
 int WizTagItem::textWidth(const QString text)
 {
     QFont f;
+    f.setPixelSize(WizSmartScaleUI(11));
     QFontMetrics fm(f);
     return fm.width(text) + TAGITEM_MARGIN * 2;
 }
@@ -597,7 +602,7 @@ void WizTagItem::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
     QPainter pt(this);
-    QRect rcBorder(0, (height() - TAGITEM_HEIGHT) / 2, width(), TAGITEM_HEIGHT);
+    QRect rcBorder(0, (height() - sizeHint().height()) / 2, width(), sizeHint().height());
 
     pt.setPen(Qt::NoPen);
     pt.setBrush(QBrush(QColor(m_selected ? "#535453" : "#B6B6B6")));
@@ -605,7 +610,7 @@ void WizTagItem::paintEvent(QPaintEvent* event)
     pt.drawRoundedRect(rcBorder, 8, 8);
     pt.setPen(Qt::white);
     QFont f = pt.font();
-    f.setPixelSize(11);
+    f.setPixelSize(WizSmartScaleUI(11));
     pt.setFont(f);
     pt.drawText(rcBorder, Qt::AlignCenter, m_tagName);
 

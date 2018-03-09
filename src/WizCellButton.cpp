@@ -11,6 +11,7 @@
 
 #include "utils/WizStyleHelper.h"
 #include "share/WizMisc.h"
+#include "share/WizQtHelper.h"
 
 
 WizCellButton::WizCellButton(ButtonType type, QWidget *parent)
@@ -18,7 +19,7 @@ WizCellButton::WizCellButton(ButtonType type, QWidget *parent)
     , m_state(0)
     , m_count(0)
     , m_buttonType(type)
-    , m_iconSize(14, 14)
+    , m_iconSize(WizSmartScaleUI(14), WizSmartScaleUI(14))
 {    
 }
 
@@ -95,7 +96,7 @@ void WizCellButton::paintEvent(QPaintEvent *event)
     int nLeft = (opt.rect.width() - size.width()) / 2;
     if (WithCountInfo == m_buttonType)
     {
-        nLeft = (opt.rect.width() - nTextWidth - size.width()) / 2;
+        nLeft = (opt.rect.width() - WizSmartScaleUI(nTextWidth) - size.width()) / 2;
     }
 
     QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
@@ -121,12 +122,12 @@ QSize WizCellButton::sizeHint() const
     switch (m_buttonType)
     {
     case ImageOnly:
-        return QSize(28, 26);
+        return QSize(28, WizSmartScaleUI(26));
     case WithCountInfo:
-        return QSize(28 + nTextWidth, 26);
+        return QSize(28 + WizSmartScaleUI(nTextWidth), WizSmartScaleUI(26));
 #ifdef Q_OS_WIN
     default:
-        return QSize(28, 26);
+        return QSize(28, WizSmartScaleUI(26));
 #endif
     }
 }
@@ -151,7 +152,7 @@ namespace RoundCellButtonConst {
 WizRoundCellButton::WizRoundCellButton(QWidget* parent)
     : WizCellButton(ImageOnly, parent)
 {
-    m_iconSize = QSize(iconWidth(), RoundCellButtonConst::iconHeight);
+    m_iconSize = QSize(iconWidth(), WizSmartScaleUI(RoundCellButtonConst::iconHeight));
 
     setMaximumWidth(0);
     m_animation = new QPropertyAnimation(this, "maximumWidth", this);
@@ -196,7 +197,7 @@ QString WizRoundCellButton::text() const
 
 int WizRoundCellButton::iconWidth() const
 {
-    return 14;
+    return WizSmartScaleUI(RoundCellButtonConst::iconHeight);
 
 //    switch (m_state) {
 //    case Normal:
@@ -215,9 +216,9 @@ int WizRoundCellButton::iconWidth() const
 int WizRoundCellButton::buttonWidth() const
 {
     QFont f;
-    f.setPixelSize(RoundCellButtonConst::fontSize);
+    f.setPixelSize(WizSmartScaleUI(RoundCellButtonConst::fontSize));
     QFontMetrics fm(f);
-    int width = RoundCellButtonConst::margin * 2 + RoundCellButtonConst::spacing
+    int width = RoundCellButtonConst::margin * 2.5 + RoundCellButtonConst::spacing
             + iconWidth() + fm.width(text());
     return width;
 }
@@ -260,11 +261,12 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
     }
 
-    QRect rcText(rcIcon.right() + RoundCellButtonConst::spacing, opt.rect.y(),
-                 opt.rect.right() - rcIcon.right() - RoundCellButtonConst::spacing, opt.rect.height());
-    p.setPen(QColor("#535353"));
     QFont f = p.font();
-    f.setPixelSize(RoundCellButtonConst::fontSize);
+    f.setPixelSize(WizSmartScaleUI(RoundCellButtonConst::fontSize));
+    QFontMetrics fm(f);
+    QRect rcText(rcIcon.right() + RoundCellButtonConst::spacing, (opt.rect.height() - fm.height()) / 2,
+                 opt.rect.right() - rcIcon.right() - RoundCellButtonConst::spacing, fm.height());
+    p.setPen(QColor("#535353"));
     p.setFont(f);
     p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, text());
 }
@@ -273,7 +275,7 @@ QSize WizRoundCellButton::sizeHint() const
 {
     //NTOE: 设置一个最大宽度，实际宽度由animation通过maxWidth进行控制
     int maxWidth = 200;
-    return QSize(maxWidth, RoundCellButtonConst::buttonHeight);
+    return QSize(maxWidth, WizSmartScaleUI(RoundCellButtonConst::buttonHeight));
 }
 
 void WizRoundCellButton::applyAnimation()

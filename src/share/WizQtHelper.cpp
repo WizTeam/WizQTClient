@@ -420,7 +420,6 @@ int WizSmartScaleUI(int spec)
     static double rate = 0;
     if (0 == (int)rate)
     {
-        rate = 1.0;
         //
         QList<QScreen*> screens = QApplication::screens();
         if (screens.size() > 0)
@@ -451,6 +450,11 @@ int WizSmartScaleUI(int spec)
             {
                 rate = 2.0;
             }
+        }
+        else
+        {
+            // 当程序窗口还没有初始化时，将得不到程序关联屏幕的相关数据，应该在窗口初始化完成后调用本函数。
+            Q_ASSERT(false);
         }
     }
     //
