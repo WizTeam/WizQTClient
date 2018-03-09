@@ -12,6 +12,7 @@
 #include "WizMainWindow.h"
 #include "WizDocumentWebView.h"
 #include "WizDocumentWebEngine.h"
+#include "share/WizQtHelper.h"
 
 WizTitleEdit::WizTitleEdit(QWidget *parent)
     : QLineEdit(parent)
@@ -28,7 +29,7 @@ WizTitleEdit::WizTitleEdit(QWidget *parent)
     connect(this, SIGNAL(textEdited(QString)), SLOT(onTextEdit(QString)));
     connect(this, SIGNAL(textChanged(QString)), SLOT(onTextChanged(QString)));
     QFont f = font();
-    f.setPixelSize(14);
+    f.setPixelSize(WizSmartScaleUI(14));
     setFont(f);
 }
 

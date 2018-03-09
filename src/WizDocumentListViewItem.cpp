@@ -865,7 +865,7 @@ void WizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewIte
 
     p->setPen(Utils::WizStyleHelper::listViewSectionItemText());
     QFont font;
-    font.setPixelSize(12);
+    font.setPixelSize(WizSmartScaleUI(12));
     p->setFont(font);
     QRect rc = vopt->rect;
     rc.setLeft(rc.x() + Utils::WizStyleHelper::listViewItemHorizontalPadding());

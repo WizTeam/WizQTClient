@@ -64,8 +64,8 @@ WizSingleDocumentViewer::WizSingleDocumentViewer(WizExplorerApp& app, const QStr
     //m_docView->web()->setInSeperateWindow(true);
     if (WizIsHighPixel())
     {
-        m_docView->setMaximumWidth(1095);
-        m_docView->setSizeHint(QSize(1095, 1));
+        m_docView->setMaximumWidth(QWIDGETSIZE_MAX);
+        m_docView->setSizeHint(QSize(QWIDGETSIZE_MAX, 1));
     }
     else
     {
