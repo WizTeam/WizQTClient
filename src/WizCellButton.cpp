@@ -122,12 +122,12 @@ QSize WizCellButton::sizeHint() const
     switch (m_buttonType)
     {
     case ImageOnly:
-        return QSize(28, WizSmartScaleUI(26));
+        return QSize(WizSmartScaleUI(28), WizSmartScaleUI(26));
     case WithCountInfo:
-        return QSize(28 + WizSmartScaleUI(nTextWidth), WizSmartScaleUI(26));
+        return QSize(WizSmartScaleUI(28) + WizSmartScaleUI(nTextWidth), WizSmartScaleUI(26));
 #ifdef Q_OS_WIN
     default:
-        return QSize(28, WizSmartScaleUI(26));
+        return QSize(WizSmartScaleUI(28), WizSmartScaleUI(26));
 #endif
     }
 }

@@ -1028,7 +1028,7 @@ int WizStyleHelper::titleEditorHeight()
 
 int WizStyleHelper::titleIconHeight()
 {
-    return WizSmartScaleUI(11);
+    return WizSmartScaleUI(12);
 }
 
 int WizStyleHelper::editToolBarHeight()
@@ -1043,7 +1043,7 @@ int WizStyleHelper::infoBarHeight()
 
 int WizStyleHelper::editIconHeight()
 {
-    return WizSmartScaleUI(11);
+    return WizSmartScaleUI(12);
 }
 
 int WizStyleHelper::tagBarHeight()

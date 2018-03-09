@@ -1712,24 +1712,33 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
     return WizLoadSkinIcon(strSkinName, strIconName, QSize(), mode, state);
 }
 
-QPixmap WizLoadPixmap(const QString& strSkinName, const QString& strIconName, const QSize& iconSize)
+QPixmap WizLoadPixmapIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize)
 {
-    QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
-    QString strIcon2x = WizGetSkinResourceFileName(strSkinName, strIconName + "@2x");
-
-    if (iconSize.height() > 0) {
-        QPixmap pixmapNormal = QPixmap(strIconNormal);
-        if (QFile::exists(strIcon2x)) {
-            QPixmap pixmap2x = QPixmap(strIcon2x);
-            if (pixmapNormal.height() < iconSize.height()) {
-                return pixmap2x.scaled(iconSize, Qt::KeepAspectRatio);
-//                return pixmap2x.scaledToHeight(iconSize.height());
-            }
-        }
-        return pixmapNormal.scaled(iconSize, Qt::KeepAspectRatio);
-//        return pixmapNormal.scaledToHeight(iconSize.height());
+    static int rate = 0;
+    if (!rate) {
+        //
+        rate = WizSmartScaleUI(100);
     }
-    return QPixmap(strIconNormal);
+    //
+    if (rate < 175) {
+        //
+        //don't scale image
+        QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
+        return QPixmap(strIconNormal);
+        //
+    } else {
+        //
+        //using 2x
+        QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
+        QString strIcon2x = WizGetSkinResourceFileName(strSkinName, strIconName + "@2x");
+        //
+        if (QFile::exists(strIcon2x)) {
+            return QPixmap(strIcon2x);
+        }
+        //
+        return QPixmap(strIconNormal);
+    }
+
 }
 
 QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize,
@@ -1778,20 +1787,20 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, co
         return QIcon();
     }
 
-    QPixmap pixmapNormal = WizLoadPixmap(strSkinName, strIconNormal, iconSize);
+    QPixmap pixmapNormal = WizLoadPixmapIcon(strSkinName, strIconNormal, iconSize);
 
     QIcon icon;
     icon.addPixmap(pixmapNormal, QIcon::Normal, QIcon::Off);
 
     // used for check state
     if (QFile::exists(WizGetSkinResourceFileName(strSkinName, strIconActive1))) {
-        QPixmap pixmapActive1 = WizLoadPixmap(strSkinName, strIconActive1, iconSize);
+        QPixmap pixmapActive1 = WizLoadPixmapIcon(strSkinName, strIconActive1, iconSize);
         icon.addPixmap(pixmapActive1, QIcon::Active, QIcon::On);
     }
 
     // used for sunken state
     if (QFile::exists(WizGetSkinResourceFileName(strSkinName, strIconActive2))) {
-        QPixmap pixmapActive2 = WizLoadPixmap(strSkinName, strIconActive2, iconSize);
+        QPixmap pixmapActive2 = WizLoadPixmapIcon(strSkinName, strIconActive2, iconSize);
         icon.addPixmap(pixmapActive2, QIcon::Active, QIcon::Off);
     }
 

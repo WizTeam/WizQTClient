@@ -42,8 +42,8 @@
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
 
-const int RecommendedWidthForTwoLine = 685;
-const int RecommendedWidthForOneLine = 1060;
+#define RecommendedWidthForTwoLine WizSmartScaleUI(685)
+#define RecommendedWidthForOneLine WizSmartScaleUI(1060)
 
 #define WIZSEPARATOR    "separator"
 #define WIZFONTPANEL    "fontpanel"
@@ -373,8 +373,8 @@ QIcon createColorIcon(QColor color)
     return QIcon(pixmap);
 }
 
-const int TOOLBUTTON_MARGIN_WIDTH = 12;
-const int TOOLBUTTON_ARRWO_WIDTH = 16;
+#define TOOLBUTTON_MARGIN_WIDTH WizSmartScaleUI(12)
+#define TOOLBUTTON_ARRWO_WIDTH  WizSmartScaleUI(16)
 
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
@@ -519,8 +519,8 @@ public:
         , m_colorHoverBorder("#c8dae8")
         , m_colorHoverFill("#e8f0f3")
         , m_colorSunkenBorder("#0072c4")
-        , m_horizontalPadding_left(10)
-        , m_horizontalPadding_rgiht(10)
+        , m_horizontalPadding_left(WizSmartScaleUI(10))
+        , m_horizontalPadding_rgiht(WizSmartScaleUI(10))
     {
         setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
@@ -632,7 +632,8 @@ private:
     QColor m_colorSunkenBorder;
 };
 
-const int ColorButtonRightArrowWidth = 18;
+#define ColorButtonRightArrowWidth  WizSmartScaleUI(18)
+
 class CWizToolButtonColor : public CWizToolButton
 {
 public:
@@ -700,15 +701,20 @@ protected:
 
         if (opt.state & QStyle::State_MouseOver)
         {
-            QPoint top(rcIcon.right() + 7, opt.rect.x() + (opt.rect.height() - 13) / 2);
+            QPoint top(rcIcon.right() + WizSmartScaleUI(7), opt.rect.x() + (opt.rect.height() - 13) / 2);
             p.setPen(QPen(QColor("#C4C4C4")));
             p.drawLine(top, QPoint(top.x(), top.y() + 13));
         }
 
         //arrow
         static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+#ifdef Q_OS_MAC
         int arrowHeight = arrow.height() * (WizIsHighPixel() ? 0.5f : 1);
-        QRect rcArrow(rcIcon.right() + 7, (opt.rect.height() - arrowHeight) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
+#else
+        int arrowHeight = TOOLBUTTON_ARRWO_WIDTH;
+#endif
+
+        QRect rcArrow(rcIcon.right() + WizSmartScaleUI(7), (opt.rect.height() - arrowHeight) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
         p.drawPixmap(rcArrow, arrow);
     }
 
@@ -758,7 +764,7 @@ public:
         , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
-        setSizeAdjustPolicy(QComboBox::AdjustToContents);
+        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
         QFont f = font();
         f.setPixelSize(Utils::WizStyleHelper::editComboFontSize());
         setFont(f);
@@ -875,7 +881,7 @@ public:
         , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
-        setSizeAdjustPolicy(QComboBox::AdjustToContents);
+        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
         setEditable(false);
     }
 
@@ -2073,7 +2079,6 @@ void WizEditorToolBar::applyBackColor(const QColor& color)
 
 void WizEditorToolBar::adjustButtonPosition()
 {
-    //
     int parentWidgetWidth = m_editor->width() - 28;
     int firstLineWidth = m_btnShowExtra->width();
     for (QWidget* widget : m_buttonContainersInFirstLine)
