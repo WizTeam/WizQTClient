@@ -16,7 +16,6 @@
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
 
-#include "utils/WizLogger.h"
 
 #ifdef Q_OS_MAC
 #include "mac/WizMacHelper.h"
@@ -814,16 +813,15 @@ QRect WizStyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QP
 
     QRect rcd(rc.x() + rc.right() - WizSmartScaleUI(66), rc.y() + rc.height() - WizSmartScaleUI(60), WizSmartScaleUI(50), WizSmartScaleUI(50));
 
-    int nScaledThumbnailMaxWidth = WizSmartScaleUI(nThumbnailPixmapMaxWidth);
     int nWidth = 0, nHeight = 0;
-//    if (pm.width() > nScaledThumbnailMaxWidth || pm.height() > nScaledThumbnailMaxWidth) {
-        double fRate = qMin<double>(double(nScaledThumbnailMaxWidth) / pm.width(), double(nScaledThumbnailMaxWidth) / pm.height());
+    if (pm.width() > nThumbnailPixmapMaxWidth || pm.height() > nThumbnailPixmapMaxWidth) {
+        double fRate = qMin<double>(double(nThumbnailPixmapMaxWidth) / pm.width(), double(nThumbnailPixmapMaxWidth) / pm.height());
         nWidth = int(pm.width() * fRate);
         nHeight = int(pm.height() * fRate);
-//    } else {
-//        nWidth = pm.width();
-//        nHeight = pm.height();
-//    }
+    } else {
+        nWidth = pm.width();
+        nHeight = pm.height();
+    }
 
     int adjustX = (rcd.width() - nWidth) / 2;
     int adjustY = (rcd.height() - nHeight) / 2;
@@ -990,7 +988,7 @@ int WizStyleHelper::fontExtend(QFont& f)
     }
 
     f.setFamily(strFont);
-    f.setPixelSize(WizSmartScaleUI(9));
+    f.setPixelSize(9);
 
     return QFontMetrics(f).height();
 }
@@ -1013,7 +1011,7 @@ int WizStyleHelper::fontSection(QFont& f)
 
 int WizStyleHelper::editorButtonHeight()
 {
-    return WizSmartScaleUI(26);
+    return 28;
 }
 
 QMargins WizStyleHelper::editorBarMargins()
@@ -1026,24 +1024,14 @@ int WizStyleHelper::titleEditorHeight()
     return WizSmartScaleUI(30);
 }
 
-int WizStyleHelper::titleIconHeight()
-{
-    return WizSmartScaleUI(11);
-}
-
 int WizStyleHelper::editToolBarHeight()
 {
-    return WizSmartScaleUI(30);
+    return 30;
 }
 
 int WizStyleHelper::infoBarHeight()
 {
-    return WizSmartScaleUI(34);
-}
-
-int WizStyleHelper::editIconHeight()
-{
-    return WizSmartScaleUI(11);
+    return 34;
 }
 
 int WizStyleHelper::tagBarHeight()
@@ -1054,11 +1042,6 @@ int WizStyleHelper::tagBarHeight()
 int WizStyleHelper::notifyBarHeight()
 {
     return WizSmartScaleUI(32);
-}
-
-int WizStyleHelper::editComboFontSize()
-{
-    return WizSmartScaleUI(11);
 }
 
 QVariant WizStyleHelper::getValue(const QString& key, const QVariant& defaultValue)

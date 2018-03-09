@@ -155,12 +155,9 @@ public:
     static int editorButtonHeight();
     static QMargins editorBarMargins();
     static int titleEditorHeight();
-    static int titleIconHeight();
     static int editToolBarHeight();
-    static int editIconHeight();
     static int infoBarHeight();
     static int tagBarHeight();
-    static int editComboFontSize();
     //
     static int notifyBarHeight();
 

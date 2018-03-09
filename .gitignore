@@ -4,4 +4,8 @@ tags
 CMakeLists.txt.user*
 !macos-package/.DS_Store
 *.autosave
+<<<<<<< HEAD
 .idea/*
+=======
+.idea/*
+>>>>>>> parent of 0013f67... Merge pull request #515 from Ahmong/2.5.8
