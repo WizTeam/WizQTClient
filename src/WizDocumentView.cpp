@@ -270,6 +270,7 @@ void WizDocumentView::showEvent(QShowEvent *event)
 void WizDocumentView::resizeEvent(QResizeEvent* ev)
 {
     QWidget::resizeEvent(ev);
+    qDebug() << "oldSize: " << ev->oldSize() << ", newSize: " << ev->size();
 
     m_title->editorToolBar()->adjustButtonPosition();
 }
