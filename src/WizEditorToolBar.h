@@ -120,6 +120,7 @@ private:
     QList<QWidget*> buttonContainersInSecondLine();
     //
     int firstLineWidth();
+    int secondLineWidth();
 
 protected Q_SLOTS:
     void on_editor_google_triggered();

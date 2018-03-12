@@ -764,7 +764,7 @@ public:
         , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
-        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
         QFont f = font();
         f.setPixelSize(Utils::WizStyleHelper::editComboFontSize());
         setFont(f);
@@ -881,7 +881,7 @@ public:
         , m_isPopup(false)
     {
         setFocusPolicy(Qt::NoFocus);
-        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+        setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
         setEditable(false);
     }
 
@@ -1342,7 +1342,8 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     containerLayout1->addSpacing(12);
 
     layout->addWidget(buttonContainer1);
-
+    //
+    setMinimumWidth(firstLineWidth() - 20);
 
     QWidget*  moveableButtonContainer1 = createMoveAbleWidget(this);
     moveableButtonContainer1->layout()->addWidget(m_btnJustify);
@@ -1421,7 +1422,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->setSpacing(8);
+    vLayout->setSpacing(WizSmartScaleUI(8));
     vLayout->addWidget(firstLineWidget);
     vLayout->addWidget(m_secondLineButtonContainer);
 
@@ -2119,17 +2120,29 @@ int WizEditorToolBar::firstLineWidth()
     auto items = buttonContainersInFirstLine();
     for (QWidget* widget : items)
     {
-        total += widget->sizeHint().width();
+        total += widget->sizeHint().width();// + WizSmartScaleUI(8);
     }
-    return total;
+    return total + m_btnShowExtra->size().width();
+}
 
+int WizEditorToolBar::secondLineWidth()
+{
+    int total = 0;
+    auto items = buttonContainersInSecondLine();
+    for (QWidget* widget : items)
+    {
+        total += widget->sizeHint().width();// + WizSmartScaleUI(8);
+    }
+    return total;// - WizSmartScaleUI(8);
 }
 
 void WizEditorToolBar::adjustButtonPosition()
 {
-    int parentWidgetWidth = m_editor->width() - WizSmartScaleUI(8) - m_btnShowExtra->width();
+    int parentWidgetWidth = m_editor->width() - WizSmartScaleUI(28) - 1; //28 ???
     //
     int firstWidth = firstLineWidth();
+    //
+    bool changed = false;
     //
     if (firstWidth > parentWidgetWidth)
     {
@@ -2141,7 +2154,7 @@ void WizEditorToolBar::adjustButtonPosition()
             //
             QWidget* last = items.last();
             moveWidgetFromFristLineToSecondLine(last);
-            updateGeometry();
+            changed = true;
             //
             firstWidth = firstLineWidth();
         }
@@ -2155,15 +2168,55 @@ void WizEditorToolBar::adjustButtonPosition()
                 break;
             //
             QWidget * widget = items.first();
-            if (widget->sizeHint().width() + firstWidth > parentWidgetWidth)
+            int width = widget->sizeHint().width();
+            if (width + firstWidth > parentWidgetWidth)
                 break;
             //
             moveWidgetFromSecondLineToFirstLine(widget);
-            updateGeometry();
+            changed = true;
             //
             firstWidth = firstLineWidth();
         }
     }
+    //
+    if (!changed)
+        return;
+    //
+    for (auto widget : buttonContainersInFirstLine())
+    {
+        widget->setVisible(true);
+    }
+    //
+    auto items = buttonContainersInSecondLine();
+    //
+    int total = 0;
+    //
+    for (auto widget : items)
+    {
+        total += widget->sizeHint().width();
+        if (total < parentWidgetWidth)
+        {
+            widget->setVisible(true);
+        }
+        else
+        {
+            widget->setVisible(false);
+        }
+    }
+    //
+    //
+    m_firstLineButtonContainer->updateGeometry();
+    m_secondLineButtonContainer->updateGeometry();
+    //
+#ifdef QT_DEBUG
+    qDebug() << "firstLineWidth: " << firstLineWidth();
+    qDebug() << "secondLineWidth: " << secondLineWidth();
+    qDebug() << "parentWidgetWidth: " << parentWidgetWidth;
+    qDebug() << "m_firstLineButtonContainer->sizeHint().width(): " << m_firstLineButtonContainer->sizeHint().width();
+    qDebug() << "m_secondLineButtonContainer->sizeHint().width(): " << m_secondLineButtonContainer->sizeHint().width();
+    qDebug() << "m_firstLineButtonContainer->size().width(): " << m_firstLineButtonContainer->size().width();
+#endif
+    //
     if (buttonContainersInSecondLine().isEmpty())
     {
         m_btnShowExtra->hide();
