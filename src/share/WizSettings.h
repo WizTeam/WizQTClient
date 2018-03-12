@@ -72,6 +72,7 @@ enum WizOptionsType
     wizoptionsSkin,
     wizoptionsFont,
     wizoptionsFolders,
+    wizoptionsSpellCheck,
 };
 
 enum WizPositionType
@@ -135,6 +136,9 @@ public:
 
     bool useSystemBasedStyle() const;
     void setUseSystemBasedStyle(bool bSystemStyle);
+
+    bool isEnableSpellCheck() const;
+    void setEnableSpellCheck(bool b);
 
     bool receiveMobileFile() const;
     void setReceiveMobileFile(bool bReceiveFile);

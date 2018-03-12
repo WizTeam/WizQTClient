@@ -178,6 +178,8 @@ public:
     void editorFocus();
     void enableEditor(bool enalbe);
     QString noteResourcesPath();
+    //
+    void editorResetSpellCheck();
 
     void setIgnoreActiveWindowEvent(bool igoreEvent);
 

@@ -410,6 +410,21 @@ void WizUserSettings::setUseSystemBasedStyle(bool bSystemStyle)
     set("UseSystemBasedStyle", bSystemStyle ? "1" : "0");
 }
 
+bool WizUserSettings::isEnableSpellCheck() const
+{
+    QString strSpellCheck = get("SpellCheck");
+    if (!strSpellCheck.isEmpty()) {
+        return strSpellCheck.toInt() ? true : false;
+    }
+
+    return false;
+}
+void WizUserSettings::setEnableSpellCheck(bool b)
+{
+    set("SpellCheck", b ? "1" : "0");
+}
+
+
 bool WizUserSettings::receiveMobileFile() const
 {
     QString strReceiveMobileFile = get("RecevieMobileFile");
