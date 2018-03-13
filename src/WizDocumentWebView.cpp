@@ -675,7 +675,7 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
 
-    strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
+    strCss.replace("/*default-font-family*/", QString("font-family:'%1';").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
     QString backgroundColor = m_app.userSettings().editorBackgroundColor();
     if (backgroundColor.isEmpty())
