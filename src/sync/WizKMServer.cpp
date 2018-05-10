@@ -417,6 +417,9 @@ bool WizKMApiServerBase::setValue(const QString& strMethodPrefix, const QString&
 WizKMAccountsServer::WizKMAccountsServer(QObject* parent)
     : WizKMApiServerBase(WizCommonApiEntry::newAsServerUrl(), parent)
 {
+#ifdef QT_DEBUG
+    //m_strServer = "http://localhost:5001";
+#endif
     m_bLogin = FALSE;
     m_bAutoLogout = FALSE;
 }
@@ -857,7 +860,6 @@ bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
     strUrl += QString("/messages/status?ids=%1&status=%2").arg(strMessageIDs).arg(WizIntToStr(nStatus));
-    strUrl = appendNormalParams(strUrl, getToken());
     qDebug() << "set message raad status, strToken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
     return NoResult::execStandardJsonRequest(*this, strUrl);
@@ -867,7 +869,6 @@ bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, i
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?ids=%1").arg(strMessageIDs);
-    strUrl = appendNormalParams(strUrl, getToken());
     qDebug() << "set message delete status, strToken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
     return NoResult::execStandardJsonRequest(*this, strUrl, "DELETE");
@@ -897,7 +898,10 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
     , m_lastJsonResult(200, QString(""), QString(""))
     , m_objectsTotalSize(0)
 {
-    //m_userInfo.strKbServer = "http://localhost:4001";
+#ifdef QT_DEBUG
+    m_userInfo.strXmlRpcServer = "http://localhost:4001/wizks/xmlrpc";
+    m_strServer = m_userInfo.strKbServer = "http://localhost:4001";
+#endif
     TOLOG1("sync type: %1", isUseNewSync() ? "new" : "old");
 }
 

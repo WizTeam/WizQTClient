@@ -190,7 +190,7 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
     //
     connect(ui->useNewSync, SIGNAL(clicked(bool)), SLOT(useNewSyncClicked(bool)));
-    ui->useNewSync->setChecked(WizToken::userInfo().syncType == 1);
+    ui->useNewSync->setChecked(WizToken::userInfo().syncType >= 1);
     if (ui->useNewSync->isChecked())
     {
         ui->useNewSync->setEnabled(false);

@@ -178,6 +178,9 @@ QString WizCommonApiEntry::newAsServerUrl()
 
 QString WizCommonApiEntry::messageServerUrl()
 {    
+#ifdef QT_DEBUG
+    //return "http://localhost:5001/wizmessage";
+#endif
     return getUrlByCommand(WIZNOTE_API_COMMAND_MESSAGE_SERVER);
 }
 
