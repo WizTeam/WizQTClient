@@ -669,7 +669,7 @@ bool WIZGROUPDATA::fromJson(const Json::Value& value)
 {
     try {
         //
-        strKbServer = QString::fromStdString(value["ksServerUrl"].asString());
+        strKbServer = QString::fromStdString(value["kbServer"].asString());
         bizGUID = QString::fromStdString(value["bizGuid"].asString());
         bizName = QString::fromStdString(value["bizName"].asString());
         tCreated = QDateTime::fromTime_t(value["created"].asInt64() / 1000);
