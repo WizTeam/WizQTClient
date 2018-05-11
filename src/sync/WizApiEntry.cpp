@@ -354,7 +354,7 @@ QString WizApiEntry::appendSrc(QString url)
     QUrl u(url);
     QString host = u.host();
     //
-    return url + "&src=" + host;
+    return url + "&srcUrl=" + host;
 }
 
 
