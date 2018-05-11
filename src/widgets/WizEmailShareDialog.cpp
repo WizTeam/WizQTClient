@@ -209,7 +209,7 @@ void WizEmailShareDialog::sendEmails()
 {
     ui->labelInfo->setText(tr("Sending..."));
 
-    QString strKS = WizToken::userInfo().strXmlRpcServer;
+    QString strKS = WizToken::userInfo().strKbServer;
     QString strExInfo = getExInfo();
     QString strUrl = WizCommonApiEntry::mailShareUrl(strKS, strExInfo);
     qDebug() << "share url : " << strUrl;

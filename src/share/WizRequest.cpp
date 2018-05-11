@@ -30,6 +30,10 @@ WIZSTANDARDRESULT::WIZSTANDARDRESULT(ERRORTYPE error, QString message, QString e
 
 bool WizRequest::execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody)
 {
+#ifdef QT_DEBUG
+    qDebug() << url;
+#endif
+    //
     method = method.toUpper();
 
     QNetworkAccessManager net;

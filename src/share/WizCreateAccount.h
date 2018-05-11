@@ -12,7 +12,6 @@ public:
     void createAccount(const CString& strUserId, const CString& strPassword, const CString& strInviteCode);
 
 protected:
-    virtual void onXmlRpcError(const QString& strMethodName, WizXmlRpcError err, int errorCode, const QString& errorMessage);
     virtual void onCreateAccount();
 
 Q_SIGNALS:

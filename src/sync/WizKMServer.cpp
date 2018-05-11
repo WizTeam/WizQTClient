@@ -1,7 +1,6 @@
 ﻿#include "WizKMServer.h"
 #include "WizApiEntry.h"
 #include "WizToken.h"
-#include "WizXmlRpcServer.h"
 //
 #include "share/jsoncpp/json/json.h"
 #include "share/WizZip.h"
@@ -13,7 +12,7 @@
 #include "share/WizThreads.h"
 
 #include "utils/WizMisc.h"
-
+#include "utils/WizLogger.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
 
@@ -43,6 +42,8 @@ QString appendNormalParams(const QString& strUrl, const QString& token)
     {
         url += "&token=" + token;
     }
+    //
+    url = WizApiEntry::appendSrc(url);
     //
     return url;
 }
@@ -264,46 +265,7 @@ bool postJsonList(WizKMApiServerBase& server, QString urlPath, const std::deque<
 }
 
 ////////////////
-/// \brief The old xml-rpc data
 /////
-struct CWizKMBaseParam: public WizXmlRpcStructValue
-{
-    CWizKMBaseParam(int apiVersion = WIZKM_WEBAPI_VERSION)
-    {
-        changeApiVersion(apiVersion);
-        //
-#ifdef Q_OS_MAC
-        addString("client_type", "mac");
-#else
-        addString("client_type", "linux");
-#endif
-        addString("client_version", WIZ_CLIENT_VERSION);
-        //
-        QString LocalLanguage = QLocale::system().name();
-        addString("client_lang", LocalLanguage);
-    }
-    //
-    void changeApiVersion(int nApiVersion)
-    {
-        addString("api_version", WizIntToStr(nApiVersion));
-    }
-    int getApiVersion()
-    {
-        QString str;
-        getString("api_version", str);
-        return wiz_ttoi(str);
-    }
-};
-
-struct CWizKMTokenOnlyParam : public CWizKMBaseParam
-{
-    CWizKMTokenOnlyParam(const QString& strToken, const QString& strKbGUID)
-    {
-        addString("token", strToken);
-        addString("kb_guid", strKbGUID);
-    }
-};
-
 //
 
 WizKMApiServerBase::WizKMApiServerBase(const QString& strServer, QObject* parent)
@@ -495,7 +457,6 @@ bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
     //
     m_bLogin = WithResult::execStandardJsonRequest<WIZUSERINFO>(*this, urlPath, m_userInfo, "POST", params);
     //
-    qDebug() << "old server" << m_userInfo.strXmlRpcServer;
     qDebug() << "new server" << m_userInfo.strKbServer;
     //
     return m_bLogin;
@@ -899,8 +860,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
     , m_objectsTotalSize(0)
 {
 #ifdef QT_DEBUG
-    m_userInfo.strXmlRpcServer = "http://localhost:4001/wizks/xmlrpc";
-    m_strServer = m_userInfo.strKbServer = "http://localhost:4001";
+    //m_strServer = m_userInfo.strKbServer = "http://localhost:4001";
 #endif
     TOLOG1("sync type: %1", isUseNewSync() ? "new" : "old");
 }
@@ -1001,17 +961,6 @@ bool WizKMDatabaseServer::getCommentCount(const QString& strDocumentGuid, int& c
 {
     QString urlPath = "/ks/note/comments/count/" + getKbGuid() + "/" + strDocumentGuid;
     return WithResult::execStandardJsonRequest<int>(*this, urlPath, commentCount);
-}
-
-bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
-{
-    if (!data_downloadOld(strDocumentGUID, "document", ret.arrayData, ret.strTitle))
-    {
-        TOLOG1("Failed to download attachment data: %1", ret.strTitle);
-        return false;
-    }
-    //
-    return true;
 }
 
 
@@ -1228,73 +1177,9 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
 
 bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
 {
-    if (isUseNewSync()) {
-        return document_downloadDataNew(strDocumentGUID, ret, fileName);
-    } else {
-        return document_downloadDataOld(strDocumentGUID, ret, fileName);
-    }
+    return document_downloadDataNew(strDocumentGUID, ret, fileName);
 }
 //
-
-struct CWizKMDocumentPostDataParam
-    : public CWizKMTokenOnlyParam
-{
-    CWizKMDocumentPostDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strDocumentGUID, bool withDocumentData, const WIZDOCUMENTDATA& infodata, const CWizStdStringArray& tags, const QString& strObjMd5)
-        : CWizKMTokenOnlyParam(strToken, strBookGUID)
-    {
-        changeApiVersion(nApiVersion);
-        //
-        addBool("with_document_data", withDocumentData);
-        //
-        Q_ASSERT(strDocumentGUID == infodata.strGUID);
-
-        addString("document_guid", strDocumentGUID);
-        addString("document_title", infodata.strTitle);
-        addString("document_category", infodata.strLocation);
-        addString("document_filename", infodata.strName);
-        addString("document_seo", infodata.strSEO);
-        addString("document_url", infodata.strURL);
-        addString("document_author", infodata.strAuthor);
-        addString("document_keywords", infodata.strKeywords);
-        addString("document_type", infodata.strType);
-        addString("document_owner", infodata.strOwner);
-        addString("document_filetype", infodata.strFileType);
-        addString("document_styleguid", infodata.strStyleGUID);
-        addTime("dt_created", infodata.tCreated);
-        addTime("dt_modified", infodata.tModified);
-        addTime("dt_accessed", infodata.tAccessed);
-        addInt("document_protected", infodata.nProtected);
-        addInt("document_readcount", infodata.nReadCount);
-        addInt("document_attachment_count", infodata.nAttachmentCount);
-        addTime("dt_data_modified", infodata.tDataModified);
-        addString("data_md5", infodata.strDataMD5);
-        addString("document_zip_md5", strObjMd5);
-        //
-        CString strTagGuids;
-        ::WizStringArrayToText(tags, strTagGuids, "*");
-        //
-        addString("document_tag_guids", strTagGuids);
-    }
-};
-
-
-bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
-{
-    ATLASSERT(ret.arrayData.isEmpty());
-    if (!ret.arrayData.isEmpty())
-    {
-        TOLOG("fault error: ret.arrayData is not null!");
-        return FALSE;
-    }
-    //
-    if (!data_downloadOld(strAttachmentGUID, "attachment", ret.arrayData, ret.strName))
-    {
-        TOLOG1("Failed to download attachment data: %1", ret.strName);
-        return FALSE;
-    }
-    //
-    return TRUE;
-}
 
 bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
@@ -1304,293 +1189,9 @@ bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentG
 
 bool WizKMDatabaseServer::attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    if (isUseNewSync()) {
-        return attachment_downloadDataNew(strDocumentGUID, strAttachmentGUID, ret);
-    } else {
-        return attachment_downloadDataOld(strDocumentGUID, strAttachmentGUID, ret);
-    }
+    return attachment_downloadDataNew(strDocumentGUID, strAttachmentGUID, ret);
 }
 
-struct CWizKMAttachmentPostDataParam
-    : public CWizKMTokenOnlyParam
-{
-    CWizKMAttachmentPostDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strAttachmentGUID, const WIZDOCUMENTATTACHMENTDATA& infodata, const QString& strObjMd5)
-        : CWizKMTokenOnlyParam(strToken, strBookGUID)
-    {
-        changeApiVersion(nApiVersion);
-
-        Q_ASSERT(strAttachmentGUID == infodata.strGUID);
-        addString("attachment_guid", strAttachmentGUID);
-        addString("attachment_document_guid", infodata.strDocumentGUID);
-        addString("attachment_name", infodata.strName);
-        addString("attachment_url", infodata.strURL);
-        addString("attachment_description", infodata.strDescription);
-        addTime("dt_info_modified", infodata.tInfoModified);
-        addString("info_md5", infodata.strInfoMD5);
-        addTime("dt_data_modified", infodata.tDataModified);
-        addString("data_md5", infodata.strDataMD5);
-        //
-        addTime("dt_data_modified", infodata.tDataModified);
-        addString("data_md5", infodata.strDataMD5);
-        addString("attachment_zip_md5", strObjMd5);
-        //
-        addBool("attachment_info", true);
-        addBool("attachment_data", true);
-    }
-};
-
-struct CWizKMDataDownloadParam
-    : public CWizKMTokenOnlyParam
-{
-    CWizKMDataDownloadParam(const QString& strToken, const QString& strBookGUID, const QString& strObjectGUID, const QString& strObjectType, int pos, int size)
-        : CWizKMTokenOnlyParam(strToken, strBookGUID)
-    {
-        addString("obj_guid", strObjectGUID);
-        addString("obj_type", strObjectType);
-        //
-        addInt64("start_pos", pos);
-        addInt64("part_size", size);
-    }
-};
-
-
-struct WIZKMDATAPART
-{
-    __int64 nObjectSize;
-    int bEOF;
-    __int64 nPartSize;
-    QString strPartMD5;
-    QByteArray stream;
-    //
-    WIZKMDATAPART()
-        : nObjectSize(0)
-        , bEOF(FALSE)
-        , nPartSize(0)
-    {
-    }
-    bool loadFromXmlRpc(WizXmlRpcStructValue& data)
-    {
-        data.getInt64("obj_size", nObjectSize);
-        data.getInt("eof", bEOF);
-        data.getInt64("part_size", nPartSize);
-        data.getString("part_md5", strPartMD5);
-        return data.getStream("data", stream);
-    }
-};
-
-bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, bool& bEOF)
-{
-    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
-
-    CWizKMDataDownloadParam param(m_userInfo.strToken, m_userInfo.strKbGUID, strObjectGUID, strObjectType, pos, size);
-    //
-    WIZKMDATAPART part;
-    if (!server.call("data.download", part, &param))
-    {
-        TOLOG("data.download failure!");
-        return FALSE;
-    }
-    //
-    __int64 nStreamSize = part.stream.size();
-    if (part.nPartSize != nStreamSize)
-    {
-        TOLOG2("part size does not match: stream_size=%1, part_size=%2", WizInt64ToStr(nStreamSize), WizInt64ToStr(part.nPartSize));
-        return FALSE;
-    }
-    //
-    QString strStreamMD5 = WizMd5StringNoSpaceJava(part.stream);
-    if (0 != strStreamMD5.compare(part.strPartMD5, Qt::CaseInsensitive))
-    {
-        TOLOG2("part md5 does not match, stream_md5=%1, part_md5=%2", strStreamMD5, part.strPartMD5);
-        return FALSE;
-    }
-    //
-    nAllSize = (int)part.nObjectSize;
-    bEOF = part.bEOF;
-    //
-    stream.append(part.stream);
-
-    return TRUE;
-}
-
-
-
-
-struct CWizKMDataUploadParam
-    : public CWizKMTokenOnlyParam
-{
-    CWizKMDataUploadParam(const QString& strToken, const QString& strBookGUID, const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, const QByteArray& stream)
-        : CWizKMTokenOnlyParam(strToken, strBookGUID)
-    {
-        addString("obj_guid", strObjectGUID);
-        addString("obj_type", strObjectType);
-        addString("obj_md5", strObjectMD5);
-        addInt("obj_size", allSize);
-        addInt("part_count", partCount);
-        addInt("part_sn", partIndex);
-        addInt64("part_size", stream.size());
-        addString("part_md5", ::WizMd5StringNoSpaceJava(stream));
-        addBase64("data", stream);
-    }
-};
-
-
-
-bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream)
-{
-    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
-
-    __int64 nStreamSize = stream.size();
-    if (partSize != (int)nStreamSize)
-    {
-        TOLOG2("Fault error: stream_size=%1, part_size=%2", WizIntToStr(int(nStreamSize)), WizIntToStr(partSize));
-        return FALSE;
-    }
-    //
-    CWizKMDataUploadParam param(m_userInfo.strToken, m_userInfo.strKbGUID, strObjectGUID, strObjectType, strObjectMD5, allSize, partCount, partIndex, stream);
-    //
-    if (!server.call("data.upload", &param))
-    {
-        TOLOG("Can not upload object part data!");
-        return FALSE;
-    }
-
-    //
-    return TRUE;
-}
-
-
-bool WizKMDatabaseServer::data_downloadOld(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
-{
-    stream.clear();
-    //
-    int nAllSize = 0;
-    int startPos = 0;
-    while (1)
-    {
-        int partSize = 500 * 1000;
-        //
-        bool bEOF = FALSE;
-        if (!data_download(strObjectGUID, strObjectType, startPos, partSize, stream, nAllSize, bEOF))
-        {
-            TOLOG(WizFormatString1("Failed to download object part data: %1", strDisplayName));
-            return FALSE;
-        }
-        //
-        int nDownloadedSize = stream.size();
-        //
-        if (bEOF)
-            break;
-        //
-        startPos = nDownloadedSize;
-
-        emit downloadProgress(nAllSize, nDownloadedSize);
-    }
-    //
-    __int64 nStreamSize = stream.size();
-    if (nStreamSize != nAllSize)
-    {
-        TOLOG3("Failed to download object data: %1, stream_size=%2, object_size=%3", strDisplayName, WizInt64ToStr(nStreamSize), WizInt64ToStr(nAllSize));
-        return FALSE;
-    }
-    //
-    return TRUE;
-}
-bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName)
-{
-    __int64 nStreamSize = stream.size();
-    if (0 == nStreamSize)
-    {
-        TOLOG("fault error: stream is zero");
-        return FALSE;
-    }
-    //
-    QString strMD5(strObjMD5);
-    //
-    QByteArray spPartStream;
-    //
-    int partSize = 500 * 1000;
-    int partCount = int(nStreamSize / partSize);
-    if (nStreamSize % partSize != 0)
-    {
-        partCount++;
-    }
-    //
-    for (int i = 0; i < partCount; i++)
-    {
-        spPartStream.clear();
-
-        int start = i * partSize;
-        int end = std::min<int>(start + partSize, int(nStreamSize));
-        ATLASSERT(end > start);
-        //
-        int curPartSize = end - start;
-        ATLASSERT(curPartSize <= partSize);
-        //
-        const char* begin = stream.data() + start;
-        spPartStream = spPartStream.fromRawData(begin, curPartSize);
-        //
-        int curPartStreamSize = (int)spPartStream.size();
-        ATLASSERT(curPartStreamSize == curPartSize);
-        //
-        if (!data_upload(strObjectGUID, strObjectType, strMD5, (int)nStreamSize, partCount, i, curPartSize, spPartStream))
-        {
-            TOLOG1("Failed to upload part data: %1", strDisplayName);
-            return FALSE;
-        }
-    }
-    //
-    //
-    return TRUE;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-//
-bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
-{
-    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
-
-    if (!data.arrayData.isEmpty() && data.arrayData.size() > m_kbInfo.getMaxFileSize())
-    {
-        TOLOG1("%1 is too large, skip it", data.strTitle);
-        return FALSE;
-    }
-    //
-    QString strObjMd5;
-    //
-    if (!data.arrayData.isEmpty() && bWithDocumentData)
-    {
-        strObjMd5 = WizMd5StringNoSpaceJava(data.arrayData);
-        if (!data_upload(data.strGUID, "document", data.arrayData, strObjMd5, data.strTitle))
-        {
-            TOLOG1("Failed to upload note data: %1", data.strTitle);
-            return FALSE;
-        }
-    }
-    else
-    {
-        bWithDocumentData = false;
-    }
-    //
-    CWizKMDocumentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, bWithDocumentData, data, data.arrayTagGUID, strObjMd5);
-    //
-    WizXmlRpcResult ret;
-    if (!server.call("document.postSimpleData", ret, &param))
-    {
-        TOLOG("document.postSimpleData failure!");
-        return FALSE;
-    }
-    //
-    if (WizXmlRpcStructValue* pRet = ret.getResultValue<WizXmlRpcStructValue>())
-    {
-        pRet->getInt64("version", nServerVersion);
-    }
-    //
-    return TRUE;
-}
-
-//
 struct WIZRESOURCEDATA
 {
     QString name;
@@ -2071,56 +1672,14 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 
 bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
-    if (isUseNewSync()) {
-        return document_postDataNew(data, bWithDocumentData, nServerVersion);
-    } else {
-        return document_postDataOld(data, bWithDocumentData, nServerVersion);
-    }
+    return document_postDataNew(data, bWithDocumentData, nServerVersion);
 }
 
 
-bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
-{
-    WizXmlRpcServer server(m_userInfo.strXmlRpcServer, NULL);
-
-    if (data.arrayData.size() > m_kbInfo.getMaxFileSize())
-    {
-        TOLOG1("%1 is too large, skip it", data.strName);
-        return TRUE;
-    }
-    //
-    QString strObjMd5 = ::WizMd5StringNoSpaceJava(data.arrayData);
-    //
-    if (!data_upload(data.strGUID, "attachment", data.arrayData, strObjMd5, data.strName))
-    {
-        TOLOG1("Failed to upload attachment data: %1", data.strName);
-        return FALSE;
-    }
-    //
-    CWizKMAttachmentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, data, strObjMd5);
-    //
-    WizXmlRpcResult ret;
-    if (!server.call("attachment.postSimpleData", ret, &param))
-    {
-        TOLOG("attachment.postSimpleData failure!");
-        return FALSE;
-    }
-    //
-    if (WizXmlRpcStructValue* pRet = ret.getResultValue<WizXmlRpcStructValue>())
-    {
-        pRet->getInt64("version", nServerVersion);
-    }
-    //
-    return TRUE;
-}
 
 bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
-    if (isUseNewSync()) {
-        return attachment_postDataNew(data, withData, nServerVersion);
-    } else {
-        return attachment_postDataOld(data, withData, nServerVersion);
-    }
+    return attachment_postDataNew(data, withData, nServerVersion);
 }
 
 

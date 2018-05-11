@@ -1272,7 +1272,7 @@ bool WizDownloadDocumentsByGuids(IWizKMSyncEvents* pEvents, WizKMAccountsServer&
             return false;
         }
         //
-        userInfo.strKbGUID = group.strGroupGUID;
+        userInfo = WIZUSERINFO(server.m_userInfo, group);
     }
     //
     WizKMDatabaseServer serverDB(userInfo);
@@ -1353,8 +1353,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strKbGUID = group.strGroupGUID;
+        WIZUSERINFO userInfo = WIZUSERINFO(server.m_userInfo, group);
         WizKMDatabaseServer serverDB(userInfo);
         //
         pEvents->onStatus(_TR("Query notes information"));
@@ -1734,9 +1733,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strKbGUID = group.strGroupGUID;
-        //
+        WIZUSERINFO userInfo(server.m_userInfo, group);
         //
         WizKMSync syncGroup(pGroupDatabase, userInfo,
                             server.getKbInfo(userInfo.strKbGUID),
@@ -1804,9 +1801,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_userInfo;
-        userInfo.strKbGUID = group.strGroupGUID;
-        //
+        WIZUSERINFO userInfo = WIZUSERINFO(server.m_userInfo, group);
         //
         WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, TRUE, FALSE, NULL);
         //

@@ -35,7 +35,6 @@
 #include "WizConsoleDialog.h"
 #include "WizCategoryView.h"
 #include "WizDocumentListView.h"
-#include "WizCertManager.h"
 #include "WizUserCipherForm.h"
 #include "WizDocumentView.h"
 #include "WizTitleBar.h"

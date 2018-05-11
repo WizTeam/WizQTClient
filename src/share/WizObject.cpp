@@ -1,6 +1,5 @@
 ﻿#include "WizObject.h"
 
-#include "WizXmlRpc.h"
 #include "WizMisc.h"
 #include "utils/WizLogger.h"
 #include "share/jsoncpp/json/json.h"
@@ -16,8 +15,29 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 {
     strToken = info.strToken;
     strKbGUID = info.strKbGUID;
-    strXmlRpcServer = info.strXmlRpcServer;
     strKbServer = info.strKbServer;
+    nMaxFileSize = info.nMaxFileSize;
+    strInviteCode = info.strInviteCode;
+    strMywizEmail = info.strMywizEmail;
+    strNoticeLink = info.strNoticeLink;
+    strNoticeText = info.strNoticeText;
+    strDisplayName = info.strDisplayName;
+    strUserEmail = info.strUserEmail;
+    strUserGUID = info.strUserGUID;
+    nUserLevel = info.nUserLevel;
+    strUserLevelName = info.strUserLevelName;
+    nUserPoints = info.nUserPoints;
+    strUserType = info.strUserType;
+    tVipExpried = info.tVipExpried;
+    tCreated = info.tCreated;
+    syncType = info.syncType;
+}
+
+WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info, const WIZGROUPDATA& group)
+{
+    strToken = info.strToken;
+    strKbGUID = group.strGroupGUID;    //group
+    strKbServer = group.strKbServer;    //group
     nMaxFileSize = info.nMaxFileSize;
     strInviteCode = info.strInviteCode;
     strMywizEmail = info.strMywizEmail;
@@ -41,7 +61,6 @@ bool WIZUSERINFO::fromJson(const Json::Value& value)
         strToken = QString::fromStdString(value["token"].asString());
         strKbGUID = QString::fromStdString(value["kbGuid"].asString());
         strKbServer = QString::fromStdString(value["kbServer"].asString());
-        strXmlRpcServer = QString::fromStdString(value["kbXmlRpcServer"].asString());
         strMywizEmail = QString::fromStdString(value["mywizEmail"].asString());
         nUserLevel = value["userLevel"].asInt();
         strUserLevelName = QString::fromStdString(value["userLevelName"].asString());
@@ -68,8 +87,7 @@ bool WIZUSERINFO::fromJson(const Json::Value& value)
         return !strToken.isEmpty()
                 && !strKbGUID.isEmpty()
                 && !strUserGUID.isEmpty()
-                && !strKbServer.isEmpty()
-                && !strXmlRpcServer.isEmpty();
+                && !strKbServer.isEmpty();
         //
     } catch (Json::Exception& e) {
         TOLOG1("failed to convert json to userinfo: %1", e.what());
@@ -84,16 +102,6 @@ WIZUSERCERT::WIZUSERCERT()
 {
 }
 
-bool WIZUSERCERT::loadFromXmlRpc(WizXmlRpcStructValue& val)
-{
-    WizXmlRpcStructValue& data = val;
-    data.getStr("n", strN);
-    data.getStr("e", stre);
-    data.getStr("d", strd);
-    data.getStr("hint", strHint);
-
-    return true;
-}
 
 WIZKBVALUEVERSIONS::WIZKBVALUEVERSIONS()
     : inited(false)
@@ -176,31 +184,6 @@ bool WIZKBINFO::fromJson(const Json::Value& value)
         return false;
     }
     //
-    return true;
-}
-
-/* -------------------------- WIZOBJECTPARTDATA -------------------------- */
-WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
-    : nStartPos(0)
-    , nQuerySize(0)
-    , nObjectSize(0)
-    , bEOF(false)
-    , nPartSize(0)
-{
-}
-
-bool WIZOBJECTPARTDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
-{
-    data.getInt("eof", bEOF);
-    data.getInt64("obj_size", nObjectSize);
-    data.getString("part_md5", strPartMD5);
-    data.getInt64("part_size", nPartSize);
-
-    if (!data.getStream("data", arrayData)){
-        TOLOG("Fault error, data is null!");
-        return false;
-    }
-
     return true;
 }
 
@@ -686,6 +669,7 @@ bool WIZGROUPDATA::fromJson(const Json::Value& value)
 {
     try {
         //
+        strKbServer = QString::fromStdString(value["ksServerUrl"].asString());
         bizGUID = QString::fromStdString(value["bizGuid"].asString());
         bizName = QString::fromStdString(value["bizName"].asString());
         tCreated = QDateTime::fromTime_t(value["created"].asInt64() / 1000);

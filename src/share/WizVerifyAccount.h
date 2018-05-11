@@ -12,10 +12,6 @@ public:
 
 protected:
     virtual void onClientLogin(const WIZUSERINFO& userInfo);
-    virtual void onXmlRpcError(const QString& strMethodName,
-                               WizXmlRpcError err,
-                               int errorCode,
-                               const QString& errorMessage);
 
 Q_SIGNALS:
     void done(bool succeeded, int errorCode, const QString& errorMessage);

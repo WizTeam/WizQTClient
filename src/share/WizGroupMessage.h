@@ -56,10 +56,6 @@ private:
     void syncEnd(); // stub
 
 protected:
-    virtual void onXmlRpcError(const QString& strMethodName,
-                               WizXmlRpcError err,
-                               int errorCode,
-                               const QString& errorMessage);
 
     virtual void onClientLogin(const WIZUSERINFO& userInfo);
     virtual void onSetMessageStatus();
