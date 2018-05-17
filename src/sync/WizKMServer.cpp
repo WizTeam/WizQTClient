@@ -862,7 +862,6 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
 #ifdef QT_DEBUG
     //m_strServer = m_userInfo.strKbServer = "http://localhost:4001";
 #endif
-    TOLOG1("sync type: %1", isUseNewSync() ? "new" : "old");
 }
 
 WizKMDatabaseServer::~WizKMDatabaseServer()
@@ -879,18 +878,6 @@ bool WizKMDatabaseServer::isGroup() const
     Q_ASSERT(!WizToken::userInfo().strKbGUID.isEmpty());
     //
     return WizToken::userInfo().strKbGUID != m_userInfo.strKbGUID;
-}
-
-bool WizKMDatabaseServer::isUseNewSync() const
-{
-    int syncType = WizToken::userInfo().syncType;
-    if (syncType == 100)
-        return true;
-    //
-    if (isGroup())
-        return false;
-    //
-    return syncType == 1;
 }
 
 void WizKMDatabaseServer::setKBInfo(const WIZKBINFO& info)

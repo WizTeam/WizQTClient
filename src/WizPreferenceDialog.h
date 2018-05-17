@@ -47,8 +47,6 @@ public Q_SLOTS:
     void onButtonFontSelect_clicked();
     void onButtonFontSelect_confirmed();
     //
-    void useNewSyncClicked(bool checked);
-    //
     void on_enableSpellCheck(bool checked);
 
 private slots:

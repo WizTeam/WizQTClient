@@ -7,7 +7,6 @@
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
-    , syncType(0)
 {
 }
 
@@ -30,7 +29,6 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
     tCreated = info.tCreated;
-    syncType = info.syncType;
 }
 
 WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info, const WIZGROUPDATA& group)
@@ -52,7 +50,6 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info, const WIZGROUPDATA& group)
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
     tCreated = info.tCreated;
-    syncType = info.syncType;
 }
 
 bool WIZUSERINFO::fromJson(const Json::Value& value)
@@ -67,7 +64,6 @@ bool WIZUSERINFO::fromJson(const Json::Value& value)
         nUserPoints = value["userPoints"].asInt();
         strUserType = QString::fromStdString(value["userType"].asString());
         nMaxFileSize = value["uploadSizeLimit"].asInt64();
-        syncType = value["syncType"].asInt();
 
         strInviteCode = QString::fromStdString(value["inviteCode"].asString());
         strNoticeText = QString::fromStdString(value["noticeText"].asString());

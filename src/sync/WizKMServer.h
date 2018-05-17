@@ -132,8 +132,6 @@ public:
     const WIZUSERINFOBASE& userInfo() const { return m_userInfo; }
     //
     bool isGroup() const;
-    bool isUseNewSync() const;
-
     //
     void clearJsonResult() { m_lastJsonResult = WIZSTANDARDRESULT(200, QString(""), QString("")); }
     WIZSTANDARDRESULT lastJsonResult() const { return m_lastJsonResult; }
