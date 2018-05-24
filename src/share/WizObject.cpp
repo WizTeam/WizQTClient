@@ -641,6 +641,7 @@ WIZGROUPDATA::WIZGROUPDATA()
 
 WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
     : bizGUID(data.bizGUID)
+    , strKbServer(data.strKbServer)
     , bizName(data.bizName)
     , tCreated(data.tCreated)
     , tModified(data.tModified)

@@ -1821,13 +1821,19 @@ void WizOEMDownloader::checkServerLicence(const QString& licence)
     QString settings = _downloadOEMSettings();
     if (settings.isEmpty())
     {
+        emit errorMessage(tr("Licence not found : %1").arg(settings.left(100)));
+        qDebug() << "Can not find licence from oem settings";
         return;
     }
     //
     Json::Value d;
     Json::Reader reader;
     if (!reader.parse(settings.toUtf8().constData(), d))
+    {
+        emit errorMessage(tr("Licence not found : %1").arg(settings.left(100)));
+        qDebug() << "Can not find licence from oem settings";
         return;
+    }
 
     if (d.isMember("licence"))
     {

@@ -110,6 +110,9 @@ void WizCommonApiEntry::setEnterpriseServerIP(const QString& strIP)
         if (strIP.startsWith("http"))
         {
             m_server = strIP;
+            if (!m_server.endsWith("/")) {
+                m_server += "/";
+            }
         }
         else
         {
@@ -354,7 +357,7 @@ QString WizApiEntry::appendSrc(QString url)
     QUrl u(url);
     QString host = u.host();
     //
-    return url + "&srcUrl=" + host;
+    return url + "&srcHost=" + host;
 }
 
 
