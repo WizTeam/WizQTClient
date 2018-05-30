@@ -860,6 +860,9 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const 
     , m_objectsTotalSize(0)
 {
 #ifdef QT_DEBUG
+    if (m_strServer.isEmpty()) {
+        Q_ASSERT(false);
+    }
     //m_strServer = m_userInfo.strKbServer = "http://localhost:4001";
 #endif
 }

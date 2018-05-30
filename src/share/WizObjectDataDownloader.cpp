@@ -234,7 +234,7 @@ bool WizObjectDownloader::downloadDocument()
     return ret;
 }
 
-bool WizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
+bool WizObjectDownloader::getUserInfo(WIZUSERINFO& info)
 {
     QString token = WizToken::token();
     if (token.isEmpty()) {
@@ -244,6 +244,12 @@ bool WizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
     info = WizToken::userInfo();
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
+    //
+    WIZGROUPDATA group;
+    if (WizDatabaseManager::instance()->db().getGroupData(m_data.strKbGUID, group))
+    {
+        info = WIZUSERINFO(info, group);
+    }
 
     return true;
 }

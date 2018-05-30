@@ -74,7 +74,7 @@ private:
 private:
     bool downloadNormalData();
     bool downloadDocument();
-    bool getUserInfo(WIZUSERINFOBASE& info);
+    bool getUserInfo(WIZUSERINFO& info);
 
 private Q_SLOTS:
     void on_downloadProgress(int totalSize, int loadedSize);
