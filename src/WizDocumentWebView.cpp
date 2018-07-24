@@ -1152,6 +1152,7 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
         //
         QString strScript = "WizEditor.getContentHtml()";
         //
+        TOLOG("saving note...");
         page()->runJavaScript(strScript, [=](const QVariant& ret){
             //
             bool succeeded = false;
@@ -1164,11 +1165,20 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
                     m_currentNoteHtml = html;
                     emit currentHtmlChanged();
                     //
-                    qDebug() << m_currentNoteHtml;
+                    //qDebug() << m_currentNoteHtml;
                     //
                     m_docSaverThread->save(doc, html, strFileName, 0);
+                    TOLOG("save note done...");
                 }
             }
+            //
+            if (!succeeded)
+            {
+                TOLOG("save note failed, html is empty");
+                QString message = tr("Failed to save note.");
+                WizMessageBox::warning(this, tr("Error"), message);
+            }
+            //
             callback(QVariant(succeeded));
         });
         //
@@ -1371,9 +1381,6 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     //
     m_strNoteHtmlFileName = strFileName;
     load(QUrl::fromLocalFile(strFileName));
-
-    //Waiting for the editor initialization complete if it's the first time to load a document.
-    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
 
     onNoteLoadFinished();
 }
