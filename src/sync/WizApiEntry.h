@@ -28,6 +28,7 @@ public:
     static QString captchaUrl(const QString& strCaptchaID, int nWidth = 120, int nHeight = 40);
     static QString editStatusUrl();
     static QString shareServer();
+    static QString shareNoteUrl();
 
     //
     static QString makeUpUrlFromCommand(const QString& strCommand);

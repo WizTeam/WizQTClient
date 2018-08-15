@@ -183,17 +183,14 @@ void WizShareLinkDialog::notifyEvent(const QString& event, const QVariant& param
 
 void WizShareLinkDialog::loadHtml()
 {
-    QUrlQuery query;
-    query.addQueryItem("share_server", WizCommonApiEntry::shareServer());
-    QString strFile = Utils::WizPathResolve::resourcesPath() + "files/share_link/index.html";
-    QUrl url = QUrl::fromLocalFile(strFile);
-    url.setQuery(query);
-    //
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] () {
         //
+        QString strUrlTemplate = WizCommonApiEntry::shareNoteUrl();
         QString token = WizToken::token();
         WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-            QString strUrl = "http://192.168.1.73:3000/wapp/pages/share?kbGuid=ac088d0f-6533-450b-b219-3c955f623f02&docGuid=53c46d72-13c7-443c-b848-f71d5ab0aa85&token={token}";
+            QString strUrl = strUrlTemplate;
+            strUrl.replace("{kb_guid}", getKbGuid());
+            strUrl.replace("{doc_guid}", getGuid());
             strUrl.replace("{token}", token);
             QUrl url = QUrl(strUrl);
 #ifdef QT_DEBUG

@@ -290,6 +290,13 @@ QString WizCommonApiEntry::shareServer()
     return url;
 }
 
+QString WizCommonApiEntry::shareNoteUrl()
+{
+    QString url = getUrlByCommand("share_url");
+    return url;
+}
+
+
 QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand, const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
