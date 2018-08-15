@@ -1024,7 +1024,7 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
             RESDATA data;
             data.name = QString::fromUtf8(resObj["name"].asString().c_str());
             data.url = QString::fromUtf8(resObj["url"].asString().c_str());
-            data.size = resObj["size"].asInt64();
+            data.size = atoi((resObj["size"].asString().c_str()));
             data.time = QDateTime::fromTime_t(resObj["time"].asInt64() / 1000);
             serverResources.push_back(data);
         }

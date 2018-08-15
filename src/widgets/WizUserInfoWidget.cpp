@@ -83,6 +83,11 @@ WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     setMenu(m_menuMain);
 }
 
+void WizUserInfoWidget::showAccountSettings()
+{
+    on_action_accountSettings_triggered();
+}
+
 void WizUserInfoWidget::resetUserInfo()
 {
     WIZUSERINFO info;

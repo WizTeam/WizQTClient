@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "share/WizWebEngineView.h"
+#include "share/WizThreads.h"
 #include "sync/WizApiEntry.h"
 
 #define ShareLinkFirstTips "ShareLinkFirstTips"
@@ -22,7 +23,7 @@ WizShareLinkDialog::WizShareLinkDialog(WizUserSettings& settings, QWidget* paren
     , m_settings(settings)
     , m_view(new WizWebEngineView(this))
 {
-    setWindowFlags(Qt::CustomizeWindowHint);
+    //setWindowFlags(Qt::CustomizeWindowHint);
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_view);
@@ -31,9 +32,9 @@ WizShareLinkDialog::WizShareLinkDialog(WizUserSettings& settings, QWidget* paren
     m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     //
     m_view->addToJavaScriptWindowObject("external", this);
+    m_view->addToJavaScriptWindowObject("wizQt", this);
     //m_view->addToJavaScriptWindowObject("customObject", this);
 
-    m_animation = new QPropertyAnimation(this, "size", this);
 }
 
 WizShareLinkDialog::~WizShareLinkDialog()
@@ -163,6 +164,23 @@ QString WizShareLinkDialog::formateISO8601String()
     return date.toString(Qt::ISODate);
 }
 
+void WizShareLinkDialog::notifyEvent(const QString& event, const QVariant& params)
+{
+    qDebug() << event;
+    if (event == "UpgradeToVip") {
+        //
+        done(100);
+        //close();
+
+    } else if (event == "VerifyMobile") {
+        //
+        done(200);
+        //close();
+        //
+    }
+}
+
+
 void WizShareLinkDialog::loadHtml()
 {
     QUrlQuery query;
@@ -170,6 +188,21 @@ void WizShareLinkDialog::loadHtml()
     QString strFile = Utils::WizPathResolve::resourcesPath() + "files/share_link/index.html";
     QUrl url = QUrl::fromLocalFile(strFile);
     url.setQuery(query);
-    m_view->load(url);
+    //
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        //
+        QString token = WizToken::token();
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+            QString strUrl = "http://192.168.1.73:3000/wapp/pages/share?kbGuid=ac088d0f-6533-450b-b219-3c955f623f02&docGuid=53c46d72-13c7-443c-b848-f71d5ab0aa85&token={token}";
+            strUrl.replace("{token}", token);
+            QUrl url = QUrl(strUrl);
+#ifdef QT_DEBUG
+            qDebug() << url;
+#endif
+            m_view->load(url);
+        });
+
+    });
+    //
 }
 

@@ -24,6 +24,8 @@ public:
 
     void shareDocument(const WIZDOCUMENTDATA& doc);
 
+    Q_INVOKABLE void notifyEvent(const QString& event, const QVariant& params);
+
     Q_INVOKABLE void logAction(const QString& strAction);
     Q_INVOKABLE void writeToLog(const QString& strLog);
     Q_INVOKABLE void getToken();
@@ -63,7 +65,6 @@ private:
     WizUserSettings& m_settings;
     WizWebEngineView* m_view;
     WIZDOCUMENTDATA m_doc;
-    QPropertyAnimation* m_animation;
     QString m_formateISO8601StringParam;
 };
 
