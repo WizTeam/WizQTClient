@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
+#include <QSaveFile>
 #include <QBuffer>
 #include <QTextStream>
 #include <QDebug>
@@ -231,14 +232,21 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
     zip->setCurrentFile(fileName);
     QuaZipFile inFile(zip);
     if(!inFile.open(QIODevice::ReadOnly) || inFile.getZipError()!=UNZ_OK) return false;
+    //
+    int uncompressedSize = inFile.usize();
 
     // Controllo esistenza cartella file risultato
     QDir().mkpath(QFileInfo(fileDest).absolutePath());
 
     // Apro il file risultato
-    QFile outFile;
+    if (QFile::exists(fileDest))
+    {
+        qDebug() << "delete exists file.";
+        QFile::remove(fileDest);
+    }
+    QSaveFile outFile;
     outFile.setFileName(fileDest);
-    if(!outFile.open(QIODevice::WriteOnly)) {
+    if(!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
 
         outFile.setPermissions(QFile::ReadOwner
                                | QFile::WriteOwner
@@ -248,7 +256,7 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
                                | QFile::ReadOther
                                );
         //
-        if (!outFile.open(QIODevice::WriteOnly))
+        if (!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
             return false;
     }
 
@@ -264,7 +272,20 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
         removeFile(QStringList(fileDest));
         return false;
     }
-    outFile.close();
+    if (!outFile.commit())
+    {
+        qDebug() << "failed to save zip file: " << fileDest;
+        return false;
+    }
+    //
+#ifdef QT_DEBUG
+    int len = Utils::WizMisc::getFileSize(fileDest);
+    qDebug() << "file len after unzip: " << len;
+    if (len != uncompressedSize)
+    {
+        qDebug() << "uncompressed size: " << uncompressedSize << ", but file size: " << len;
+    }
+#endif
 
     return true;
 }

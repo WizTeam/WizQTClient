@@ -359,8 +359,7 @@ bool WizKMSyncThread::quickSync()
             {
                 IWizSyncableDatabase* pGroupDatabase = m_db.getGroupDatabase(group);
                 //
-                WIZUSERINFO userInfo = m_info;
-                userInfo.strKbGUID = group.strGroupGUID;
+                WIZUSERINFO userInfo(m_info, group);
                 //
                 WizKMSync syncGroup(pGroupDatabase, userInfo, WIZKBINFO(), WIZKBVALUEVERSIONS(), m_pEvents, TRUE, TRUE, NULL);
                 //

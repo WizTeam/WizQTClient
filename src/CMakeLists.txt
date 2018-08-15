@@ -52,13 +52,9 @@ set(wiznote_SOURCES
     share/cppsqlite3.cpp
     share/WizObject.cpp
     share/WizKMCore.cpp
-    share/WizXml.cpp
-    share/WizXmlRpc.cpp
     share/WizGlobal.cpp
-    sync/WizXmlRpcServer.cpp
     share/WizDatabase.cpp
     share/WizDatabaseManager.cpp
-    #share/WizVerifyAccount.cpp
     share/WizSettings.cpp
     share/WizUI.cpp
     share/WizMd5.cpp
@@ -66,7 +62,6 @@ set(wiznote_SOURCES
     share/WizWin32Helper.cpp
     share/WizDrawTextHelper.cpp
     share/WizUIHelper.cpp
-    #share/WizCreateAccount.cpp
     share/WizCommonUI.cpp
     share/WizAnimateAction.cpp
     share/WizPopupWidget.cpp
@@ -209,9 +204,6 @@ set(wiznote_HEADERS
     share/cppsqlite3.h
     share/WizObject.h
     share/WizKMCore.h
-    share/WizXml.h
-    share/WizXmlRpc.h
-    sync/WizXmlRpcServer.h
     share/WizDatabase.h
     share/WizDatabaseManager.h
     share/WizSettings.h

@@ -2,7 +2,6 @@
 #define WIZDOWNLOADOBJECTDATA_H
 
 #include "WizDatabaseManager.h"
-#include "../sync/WizXmlRpcServer.h"
 
 class WizDownloadObjectData
 {
@@ -20,10 +19,6 @@ private:
     bool m_bInited;
 
 protected:
-    virtual void onXmlRpcError(const QString& strMethodName,
-                               WizXmlRpcError err,
-                               int errorCode,
-                               const QString& errorMessage);
 
     virtual void onClientLogin(const WIZUSERINFO& userInfo);
     virtual void onGetGroupList(const CWizGroupDataArray& arrayGroup);

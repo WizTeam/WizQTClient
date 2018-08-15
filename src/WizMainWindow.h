@@ -40,6 +40,7 @@ class WizTemplatePurchaseDialog;
 
 class WizSearchView;
 class WizSearcher;
+class WizUserInfoWidget;
 
 class QtSegmentControl;
 class WizObjectDownloaderHost;
@@ -206,6 +207,7 @@ private:
     QString m_strSearchKeywords;
 
     WizSearchView* m_searchWidget;
+    WizUserInfoWidget* m_userInfoWidget;
 
     WizMobileFileReceiver *m_mobileFileReceiver;    
 

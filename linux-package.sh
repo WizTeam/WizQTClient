@@ -17,6 +17,8 @@ mkdir bin
 cd bin
 
 cp ../../../WizQTClient-Release-Linux/src/WizNote ./
+mkdir qtwebengine_dictionaries
+cp -R ../../../WizQTClient/share/qtwebengine_dictionaries ./
 
 cd ..
 cp -R ../../WizQTClient-Release-Linux/share ./
@@ -47,10 +49,14 @@ cd ..
 cp ../WizQTClient/build/common/wiznote2.desktop ./wiznote.desktop
 cd ./WizNote
 mkdir plugins
+mkdir lib
 cd ./plugins/
 mkdir platforminputcontexts
 cd ../..
-cp /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
+#cp ../WizQTClient/libfcitxplatforminputcontextplugin.so ./WizNote/plugins/platforminputcontexts
+cp /lib/x86_64-linux-gnu/libssl.so.1.0.0 ./WizNote/lib/
+cp /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 ./WizNote/lib/
+
 cd ..
 
 

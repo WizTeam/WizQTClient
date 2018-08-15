@@ -2,6 +2,9 @@
 
 #include <QLabel>
 #include <QHBoxLayout>
+#include <sstream>
+#include <string>
+#include <QDebug>
 
 #include "utils/WizStyleHelper.h"
 #include "share/WizObject.h"
@@ -15,7 +18,9 @@ WizInfoBar::WizInfoBar(WizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
 {
-    setStyleSheet("font-size: 12px; color: #a2a2a2;");
+    QString strStyle;
+    strStyle += "font-size: " + QString::number(WizSmartScaleUI(12)) + "px; color: #a2a2a2;";
+    setStyleSheet(strStyle);
     setContentsMargins(0, 0, 0, 6);
 
     int nHeight = Utils::WizStyleHelper::infoBarHeight();

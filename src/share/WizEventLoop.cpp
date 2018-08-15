@@ -138,29 +138,3 @@ void WizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTo
     m_uploadBytes = bytesSent;
 //    qDebug() << "upload progress changed  " << bytesSent << "  totoal  : " << bytesTotal;
 }
-
-
-WizXmlRpcEventLoop::WizXmlRpcEventLoop(QNetworkReply* pReply, QObject* parent)
-    : WizAutoTimeOutEventLoop(pReply, parent)
-{
-}
-
-void WizXmlRpcEventLoop::doFinished(QNetworkReply* reply)
-{
-    m_finished = true;
-    m_error = reply->error();
-    if (m_error) {
-        m_errorString = reply->errorString();
-        return;
-    }
-
-    //TODO: modify content type checker
-    QString strContentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
-    if (strContentType.remove(' ').toLower() != "text/xml;charset=utf-8") {
-        m_error = QNetworkReply::ProtocolFailure;
-        m_errorString = "Invalid content type of response";
-        return;
-    }
-
-    m_result = reply->readAll();
-}

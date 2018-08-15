@@ -35,7 +35,6 @@
 #include "WizConsoleDialog.h"
 #include "WizCategoryView.h"
 #include "WizDocumentListView.h"
-#include "WizCertManager.h"
 #include "WizUserCipherForm.h"
 #include "WizDocumentView.h"
 #include "WizTitleBar.h"
@@ -1274,7 +1273,15 @@ void WizMainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, con
 
     WizShareLinkDialog dlg(userSettings());
     dlg.shareDocument(doc);
-    dlg.exec();
+    int result = dlg.exec();
+    qDebug() << result;
+    if (result == 100) {
+        //upgrade vip
+        showVipUpgradePage();
+    } else if (result == 200) {
+        //mobile
+        m_userInfoWidget->showAccountSettings();
+    }
 }
 
 void WizMainWindow::openVipPageInWebBrowser()
@@ -1777,7 +1784,6 @@ void WizMainWindow::initMenuList()
 void WizMainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
-    #ifdef USECOCOATOOLBAR
     m_toolBar->showInWindow(this);
 
     m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(false);
@@ -1807,51 +1813,12 @@ void WizMainWindow::initToolBar()
 
     m_toolBar->addStandardItem(WizMacToolBar::FlexibleSpace);
 
-    WizUserInfoWidget* info = new WizUserInfoWidget(*this, nullptr);
-    m_toolBar->addWidget(info, "", "");
+    m_userInfoWidget = new WizUserInfoWidget(*this, nullptr);
+    m_toolBar->addWidget(m_userInfoWidget, "", "");
     //
     m_searchWidget = m_toolBar->getSearchWidget();
     m_searchWidget->setUserSettings(m_settings);
     m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(isHighPix ? 217 : 230, 0));
-    #else
-
-
-//    return;
-
-
-//    setUnifiedTitleAndToolBarOnMac(true);
-    setContextMenuPolicy(Qt::NoContextMenu);
-    addToolBar(m_toolBar);
-    m_toolBar->setAllowedAreas(Qt::TopToolBarArea);
-    m_toolBar->setMovable(false);
-
-    m_toolBar->addWidget(new WizFixedSpacer(QSize(10, 1), m_toolBar));
-
-    WizUserInfoWidget* info = new WizUserInfoWidget(*this, m_toolBar);
-    m_toolBar->addWidget(info);
-
-    m_toolBar->addWidget(new WizFixedSpacer(QSize(20, 1), m_toolBar));
-
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-
-    //m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-    m_spacerForToolButtonAdjust = new WizFixedSpacer(QSize(20, 1), m_toolBar);
-    m_toolBar->addWidget(m_spacerForToolButtonAdjust);
-
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
-    updateHistoryButtonStatus();
-
-    m_toolBar->addWidget(new WizSpacer(m_toolBar));
-
-    m_searchWidget = new WizSearchView(this);
-    m_searchWidget->setWidthHint(280);
-    m_toolBar->addWidget(m_searchWidget);
-
-    m_toolBar->addWidget(new WizFixedSpacer(QSize(20, 1), m_toolBar));
-    m_toolBar->setStyleSheet("QToolBar{background-color:#fcfcfc;}");
-    #endif
 
 #else
     layoutTitleBar();
@@ -1905,8 +1872,8 @@ void WizMainWindow::initToolBar()
     //
     m_toolBar->addWidget(new WizSpacer(m_toolBar));
 
-    WizUserInfoWidget* info = new WizUserInfoWidget(*this, m_toolBar);
-    m_toolBar->addWidget(info);
+    m_userInfoWidget = new WizUserInfoWidget(*this, m_toolBar);
+    m_toolBar->addWidget(m_userInfoWidget);
 
     updateHistoryButtonStatus();
 
@@ -3447,6 +3414,9 @@ void WizMainWindow::on_options_settingsChanged(WizOptionsType type)
         break;
     case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);
+        break;
+    case wizoptionsSpellCheck:
+        m_doc->web()->editorResetSpellCheck();
         break;
     default:
         break;

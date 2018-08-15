@@ -20,7 +20,7 @@ public:
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();
     static QString commentUrlTemplate();
-    static QString mailShareUrl(const QString& strKUrl, const QString& strMailInfo);
+    static QString mailShareUrl(const QString& strKsServer, const QString& strMailInfo);
     static QString accountInfoUrl(const QString& strToken);
     static QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);
     static QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);
@@ -28,6 +28,7 @@ public:
     static QString captchaUrl(const QString& strCaptchaID, int nWidth = 120, int nHeight = 40);
     static QString editStatusUrl();
     static QString shareServer();
+    static QString shareNoteUrl();
 
     //
     static QString makeUpUrlFromCommand(const QString& strCommand);
@@ -68,6 +69,8 @@ public:
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken);
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken,
                                       const QString& strExtInfo);
+    //
+    static QString appendSrc(QString url);
 
 private:
     static QString requestUrl(const QString& strCommand);

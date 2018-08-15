@@ -110,6 +110,9 @@ void WizCommonApiEntry::setEnterpriseServerIP(const QString& strIP)
         if (strIP.startsWith("http"))
         {
             m_server = strIP;
+            if (!m_server.endsWith("/")) {
+                m_server += "/";
+            }
         }
         else
         {
@@ -178,6 +181,9 @@ QString WizCommonApiEntry::newAsServerUrl()
 
 QString WizCommonApiEntry::messageServerUrl()
 {    
+#ifdef QT_DEBUG
+    //return "http://localhost:5001/wizmessage";
+#endif
     return getUrlByCommand(WIZNOTE_API_COMMAND_MESSAGE_SERVER);
 }
 
@@ -220,7 +226,7 @@ QString WizCommonApiEntry::avatarUploadUrl()
     return strUrl;
 }
 
-QString WizCommonApiEntry::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
+QString WizCommonApiEntry::mailShareUrl(const QString& strKsServer, const QString& strMailInfo)
 {
     // 通过endpoints获得api命令为mail_share，和之前使用的mail_share2不同，需要分开处理
     QString strMailShare = getUrlFromCache("mail_share");
@@ -230,9 +236,7 @@ QString WizCommonApiEntry::mailShareUrl(const QString& strKUrl, const QString& s
         updateUrlCache("mail_share", strMailShare);
     }
 
-    QString strKSServer = strKUrl;
-    //NOTE: 新版服务器修改了获取方法，需要自行将KUrl中的/xmlrpc移除
-    strKSServer.remove("/xmlrpc");
+    QString strKSServer = strKsServer + "/wizks";
     strMailShare.replace("{server_url}", strKSServer);
     strMailShare.append(strMailInfo);
     return strMailShare;
@@ -285,6 +289,13 @@ QString WizCommonApiEntry::shareServer()
     QString url = getUrlByCommand("share_server");
     return url;
 }
+
+QString WizCommonApiEntry::shareNoteUrl()
+{
+    QString url = getUrlByCommand("share_url");
+    return url;
+}
+
 
 QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand, const QString& strToken)
 {
@@ -348,6 +359,15 @@ QString WizCommonApiEntry::requestUrl(const QString& strCommand)
     return strUrl;
 }
 
+QString WizApiEntry::appendSrc(QString url)
+{
+    QUrl u(url);
+    QString host = u.host();
+    //
+    return url + "&srcHost=" + host;
+}
+
+
 QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
 {
     // random seed
@@ -362,7 +382,8 @@ QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
             .arg(QHostInfo::localHostName())\
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
-
+    //
+    strUrl = WizApiEntry::appendSrc(strUrl);
     return strUrl;
 }
 

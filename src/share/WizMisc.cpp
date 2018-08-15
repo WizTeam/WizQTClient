@@ -1709,8 +1709,48 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
 QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
                       QIcon::Mode mode /* = QIcon::Normal */, QIcon::State state /* = QIcon::Off */)
 {
+    return WizLoadSkinIcon(strSkinName, strIconName, QSize(), mode, state);
+}
+
+QPixmap WizLoadPixmapIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize)
+{
+    static int rate = 0;
+    if (!rate) {
+        //
+        rate = WizSmartScaleUI(100);
+    }
+    //
+    if (rate < 175) {
+        //
+        //don't scale image
+        QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
+        return QPixmap(strIconNormal);
+        //
+    } else {
+        //
+        //using 2x
+        QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
+        QString strIcon2x = WizGetSkinResourceFileName(strSkinName, strIconName + "@2x");
+        //
+        if (QFile::exists(strIcon2x)) {
+            return QPixmap(strIcon2x);
+        }
+        //
+        return QPixmap(strIconNormal);
+    }
+
+}
+
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize,
+                      QIcon::Mode mode /* = QIcon::Normal */, QIcon::State state /* = QIcon::Off */)
+{
     Q_UNUSED(mode);
     Q_UNUSED(state);
+
+
+ #ifdef Q_OS_MAC
+
+    Q_UNUSED(iconSize);
 
     QString strIconNormal = WizGetSkinResourceFileName(strSkinName, strIconName);
     QString strIconActive1 = WizGetSkinResourceFileName(strSkinName, strIconName + "_on");
@@ -1736,6 +1776,36 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
     }
 
     return icon;
+#else
+    QString strIconNormal = strIconName;
+    QString strIconActive1 = strIconName + "_on";
+    QString strIconActive2 = strIconName + "_selected";
+
+
+    if (!QFile::exists(WizGetSkinResourceFileName(strSkinName, strIconNormal))) {
+        //TOLOG1("Can't load icon: ", strIconName);
+        return QIcon();
+    }
+
+    QPixmap pixmapNormal = WizLoadPixmapIcon(strSkinName, strIconNormal, iconSize);
+
+    QIcon icon;
+    icon.addPixmap(pixmapNormal, QIcon::Normal, QIcon::Off);
+
+    // used for check state
+    if (QFile::exists(WizGetSkinResourceFileName(strSkinName, strIconActive1))) {
+        QPixmap pixmapActive1 = WizLoadPixmapIcon(strSkinName, strIconActive1, iconSize);
+        icon.addPixmap(pixmapActive1, QIcon::Active, QIcon::On);
+    }
+
+    // used for sunken state
+    if (QFile::exists(WizGetSkinResourceFileName(strSkinName, strIconActive2))) {
+        QPixmap pixmapActive2 = WizLoadPixmapIcon(strSkinName, strIconActive2, iconSize);
+        icon.addPixmap(pixmapActive2, QIcon::Active, QIcon::Off);
+    }
+
+    return icon;
+#endif
 }
 
 QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QString& strIconName)
@@ -2510,6 +2580,18 @@ QChar getWizSearchSplitChar()
 }
 
 
+double calScaleFactor()
+{
+    static double scaleFactor = 0;
+
+    if (scaleFactor < 0.5)
+    {
+        scaleFactor = 1.0 * WizSmartScaleUI(100) / 100;
+    }
+
+    return scaleFactor;
+}
+
 void WizScaleIconSizeForRetina(QSize& size)
 {
 #ifdef Q_OS_MAC
@@ -2527,7 +2609,9 @@ bool WizIsHighPixel()
 #ifdef Q_OS_MAC
     return qApp->devicePixelRatio() >= 2;
 #endif
-    return false;
+    return calScaleFactor() > 1.5;
+
+//    return false;
 }
 
 

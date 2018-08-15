@@ -202,6 +202,11 @@ void WizWebEngineView::innerLoadFinished(bool ret)
     //
     if (ret)
     {
+        // 页面加载时设置合适的缩放比例
+        qreal zFactor = (1.0*WizSmartScaleUI(100)) / 100;
+        setZoomFactor(zFactor);
+        //
+
         if (m_server && m_server->isListening()
                 && m_clientWrapper
                 && m_channel)
@@ -295,6 +300,24 @@ bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev)
                 web->page()->triggerAction(QWebEnginePage::SelectAll);
                 return true;
             }
+            else if (ev->modifiers()&Qt::KeyboardModifier::ControlModifier && ev->key() == Qt::Key_Up)
+            {
+                //放大
+                qreal factor = web->zoomFactor();
+                factor += 0.1;
+                factor = (factor > 5.0) ? 5.0 : factor;
+                web->setZoomFactor(factor);
+                return true;
+            }
+            else if (ev->modifiers()&Qt::KeyboardModifier::ControlModifier && ev->key() == Qt::Key_Down)
+            {
+                //缩小
+                qreal factor = web->zoomFactor();
+                factor -= 0.1;
+                factor = (factor < 0.5) ? 0.5 : factor;
+                web->setZoomFactor(factor);
+                return true;
+            }
         }
     }
     return false;
@@ -329,7 +352,7 @@ void WizWebEngineView::wheelEvent(QWheelEvent *event)
             factor -= 0.1;
             factor = (factor < 0.5)?0.5:factor;
         }
-        setZoomFactor(factor);
+        //setZoomFactor(factor);
     } else {
         event->ignore();
     }

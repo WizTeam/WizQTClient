@@ -269,17 +269,12 @@ bool WizDocument::moveTo(WizDatabase& targetDB, const WIZTAGDATA& targetTag)
             WizFolder folder(m_db, m_db.getDefaultNoteLocation());
             moveTo(&folder);
         }
-
-        CWizTagDataArray arrayTag;
-        m_db.getDocumentTags(m_data.strGUID, arrayTag);
-        if (arrayTag.size() > 0)
-        {
-            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
-            {
-                removeTag(*it);
-            }
-        }
-        return addTag(targetTag);
+        //
+        CWizStdStringArray tags;
+        tags.push_back(targetTag.strGUID);
+        //
+        bool ret = m_db.setDocumentTags2(m_data, tags, true);
+        return ret;
     }
 
     //
@@ -1214,8 +1209,6 @@ void WizDatabase::setUserInfo(const WIZUSERINFO& userInfo)
     setMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
     setMeta(g_strAccountSection, "DateSignUp", userInfo.tCreated.toString());
     setMeta(g_strAccountSection, "kbServer", userInfo.strKbServer);
-    setMeta(g_strAccountSection, "SyncType", QString::number(userInfo.syncType));
-
 
     Q_EMIT userInfoChanged();
 }
@@ -2161,6 +2154,7 @@ bool WizDatabase::getGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     group.strGroupGUID = groupGUID;
     group.strGroupName = getMetaDef(g_strGroupSection, groupGUID);
 
+    group.strKbServer = getMetaDef(g_strGroupSection, groupGUID + "_KbServer");
     group.bizGUID = getMetaDef(g_strGroupSection, groupGUID + "_BizGUID");
     group.bizName= getMetaDef(g_strGroupSection, groupGUID + "_BizName");
     group.bOwn = getMetaDef(g_strGroupSection, groupGUID + "_Own") == "1";
@@ -2226,8 +2220,9 @@ bool WizDatabase::setAllGroupInfoCore(const CWizGroupDataArray& arrayGroup)
         setMeta(g_strGroupSection, QString::number(i), group.strGroupGUID);
         setMeta(g_strGroupSection, group.strGroupGUID, group.strGroupName);
 
+        setMeta(g_strGroupSection, group.strGroupGUID + "_KbServer", group.strKbServer);
         setMeta(g_strGroupSection, group.strGroupGUID + "_BizGUID", group.bizGUID);
-        setMeta(g_strGroupSection, group.strGroupGUID + "_BizName", group.bizGUID);
+        setMeta(g_strGroupSection, group.strGroupGUID + "_BizName", group.bizName);
         setMeta(g_strGroupSection, group.strGroupGUID + "_Own", group.bOwn ? "1" : "0");
         setMeta(g_strGroupSection, group.strGroupGUID + "_Role", QString::number(group.nUserGroup));
         setMeta(g_strGroupSection, group.strGroupGUID + "_MyWizEmail", group.strMyWiz);
@@ -2827,7 +2822,6 @@ bool WizDatabase::getUserInfo(WIZUSERINFO& userInfo)
     userInfo.strMywizEmail = getMetaDef(g_strAccountSection, "MywizMail");
     userInfo.tCreated = QDateTime::fromString(getMetaDef(g_strAccountSection, "DateSignUp"));
     userInfo.strKbServer = getMetaDef(g_strAccountSection, "KbServer");
-    userInfo.syncType = getMetaDef(g_strAccountSection, "SyncType").toInt();
 
     return true;
 }

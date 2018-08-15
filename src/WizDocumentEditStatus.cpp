@@ -428,7 +428,7 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
         WIZGROUPDATA group;
         if (!WizDatabaseManager::instance()->db().getGroupData(strKbGUID, group))
             return false;
-        userInfo.strKbGUID = group.strGroupGUID;
+        userInfo = WIZUSERINFO(userInfo, group);
     }
     //
     WizKMDatabaseServer server(userInfo);

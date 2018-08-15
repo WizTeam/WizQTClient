@@ -84,6 +84,9 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
             ui->radioAuto->setChecked(true);
             break;
     }
+    //
+    ui->spellCheck->setChecked(userSettings().isEnableSpellCheck());
+    connect(ui->spellCheck, SIGNAL(toggled(bool)), this, SLOT(on_enableSpellCheck(bool)));
 
     // syncing tab
     int nInterval = userSettings().syncInterval();
@@ -185,13 +188,6 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
-    //
-    connect(ui->useNewSync, SIGNAL(clicked(bool)), SLOT(useNewSyncClicked(bool)));
-    ui->useNewSync->setChecked(WizToken::userInfo().syncType == 1);
-    if (ui->useNewSync->isChecked())
-    {
-        ui->useNewSync->setEnabled(false);
-    }
 }
 
 void WizPreferenceWindow::showPrintMarginPage()
@@ -474,54 +470,9 @@ void WizPreferenceWindow::on_tabWidget_currentChanged(int index)
 //    }
 }
 
-void WizPreferenceWindow::useNewSyncClicked(bool checked)
+
+void WizPreferenceWindow::on_enableSpellCheck(bool checked)
 {
-    if (checked)
-    {
-        QString message = tr("Before checking, you need to know:\n\nDon't support returning old sync mode;\nWhen used, other client must be updated to the latest version, or can't log in.\n\nDo you want to use?");
-        if (QMessageBox::Yes != WizMessageBox::question(this, message))
-        {
-            ui->useNewSync->setChecked(false);
-            return;
-        }
-
-        //
-        WizExecutingActionDialog::executeAction(tr("Change user settings..."), WIZ_THREAD_NETWORK, [=] {
-            //
-            bool ret = false;
-            QString errorMessage = tr("Network error");
-            //
-            QString asUrl = WizCommonApiEntry::newAsServerUrl();
-            if (!asUrl.isEmpty())
-            {
-                QString url = asUrl + "/as/user/settings/sync_type/1?token=" + WizToken::token();
-                //
-                WIZSTANDARDRESULT result = WizRequest::execStandardJsonRequest(url, "PUT");
-                if (result)  {
-                    ret = true;
-                } else {
-                    errorMessage = result.returnMessage;
-                }
-            }
-            //
-            ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-                //
-                QTimer::singleShot(300, [=]{
-                    if (ret) {
-                        ui->useNewSync->setEnabled(false);
-                        WizMessageBox::information(this, tr("Succeeded to change user settings, please restart WizNote."));
-                    } else {
-                        WizMessageBox::warning(this, tr("Failed to change user settings:\n\n %1").arg(errorMessage));
-                        ui->useNewSync->setChecked(false);
-                    }
-                });
-                //
-
-            });
-            //
-
-        });
-    }
-
+    userSettings().setEnableSpellCheck(checked);
+    Q_EMIT settingsChanged(wizoptionsSpellCheck);
 }
-

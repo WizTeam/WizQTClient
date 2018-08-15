@@ -11,6 +11,8 @@
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"
 #include "sync/WizKMServer.h"
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
 
 #define QUERY_DELAY 3
 
@@ -46,6 +48,13 @@ void WizCommentQuerier::run()
     WIZUSERINFO info = WizToken::userInfo();
     //
     info.strKbGUID = m_kbGUID;
+    //
+    WIZGROUPDATA group;
+    if (WizDatabaseManager::instance()->db().getGroupData(m_kbGUID, group))
+    {
+        info = WIZUSERINFO(info, group);
+    }
+    //
     WizKMDatabaseServer server(info);
     int count = 0;
     server.getCommentCount(m_GUID, count);

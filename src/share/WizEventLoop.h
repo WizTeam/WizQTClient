@@ -57,14 +57,5 @@ protected:
 };
 
 
-class WizXmlRpcEventLoop : public WizAutoTimeOutEventLoop
-{
-    Q_OBJECT
-public:
-    explicit WizXmlRpcEventLoop(QNetworkReply* pReply, QObject *parent = 0);
-
-protected:
-    virtual void doFinished(QNetworkReply* reply);
-};
 
 #endif // CWIZEVENTLOOP_H
