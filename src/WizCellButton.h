@@ -50,7 +50,7 @@ protected:
     //QIcon m_backgroundIcon;
 
 protected:
-    void paintEvent(QPaintEvent* event);
+    //void paintEvent(QPaintEvent* event);
     QSize sizeHint() const;
     QString countInfo() const;
 };

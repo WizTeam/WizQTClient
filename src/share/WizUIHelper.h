@@ -48,4 +48,6 @@ protected:
     virtual QSplitterHandle* createHandle();    
 };
 
+bool isDarkMode();
+
 #endif // WIZMACHELPER_H

@@ -136,6 +136,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 {
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage(this);
     setPage(page);
+    page->setBackgroundColor(Qt::black);
 
     connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
     connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
@@ -990,6 +991,11 @@ QString WizDocumentWebView::getHighlightKeywords()
 
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
+    WizDocumentWebView* self = this;
+    QTimer::singleShot(1000, [=] {
+        self->setVisible(true);
+    });
+    //
     if (!ok)
         return;
     //
@@ -1004,10 +1010,11 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     //
     QString noteType = getNoteType();
     //
-    QString strCode = WizFormatString6("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\", %5, \"%6\");",
+    QString strCode = WizFormatString7("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\", %5, \"%6\", %7);",
                                        editorPath, lang, userGUID, userAlias,
                                        ignoreTable ? "true" : "false",
-                                       noteType);
+                                       noteType,
+                                       isDarkMode() ? "true" : "false");
     qDebug() << strCode;
     if (m_currentEditorMode == modeEditor)
     {
@@ -1378,6 +1385,11 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     replaceDefaultCss(strHtml);
     //
     ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
+    //
+    if (isDarkMode()) {
+        page()->setBackgroundColor(Qt::black);
+        setVisible(false);
+    }
     //
     m_strNoteHtmlFileName = strFileName;
     load(QUrl::fromLocalFile(strFileName));

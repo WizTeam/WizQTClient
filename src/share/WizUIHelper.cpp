@@ -44,8 +44,7 @@ public:
     {
         QPainter painter(this);
 
-        // FIXME: hard-coded
-        QColor bgColor = QColor("#dbdbdb");
+        QColor bgColor = QColor(isDarkMode() ? "#000000" : "#dbdbdb");
         painter.setPen(bgColor);
         painter.setBrush(bgColor);
         painter.fillRect(event->rect(), bgColor);

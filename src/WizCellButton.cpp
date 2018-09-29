@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QFontMetrics>
 #include <QPropertyAnimation>
+#include <QGraphicsColorizeEffect>
 
 #include "utils/WizStyleHelper.h"
 #include "share/WizMisc.h"
@@ -16,11 +17,16 @@
 
 WizCellButton::WizCellButton(ButtonType type, QWidget *parent)
     : QToolButton(parent)
+    , m_buttonType(type)
     , m_state(0)
     , m_count(0)
-    , m_buttonType(type)
     , m_iconSize(WizSmartScaleUI(14), WizSmartScaleUI(14))
 {    
+    QGraphicsColorizeEffect* m_effect = new QGraphicsColorizeEffect;
+    m_effect->setColor(QColor(122, 193, 66));
+    m_effect->setStrength(0);
+    m_effect->setEnabled(true);
+    setGraphicsEffect(m_effect);
 }
 
 void WizCellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
@@ -75,8 +81,8 @@ void WizCellButton::setCount(int count)
     m_count = count;
     update();
 }
-
 const int nTextWidth = 14;
+/*
 void WizCellButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -116,7 +122,7 @@ void WizCellButton::paintEvent(QPaintEvent *event)
         p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, countInfo());
     }
 }
-
+*/
 QSize WizCellButton::sizeHint() const
 {
     switch (m_buttonType)
@@ -230,6 +236,8 @@ void WizRoundCellButton::setState(int state)
     applyAnimation();
 }
 
+extern bool isDarkMode();
+
 void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
 {
     QStyleOptionToolButton opt;
@@ -244,7 +252,11 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
         state = QIcon::On;
 
     p.setPen(Qt::NoPen);
-    p.setBrush(QColor((mode & QIcon::Active) ? "#D3D3D3" : "#E6E6E6"));
+    if (isDarkMode()) {
+        p.setBrush(Qt::transparent);
+    } else {
+        p.setBrush(QColor((mode & QIcon::Active) ? "#D3D3D3" : "#E6E6E6"));
+    }
     p.setRenderHint(QPainter::Antialiasing, true);
     p.drawRoundedRect(opt.rect, 8, 10);
 

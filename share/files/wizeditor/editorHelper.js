@@ -32,7 +32,7 @@ function WizStopEditorAmend() {
 /*
   function for C++ execute
 */
-function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, noteType) {
+function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, noteType, enableNightMode) {
     try {
         if (!WizEditor) {
             alert("WizEditor is null!");
@@ -50,7 +50,10 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
             userInfo: user,
             clientType: "mac",
             ignoreTable : ignoreTable,
-            dependencyUrl: basePath + 'dependency'
+            dependencyUrl: basePath + 'dependency',
+            nightMode: {
+                enable: enableNightMode
+            }
         }
         //
         WizEditor.init(editorOptions);

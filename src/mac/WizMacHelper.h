@@ -63,6 +63,8 @@ int getSystemMajorVersion();
 int getSystemMinorVersion();
 int getSystemPatchVersion();
 
+bool isDarkMode();
+
 void updateShareExtensionAccount(const QString &userId, const QString &userGUID, const QString &myWiz, const QString &displayName);
 void readShareExtensionAccount();
 

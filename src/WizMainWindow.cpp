@@ -1987,10 +1987,16 @@ QWidget* WizMainWindow::createNoteListView()
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     m_noteListWidget->setLayout(layoutList);
-//    m_noteListWidget->setStyleSheet("background-color:#F5F5F5;");
+    //
     QPalette pal = m_noteListWidget->palette();
-    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
-    pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#000000"));
+        pal.setColor(QPalette::Base, QColor("#000000"));
+
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    }
     m_noteListWidget->setPalette(pal);
     m_noteListWidget->setAutoFillBackground(true);
 
@@ -2022,19 +2028,7 @@ QWidget* WizMainWindow::createNoteListView()
     m_labelDocumentsHint->setText(tr("Unread documents"));
     m_labelDocumentsHint->setStyleSheet("color: #A7A7A7; font-size:14px; padding-top:2px; margin-right:6px;"); //font: 12px;
     layoutActions->addWidget(m_labelDocumentsHint);
-//    connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
-
-//    m_labelDocumentsCount = new QLabel("", this);
-//    m_labelDocumentsCount->setMargin(5);
-//    layoutActions->addWidget(m_labelDocumentsCount);
-//    connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
     connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
-
-
-//    //sortBtn->setStyleSheet("padding-top:10px;");
-//    m_labelDocumentsCount->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
-//    m_btnMarkDocumentsReaded->setVisible(false);
-//    m_labelDocumentsHint->setVisible(false);
 
     m_btnMarkDocumentsReaded = new WizImageButton(this);
     QIcon btnIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "actionMarkMessagesRead");
@@ -2052,12 +2046,20 @@ QWidget* WizMainWindow::createNoteListView()
     QWidget* wgtRightBorder = new QWidget(this);
     wgtRightBorder->setFixedWidth(13);
     wgtRightBorder->setFixedHeight(::WizSmartScaleUI(30));
-    wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
+    if (isDarkMode()) {
+        wgtRightBorder->setStyleSheet(QString("border-left:1px solid #000000;"));
+    } else {
+        wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
+    }
     layoutButtonContainer->addWidget(wgtRightBorder);
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    if (isDarkMode()) {
+        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#000000");
+    } else {
+        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    }
 
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);

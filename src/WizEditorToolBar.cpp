@@ -1614,6 +1614,7 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     QList<QAction*> actions = menu->actions();
     for (QAction* action : actions)
     {
+        qDebug() << action->iconText();
         QWebEnginePage::WebAction a = menuText2WebAction(page, action->iconText());
         switch (a)
         {

@@ -75,9 +75,16 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
 
     m_docView = new QWidget(this);
     m_docView->setLayout(layoutDoc);
-
+    //
     m_tab = new QStackedWidget(this);
     //
+    if (isDarkMode()) {
+        setAutoFillBackground(true);
+        setStyleSheet("background-color:#000000;");
+        m_tab->setAutoFillBackground(true);
+        m_tab->setStyleSheet("background-color:#000000;");
+    }
+
     m_passwordView->setGeometry(this->geometry());
     connect(m_passwordView, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
     //

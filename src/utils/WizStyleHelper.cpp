@@ -22,6 +22,12 @@
 #include "mac/WizMacHelper.h"
 #endif
 
+#ifndef Q_OS_MAC
+bool isDarkMode() {
+    return false;
+}
+#endif
+
 namespace Utils {
 
 WizSettings* WizStyleHelper::m_settings = 0;
@@ -1064,7 +1070,14 @@ int WizStyleHelper::editComboFontSize()
 QVariant WizStyleHelper::getValue(const QString& key, const QVariant& defaultValue)
 {
     if (!m_settings) {
-        m_settings = new WizSettings(WizPathResolve::themePath(themeName()) + "skin.ini");
+        QString fileName = WizPathResolve::themePath(themeName()) + "skin.ini";
+        if (isDarkMode()) {
+            QString darkFileName = WizPathResolve::themePath(themeName()) + "skin_dark.ini";
+            if (WizPathFileExists(darkFileName)) {
+                fileName = darkFileName;
+            }
+        }
+        m_settings = new WizSettings(fileName);
     }
 
     return m_settings->value(key, defaultValue);

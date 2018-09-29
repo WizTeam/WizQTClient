@@ -2,6 +2,8 @@
 
 #include <QtGui>
 
+extern bool isDarkMode();
+
 WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
     , m_bgColor("transparent")
@@ -102,6 +104,12 @@ void WizScrollBar::on_scrollTimeout()
 
 void WizScrollBar::setHandleVisible(bool visible)
 {
+    QString leftBorder;
+    if (isDarkMode()) {
+        leftBorder = "border-left:1px solid #000000;";
+    } else {
+        leftBorder = "border-left:1px solid #e7e7e7;";
+    }
     setStyleSheet(
         QString("QScrollBar {\
             background: %1;\
@@ -125,7 +133,7 @@ void WizScrollBar::setHandleVisible(bool visible)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(m_bgColor).arg(m_bLeftBorder ? "border-left:1px solid #e7e7e7;" : "")
+        }").arg(m_bgColor).arg(m_bLeftBorder ? leftBorder : "")
         .arg(visible ? m_handleColor : "transparent"));
 }
 

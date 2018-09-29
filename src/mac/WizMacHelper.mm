@@ -902,6 +902,20 @@ int getSystemPatchVersion()
     return bugfix;
 }
 
+bool isDarkMode()
+{
+    static bool first = true;
+    static bool ret = false;
+    if (first) {
+        first = false;
+        NSDictionary *dict = [[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain];
+        id style = [dict objectForKey:@"AppleInterfaceStyle"];
+        bool darkModeOn = ( style && [style isKindOfClass:[NSString class]] && NSOrderedSame == [style caseInsensitiveCompare:@"dark"] );
+        ret = darkModeOn;
+    }
+    return ret;
+}
+
 void updateShareExtensionAccount(const QString& userId, const QString& userGUID, const QString& myWiz, const QString& displayName)
 {
     NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:WizShareSettingsName];

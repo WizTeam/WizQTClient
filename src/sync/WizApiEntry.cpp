@@ -293,6 +293,13 @@ QString WizCommonApiEntry::shareServer()
 QString WizCommonApiEntry::shareNoteUrl()
 {
     QString url = getUrlByCommand("share_url");
+    //
+    QString strStandardParams = QString("&l=%1&v=%2&plat=%3")
+            .arg(LocalLanguage)\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(WIZNOTE_API_ARG_PLATFORM);
+    url += strStandardParams;
+
     return url;
 }
 
