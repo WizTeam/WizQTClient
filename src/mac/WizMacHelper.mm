@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <QEventLoop>
 #include <QDebug>
+#include <QPixmap>
+#include <qmacfunctions.h>
 #include "html/WizHtmlCollector.h"
 
 #import <WebKit/WebKit.h>
@@ -1058,3 +1060,64 @@ QList<WizWindowInfo> WizGetActiveWindows()
 
     return windowTitles;
 }
+
+NSImage* imageWithTintColor(NSImage* image, NSColor* tintColor)
+{
+    NSSize size = image.size;
+
+    NSImage* im = [[NSImage alloc] initWithSize:size];
+    NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
+                                initWithBitmapDataPlanes:NULL
+                                              pixelsWide:size.width
+                                              pixelsHigh:size.height
+                                           bitsPerSample:8
+                                         samplesPerPixel:4
+                                                hasAlpha:YES
+                                                isPlanar:NO
+                                          colorSpaceName:NSCalibratedRGBColorSpace
+                                             bytesPerRow:0
+                                            bitsPerPixel:0];
+
+    [im addRepresentation:rep];
+
+    [im lockFocus];
+
+    CGContextRef ctx = [NSGraphicsContext currentContext].CGContext;
+    //CGContextRef ctx = [[NSGraphicsContext currentContext] graphicsPort];
+    CGContextClearRect(ctx, NSMakeRect(0, 0, size.width, size.height));
+    CGContextSetFillColorWithColor(ctx, [tintColor CGColor]);
+    CGContextFillRect(ctx, NSMakeRect(0, 0, size.width, size.height));
+    //
+    NSRect bounds = NSMakeRect(0, 0, size.width, size.height);
+    [image drawInRect:bounds fromRect:bounds operation:NSCompositingOperationDestinationIn fraction:1.0];
+    //[image drawInRect:bounds blendMode:kCGBlendModeDestinationIn alpha:1.0f];
+
+    [im unlockFocus];
+
+    return im;
+}
+
+QImage qimageWithTintColor(const QImage& image, QColor tintColor)
+{
+    NSImage* im = QtMac::toNSImage(QPixmap::fromImage(image));
+    //
+
+    CGFloat red = 0, green = 0, blue = 0, alpha = 0;
+    tintColor.getRgbF(&red, &green, &blue, &alpha);
+    CGColorRef colorRef = CGColorCreateGenericRGB(red, green, blue, alpha);
+    NSColor* color = [NSColor colorWithCGColor:colorRef];
+    //
+    im = imageWithTintColor(im, color);
+    CGImageRef imgRef = [im CGImageForProposedRect:NULL context:nil hints:nil];
+    QPixmap p = QtMac::fromCGImageRef(imgRef);
+    QImage ret = p.toImage();
+    return ret;
+}
+
+
+//void testImage()
+//{
+//    QImage image("/Users/weishijun/test_red.png");
+//    QImage ret = qimageWithTintColor(image, Qt::blue);
+//    ret.save("/Users/weishijun/test_red.png");
+//}

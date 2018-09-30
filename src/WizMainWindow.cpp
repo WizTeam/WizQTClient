@@ -2077,8 +2077,13 @@ QWidget*WizMainWindow::createMessageListView()
     layoutList->setSpacing(0);
     m_msgListWidget->setLayout(layoutList);
     QPalette pal = m_msgListWidget->palette();
-    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
-    pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#000000"));
+        pal.setColor(QPalette::Base, QColor("#000000"));
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    }
     m_msgListWidget->setPalette(pal);
     m_msgListWidget->setAutoFillBackground(true);
 
@@ -2096,7 +2101,11 @@ QWidget*WizMainWindow::createMessageListView()
 
     QWidget* placeHoldWgt = new QWidget(this);
     placeHoldWgt->setFixedSize(13, WizSmartScaleUI(20));
-    placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
+    if (isDarkMode()) {
+        placeHoldWgt->setStyleSheet("border-left:1px solid #000000;");
+    } else {
+        placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
+    }
     QHBoxLayout* layout2 = new QHBoxLayout();
     layout2->setContentsMargins(0, 0, 0, 0);
     layout2->setSpacing(0);
@@ -2106,7 +2115,11 @@ QWidget*WizMainWindow::createMessageListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    if (isDarkMode()) {
+        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#000000");
+    } else {
+        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    }
 
     layoutList->addLayout(titleBarLayout);
     layoutList->addWidget(line2);

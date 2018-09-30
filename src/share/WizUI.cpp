@@ -62,12 +62,20 @@ BOOL WizSkin9GridImage::splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* p
     return TRUE;
 }
 
+extern bool isDarkMode();
+extern QImage qimageWithTintColor(const QImage& image, QColor tintColor);
+
 BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLeft)
 {
     clear();
     //
     if (!m_img.load(strImageFileName))
         return FALSE;
+    //
+    if (isDarkMode()) {
+        m_img = qimageWithTintColor(m_img, "#666666");
+    }
+
     //
     int nImageWidth = m_img.width();
     int nImageHeight = m_img.height();
@@ -79,7 +87,11 @@ BOOL WizSkin9GridImage::setImage(const QImage& image, QPoint ptTopLeft)
 {
     clear();
     //
-    m_img = image;
+    if (isDarkMode()) {
+        m_img = qimageWithTintColor(image, "#666666");
+    } else {
+        m_img = image;
+    }
     //
     int nImageWidth = m_img.width();
     int nImageHeight = m_img.height();
@@ -131,7 +143,7 @@ void WizSkin9GridImage::drawBorder(QPainter* p, QRect rc) const
     }
 }
 
-
+extern bool isDarkMode();
 
 
 WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
@@ -145,8 +157,13 @@ WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     m_layout = new QHBoxLayout(this);
     m_edit = new QLineEdit(this);
     m_edit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
-                          "selection-background-color: #8ECAF1;}"));
+    if (isDarkMode()) {
+        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#999999; "
+                              "selection-background-color: #cccccc;}"));
+    } else {
+        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
+                              "selection-background-color: #8ECAF1;}"));
+    }
     m_leftIcon = new QLabel(this);
     m_rightIcon = new QLabel(this);
     //

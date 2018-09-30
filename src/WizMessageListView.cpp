@@ -359,7 +359,11 @@ WizMessageListView::WizMessageListView(WizDatabaseManager& dbMgr, QWidget *paren
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new WizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
-    m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
+    if (isDarkMode()) {
+        m_vScroll->applyStyle("#000000", "#333333", true);
+    } else {
+        m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
+    }
 #endif
 
     // init
@@ -984,7 +988,11 @@ WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* par
 {
     setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
     QPalette pal = palette();
-    pal.setColor(QPalette::Window, QColor("#F7F7F7"));
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#000000"));
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F7F7F7"));
+    }
     setPalette(pal);
     setAutoFillBackground(true);
 

@@ -64,6 +64,7 @@ int getSystemMinorVersion();
 int getSystemPatchVersion();
 
 bool isDarkMode();
+QImage qimageWithTintColor(const QImage& image, QColor tintColor);
 
 void updateShareExtensionAccount(const QString &userId, const QString &userGUID, const QString &myWiz, const QString &displayName);
 void readShareExtensionAccount();
