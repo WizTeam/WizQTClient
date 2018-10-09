@@ -9,6 +9,7 @@
 
 #include "WizSettings.h"
 #include "WizNoteStyle.h"
+#include "WizUIBase.h"
 
 BOOL WizSkin9GridImage::clear()
 {
@@ -62,18 +63,15 @@ BOOL WizSkin9GridImage::splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* p
     return TRUE;
 }
 
-extern bool isDarkMode();
-extern QImage qimageWithTintColor(const QImage& image, QColor tintColor);
-
-BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLeft)
+BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLeft, QColor darkColor)
 {
     clear();
     //
     if (!m_img.load(strImageFileName))
         return FALSE;
     //
-    if (isDarkMode()) {
-        m_img = qimageWithTintColor(m_img, "#666666");
+    if (isDarkMode() && darkColor != Qt::transparent) {
+        m_img = qimageWithTintColor(m_img, darkColor);
     }
 
     //
@@ -83,12 +81,12 @@ BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLe
     return splitRect(QRect(0, 0, nImageWidth, nImageHeight), ptTopLeft, m_arrayImageGrid, 9);
 }
 
-BOOL WizSkin9GridImage::setImage(const QImage& image, QPoint ptTopLeft)
+BOOL WizSkin9GridImage::setImage(const QImage& image, QPoint ptTopLeft, QColor darkColor)
 {
     clear();
     //
-    if (isDarkMode()) {
-        m_img = qimageWithTintColor(image, "#666666");
+    if (isDarkMode() && darkColor != Qt::transparent) {
+        m_img = qimageWithTintColor(image, darkColor);
     } else {
         m_img = image;
     }
@@ -143,9 +141,6 @@ void WizSkin9GridImage::drawBorder(QPainter* p, QRect rc) const
     }
 }
 
-extern bool isDarkMode();
-
-
 WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     : QWidget(parent)
     , m_background(NULL)
@@ -181,10 +176,10 @@ WizIconLineEditContainer::~WizIconLineEditContainer()
     if (m_background)
         delete m_background;
 }
-void WizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
+void WizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt, QColor darkColor)
 {
     m_background = new WizSkin9GridImage();
-    m_background->setImage(fileName, pt);
+    m_background->setImage(fileName, pt, darkColor);
 }
 
 void WizIconLineEditContainer::setLeftIcon(QString fileName)
@@ -285,3 +280,4 @@ QWidget* WizInitWidgetMarginsEx(const QString& strSkinName, QWidget* widget, con
 
     return wrap;
 }
+

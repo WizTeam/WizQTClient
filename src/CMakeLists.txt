@@ -62,6 +62,7 @@ set(wiznote_SOURCES
     share/WizWin32Helper.cpp
     share/WizDrawTextHelper.cpp
     share/WizUIHelper.cpp
+    share/WizUIBase.cpp
     share/WizCommonUI.cpp
     share/WizAnimateAction.cpp
     share/WizPopupWidget.cpp
@@ -213,6 +214,7 @@ set(wiznote_HEADERS
     share/WizWin32Helper.h
     share/WizDrawTextHelper.h
     share/WizUIHelper.h
+    share/WizUIBase.h
     share/WizCommonUI.h
     share/WizAnimateAction.h
     share/WizPopupWidget.h

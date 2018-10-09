@@ -44,6 +44,7 @@
 #include "WizProxyDialog.h"
 #include "WizNoteStyle.h"
 #include "WizOEMSettings.h"
+#include "share/WizUIBase.h"
 
 
 #define WIZ_SERVERACTION_CONNECT_WIZSERVER     "CONNECT_TO_WIZSERVER"
@@ -82,7 +83,6 @@ public:
 private:
     QList<QWidget*> m_widgetList;
 };
-
 
 WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUser>& localUsers, QWidget *parent)
 #ifdef Q_OS_MAC
@@ -152,7 +152,16 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     connect(ui->btn_selectServer, SIGNAL(clicked()), SLOT(showServerListMenu()));
     connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(onUserNameEdited(QString)));
     //
-
+#ifdef Q_OS_MAC
+    if (isDarkMode()) {
+        QString style = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        m_lineEditNewPassword->setStyleSheet(style);
+        m_lineEditNewUserName->setStyleSheet(style);
+        m_lineEditRepeatPassword->setStyleSheet(style);
+        m_lineEditPassword->setStyleSheet(style);
+        m_lineEditUserName->setStyleSheet(style);
+    }
+#endif
     //
     connect(&m_wizBoxSearchingTimer, SIGNAL(timeout()), SLOT(onWizBoxSearchingTimeOut()));
 #ifndef Q_OS_MAC
@@ -577,30 +586,30 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strIconPerson = WizGetSkinResourceFileName(strThemeName, "loginIconPerson" + (isHighPix ? "@2x" : QString()));
     QString strIconKey = WizGetSkinResourceFileName(strThemeName, "loginIconKey" + (isHighPix ? "@2x" : QString()));
     QString strIconServer = WizGetSkinResourceFileName(strThemeName, "loginIconServer" + (isHighPix ? "@2x" : QString()));
-    ui->wgt_usercontainer->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
+    ui->wgt_usercontainer->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_usercontainer->setLeftIcon(strIconPerson);
     ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow" + (isHighPix ? "@2x" : QString())));
     m_lineEditUserName->setPlaceholderText("example@mail.com");
 
-    ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
+    ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_passwordcontainer->setLeftIcon(strIconKey);
     m_lineEditPassword->setEchoMode(QLineEdit::Password);
     m_lineEditPassword->setPlaceholderText(tr("Password"));
 
-    ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
+    ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_serveroptioncontainer->setLeftIcon(strIconServer);
     m_lineEditServer->setPlaceholderText(tr("Please search or input your server IP"));
 
-    ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
+    ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_newUser->setLeftIcon(strIconPerson);
     m_lineEditNewUserName->setPlaceholderText(tr("Please input email as your account"));
 
-    ui->wgt_newPassword->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
+    ui->wgt_newPassword->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_newPassword->setLeftIcon(strIconKey);
     m_lineEditNewPassword->setPlaceholderText(tr("Please enter your password"));
     m_lineEditNewPassword->setEchoMode(QLineEdit::Password);
 
-    ui->wgt_passwordRepeat->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
+    ui->wgt_passwordRepeat->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_passwordRepeat->setLeftIcon(strIconKey);
     m_lineEditRepeatPassword->setPlaceholderText(tr("Please repeat your password"));
     m_lineEditRepeatPassword->setEchoMode(QLineEdit::Password);
@@ -1552,7 +1561,7 @@ void WizLoginDialog::onWizLogInStateEntered()
     //
     QString strThemeName = Utils::WizStyleHelper::themeName();
     QString strLoginBottomLineEditor = WizGetSkinResourceFileName(strThemeName, "loginBottomLineEditor");
-    ui->wgt_passwordcontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
+    ui->wgt_passwordcontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
 
     //
     m_serverType = WizServer;

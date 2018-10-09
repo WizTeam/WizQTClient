@@ -378,6 +378,7 @@ QIcon createColorIcon(QColor color)
 
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
+extern QPixmap qpixmapWithTintColor(const QPixmap& image, QColor tintColor);
 
 void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, bool bDrawRight, bool hasFocus)
 {
@@ -386,6 +387,18 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
     // load file
     static QPixmap normalPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground", true));
     static QPixmap focusPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground_on", true));
+    //
+#ifdef Q_OS_MAC
+    static bool first = true;
+    if (first) {
+        first = false;
+        if (isDarkMode()) {
+            normalPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#666666"));
+            focusPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#888888"));
+        }
+    }
+#endif
+    //
     static QPixmap normalPixBackgroundMid = normalPixBackground.copy(6, 0, 2, normalPixBackground.height());
     static QPixmap focusPixBackgroundMid = focusPixBackground.copy(6, 0, 2, focusPixBackground.height());
     QRect rcLeft(rect.x(), rect.y(), 6, rect.size().height());
@@ -956,11 +969,14 @@ public:
     {
         setFixedWidth(1);
         setFixedHeight(Utils::WizStyleHelper::editorButtonHeight());
-        setStyleSheet("background-color:#E7E7E7;");
+        if (isDarkMode()) {
+            setStyleSheet("background-color:#333333;");
+        } else {
+            setStyleSheet("background-color:#E7E7E7;");
+        }
         setAutoFillBackground(true);
     }
 };
-
 
 QWidget* createMoveAbleWidget(QWidget* parent)
 {

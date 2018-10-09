@@ -108,6 +108,12 @@ void installOnLinux()
 }
 #endif
 
+//#include <QPixmap>
+//void testImage() {
+//    QImage image = QPixmap("/Users/weishijun/test.png").toImage();
+//    image = qimageWithTintColor(image, Qt::red);
+//    image.save("/Users/weishijun/test_red.png");
+//}
 
 int mainCore(int argc, char *argv[])
 {
@@ -124,6 +130,7 @@ int mainCore(int argc, char *argv[])
     QtWebEngine::initialize();
 #else
     QApplication a(argc, argv);
+    //testImage();
     //
 #ifdef BUILD4APPSTORE
     QDir dir(QApplication::applicationDirPath());

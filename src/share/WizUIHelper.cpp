@@ -4,6 +4,7 @@
 
 #include "share/WizMisc.h"
 #include "utils/WizPathResolve.h"
+#include "WizUIBase.h"
 #include <QLabel>
 
 QBrush WizGetLeftViewBrush()
@@ -90,4 +91,3 @@ QSplitterHandle *WizSplitter::createHandle()
     CWizSplitterHandle* spliter =  new CWizSplitterHandle(orientation(), this);
     return spliter;
 }
-

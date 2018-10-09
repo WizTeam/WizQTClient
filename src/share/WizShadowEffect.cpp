@@ -296,7 +296,7 @@ WizShadowWidget::WizShadowWidget(QWidget* parent, int shadowSize, bool canResize
     }
     //
     QImage image = WizMakeShadowImage(shadowSize, true);
-    m_shadow->setImage(image, QPoint(shadowSize + 1, shadowSize + 1));
+    m_shadow->setImage(image, QPoint(shadowSize + 1, shadowSize + 1), "#666666");
 }
 
 void WizShadowWidget::paintEvent(QPaintEvent *)

@@ -66,7 +66,6 @@ enum DocSize {
     _1GB = 1 * 1024 * 1024 * 1024
 };
 
-
 WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
     , m_app(app)

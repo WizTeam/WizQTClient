@@ -22,11 +22,6 @@
 #include "mac/WizMacHelper.h"
 #endif
 
-#ifndef Q_OS_MAC
-bool isDarkMode() {
-    return false;
-}
-#endif
 
 namespace Utils {
 

@@ -1,8 +1,7 @@
 ﻿#include "WizScrollBar.h"
+#include "share/WizUIBase.h"
 
 #include <QtGui>
-
-extern bool isDarkMode();
 
 WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
