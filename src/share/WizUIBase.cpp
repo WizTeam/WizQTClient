@@ -58,6 +58,34 @@ QImage qimageWithTintColor(const QImage& image, QColor tintColor)
     uchar* pBytesDest = dest.bits();
     int strideDest = dest.bytesPerLine();
     //
+    int maxGray = 0;
+    //
+    for (int j = 0; j < height; j++)
+    {
+        for (int i = 0; i < width; i++)
+        {
+            const uchar* pPixelSrc = pBytesSrc + j * strideSrc + i * 4;
+            int Sb = argb ? pPixelSrc[0] : pPixelSrc[1];
+            int Sg = argb ? pPixelSrc[1] : pPixelSrc[2];
+            int Sr = argb ? pPixelSrc[2] : pPixelSrc[3];
+            //
+            int Gray = (Sr*299 + Sg*587 + Sb*114 + 500) / 1000;
+            if (Gray > maxGray) {
+                maxGray = Gray;
+                if (maxGray == 255) {
+                    break;
+                }
+            }
+        }
+        if (maxGray == 255) {
+            break;
+        }
+    }
+    //
+    if (0 == maxGray) {
+        maxGray = 1;
+    }
+    //
     for (int j = 0; j < height; j++)
     {
         for (int i = 0; i < width; i++)
@@ -65,17 +93,17 @@ QImage qimageWithTintColor(const QImage& image, QColor tintColor)
             const uchar* pPixelSrc = pBytesSrc + j * strideSrc + i * 4;
             uchar* pPixelDest = pBytesDest + j * strideDest + i * 4;
             //
-            pPixelDest[0] = Db;
-            pPixelDest[1] = Dg;
-            pPixelDest[2] = Dr;
-            pPixelDest[3] = Da;
-            //
             int Sb = argb ? pPixelSrc[0] : pPixelSrc[1];
             int Sg = argb ? pPixelSrc[1] : pPixelSrc[2];
             int Sr = argb ? pPixelSrc[2] : pPixelSrc[3];
             int Sa = argb ? pPixelSrc[3] : pPixelSrc[0];
             //
             int Gray = (Sr*299 + Sg*587 + Sb*114 + 500) / 1000;
+            Gray = Gray * 255 / maxGray;
+            if (Gray > 255) {
+                Gray = 255;
+                qDebug() << "gray > 255?";
+            }
             //
             pPixelDest[3] = Sa;	//keep alpha
             pPixelDest[0] = Db * Gray / 255 * Sa / 0xFF;

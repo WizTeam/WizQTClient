@@ -2,11 +2,13 @@
 
 #include <QDebug>
 #include <QPixmap>
+#include <QMap>
 
 #include "WizMacToolBarDelegate.h"
 #include "WizMacHelper_mm.h"
 #include "WizMacActionHelper.h"
 #include "WizSearchWidget_mm.h"
+#include "share/WizUIBase.h"
 
 
 
@@ -30,7 +32,6 @@
 //    m_image = image;
 //}
 //@end
-
 
 
 WizMacActionHelper::WizMacActionHelper(WizMacToolBarItem* item, QAction* action, QObject* parent)
@@ -105,6 +106,11 @@ public:
         if (!icon.isNull())
         {
             QPixmap pix = icon.pixmap(icon.availableSizes().first(), m_action->isEnabled() ? QIcon::Normal : QIcon::Disabled);
+            //
+            if (isDarkMode()) {
+                pix = qpixmapWithTintColor(pix, Qt::white);
+            }
+            //
             NSImage* image = WizToNSImage(pix);
             [item setImage:image];
         }
@@ -136,6 +142,11 @@ public:
             //
 //            QIcon icon = m_action->icon();
             QPixmap pix = m_action->icon().pixmap(m_action->icon().availableSizes().first(), newEnabled ? QIcon::Normal : QIcon::Disabled);
+            //
+            if (isDarkMode()) {
+                QColor color = newEnabled ? Qt::white : Qt::darkGray;
+                pix = qpixmapWithTintColor(pix, color);
+            }
             //
             NSImage* img = WizToNSImage(pix);
             if (img)
