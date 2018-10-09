@@ -9,6 +9,7 @@
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
+#include <QSpacerItem>
 
 #include "share/WizGlobal.h"
 
@@ -133,6 +134,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     layoutEditor->setContentsMargins(0, 5, 0, 0);
     layoutEditor->addWidget(m_title);
     layoutEditor->addWidget(m_web);
+    QSpacerItem* verticalSpacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layoutEditor->addSpacerItem(verticalSpacer);
     layoutEditor->setStretchFactor(m_title, 0);
     layoutEditor->setStretchFactor(m_web, 1);
 

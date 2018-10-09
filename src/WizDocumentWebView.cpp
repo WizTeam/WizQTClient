@@ -992,9 +992,12 @@ QString WizDocumentWebView::getHighlightKeywords()
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     WizDocumentWebView* self = this;
-    QTimer::singleShot(1000, [=] {
-        self->setVisible(true);
-    });
+    if (isDarkMode()) {
+        //
+        QTimer::singleShot(1000, [=] {
+            self->setVisible(true);
+        });
+    }
     //
     if (!ok)
         return;
