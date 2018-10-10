@@ -36,6 +36,12 @@ WizNoteInfoForm::WizNoteInfoForm(QWidget *parent)
     ui->labelOpenDocument->setText(openDocument);
     QString versionHistory = formatLabelLink("history", tr("Click to view version history"));
     ui->labelHistory->setText(versionHistory);
+    //
+    if (isDarkMode()) {
+        setStyleSheet("background-color:#666666; border-radius:4px;");
+    } else {
+        setStyleSheet("background-color:#FFFFFF; border-radius:4px;");
+    }
 }
 
 WizNoteInfoForm::~WizNoteInfoForm()

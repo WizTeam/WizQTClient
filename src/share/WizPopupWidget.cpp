@@ -4,6 +4,7 @@
 
 #include "WizMisc.h"
 #include "utils/WizStyleHelper.h"
+#include "share/WizUIBase.h"
 
 #ifdef Q_OS_WIN
 //#include "WizWindowsHelper.h"
@@ -19,9 +20,15 @@ WizPopupWidget::WizPopupWidget(QWidget* parent)
 {
     setContentsMargins(8, 20, 8, 8);
 
-    QPalette pal;
-    pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
-    setPalette(pal);
+#ifdef Q_OS_LINUX
+    setStyleSheet("QWidget{background:#D7D7D7;}");
+#elif defined(Q_OS_MAC)
+    if (isDarkMode()) {
+        setStyleSheet("QWidget{background:#666666;}");
+    } else {
+        setStyleSheet("QWidget{background:#F7F7F7;}");
+    }
+#endif
 }
 
 QSize WizPopupWidget::sizeHint() const

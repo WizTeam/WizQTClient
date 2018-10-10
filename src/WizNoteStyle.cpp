@@ -229,6 +229,10 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
     int lineHeight = fm.height() + 2;
 
     QColor color("#535353");
+    if (isDarkMode()) {
+        color = QColor("#AAAAAA");
+    }
+    //
     for (int line = 0; line < wrapTextLineText && line < lineCount; line++)
     {        
         CString strText = view->itemText(vopt->index, line);

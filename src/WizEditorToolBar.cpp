@@ -422,7 +422,11 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 {
     QStylePainter painter(cm);
 
-    opt.palette.setColor(QPalette::Text, "#646464");
+    if (isDarkMode()) {
+        opt.palette.setColor(QPalette::Text, "#AAAAAA");
+    } else {
+        opt.palette.setColor(QPalette::Text, "#646464");
+    }
     painter.setPen(cm->palette().color(QPalette::Text));
 
     drawButtonBackground(&painter, opt.rect, true, true, opt.state & QStyle::State_MouseOver);
@@ -1046,18 +1050,34 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_comboFontSize->setFixedWidth(48);
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
-    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#F6F6F6;}"
-                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    if (isDarkMode()) {
+        m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#666666;}"
+                                        "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    } else {
+        m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#F6F6F6;}"
+                                        "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    }
+
     WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
     m_comboParagraph->setItemDelegate(paragraphDelegate);
     //
-    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#F6F6F6;}"
-                                     "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    if (isDarkMode()) {
+        m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#666666;}"
+                                         "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    } else {
+        m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#F6F6F6;}"
+                                         "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    }
     WizToolComboboxItemDelegate* fontFamilyDelegate = new WizToolComboboxItemDelegate(m_comboFontFamily, m_comboFontFamily, paraItems, nParagraphItemCount);
     m_comboFontFamily->setItemDelegate(fontFamilyDelegate);
     //
-    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#F6F6F6;}"
-                                   "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    if (isDarkMode()) {
+        m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#666666;}"
+                                       "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    } else {
+        m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#F6F6F6;}"
+                                       "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    }
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
 #endif
@@ -1766,6 +1786,9 @@ QMenu* WizEditorToolBar::createColorMenu(const char *slot, const char *slotColor
     pBtnOtherColor->setFixedSize(QSize(WizSmartScaleUI(110), WizSmartScaleUI(20)));
     pBtnOtherColor->setAutoRaise(true);
     pBtnOtherColor->setToolTip(tr("show more colors..."));
+    if (isDarkMode()) {
+        pBtnOtherColor->setStyleSheet("color:#AAAAAA");
+    }
     connect(pBtnOtherColor, SIGNAL(clicked()), this, slotColorBoard);
 
     // 基本色
