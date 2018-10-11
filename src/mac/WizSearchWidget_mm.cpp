@@ -100,13 +100,14 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_treeWgt->setAttribute(Qt::WA_MacShowFocusRect, false);
     //
     if (isDarkMode()) {
-        m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; color: #aaaaaa, background-color:#666666;}  "
-                                 "QTreeView::item { color:#aaaaaa; border-left:20px solid #666666;  margin-left:20px; }");
+        m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; color: #aaaaaa; background-color:#666666;}  "
+                                 "QTreeView::item{background-color:#666666;}  "
+                                 "QTreeView::branch { color:#aaaaaa; border-left:20px solid #666666;  margin-left:20px; }");
         m_treeWgt->header()->setStyleSheet("QHeaderView:section{ background-color:#666666; height:20px; "
                                            "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
     } else {
         m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; }  "
-                                 "QTreeView::item { color:#AAAAAA; border-left:20px solid #FFFFFF;  margin-left:20px; }");
+                                 "QTreeView::branch { color:#AAAAAA; border-left:20px solid #FFFFFF;  margin-left:20px; }");
         m_treeWgt->header()->setStyleSheet("QHeaderView:section{ background-color:#FFFFFF; height:20px; "
                                            "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
     }

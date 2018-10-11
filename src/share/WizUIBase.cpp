@@ -27,6 +27,10 @@ QImage qimageWithTintColor(const QImage& image, QColor tintColor)
         return image;
     }
     //
+    if (tintColor == Qt::transparent) {
+        return image;
+    }
+    //
     QImage src = image;
     QImage::Format format = src.format();
     if (format == QImage::Format_ARGB32_Premultiplied || format == QImage::Format_RGBA8888_Premultiplied) {

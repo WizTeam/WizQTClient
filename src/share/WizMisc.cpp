@@ -30,6 +30,7 @@
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
 #include "share/WizEventLoop.h"
+#include "share/WizUIBase.h"
 #include "WizDatabaseManager.h"
 #include "WizObjectDataDownloader.h"
 #include "WizProgressDialog.h"
@@ -1706,10 +1707,9 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     return QString();
 }
 
-QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName,
-                      QIcon::Mode mode /* = QIcon::Normal */, QIcon::State state /* = QIcon::Off */)
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, QColor darkColor)
 {
-    return WizLoadSkinIcon(strSkinName, strIconName, QSize(), mode, state);
+    return WizLoadSkinIcon(strSkinName, strIconName, QSize(), darkColor);
 }
 
 QPixmap WizLoadPixmapIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize)
@@ -1741,12 +1741,45 @@ QPixmap WizLoadPixmapIcon(const QString& strSkinName, const QString& strIconName
 
 }
 
-QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize,
-                      QIcon::Mode mode /* = QIcon::Normal */, QIcon::State state /* = QIcon::Off */)
+QString prepareDarkIconFile(const QString& fileName, QColor color)
 {
-    Q_UNUSED(mode);
-    Q_UNUSED(state);
+    if (!isDarkMode()) {
+        return fileName;
+    }
+    if (color == Qt::transparent) {
+        return fileName;
+    }
+    //
+    QString title = Utils::WizMisc::extractFileTitle(fileName);
+    QString ext = Utils::WizMisc::extractFileExt(fileName);
+    QString x2FileName = Utils::WizMisc::extractFilePath(fileName) + title + "@2x" + ext;
+    //
+    QString colorName = color.name();
+    //
+    QString tempFileName = Utils::WizPathResolve::tempPath() + title + colorName + ext;
+    QString temp2xFileName = Utils::WizPathResolve::tempPath() + title + colorName + "@2x" + ext;
+    //
+    if (!QFile::exists(tempFileName)) {
+        QPixmap pixmap(fileName);
+        pixmap = qpixmapWithTintColor(pixmap, color);
+        pixmap.save(tempFileName);
+    }
+    //
+    if (!QFile::exists(temp2xFileName)) {
+        if (QFile::exists(x2FileName)) {
+            //
+            QPixmap pixmap(x2FileName);
+            pixmap = qpixmapWithTintColor(pixmap, color);
+            pixmap.save(temp2xFileName);
+            //
+        }
+    }
+    //
+    return tempFileName;
+}
 
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize, QColor darkColor)
+{
 
  #ifdef Q_OS_MAC
 
@@ -1763,15 +1796,24 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, co
     }
 
     QIcon icon;
+    if (isDarkMode()) {
+        strIconNormal = prepareDarkIconFile(strIconNormal, darkColor);
+    }
     icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
 
     // used for check state
     if (QFile::exists(strIconActive1)) {
+        if (isDarkMode()) {
+            strIconActive1 = prepareDarkIconFile(strIconActive1, darkColor);
+        }
         icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::On);
     }
 
     // used for sunken state
     if (QFile::exists(strIconActive2)) {
+        if (isDarkMode()) {
+            strIconActive2 = prepareDarkIconFile(strIconActive2, darkColor);
+        }
         icon.addFile(strIconActive2, QSize(), QIcon::Active, QIcon::Off);
     }
 

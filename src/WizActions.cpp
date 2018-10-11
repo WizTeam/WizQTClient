@@ -7,6 +7,7 @@
 #include "share/WizSettings.h"
 #include "share/WizAnimateAction.h"
 #include "widgets/WizTableSelector.h"
+#include "share/WizUIBase.h"
 
 struct WIZACTION
 {

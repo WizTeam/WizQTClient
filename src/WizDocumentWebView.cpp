@@ -1259,12 +1259,11 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
 #ifdef DEBUG_EDITOR
-    QString strEditorJS = "http://192.168.1.73:8080/libs/wizEditor/wizEditorForMac.js";
-    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
+    QString strEditorJS = "http://192.168.1.73:8080/libs/wizDocument/wizEditorForMac.js";
 #else
     QString strEditorJS = "file:///" +  strHtmlEditorPath + "wizEditorForMac.js";
-    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
 #endif
+    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
     //
     files.clear();
     files[strEditorJS] = "";
@@ -2334,6 +2333,14 @@ void WizDocumentWebView::saveCurrentNote()
     });
 }
 
+void WizDocumentWebView::doPaste()
+{
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        onPasteCommand();
+        //
+    });
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 

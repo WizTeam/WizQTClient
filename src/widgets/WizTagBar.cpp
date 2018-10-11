@@ -11,6 +11,7 @@
 #include "utils/WizStyleHelper.h"
 #include "utils/WizLogger.h"
 #include "share/WizMisc.h"
+#include "share/WizUIBase.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
 #include "WizDef.h"
