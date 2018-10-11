@@ -13,7 +13,7 @@
 #include "share/WizMisc.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
-
+#include "share/WizUIBase.h"
 #include "utils/WizLogger.h"
 
 #ifdef Q_OS_MAC
@@ -41,6 +41,11 @@ WizConsoleDialog::WizConsoleDialog(WizExplorerApp& app, QWidget* parent)
 
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(onConsoleTextChanged()));
     connect(m_ui->editConsole->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(onConsoleSliderMoved(int)));
+    //
+    if (isDarkMode()) {
+        QString darkStyleSheet = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        m_ui->editConsole->setStyleSheet(darkStyleSheet);
+    }
 
     //
     load();

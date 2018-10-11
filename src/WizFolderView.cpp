@@ -31,6 +31,11 @@ WizFolderView::WizFolderView(WizExplorerApp& app, QWidget *parent, bool showRead
 #endif
 
     //initFolders();
+    //
+    if (isDarkMode()) {
+        QString darkStyleSheet = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        setStyleSheet(darkStyleSheet);
+    }
 }
 
 void WizFolderView::resizeEvent(QResizeEvent* event)

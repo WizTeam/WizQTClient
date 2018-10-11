@@ -173,7 +173,7 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
             arg(m_app.userSettings().defaultFontFamily())
             .arg(m_app.userSettings().defaultFontSize());
     ui->editFont->setText(strFont);
-
+    //
     connect(ui->buttonFontSelect, SIGNAL(clicked()), SLOT(onButtonFontSelect_clicked()));
 
     //
@@ -182,8 +182,21 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     ui->spinBox_left->setValue(m_app.userSettings().printMarginValue(wizPositionLeft));
     ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
+    //
+    if (isDarkMode()) {
+        QString darkStyleSheet = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        ui->editFont->setStyleSheet(darkStyleSheet);
+        ui->spinBox_bottom->setStyleSheet(darkStyleSheet);
+        ui->spinBox_left->setStyleSheet(darkStyleSheet);
+        ui->spinBox_right->setStyleSheet(darkStyleSheet);
+        ui->spinBox_top->setStyleSheet(darkStyleSheet);
+    }
+
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
+    if (isDarkMode()) {
+        strColor = WizColorLineEditorBackground.name();
+    }
     updateEditorBackgroundColor(strColor);
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();

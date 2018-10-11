@@ -857,6 +857,7 @@ WizCategoryViewAllFoldersItem::WizCategoryViewAllFoldersItem(WizExplorerApp& app
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folders_normal"),
                  Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    //
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folders_selected"),
                  Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);

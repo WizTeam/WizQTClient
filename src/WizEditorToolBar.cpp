@@ -462,7 +462,10 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 
     QRect editRect = cm->style()->subControlRect(QStyle::CC_ComboBox, &opt, QStyle::SC_ComboBoxEditField);
     if (!opt.currentText.isEmpty()) {
-        painter.drawItemText(editRect.adjusted(1, 0, -1, 0),
+        QPoint center = editRect.center();
+        center.setY(opt.rect.center().y());
+        editRect.moveCenter(center);
+        painter.drawItemText(editRect,//.adjusted(1, 0, -1, 0),
                      cm->style()->visualAlignment(opt.direction, Qt::AlignLeft | Qt::AlignVCenter),
                      opt.palette, opt.state & QStyle::State_Enabled, opt.currentText, QPalette::Text);
     }
