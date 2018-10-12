@@ -432,8 +432,10 @@ if(UNIX)
         find_library(_COCOA_LIBRARY Cocoa)
         find_library(_WEBENGINE_LIBRARY WebEngine)
         find_library(_WEBENGINEWIDGETS_LIBRARY WebEngineWidgets)
+        find_library(_WEBENGINE_LIBRARY WebEngine)
         find_library(_STORE_LIBRARY StoreKit)
         find_library(_IO_LIBRARY IOKit)
+        find_package(Qt5Svg)
         if (PLCrashReporter)
             find_library(_CRASHREPORTER CrashReporter)
         endif(PLCrashReporter)
@@ -532,6 +534,7 @@ if(UNIX)
 			target_link_libraries(${PROJECT_NAME}
 				quazip
 				cryptlib
+                Qt5::Svg
 				Qt5::WebEngine
 				Qt5::WebEngineWidgets
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
@@ -542,7 +545,8 @@ if(UNIX)
 			target_link_libraries(${PROJECT_NAME}
 				quazip
 				cryptlib
-				Qt5::WebEngine
+                Qt5::Svg
+                Qt5::WebEngine
 				Qt5::WebEngineWidgets
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
@@ -555,7 +559,8 @@ if(UNIX)
                         X11
 			quazip
 			cryptlib
-			Qt5::WebEngine
+            Qt5::Svg
+            Qt5::WebEngine
 			Qt5::WebEngineWidgets
 			${CMAKE_DL_LIBS}
 		)
@@ -564,7 +569,8 @@ else(NOT UNIX)
 	target_link_libraries(${PROJECT_NAME}
 		quazip
 		cryptlib
-		Qt5::WebEngine
+        Qt5::Svg
+        Qt5::WebEngine
 		Qt5::WebEngineWidgets
 		${CMAKE_DL_LIBS}
                 Qt5::WinMain

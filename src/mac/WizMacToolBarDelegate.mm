@@ -140,18 +140,20 @@ public:
                 [m_item setEnabled: (newEnabled ? YES : NO)];
             }
             //
-//            QIcon icon = m_action->icon();
-            QPixmap pix = m_action->icon().pixmap(m_action->icon().availableSizes().first(), newEnabled ? QIcon::Normal : QIcon::Disabled);
-            //
-            if (isDarkMode()) {
-                QColor color = newEnabled ? Qt::white : Qt::darkGray;
-                pix = qpixmapWithTintColor(pix, color);
-            }
-            //
-            NSImage* img = WizToNSImage(pix);
-            if (img)
-            {
-                [m_item setImage:img];
+            QIcon icon = m_action->icon();
+            if (!icon.isNull()) {
+                QPixmap pix = icon.pixmap(m_action->icon().availableSizes().first(), newEnabled ? QIcon::Normal : QIcon::Disabled);
+                //
+                if (isDarkMode()) {
+                    QColor color = newEnabled ? Qt::white : Qt::darkGray;
+                    pix = qpixmapWithTintColor(pix, color);
+                }
+                //
+                NSImage* img = WizToNSImage(pix);
+                if (img)
+                {
+                    [m_item setImage:img];
+                }
             }
         }
     }

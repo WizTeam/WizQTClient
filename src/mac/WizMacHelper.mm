@@ -865,29 +865,6 @@ void adjustSubViews(QWidget* wgt)
 }
 
 
-
-
-int getSystemMinorVersion()
-{
-    SInt32 minor;
-//    SInt32 major, minor, bugfix;
-//    Gestalt(gestaltSystemVersionMajor, &major);
-    Gestalt(gestaltSystemVersionMinor, &minor);
-//    Gestalt(gestaltSystemVersionBugFix, &bugfix);
-//    NSOperatingSystemVersion systemVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
-//    return systemVersion.minorVersion;
-
-    return minor;
-}
-
-
-bool systemWidgetBlurAvailable()
-{
-    return false;
-    return (getSystemMinorVersion() >= 15) || (getSystemMinorVersion() == 10 && getSystemPatchVersion() >= 4);
-}
-
-
 int getSystemMajorVersion()
 {
     SInt32 major;
@@ -896,6 +873,12 @@ int getSystemMajorVersion()
     return major;
 }
 
+int getSystemMinorVersion()
+{
+    SInt32 minor;
+    Gestalt(gestaltSystemVersionMinor, &minor);
+    return minor;
+}
 
 int getSystemPatchVersion()
 {
@@ -904,16 +887,33 @@ int getSystemPatchVersion()
     return bugfix;
 }
 
+
+bool systemWidgetBlurAvailable()
+{
+    return false;
+//    int major = getSystemMajorVersion();
+//    int minor = getSystemMinorVersion();
+//    //10.11
+//    return (major >= 11) || (major == 10 && minor >= 11);
+}
+
+
 bool isDarkMode()
 {
     static bool first = true;
     static bool ret = false;
     if (first) {
         first = false;
-        NSDictionary *dict = [[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain];
-        id style = [dict objectForKey:@"AppleInterfaceStyle"];
-        bool darkModeOn = ( style && [style isKindOfClass:[NSString class]] && NSOrderedSame == [style caseInsensitiveCompare:@"dark"] );
-        ret = darkModeOn;
+        //
+        int major = getSystemMajorVersion();
+        int minor = getSystemMinorVersion();
+        //return false;
+        if ((major >= 11) || (major == 10 && minor >= 14)) {
+            NSDictionary *dict = [[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain];
+            id style = [dict objectForKey:@"AppleInterfaceStyle"];
+            bool darkModeOn = ( style && [style isKindOfClass:[NSString class]] && NSOrderedSame == [style caseInsensitiveCompare:@"dark"] );
+            ret = darkModeOn;
+        }
     }
     return ret;
 }

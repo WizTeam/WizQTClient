@@ -93,9 +93,6 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
         m_collapsedImageSelected.load(strSkinPath + strIconName);
         m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
 
-        //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
-        //m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
-
 //        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
 //        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
         m_imagePushButton.setImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
