@@ -97,12 +97,9 @@ void WizCellButton::paintEvent(QPaintEvent *event)
     QPainter p(this);
 
     QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-    if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
+    if (m_state == Checked)
         mode = QIcon::Active;
-    QIcon::State state = QIcon::Off;
-    if (opt.state & QStyle::State_On)
-        state = QIcon::On;    
-
+    //
     QSize size = m_iconSize;
     int nLeft = (opt.rect.width() - size.width()) / 2;
     if (WithCountInfo == m_buttonType)
@@ -113,11 +110,11 @@ void WizCellButton::paintEvent(QPaintEvent *event)
     QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
     if (opt.icon.isNull())
     {
-        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
     else
     {
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
 
     if (WithCountInfo == m_buttonType)
@@ -227,11 +224,8 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
     QPainter p(this);
 
     QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-    if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
+    if (m_state == Checked)
         mode = QIcon::Active;
-    QIcon::State state = QIcon::Off;
-    if (opt.state & QStyle::State_On)
-        state = QIcon::On;
 
     p.setPen(Qt::NoPen);
     if (isDarkMode()) {
@@ -248,11 +242,11 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
     QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
     if (opt.icon.isNull())
     {
-        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
     else
     {
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
 
     QFont f = p.font();

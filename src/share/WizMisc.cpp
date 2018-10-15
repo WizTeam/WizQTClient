@@ -1783,11 +1783,13 @@ QIcon svg2Icon(const QByteArray& svgContent, const QSize& size, const WizIconOpt
         svgAddToIcon(icon, svgContent, size, options.darkColor, QIcon::Normal);
         if (options.darkSelectedColor != Qt::transparent) {
             svgAddToIcon(icon, svgContent, size, options.darkSelectedColor, QIcon::Selected);
+            svgAddToIcon(icon, svgContent, size, options.darkSelectedColor, QIcon::Active);
         }
     } else {
         svgAddToIcon(icon, svgContent, size, Qt::transparent, QIcon::Normal);
         if (options.selectedColor != Qt::transparent) {
             svgAddToIcon(icon, svgContent, size, options.selectedColor, QIcon::Selected);
+            svgAddToIcon(icon, svgContent, size, options.selectedColor, QIcon::Active);
         }
     }
     return icon;

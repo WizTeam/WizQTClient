@@ -47,6 +47,8 @@
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL QObject::tr("Share by Email")
 
 #define TITLE_BUTTON_ICON_SIZE       WizSmartScaleUI(14)
+static const WizIconOptions CHECKABLE_ICON_OPTIONS("#0000FF", Qt::transparent, "#0000FF");
+
 
 QString getOptionKey()
 {
@@ -109,7 +111,6 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+3");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
     m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag", iconSize), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
-    m_tagBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_tag_on", iconSize), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
     m_shareBtn = new WizCellButton(WizCellButton::ImageOnly, this);
@@ -154,7 +155,6 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+6");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
     m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment", iconSize), tr("Add attachments  %1%2").arg(getOptionKey()).arg(6));
-    m_attachBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_attachment_on", iconSize), tr("Add attachments  %1%2").arg(getOptionKey()).arg(6));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     // comments
@@ -162,8 +162,7 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_commentsBtn->setFixedHeight(nTitleHeight);
     QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
-    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments", iconSize), tr("Add comments  %1C").arg(getOptionKey()));
-    m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on", iconSize), tr("Add comments  %1C").arg(getOptionKey()));
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments", iconSize, CHECKABLE_ICON_OPTIONS), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)),
             SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)));
