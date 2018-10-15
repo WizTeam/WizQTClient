@@ -20,7 +20,7 @@ WizCellButton::WizCellButton(ButtonType type, QWidget *parent)
     , m_buttonType(type)
     , m_state(0)
     , m_count(0)
-    , m_iconSize(WizSmartScaleUI(14), WizSmartScaleUI(14))
+    , m_iconSize(WizSmartScaleUI(16), WizSmartScaleUI(16))
 {    
 }
 
@@ -28,6 +28,16 @@ void WizCellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
 {
     m_iconNomal = icon;
     m_strTipsNormal = strTips;
+
+    QIcon i = m_iconNomal;
+    if (i.isNull()) {
+        m_iconSize = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
+    } else {
+        auto sizes = m_iconNomal.availableSizes();
+        if (sizes.length() > 0) {
+            m_iconSize = sizes[0];
+        }
+    }
 
     setToolTip(strTips);
 }
@@ -93,7 +103,7 @@ void WizCellButton::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_On)
         state = QIcon::On;    
 
-    QSize size = m_iconSize;// opt.icon.actualSize(iconSize());
+    QSize size = m_iconSize;
     int nLeft = (opt.rect.width() - size.width()) / 2;
     if (WithCountInfo == m_buttonType)
     {
@@ -144,7 +154,6 @@ QString WizCellButton::countInfo() const
 namespace RoundCellButtonConst {
     const int margin = 8;
     const int spacing = 8;
-    const int iconHeight = 14;
     const int fontSize = 12;
     const int buttonHeight = 18;
 }
@@ -153,8 +162,6 @@ namespace RoundCellButtonConst {
 WizRoundCellButton::WizRoundCellButton(QWidget* parent)
     : WizCellButton(ImageOnly, parent)
 {
-    m_iconSize = QSize(iconWidth(), WizSmartScaleUI(RoundCellButtonConst::iconHeight));
-
     setMaximumWidth(0);
     m_animation = new QPropertyAnimation(this, "maximumWidth", this);
 }
@@ -196,31 +203,13 @@ QString WizRoundCellButton::text() const
     return "";
 }
 
-int WizRoundCellButton::iconWidth() const
-{
-    return WizSmartScaleUI(RoundCellButtonConst::iconHeight);
-
-//    switch (m_state) {
-//    case Normal:
-//        return 12;
-//        break;
-//    case Checked:
-//    case Badge:
-//        return 13;
-//        break;
-//    default:
-//        Q_ASSERT(0);
-//        break;
-//    }
-}
-
 int WizRoundCellButton::buttonWidth() const
 {
     QFont f;
     f.setPixelSize(WizSmartScaleUI(RoundCellButtonConst::fontSize));
     QFontMetrics fm(f);
     int width = RoundCellButtonConst::margin * 2.5 + RoundCellButtonConst::spacing
-            + iconWidth() + fm.width(text());
+            + m_iconSize.width() + fm.width(text());
     return width;
 }
 
@@ -256,7 +245,7 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
     QSize size = m_iconSize;
     int nLeft = RoundCellButtonConst::margin;
 
-    QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, iconWidth(), size.height());
+    QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
     if (opt.icon.isNull())
     {
         m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);

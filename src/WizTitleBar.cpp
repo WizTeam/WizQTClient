@@ -46,6 +46,8 @@
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_LINK QObject::tr("Share by Link")
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL QObject::tr("Share by Email")
 
+#define TITLE_BUTTON_ICON_SIZE       WizSmartScaleUI(14)
+
 QString getOptionKey()
 {
 #ifdef Q_OS_MAC
@@ -86,7 +88,7 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     layout->setSpacing(0);
     setLayout(layout);
 
-    QSize iconSize = QSize(Utils::WizStyleHelper::titleIconHeight(), Utils::WizStyleHelper::titleIconHeight());
+    QSize iconSize = QSize(TITLE_BUTTON_ICON_SIZE, TITLE_BUTTON_ICON_SIZE);
     m_editBtn = new WizRoundCellButton(this);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
