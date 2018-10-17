@@ -79,8 +79,7 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_editTitle->setFixedHeight(nTitleHeight);
     m_editTitle->setAlignment(Qt::AlignVCenter);
     m_editTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-//    m_editorBar->setFixedHeight(nEditToolBarHeight);
+    //
     m_editorBar->layout()->setAlignment(Qt::AlignVCenter);
 
     QString strTheme = Utils::WizStyleHelper::themeName();

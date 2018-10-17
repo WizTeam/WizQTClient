@@ -122,22 +122,27 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
 
     QWidget* wgtEditor = new QWidget(m_docView);
     //
-    m_web = new WizDocumentWebView(app, wgtEditor);
-    //m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    //使用一个widget包含webview，否则夜间模式下新建编辑，界面容易出现晃动
+    QWidget* webContainer = new QWidget(wgtEditor);
+    webContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_web = new WizDocumentWebView(app, webContainer);
+    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QVBoxLayout* webContainerLayout = new QVBoxLayout(webContainer);
+    webContainerLayout->addWidget(m_web);
+    //
     m_title->setEditor(m_web);
     //
     QWebEnginePage* commentsPage = m_comments->page();
     connect(commentsPage, SIGNAL(linkClicked(QUrl, QWebEnginePage::NavigationType, bool, WizWebEnginePage*)), m_web, SLOT(onEditorLinkClicked(QUrl, QWebEnginePage::NavigationType, bool, WizWebEnginePage*)));
 
     QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
+    //
     layoutEditor->setSpacing(0);
     layoutEditor->setContentsMargins(0, 5, 0, 0);
     layoutEditor->addWidget(m_title);
-    layoutEditor->addWidget(m_web);
-    QSpacerItem* verticalSpacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    layoutEditor->addSpacerItem(verticalSpacer);
+    layoutEditor->addWidget(webContainer);
     layoutEditor->setStretchFactor(m_title, 0);
-    layoutEditor->setStretchFactor(m_web, 1);
+    layoutEditor->setStretchFactor(webContainer, 1);
 
     //
     m_splitter = new WizSplitter(this);

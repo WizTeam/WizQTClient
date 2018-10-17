@@ -136,7 +136,9 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 {
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage(this);
     setPage(page);
-    page->setBackgroundColor(Qt::black);
+    if (isDarkMode()) {
+        page->setBackgroundColor(Qt::black);
+    }
 
     connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
     connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));

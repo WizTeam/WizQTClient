@@ -1739,6 +1739,7 @@ QPixmap svg2Pixmap(const QByteArray& svgContent,
     QDomElement root = doc.documentElement();
     if (color != Qt::transparent) {
         SetDomAttrRecur(root, "path", "fill", color.name());
+        SetDomAttrRecur(root, "polygon", "fill", color.name());
     }
     //
     QSvgRenderer rr(doc.toByteArray());

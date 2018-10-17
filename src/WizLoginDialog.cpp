@@ -651,9 +651,6 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->btn_selectServer->setStyleSheet(QString("QPushButton { border: none; background-image: url(%1);"
                                                 "background-position: right center; background-repeat: no-repeat;"
                                                      "color: rgba(255, 255, 255, 153); padding:0px; padding-right:15px; margin-right: 20px; margin-top: 5px}").arg(bg_switchserver_menu));
-//    QString strWizBoxLogInOn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox_on");
-//    ui->btn_wizBoxLogIn->setStyleSheet(QString("QPushButton{ border-image:url(%1); height: 16px; width: 16px;  margin-right: 25px; margin-top:5px;}"
-//                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
 
     ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
                                                 "color: #b1b1b1; margin:0px; margin-left:10px; margin-right:10px;  padding:0px; padding-bottom: 5px}"));

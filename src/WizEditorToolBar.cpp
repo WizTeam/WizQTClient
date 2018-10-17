@@ -54,7 +54,7 @@ const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
 
 #define WIZSHOWEXTRABUTTONITEMS "ShowExtraButtonItems"
 
-static const WizIconOptions ICON_OPTIONS(Qt::transparent, WizColorButtonIcon, Qt::transparent);
+static const WizIconOptions ICON_OPTIONS(Qt::blue, WizColorButtonIcon, Qt::blue);
 
 struct WizComboboxStyledItem
 {    
@@ -607,9 +607,8 @@ protected:
         QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
         if (mode == QIcon::Normal && (opt.state & QStyle::State_Sunken))
             mode = QIcon::Active;
-        QIcon::State state = QIcon::Off;
         if (opt.state & QStyle::State_On)
-            state = QIcon::On;
+            mode = QIcon::Active;
 
         bool bDrawLeft = (m_position == left) || (m_position == NoPosition);
         bool bDrawRight = (m_position == right) || (m_position == NoPosition);
@@ -620,7 +619,7 @@ protected:
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         if (opt.arrowType == Qt::RightArrow)
             rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_MARGIN_WIDTH);
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
 
         if (opt.arrowType == Qt::RightArrow)
         {
@@ -1252,7 +1251,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     connect(m_btnUnorderedList, SIGNAL(clicked()), SLOT(on_btnUnorderedList_clicked()));
 
     m_btnOrderedList = new CWizToolButton(this);
-    m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList", editIconSize, ICON_OPTIONS));
+    m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList2", editIconSize, ICON_OPTIONS));
     //m_btnOrderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertOrderedList")).size());
     m_btnOrderedList->setToolTip(tr("OrderedList %1%2O").arg(optionKey()).arg(commandKey()));
     m_btnOrderedList->setPosition(CWizToolButton::right);
