@@ -7,10 +7,13 @@
 #include "WizDocumentListView.h"
 #include <QApplication>
 
+#define DOCUMENT_LIST_HEADER_ICON_SIZE QSize(WizSmartScaleUI(23), WizSmartScaleUI(23))
+
+
 WizPopupButton::WizPopupButton(WizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
     , m_app(app)
-    , m_iconSize(23, 14)
+    , m_iconSize(DOCUMENT_LIST_HEADER_ICON_SIZE)
 {
     setPopupMode(QToolButton::InstantPopup);
 
@@ -86,8 +89,6 @@ void WizPopupButton::setActionChecked(const QMenu* menu, int type)
         }
     }
 }
-
-#define DOCUMENT_LIST_HEADER_ICON_SIZE QSize(WizSmartScaleUI(23), WizSmartScaleUI(12))
 
 /* ------------------------ CWizViewTypePopupButton ------------------------ */
 WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* parent)

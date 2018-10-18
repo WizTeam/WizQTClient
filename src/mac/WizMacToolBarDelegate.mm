@@ -105,12 +105,7 @@ public:
         QIcon icon = m_action->icon();
         if (!icon.isNull())
         {
-            QPixmap pix = icon.pixmap(icon.availableSizes().first(), m_action->isEnabled() ? QIcon::Normal : QIcon::Disabled);
-            //
-            if (isDarkMode()) {
-                pix = qpixmapWithTintColor(pix, Qt::white);
-            }
-            //
+            QPixmap pix = icon.pixmap(QSize(16, 16), m_action->isEnabled() ? QIcon::Normal : QIcon::Disabled);
             NSImage* image = WizToNSImage(pix);
             [item setImage:image];
         }
