@@ -42,6 +42,8 @@ void WizAnimateAction::setSingleIcons(const QString& strIconBaseName)
         QIcon icon(strFileName);
         if (icon.isNull())
             return;
+        //
+        QList<QSize> sizes = icon.availableSizes();
 
         m_icons.push_back(icon);
 

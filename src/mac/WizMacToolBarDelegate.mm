@@ -96,16 +96,11 @@ public:
         [item setPaletteLabel:[item label]];
         [item setToolTip: WizToNSString(m_action->toolTip())];
 
-        //m_view = [[CWizToolBarActionItemView alloc] init];
-        //[m_view setAutoresizesSubviews: YES];
-        //[m_view setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
-        //[item setView:m_view];
-
         // a reference to and not a copy of the pixmap data.
         QIcon icon = m_action->icon();
         if (!icon.isNull())
         {
-            QPixmap pix = icon.pixmap(QSize(16, 16), m_action->isEnabled() ? QIcon::Normal : QIcon::Disabled);
+            QPixmap pix = icon.pixmap(icon.availableSizes().first(), m_action->isEnabled() ? QIcon::Normal : QIcon::Disabled);
             NSImage* image = WizToNSImage(pix);
             [item setImage:image];
         }

@@ -236,7 +236,7 @@ NSImage* WizToNSImage(const QPixmap &pixmap)
 #else
     CGImageRef iref = pixmap.toMacCGImageRef();
 #endif
-    NSSize sz = NSMakeSize(pixmap.width() / 2, pixmap.height() / 2);
+    NSSize sz = NSMakeSize(pixmap.width(), pixmap.height());
     NSImage *image = [[NSImage alloc] initWithCGImage:iref size:sz];
     return image;
 }
