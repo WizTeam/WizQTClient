@@ -709,15 +709,12 @@ protected:
 
         //
         QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-        if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
-            mode = QIcon::Active;
-        QIcon::State state = QIcon::Off;
         if (opt.state & QStyle::State_On)
-            state = QIcon::On;
+            mode = QIcon::Active;
 
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width() - ColorButtonRightArrowWidth) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
 
         QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 6, opt.iconSize.width() - 2, 2);
         p.fillRect(QRect(rectColor), m_color);

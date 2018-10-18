@@ -103,8 +103,7 @@ private:
     bool m_selected;
     bool m_closeButtonPressed;
     QMenu* m_menu;
-    std::shared_ptr<QPixmap> m_pixDeleteNormal;
-    std::shared_ptr<QPixmap> m_pixDeletePressed;
+    static QIcon m_iconDelete;
 };
 
 class WizTagBar : public QWidget

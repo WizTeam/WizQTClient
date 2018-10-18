@@ -1972,7 +1972,7 @@ WizCategoryViewTrashItem::WizCategoryViewTrashItem(WizExplorerApp& app,
                                                      const QString& strKbGUID)
     : WizCategoryViewFolderItem(app, "/Deleted Items/", strKbGUID)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "trash", QSize(), ICON_OPTIONS);
+    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_trash", QSize(), ICON_OPTIONS);
     setIcon(0, icon);
     setText(0, PREDEFINED_TRASH);
 }

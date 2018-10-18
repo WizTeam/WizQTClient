@@ -21,7 +21,7 @@
 
 const int TAGITEM_MARGIN = 16;
 const int TAGITEM_HEIGHT  = 16;
-const int TAGITEM_DELETEICONSIZE = 10;
+const int TAGITEM_DELETEICONSIZE = 14;
 
 
 WizTagBar::WizTagBar(WizExplorerApp& app, QWidget *parent)
@@ -520,6 +520,8 @@ void WizTagBar::applyStyleSheet()
     m_btnMore->setStyleSheet("QToolButton { border: 0px; margin-top:2px;}");
 }
 
+QIcon WizTagItem::m_iconDelete;
+const QSize DELETE_ICON_SIZE = QSize(WizSmartScaleUI(TAGITEM_DELETEICONSIZE), WizSmartScaleUI(TAGITEM_DELETEICONSIZE));
 
 WizTagItem::WizTagItem(const QString guid, const QString text, QWidget* parent)
     : QWidget(parent)
@@ -529,21 +531,12 @@ WizTagItem::WizTagItem(const QString guid, const QString text, QWidget* parent)
     , m_selected(false)
     , m_closeButtonPressed(false)
     , m_menu(nullptr)
-    , m_pixDeleteNormal(nullptr)
-    , m_pixDeletePressed(nullptr)
 {
-    if (!m_pixDeleteNormal)
-    {        
-        QString deleteNormal = Utils::WizStyleHelper::skinResourceFileName("action_deleteEditorBarItem", true);
-        QString deletePressed = Utils::WizStyleHelper::skinResourceFileName("action_deleteEditorBarItem_on", true);
-        m_pixDeleteNormal = std::make_shared<QPixmap>(deleteNormal);
-        m_pixDeletePressed = std::make_shared<QPixmap>(deletePressed);
+    if (m_iconDelete.isNull()) {
+        WizIconOptions options(Qt::red, Qt::red, Qt::red);
+        m_iconDelete = WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "action_deleteEditorBarItem",
+                                       DELETE_ICON_SIZE, options);
     }
-
-//    QFont f;
-//    QFontMetrics fm(f);
-//    int nWidth = fm.width(m_text) + TAGITEM_MARGIN * 2;
-//    setFixedWidth(nWidth);
 }
 
 WizTagItem::~WizTagItem()
@@ -616,17 +609,22 @@ void WizTagItem::paintEvent(QPaintEvent* event)
 
     if (!m_readOnly)
     {
+        QSize size = DELETE_ICON_SIZE;
+        QPixmap pix;
         if (m_selected && !m_closeButtonPressed)
         {
-            QRect rcDel(rcBorder.right() - TAGITEM_DELETEICONSIZE - 2, (height() - TAGITEM_DELETEICONSIZE) / 2, TAGITEM_DELETEICONSIZE,
-                        TAGITEM_DELETEICONSIZE);
-            pt.drawPixmap(rcDel, m_pixDeleteNormal.operator *());
+            pix = m_iconDelete.pixmap(size, QIcon::Normal);
         }
         else if (m_closeButtonPressed)
         {
-            QRect rcDel(rcBorder.right() - TAGITEM_DELETEICONSIZE - 2, (height() - TAGITEM_DELETEICONSIZE) / 2, TAGITEM_DELETEICONSIZE,
-                        TAGITEM_DELETEICONSIZE);
-            pt.drawPixmap(rcDel, m_pixDeletePressed.operator *());
+            pix = m_iconDelete.pixmap(size, QIcon::Active);
+        }
+        QRect rcDel(rcBorder.right() - size.width() - 2, (height() - size.height()) / 2, size.width(),
+                    size.height());
+        //
+        if (!pix.isNull())
+        {
+            pt.drawPixmap(rcDel, pix);
         }
     }
 }
