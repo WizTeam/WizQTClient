@@ -182,12 +182,21 @@ int mainCore(int argc, char *argv[])
     QSslConfiguration::setDefaultConfiguration(conf);
 #endif
 
-    a.setStyleSheet("QToolTip { \
-                    font: 12px; \
-                    color:#000000; \
-                    padding:0px 1px; \
-                    background-color: #F8F8F8; \
-                    border:0px;}");
+    if (isDarkMode()) {
+        a.setStyleSheet("QToolTip { \
+                        font: 12px; \
+                        color:#cccccc; \
+                        padding:0px 1px; \
+                        background-color: #F8F8F8; \
+                        border:0px;}");
+    } else {
+        a.setStyleSheet("QToolTip { \
+                        font: 12px; \
+                        color:#000000; \
+                        padding:0px 1px; \
+                        background-color: #F8F8F8; \
+                        border:0px;}");
+    }
 
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);

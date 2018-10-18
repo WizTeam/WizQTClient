@@ -146,7 +146,6 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info", iconSize), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
-    m_infoBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_info_on", iconSize), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
     m_attachBtn = new WizCellButton(WizCellButton::WithCountInfo, this);

@@ -1804,6 +1804,51 @@ QIcon svg2Icon(QString svgFile, const QSize& size, const WizIconOptions& options
     return svg2Icon(bytes, size, options);
 }
 
+void addPngToIcon(QIcon& icon, const QString& fileName, QColor color, QIcon::Mode mode)
+{
+    QPixmap pixmap(fileName);
+    if (!pixmap.isNull()) {
+        if (color != Qt::transparent) {
+            pixmap = qpixmapWithTintColor(pixmap, color);
+        }
+        icon.addPixmap(pixmap, mode);
+    }
+    //
+    QString x2FileName = Utils::WizMisc::extractFilePath(fileName) +
+            Utils::WizMisc::extractFileTitle(fileName) + "@2x" + Utils::WizMisc::extractFileExt(fileName);
+    //
+    QPixmap x2Pixmap(x2FileName);
+    if (!x2Pixmap.isNull()) {
+        if (color != Qt::transparent) {
+            x2Pixmap = qpixmapWithTintColor(x2Pixmap, color);
+        }
+        icon.addPixmap(x2Pixmap, mode);
+    }
+}
+
+QIcon WizLoadPngSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize, const WizIconOptions& options)
+{
+    QString fileName = WizGetSkinResourcePath(strSkinName) + strIconName + ".png";
+    //
+    QIcon icon;
+    if (isDarkMode()) {
+        //
+        addPngToIcon(icon, fileName, options.darkColor, QIcon::Normal);
+        //
+        if (options.darkSelectedColor != Qt::transparent) {
+            addPngToIcon(icon, fileName, options.darkSelectedColor, QIcon::Selected);
+            addPngToIcon(icon, fileName, options.darkSelectedColor, QIcon::Active);
+        }
+    } else {
+        addPngToIcon(icon, fileName, Qt::transparent, QIcon::Normal);
+        if (options.selectedColor != Qt::transparent) {
+            addPngToIcon(icon, fileName, options.selectedColor, QIcon::Selected);
+            addPngToIcon(icon, fileName, options.selectedColor, QIcon::Active);
+        }
+    }
+    return icon;
+}
+
 QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize, const WizIconOptions& options)
 {
     QSize size = iconSize;
@@ -1813,8 +1858,7 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, co
     //
     QString fileName = WizGetSkinResourcePath(strSkinName) + strIconName + ".svg";
     if (!QFile::exists(fileName)) {
-        TOLOG1("Can't load icon: ", strIconName);
-        return QIcon();
+        return WizLoadPngSkinIcon(strSkinName, strIconName, iconSize, options);
     }
     //
     QIcon icon = svg2Icon(fileName, size, options);
