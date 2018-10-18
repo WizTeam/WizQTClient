@@ -87,6 +87,7 @@ void WizPopupButton::setActionChecked(const QMenu* menu, int type)
     }
 }
 
+#define DOCUMENT_LIST_HEADER_ICON_SIZE QSize(WizSmartScaleUI(23), WizSmartScaleUI(12))
 
 /* ------------------------ CWizViewTypePopupButton ------------------------ */
 WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* parent)
@@ -104,16 +105,11 @@ WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* par
     createAction(tr("One line view"), WizDocumentListView::TypeOneLine, menu, group);
     setMenu(menu);
 
-//    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
-//    m_iconOneLine.addFile(strSkinPath + "view_one_line.png");
-//    m_iconTwoLine.addFile(strSkinPath + "view_two_line.png");
-//    m_iconThumbnail.addFile(strSkinPath + "view_thumbnail.png");
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_view_type");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_view_type", DOCUMENT_LIST_HEADER_ICON_SIZE);
     setIcon(icon);
 
     int type = m_app.userSettings().get("VIEW_TYPE").toInt();
     setActionChecked(menu, type);
-//    setActionIcon(type);
 }
 
 QSize WizViewTypePopupButton::sizeHint() const
@@ -136,29 +132,11 @@ void WizViewTypePopupButton::on_action_triggered()
     Q_EMIT viewTypeChanged(type);
 }
 
-//void CWizViewTypePopupButton::setActionIcon(int type)
-//{
-//    switch (type) {
-//    case CWizDocumentListView::TypeOneLine:
-//        setIcon(m_iconOneLine);
-//        break;
-//    case CWizDocumentListView::TypeTwoLine:
-//        setIcon(m_iconTwoLine);
-//        break;
-//    case CWizDocumentListView::TypeThumbnail:
-//        setIcon(m_iconThumbnail);
-//        break;
-//    default:
-//        Q_ASSERT(0);
-//    }
-//}
-
 void WizViewTypePopupButton::on_viewTypeChanged(int type)
 {
     setActionChecked(menu(), type);
 //    setActionIcon(type);
 }
-
 
 /* ------------------------ CWizSortingPopupButton ------------------------ */
 WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *parent)
@@ -210,7 +188,7 @@ WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *paren
         m_app.userSettings().set("SORT_TYPE", QString::number(type));
     }
 
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_sort_type");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_sort_type", DOCUMENT_LIST_HEADER_ICON_SIZE);
     setIcon(icon);
 }
 

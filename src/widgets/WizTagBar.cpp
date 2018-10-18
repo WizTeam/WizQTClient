@@ -65,7 +65,6 @@ WizTagBar::WizTagBar(WizExplorerApp& app, QWidget *parent)
     m_lineEdit->setFont(f);
     hLayout->addWidget(m_lineEdit);
     hLayout->addStretch();
-
     //
     m_tagLayout = new QHBoxLayout(m_tagWidget);
     m_tagLayout->setContentsMargins(0, 0, 0, 0);
