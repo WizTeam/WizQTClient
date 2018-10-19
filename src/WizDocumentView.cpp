@@ -128,6 +128,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     m_web = new WizDocumentWebView(app, webContainer);
     m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout* webContainerLayout = new QVBoxLayout(webContainer);
+    webContainerLayout->setMargin(0);
+    webContainerLayout->setSpacing(0);
     webContainerLayout->addWidget(m_web);
     //
     m_title->setEditor(m_web);
