@@ -137,7 +137,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage(this);
     setPage(page);
     if (isDarkMode()) {
-        page->setBackgroundColor(Qt::black);
+        page->setBackgroundColor(QColor("#272727"));
     }
 
     connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
@@ -1391,7 +1391,7 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
     //
     if (isDarkMode()) {
-        page()->setBackgroundColor(Qt::black);
+        page()->setBackgroundColor(QColor("#272727"));
         setVisible(false);
     }
     //

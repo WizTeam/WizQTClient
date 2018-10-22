@@ -395,7 +395,7 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
     if (first) {
         first = false;
         if (isDarkMode()) {
-            normalPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#666666"));
+            normalPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#333333"));
             focusPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#888888"));
         }
     }
@@ -1058,7 +1058,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_comboFontFamily->setFixedWidth(122);
 
     m_comboFontSize = new CWizToolComboBox(this);
-    m_comboFontSize->setFixedWidth(48);
+    m_comboFontSize->setFixedWidth(52);
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
     if (isDarkMode()) {

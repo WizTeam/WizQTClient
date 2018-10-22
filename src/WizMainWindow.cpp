@@ -1990,8 +1990,8 @@ QWidget* WizMainWindow::createNoteListView()
     //
     QPalette pal = m_noteListWidget->palette();
     if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#000000"));
-        pal.setColor(QPalette::Base, QColor("#000000"));
+        pal.setColor(QPalette::Window, QColor("#272727"));
+        pal.setColor(QPalette::Base, QColor("#272727"));
 
     } else {
         pal.setColor(QPalette::Window, QColor("#F5F5F5"));
@@ -2006,6 +2006,9 @@ QWidget* WizMainWindow::createNoteListView()
     layoutButtonContainer->setContentsMargins(0, 0, 0, 0);
     layoutButtonContainer->setSpacing(0);
     noteButtonsContainer->setLayout(layoutButtonContainer);
+    if (isDarkMode()) {
+        noteButtonsContainer->setStyleSheet("background-color:#333333");
+    }
 
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 12, 0);
@@ -2047,7 +2050,7 @@ QWidget* WizMainWindow::createNoteListView()
     wgtRightBorder->setFixedWidth(13);
     wgtRightBorder->setFixedHeight(::WizSmartScaleUI(30));
     if (isDarkMode()) {
-        wgtRightBorder->setStyleSheet(QString("border-left:1px solid #000000;"));
+        wgtRightBorder->setStyleSheet(QString("border-left:1px solid #000000; background-color:#272727"));
     } else {
         wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
     }
@@ -2056,7 +2059,7 @@ QWidget* WizMainWindow::createNoteListView()
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
     if (isDarkMode()) {
-        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#000000");
+        line2->setStyleSheet("margin-right:14px; border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
         line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
@@ -2078,8 +2081,8 @@ QWidget*WizMainWindow::createMessageListView()
     m_msgListWidget->setLayout(layoutList);
     QPalette pal = m_msgListWidget->palette();
     if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#000000"));
-        pal.setColor(QPalette::Base, QColor("#000000"));
+        pal.setColor(QPalette::Window, QColor("#333333"));
+        pal.setColor(QPalette::Base, QColor("#333333"));
     } else {
         pal.setColor(QPalette::Window, QColor("#F5F5F5"));
         pal.setColor(QPalette::Base, QColor("#F5F5F5"));
@@ -2116,7 +2119,7 @@ QWidget*WizMainWindow::createMessageListView()
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
     if (isDarkMode()) {
-        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#000000");
+        line2->setStyleSheet("margin-right:13px; border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
         line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }

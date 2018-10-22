@@ -107,7 +107,7 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     m_vScroll = new WizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
     if (isDarkMode()) {
-        m_vScroll->applyStyle("#000000", "#333333", true);
+        m_vScroll->applyStyle("#272727", "#333333", true);
     } else {
         m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
     }

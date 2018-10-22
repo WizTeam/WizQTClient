@@ -81,9 +81,9 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     //
     if (isDarkMode()) {
         setAutoFillBackground(true);
-        setStyleSheet("background-color:#000000;");
+        setStyleSheet("background-color:#272727;");
         m_tab->setAutoFillBackground(true);
-        m_tab->setStyleSheet("background-color:#000000;");
+        m_tab->setStyleSheet("background-color:#272727;");
     }
 
     m_passwordView->setGeometry(this->geometry());
