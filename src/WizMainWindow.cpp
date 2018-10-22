@@ -2046,6 +2046,7 @@ QWidget* WizMainWindow::createNoteListView()
     m_btnMarkDocumentsReaded->setToolTip(tr("Mark all documents read"));
     connect(m_btnMarkDocumentsReaded, SIGNAL(clicked()), SLOT(on_btnMarkDocumentsRead_triggered()));
     layoutButtonContainer->addWidget(readContainer);
+    layoutButtonContainer->addSpacing(12);
 
     m_labelDocumentsHint->setVisible(false);
     m_btnMarkDocumentsReaded->setVisible(false);
