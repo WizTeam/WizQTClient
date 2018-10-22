@@ -2086,8 +2086,8 @@ QWidget*WizMainWindow::createMessageListView()
     m_msgListWidget->setLayout(layoutList);
     QPalette pal = m_msgListWidget->palette();
     if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#333333"));
-        pal.setColor(QPalette::Base, QColor("#333333"));
+        pal.setColor(QPalette::Window, QColor("#272727"));
+        pal.setColor(QPalette::Base, QColor("#272727"));
     } else {
         pal.setColor(QPalette::Window, QColor("#F5F5F5"));
         pal.setColor(QPalette::Base, QColor("#F5F5F5"));
@@ -2108,7 +2108,7 @@ QWidget*WizMainWindow::createMessageListView()
     titleBarLayout->addWidget(m_msgListTitleBar);
 
     QWidget* placeHoldWgt = new QWidget(this);
-    placeHoldWgt->setFixedSize(13, WizSmartScaleUI(20));
+    placeHoldWgt->setFixedSize(13, Utils::WizStyleHelper::listViewSortControlWidgetHeight());
     if (isDarkMode()) {
         placeHoldWgt->setStyleSheet("border-left:1px solid #000000;");
     } else {

@@ -360,7 +360,7 @@ WizMessageListView::WizMessageListView(WizDatabaseManager& dbMgr, QWidget *paren
     m_vScroll = new WizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
     if (isDarkMode()) {
-        m_vScroll->applyStyle("#000000", "#333333", true);
+        m_vScroll->applyStyle("#272727", "#333333", true);
     } else {
         m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
     }
@@ -989,7 +989,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* par
     setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
     QPalette pal = palette();
     if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#000000"));
+        pal.setColor(QPalette::Window, QColor("#333333"));
     } else {
         pal.setColor(QPalette::Window, QColor("#F7F7F7"));
     }

@@ -478,67 +478,27 @@ QColor WizStyleHelper::listViewItemBackground(int stat)
 
 QColor WizStyleHelper::listViewItemType(bool bSelected, bool bFocused)
 {
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/TypeFocus", "#3177EE").toString());
-//        } else {
-//            return QColor(getValue("Documents/TypeLoseFocus", "#3177EE").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Type", "#3177EE").toString());
-//    }
+    return QColor(getValue("Documents/Type", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/TitleFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/TitleLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Title", "#464646").toString());
-//    }
+    return QColor(getValue("Documents/Title", "#464646").toString());
 }
 
 QColor WizStyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/LeadFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/LeadLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
-//    }
+    return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
 }
 
 QColor WizStyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
-{   
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/LocationFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/LocationLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Location", "#3177EE").toString());
-//    }
+{
+    return QColor(getValue("Documents/Location", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 {    
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/SummaryFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/SummaryLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
-//    }
+    return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
 }
 
 QColor WizStyleHelper::listViewMultiLineFirstLine(bool bSelected)
@@ -620,7 +580,11 @@ void WizStyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Wi
     case ListBGTypeActive:
     {
         QRect rcBg = rc.adjusted(1, 1, -2, -borderMargin);
-        drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
+        if (isDarkMode()) {
+            drawSelectBorder(p, rcBg, QColor("#0058de"), 2);
+        } else {
+            drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
+        }
     }
 //        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
