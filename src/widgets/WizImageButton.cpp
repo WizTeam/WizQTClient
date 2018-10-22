@@ -1,4 +1,5 @@
 ﻿#include "WizImageButton.h"
+#include "share/WizQtHelper.h"
 #include <QStylePainter>
 #include <QStyleOptionButton>
 #include <QPixmap>
@@ -54,6 +55,12 @@ void WizImageButton::setStatusDown()
 {
     m_currentIcon = m_downIcon;
     update();
+}
+
+QSize WizImageButton::sizeHint() const
+{
+    int size = WizSmartScaleUI(16);
+    return QSize(size, size);
 }
 
 void WizImageButton::paintEvent(QPaintEvent* event)

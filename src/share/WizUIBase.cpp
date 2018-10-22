@@ -55,6 +55,8 @@ QImage qimageWithTintColor(const QImage& image, QColor tintColor)
     bool argb = format == QImage::Format_ARGB32_Premultiplied;
     //
     QImage dest(width, height, QImage::Format_ARGB32_Premultiplied);
+    qreal pixelRatio = image.devicePixelRatio();
+    dest.setDevicePixelRatio(pixelRatio);
     //
     const uchar* pBytesSrc = src.bits();
     int strideSrc = src.bytesPerLine();

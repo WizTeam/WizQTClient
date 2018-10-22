@@ -254,7 +254,7 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
     QFontMetrics fm(f);
     QRect rcText(rcIcon.right() + RoundCellButtonConst::spacing, (opt.rect.height() - fm.height()) / 2,
                  opt.rect.right() - rcIcon.right() - RoundCellButtonConst::spacing, fm.height());
-    p.setPen(QColor("#535353"));
+    p.setPen(QColor(isDarkMode() ? "#a6a6a6" : "#535353"));
     p.setFont(f);
     p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, text());
 }

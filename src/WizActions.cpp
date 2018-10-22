@@ -154,6 +154,8 @@ WIZACTION* WizActions::actionsData()
     return arrayActions;
 }
 
+const WizIconOptions ICON_OPTIONS = WizIconOptions(Qt::transparent, "#a6a6a6", Qt::transparent);
+
 WizShortcutAction *WizActions::addAction(WIZACTION& action, bool bUseExtraShortcut)
 {   
     QString strText = action.strText;
@@ -164,7 +166,7 @@ WizShortcutAction *WizActions::addAction(WIZACTION& action, bool bUseExtraShortc
     WizShortcutAction* pAction = new WizShortcutAction(strText, m_parent);
 
     if (!strIconName.isEmpty()) {
-        pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
+        pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName, QSize(), ICON_OPTIONS));
     }
 
     pAction->setShortcut(strShortcut);

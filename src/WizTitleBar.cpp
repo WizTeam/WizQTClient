@@ -47,7 +47,8 @@
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL QObject::tr("Share by Email")
 
 #define TITLE_BUTTON_ICON_SIZE       WizSmartScaleUI(14)
-static const WizIconOptions CHECKABLE_ICON_OPTIONS("#0000FF", Qt::transparent, "#0000FF");
+static const WizIconOptions ICON_OPTIONS("#0000FF", "#a6a6a6", "#0000FF");
+static const WizIconOptions CHECKABLE_ICON_OPTIONS("#0000FF", "#a6a6a6", "#0000FF");
 
 
 QString getOptionKey()
@@ -93,30 +94,30 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_editBtn = new WizRoundCellButton(this);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
-    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock", iconSize), tr("Edit"), tr("Switch to Editing View  %1%2").arg(getOptionKey()).arg(1));
-    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock", iconSize), tr("Read") , tr("Switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
-    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock", iconSize), tr("Save & Read"), tr("Save and switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
+    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock", iconSize, ICON_OPTIONS), tr("Edit"), tr("Switch to Editing View  %1%2").arg(getOptionKey()).arg(1));
+    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock", iconSize, ICON_OPTIONS), tr("Read") , tr("Switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
+    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock", iconSize, ICON_OPTIONS), tr("Save & Read"), tr("Save and switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));    
 
     m_separateBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_separateBtn->setFixedHeight(nTitleHeight);
     QString separateShortcut = ::WizGetShortcut("EditNoteSeparate", "Alt+2");
     m_separateBtn->setShortcut(QKeySequence::fromString(separateShortcut));
-    m_separateBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_use_separate", iconSize), tr("View note in seperate window  %1%2").arg(getOptionKey()).arg(2));
+    m_separateBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_use_separate", iconSize, ICON_OPTIONS), tr("View note in seperate window  %1%2").arg(getOptionKey()).arg(2));
     connect(m_separateBtn, SIGNAL(clicked()), SLOT(onSeparateButtonClicked()));
 
     m_tagBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_tagBtn->setFixedHeight(nTitleHeight);
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+3");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
-    m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag", iconSize), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
+    m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag", iconSize, ICON_OPTIONS), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
     m_shareBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
     QString shareShortcut = ::WizGetShortcut("EditShare", "Alt+4");
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
-    m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share", iconSize), tr("Share note  %1%2").arg(getOptionKey()).arg(4));
+    m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share", iconSize, ICON_OPTIONS), tr("Share note  %1%2").arg(getOptionKey()).arg(4));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
     WizOEMSettings oemSettings(m_app.databaseManager().db().getAccountPath());
     m_shareBtn->setVisible(!oemSettings.isHideShare());
@@ -145,14 +146,14 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_infoBtn->setFixedHeight(nTitleHeight);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
-    m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info", iconSize), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
+    m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info", iconSize, ICON_OPTIONS), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
     m_attachBtn = new WizCellButton(WizCellButton::WithCountInfo, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+6");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
-    m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment", iconSize), tr("Add attachments  %1%2").arg(getOptionKey()).arg(6));
+    m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment", iconSize, ICON_OPTIONS), tr("Add attachments  %1%2").arg(getOptionKey()).arg(6));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     // comments

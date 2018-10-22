@@ -23,6 +23,8 @@ public:
     void setStatusHot();
     void setStatusNormal();
     void setStatusDown();
+    //
+    QSize sizeHint() const override;
 
 signals:
 

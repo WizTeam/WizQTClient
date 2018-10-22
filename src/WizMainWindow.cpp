@@ -1801,6 +1801,9 @@ void WizMainWindow::initToolBar()
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 116 : 124;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
     QPixmap pixExtraMenu = Utils::WizStyleHelper::skinResourceFileName("actionNewNoteExtraMenu", true);
+    if (isDarkMode()) {
+        pixExtraMenu = qpixmapWithTintColor(pixExtraMenu, QColor("#ffffff"));
+    }
     WizMacToolBarButtonItem* newNoteItem = new WizMacToolBarButtonItem(tr("New Note"), pixExtraMenu, buttonWidth, nullptr);
     connect(newNoteItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool)));
@@ -1985,6 +1988,7 @@ QWidget* WizMainWindow::createNoteListView()
     m_noteListWidget->setMinimumWidth(100);
     QVBoxLayout* layoutList = new QVBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
+    layoutList->setMargin(0);
     layoutList->setSpacing(0);
     m_noteListWidget->setLayout(layoutList);
     //
@@ -2005,46 +2009,46 @@ QWidget* WizMainWindow::createNoteListView()
     QHBoxLayout* layoutButtonContainer = new QHBoxLayout();
     layoutButtonContainer->setContentsMargins(0, 0, 0, 0);
     layoutButtonContainer->setSpacing(0);
+    layoutButtonContainer->setMargin(0);
     noteButtonsContainer->setLayout(layoutButtonContainer);
     if (isDarkMode()) {
         noteButtonsContainer->setStyleSheet("background-color:#333333");
     }
 
-    QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(0, 0, 12, 0);
-    layoutActions->setSpacing(0);
-
     WizViewTypePopupButton* viewBtn = new WizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     connect(this, SIGNAL(documentsViewTypeChanged(int)), viewBtn, SLOT(on_viewTypeChanged(int)));
-    layoutActions->addWidget(viewBtn);
+    layoutButtonContainer->addWidget(viewBtn);
 
     WizSortingPopupButton* sortBtn = new WizSortingPopupButton(*this, this);
     sortBtn->setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
     connect(this, SIGNAL(documentsSortTypeChanged(int)), sortBtn, SLOT(on_sortingTypeChanged(int)));
-    layoutActions->addWidget(sortBtn);
-    layoutActions->addStretch(0);
+    layoutButtonContainer->addWidget(sortBtn);
+    //
+    layoutButtonContainer->addStretch(0);
 
     m_labelDocumentsHint = new QLabel(this);
+    m_labelDocumentsHint->setWordWrap(false);
     m_labelDocumentsHint->setText(tr("Unread documents"));
     m_labelDocumentsHint->setStyleSheet("color: #A7A7A7; font-size:14px; padding-top:2px; margin-right:6px;"); //font: 12px;
-    layoutActions->addWidget(m_labelDocumentsHint);
+    layoutButtonContainer->addWidget(m_labelDocumentsHint);
     connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
-
-    m_btnMarkDocumentsReaded = new WizImageButton(this);
+    //
+    //如果不用widget包着image button，会导致layout上面增加margin
+    QWidget* readContainer = new QWidget(this);
+    readContainer->setFixedSize(QSize(WizSmartScaleUI(16), WizSmartScaleUI(16)));
+    m_btnMarkDocumentsReaded = new WizImageButton(readContainer);
     QIcon btnIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "actionMarkMessagesRead");
     m_btnMarkDocumentsReaded->setIcon(btnIcon);
-    m_btnMarkDocumentsReaded->setFixedSize(QSize(18, 18));
+    m_btnMarkDocumentsReaded->setFixedSize(QSize(WizSmartScaleUI(16), WizSmartScaleUI(16)));
     m_btnMarkDocumentsReaded->setToolTip(tr("Mark all documents read"));
     connect(m_btnMarkDocumentsReaded, SIGNAL(clicked()), SLOT(on_btnMarkDocumentsRead_triggered()));
-    layoutActions->addWidget(m_btnMarkDocumentsReaded);
+    layoutButtonContainer->addWidget(readContainer);
 
     m_labelDocumentsHint->setVisible(false);
     m_btnMarkDocumentsReaded->setVisible(false);
-
-    layoutButtonContainer->addLayout(layoutActions);
 
     QWidget* wgtRightBorder = new QWidget(this);
     wgtRightBorder->setFixedWidth(13);
