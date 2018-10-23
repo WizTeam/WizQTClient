@@ -337,6 +337,8 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const WizDocumentListView *view = dynamic_cast<const WizDocumentListView *>(widget))
             {
+                QSize sz = view->size();
+                QRect rc = vopt->rect;
 //                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
                 view->drawItem(painter, vopt);
                 //drawDocumentListViewItem(vopt, painter, view);

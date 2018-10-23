@@ -107,9 +107,9 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     m_vScroll = new WizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
     if (isDarkMode()) {
-        m_vScroll->applyStyle("#272727", "#333333", true);
+        //m_vScroll->applyStyle("#272727", QColor(Qt::transparent).name(), false);
     } else {
-        m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
+        //m_vScroll->applyStyle("#F5F5F5", QColor(Qt::transparent).name(), false);
     }
 #endif
 
@@ -2250,7 +2250,7 @@ void WizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt
         p->save();
         int nRightMargin = 12;
         QStyleOptionViewItem newVopt(*vopt);
-        newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
+        //newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
         pItem->draw(p, &newVopt, viewType());
 
         p->restore();

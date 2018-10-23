@@ -2051,20 +2051,10 @@ QWidget* WizMainWindow::createNoteListView()
     m_labelDocumentsHint->setVisible(false);
     m_btnMarkDocumentsReaded->setVisible(false);
 
-    QWidget* wgtRightBorder = new QWidget(this);
-    wgtRightBorder->setFixedWidth(13);
-    wgtRightBorder->setFixedHeight(::WizSmartScaleUI(30));
-    if (isDarkMode()) {
-        wgtRightBorder->setStyleSheet(QString("border-left:1px solid #000000; background-color:#272727"));
-    } else {
-        wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
-    }
-    layoutButtonContainer->addWidget(wgtRightBorder);
-
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
     if (isDarkMode()) {
-        line2->setStyleSheet("margin-right:14px; border-top-width:1;border-top-style:solid;border-top-color:#474747");
+        line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
         line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
@@ -2107,24 +2097,10 @@ QWidget*WizMainWindow::createMessageListView()
     titleBarLayout->setSpacing(0);
     titleBarLayout->addWidget(m_msgListTitleBar);
 
-    QWidget* placeHoldWgt = new QWidget(this);
-    placeHoldWgt->setFixedSize(13, Utils::WizStyleHelper::listViewSortControlWidgetHeight());
-    if (isDarkMode()) {
-        placeHoldWgt->setStyleSheet("border-left:1px solid #000000;");
-    } else {
-        placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
-    }
-    QHBoxLayout* layout2 = new QHBoxLayout();
-    layout2->setContentsMargins(0, 0, 0, 0);
-    layout2->setSpacing(0);
-    layout2->addWidget(placeHoldWgt);
-    titleBarLayout->addLayout(layout2);
-
-
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
     if (isDarkMode()) {
-        line2->setStyleSheet("margin-right:13px; border-top-width:1;border-top-style:solid;border-top-color:#474747");
+        line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
         line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
