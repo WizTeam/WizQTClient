@@ -33,11 +33,13 @@ protected:
 
 protected:
     virtual void paintEvent(QPaintEvent* event);
+    virtual void resizeEvent(QResizeEvent* event);
 
 public:
     void setLeftAlign(bool b) { m_leftAlign = b; }
     void showAtPoint(const QPoint& pt);
     void setTriangleStyle(int triangleMargin, int triangleWidth, int triangleHeight);
+    void updateRegion();
 };
 
 #endif // WIZPOPUPWIDGET_H

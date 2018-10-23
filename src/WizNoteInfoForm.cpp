@@ -13,7 +13,7 @@
 
 QString formatLabelLink(const QString& linkHref, const QString& text)
 {
-    return WizFormatString2("<a href=\"%1\" style=\"color:#5990EF;"
+    return WizFormatString2("<a href=\"%1\" style=\"color:#448aff;"
                     "text-decoration:none;\">%2</a>", linkHref, text);
 }
 
@@ -38,7 +38,9 @@ WizNoteInfoForm::WizNoteInfoForm(QWidget *parent)
     ui->labelHistory->setText(versionHistory);
     //
     if (isDarkMode()) {
-        setStyleSheet("background-color:#666666; border-radius:4px;");
+        setStyleSheet("background-color:#272727; border-radius:4px;");
+        ui->editURL->setStyleSheet("background-color:#333333");
+        ui->editAuthor->setStyleSheet("background-color:#333333");
     } else {
         setStyleSheet("background-color:#FFFFFF; border-radius:4px;");
     }

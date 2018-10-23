@@ -676,7 +676,12 @@ WizAttachmentListWidget::WizAttachmentListWidget(QWidget* parent)
 #endif
     setPalette(pal);
 
-    setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
+    m_list->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
+    //
+    if (isDarkMode()) {
+        setStyleSheet("background-color: #333333");
+        m_list->setStyleSheet("background-color: #272727");
+    }
 }
 
 bool WizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)

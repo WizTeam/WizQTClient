@@ -24,7 +24,7 @@ WizPopupWidget::WizPopupWidget(QWidget* parent)
     setStyleSheet("QWidget{background:#D7D7D7;}");
 #elif defined(Q_OS_MAC)
     if (isDarkMode()) {
-        setStyleSheet("QWidget{background:#666666;}");
+        setStyleSheet("QWidget{background:#272727;}");
     } else {
         setStyleSheet("QWidget{background:#F7F7F7;}");
     }
@@ -47,22 +47,34 @@ QRect WizPopupWidget::getClientRect() const
 void WizPopupWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
-
 }
+
+void WizPopupWidget::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    //
+    qDebug() << event->size() << "\n" << event->oldSize();
+    //
+    setMask(maskRegion());
+}
+
+void WizPopupWidget::updateRegion()
+{
+    setMask(maskRegion());
+}
+
 
 void WizPopupWidget::showAtPoint(const QPoint& pt)
 {
-    int xOffset = m_leftAlign ? (m_triangleMargin + m_triangleWidth / 2) : sizeHint().width() - (m_triangleMargin + m_triangleWidth / 2);
+    QSize sz = sizeHint();
+    int xOffset = m_leftAlign ? (m_triangleMargin + m_triangleWidth / 2) : sz.width() - (m_triangleMargin + m_triangleWidth / 2);
     int yOffset = 0;
 
     int left = pt.x() - xOffset;
     int top = pt.y() - yOffset;
 
-    setGeometry(left, top, sizeHint().width(), sizeHint().height());
-    QRegion regin = mask();
-    if (regin.isNull()) {
-        setMask(maskRegion());
-    }
+    setGeometry(left, top, sz.width(), sz.height());
+    setMask(maskRegion());
     show();
 }
 
@@ -75,6 +87,7 @@ void WizPopupWidget::setTriangleStyle(int triangleMargin, int triangleWidth, int
 
 QRegion WizPopupWidget::maskRegion()
 {
-    return Utils::WizStyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size().width(), size().height()), m_leftAlign,
+    QSize sz = size();
+    return Utils::WizStyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, sz.width(), sz.height()), m_leftAlign,
                                                        m_triangleMargin, m_triangleWidth, m_triangleHeight);
 }
