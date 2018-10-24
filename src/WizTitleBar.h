@@ -44,8 +44,6 @@ public:
     void hideMessageTips(bool useAnimation);
     void setEditor(WizDocumentWebView* editor);
 
-    void setBackgroundColor(QColor color);
-
     void setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
     void setEditorMode(WizEditorMode editorMode);

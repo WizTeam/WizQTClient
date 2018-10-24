@@ -47,8 +47,8 @@
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL QObject::tr("Share by Email")
 
 #define TITLE_BUTTON_ICON_SIZE       WizSmartScaleUI(14)
-static const WizIconOptions ICON_OPTIONS("#0000FF", "#a6a6a6", "#0000FF");
-static const WizIconOptions CHECKABLE_ICON_OPTIONS("#0000FF", "#a6a6a6", "#0000FF");
+static const WizIconOptions ICON_OPTIONS(WIZ_TINT_COLOR, "#a6a6a6", WIZ_TINT_COLOR);
+static const WizIconOptions CHECKABLE_ICON_OPTIONS(WIZ_TINT_COLOR, "#a6a6a6", WIZ_TINT_COLOR);
 
 
 QString getOptionKey()
@@ -276,20 +276,6 @@ void WizTitleBar::setEditor(WizDocumentWebView* editor)
 
     m_editor = editor;
 }
-
-void WizTitleBar::setBackgroundColor(QColor color)
-{
-    QPalette pal = m_editTitle->palette();
-    pal.setColor(QPalette::Window, color);
-    m_editTitle->setPalette(pal);
-
-    m_editTitle->setStyleSheet("QLineEdit{background:#F5F5F5; border: 1px solid red;}");
-
-//    pal = m_infoBar->palette();
-//    pal.setColor(QPalette::Window, color);
-//    m_infoBar->setPalette(pal);
-}
-
 
 void WizTitleBar::onEditorFocusIn()
 {

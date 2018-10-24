@@ -2056,7 +2056,7 @@ QWidget* WizMainWindow::createNoteListView()
     if (isDarkMode()) {
         line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
-        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+        line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
 
     layoutList->addWidget(noteButtonsContainer);
@@ -2102,7 +2102,7 @@ QWidget*WizMainWindow::createMessageListView()
     if (isDarkMode()) {
         line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
-        line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+        line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
 
     layoutList->addLayout(titleBarLayout);

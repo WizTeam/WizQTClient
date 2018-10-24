@@ -229,7 +229,11 @@ void WizTitleEdit::setText(const QString& text)
 {
     QLineEdit::setText(text);
     setCursorPosition(0);
-    setStyleSheet("color:#535353;");
+    if (isDarkMode()) {
+        setStyleSheet("color:#a6a6a6;");
+    } else {
+        setStyleSheet("color:#535353;");
+    }
 }
 
 void WizTitleEdit::onTitleReturnPressed()

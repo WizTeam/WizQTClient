@@ -10,7 +10,7 @@ WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
     , m_bLeftBorder(false)
 {
     if (isDarkMode()) {
-        m_handleColor = "#88666666";
+        m_handleColor = "#88686868";
     }
 
     // FIXME:  hard code

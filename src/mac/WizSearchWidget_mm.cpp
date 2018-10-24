@@ -101,8 +101,8 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     //
     if (isDarkMode()) {
         m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; color: #aaaaaa; background-color:#666666;}  "
-                                 "QTreeView::item{background-color:#666666;}  "
-                                 "QTreeView::branch { color:#aaaaaa; border-left:20px solid #666666;  margin-left:20px; }");
+                                 "QTreeView::item{background-color:#666666; color:#a6a6a6}  "
+                                 "QTreeView::branch { color:#a6a6a6; border-left:20px solid #666666;  margin-left:20px; }");
         m_treeWgt->header()->setStyleSheet("QHeaderView:section{ background-color:#666666; height:20px; "
                                            "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
     } else {

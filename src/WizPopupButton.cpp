@@ -8,7 +8,7 @@
 #include <QApplication>
 
 #define DOCUMENT_LIST_HEADER_ICON_SIZE QSize(WizSmartScaleUI(23), WizSmartScaleUI(23))
-const WizIconOptions HEADER_ICON_OPTIONS = WizIconOptions(Qt::transparent, "#5c5c5c", Qt::transparent);
+const WizIconOptions HEADER_ICON_OPTIONS = WizIconOptions(Qt::transparent, "#5c5c5c", Qt::white);
 
 
 WizPopupButton::WizPopupButton(WizExplorerApp& app, QWidget *parent)
@@ -38,7 +38,7 @@ void WizPopupButton::paintEvent(QPaintEvent* event)
     // FIXME
     p.setPen("#787878");
     if (opt.state & QStyle::State_Sunken) {
-        p.fillRect(opt.rect, QColor("#dadada"));
+        p.fillRect(opt.rect, QColor(isDarkMode() ? "#686868" : "#dadada"));
     }    
 
     if (!opt.icon.isNull()) {
@@ -102,6 +102,10 @@ WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* par
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
+    if (isDarkMode()) {
+        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:0xffffff }");
+        menu->setStyleSheet(menuStyle);
+    }
     createAction(tr("Thumbnail view"), WizDocumentListView::TypeThumbnail, menu, group);
     createAction(tr("Two line view"), WizDocumentListView::TypeTwoLine, menu, group);
     createAction(tr("One line view"), WizDocumentListView::TypeOneLine, menu, group);
@@ -151,6 +155,11 @@ WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *paren
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
+    if (isDarkMode()) {
+        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:0xffffff }");
+        menu->setStyleSheet(menuStyle);
+    }
+
 
     createAction(tr("Sorting by created time"), SortingByCreatedTime, menu, group);
     createAction(tr("Sorting by updated time"), SortingByModifiedTime, menu, group);

@@ -54,7 +54,7 @@ const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
 
 #define WIZSHOWEXTRABUTTONITEMS "ShowExtraButtonItems"
 
-static const WizIconOptions ICON_OPTIONS(Qt::blue, WizColorButtonIcon, Qt::blue);
+static const WizIconOptions ICON_OPTIONS(WIZ_TINT_COLOR, WizColorButtonIcon, WIZ_TINT_COLOR);
 
 struct WizComboboxStyledItem
 {    

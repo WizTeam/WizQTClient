@@ -534,9 +534,9 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     // setup locale for welcome dialog
     if (isDarkMode()) {
         if (strLocal.startsWith("zh_")) {
-            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
+            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "dark_loginLogoCn");
         } else {
-            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
+            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "dark_loginLogoUS");
         }
     } else {
         if (strLocal.startsWith("zh_")) {

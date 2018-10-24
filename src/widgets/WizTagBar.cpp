@@ -533,7 +533,7 @@ WizTagItem::WizTagItem(const QString guid, const QString text, QWidget* parent)
     , m_menu(nullptr)
 {
     if (m_iconDelete.isNull()) {
-        WizIconOptions options(Qt::red, Qt::red, Qt::red);
+        WizIconOptions options(Qt::red, Qt::black, Qt::black);
         m_iconDelete = WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "action_deleteEditorBarItem",
                                        DELETE_ICON_SIZE, options);
     }
@@ -598,10 +598,16 @@ void WizTagItem::paintEvent(QPaintEvent* event)
     QRect rcBorder(0, (height() - sizeHint().height()) / 2, width(), sizeHint().height());
 
     pt.setPen(Qt::NoPen);
-    pt.setBrush(QBrush(QColor(m_selected ? "#535453" : "#B6B6B6")));
+    //
+    QColor background = isDarkMode() ? "#333333" : "#B6B6B6";
+    pt.setBrush(QBrush(QColor(m_selected ? "#535453" : background)));
     pt.setRenderHint(QPainter::Antialiasing, true);
     pt.drawRoundedRect(rcBorder, 8, 8);
-    pt.setPen(Qt::white);
+    if (isDarkMode()) {
+        pt.setPen(m_selected ? Qt::white : QColor("#e9e9e9"));
+    } else {
+        pt.setPen(Qt::white);
+    }
     QFont f = pt.font();
     f.setPixelSize(WizSmartScaleUI(11));
     pt.setFont(f);
