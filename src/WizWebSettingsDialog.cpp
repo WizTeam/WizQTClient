@@ -64,9 +64,11 @@ void WizWebSettingsDialog::on_web_loaded(bool ok)
 {
     if (ok)
     {
+        onLoaded(true);
     }
     else
     {
+        onLoaded(false);
         //失败的时候会造成死循环
         //loadErrorPage();
     }
@@ -97,16 +99,20 @@ void WizWebSettingsDialog::showError()
 
 void WizWebSettingsWithTokenDialog::load()
 {
-    connect(WizToken::instance(), SIGNAL(tokenAcquired(const QString&)),
-            SLOT(on_token_acquired(const QString&)), Qt::QueuedConnection);
+    if (!m_loaded) {
+        connect(WizToken::instance(), SIGNAL(tokenAcquired(const QString&)),
+                SLOT(on_token_acquired(const QString&)), Qt::QueuedConnection);
 
-    WizToken::requestToken();
+        WizToken::requestToken();
+    }
 }
 
 void WizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
 {
     if (token.isEmpty()) {
-        showError();
+        if (!m_delayShow) {
+            showError();
+        }
         return;
     }
     //
@@ -119,3 +125,23 @@ void WizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     //
     web()->load(u);
 }
+
+WizWebSettingsWithTokenDialog* WizWebSettingsWithTokenDialog::delayShow(QString title, QString url, QSize sz, QWidget* parent)
+{
+    WizWebSettingsWithTokenDialog* dialog = new WizWebSettingsWithTokenDialog(url, sz, parent);
+    //
+    dialog->setWindowTitle(title);
+    dialog->m_delayShow = true;
+    //
+    dialog->load();
+}
+
+void WizWebSettingsWithTokenDialog::onLoaded(bool ok)
+{
+    m_loaded = true;
+    //
+    if (ok) {
+        show();
+    }
+}
+

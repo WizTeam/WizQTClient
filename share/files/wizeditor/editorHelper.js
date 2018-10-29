@@ -52,7 +52,9 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
             ignoreTable : ignoreTable,
             dependencyUrl: basePath + 'dependency',
             nightMode: {
-                enable: enableNightMode
+                enable: enableNightMode,
+                color: '#a6a6a6',
+                bgColor: '#272727',
             }
         }
         //

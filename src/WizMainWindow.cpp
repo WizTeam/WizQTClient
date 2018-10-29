@@ -2366,7 +2366,10 @@ void WizMainWindow::refreshAd()
                     try {
                         //
                         QString name = QString::fromUtf8(d["adName"].asString().c_str());
-                        if (m_dbMgr.db().getMetaDef("ad",  name) != "1") {
+#ifndef QT_DEBUG
+                        if (m_dbMgr.db().getMetaDef("ad",  name) != "1")
+#endif
+                        {
                             //
                             QString start = QString::fromUtf8(d["start"].asString().c_str());
                             QString end = QString::fromUtf8(d["end"].asString().c_str());
@@ -2375,13 +2378,16 @@ void WizMainWindow::refreshAd()
                             //
                             WizOleDateTime now = ::WizGetCurrentTime();
                             if (now >= s && now <= e) {
+                                //
                                 m_dbMgr.db().setMeta("ad", name, "1");
                                 //
                                 QString link = QString::fromUtf8(d["link"].asString().c_str());
                                 QString title = QString::fromUtf8(d["title"].asString().c_str());
+                                QString strToken = WizToken::token();
+                                link.replace("{token}", strToken);
                                 //
                                 ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-                                    WizShowWebDialogWithToken(title, link, this);
+                                    WizShowWebDialogWithTokenDelayed(title, link, this);
                                 });
                             }
                             //

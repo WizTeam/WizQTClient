@@ -198,6 +198,9 @@ bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
 //web dialog
 void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url,
                                QWidget* parent = 0, const QSize& sz = QSize(800, 480), bool dialogResizable = false);
+void WizShowWebDialogWithTokenDelayed(const QString& windowTitle, const QString& url,
+                               QWidget* parent = 0, const QSize& sz = QSize(800, 480), bool dialogResizable = false);
+
 void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
 void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent = 0);
 
