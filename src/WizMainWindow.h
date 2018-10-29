@@ -269,6 +269,8 @@ public:
     void createNoteWithText(const QString& strText);
 
     void createNoteByTemplateCore(const TemplateData& tmplData);
+    //
+    void refreshAd();
 signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);

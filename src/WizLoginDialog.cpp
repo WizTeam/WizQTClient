@@ -160,6 +160,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
         m_lineEditRepeatPassword->setStyleSheet(style);
         m_lineEditPassword->setStyleSheet(style);
         m_lineEditUserName->setStyleSheet(style);
+        m_lineEditServer->setStyleSheet(style);
     }
 #endif
     //
@@ -1622,7 +1623,7 @@ void WizLoginDialog::onWizBoxLogInStateEntered()
     //
     QString strThemeName = Utils::WizStyleHelper::themeName();
     QString strLoginMidLineEditor = WizGetSkinResourceFileName(strThemeName, "loginMidLineEditor");
-    ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
+    ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
 
     m_serverType = EnterpriseServer;
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_BIZSERVER);

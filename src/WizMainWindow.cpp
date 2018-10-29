@@ -2345,6 +2345,63 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
     m_documents->viewport()->update();
     m_category->updateGroupsData();
     m_category->viewport()->update();
+    //
+    refreshAd();
+}
+
+void WizMainWindow::refreshAd()
+{
+    QString url = WizCommonApiEntry::makeUpUrlFromCommand("ad");
+    ::WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
+        //
+        QByteArray data;
+        if (WizURLDownloadToData(url, data)) {
+            //
+            Json::Value d;
+            Json::Reader reader;
+            if (reader.parse(data.constData(), d)) {
+                //
+                if (d.isObject()) {
+                    //
+                    try {
+                        //
+                        QString name = QString::fromUtf8(d["adName"].asString().c_str());
+                        if (m_dbMgr.db().getMetaDef("ad",  name) != "1") {
+                            //
+                            QString start = QString::fromUtf8(d["start"].asString().c_str());
+                            QString end = QString::fromUtf8(d["end"].asString().c_str());
+                            WizOleDateTime s = ::WizStringToDateTime(start);
+                            WizOleDateTime e = ::WizStringToDateTime(end);
+                            //
+                            WizOleDateTime now = ::WizGetCurrentTime();
+                            if (now >= s && now <= e) {
+                                m_dbMgr.db().setMeta("ad", name, "1");
+                                //
+                                QString link = QString::fromUtf8(d["link"].asString().c_str());
+                                QString title = QString::fromUtf8(d["title"].asString().c_str());
+                                //
+                                ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+                                    WizShowWebDialogWithToken(title, link, this);
+                                });
+                            }
+                            //
+                            //
+                        }
+                        //
+
+                    } catch (...) {
+
+                    }
+                    //
+                }
+
+                //
+            }
+            //
+        }
+        //
+
+    });
 }
 
 void WizMainWindow::on_syncDone_userVerified()
