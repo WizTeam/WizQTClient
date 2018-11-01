@@ -55,67 +55,6 @@
 }
 @end
 
-// @interface NSView (Vibrancy)
-
-// //Returns NSVisualEffectView
-// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode;
-
-// @end
-
-// @implementation NSView (Vibrancy)
-
-// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
-// {
-//     Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
-//     if (vibrantClass)
-//     {
-//         NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
-//         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-//         [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
-//         [vibrant setBlendingMode:mode];
-
-//         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
-
-//         return vibrant;
-//     }
-//     return nil;
-// }
-
-// @end
-
-
-// @implementation NSWindow (BackgroundBlur)
-
-// - (void)enableBehindBlur
-// {
-//     [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
-
-// //    DBSCustomView *view = [[DBSCustomView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
-// //    [self.contentView addSubview:view];
-// }
-
-
-// //- (void)enableBlendingBlur
-// //{
-// //    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
-// //}
-
-// @end
-
-
-void enableWidgetBehindBlur(QWidget* wgt)
-{
-    // NSView *nsview = (NSView *) wgt->winId();
-    // NSWindow *nswindow = [nsview window];
-    // [nswindow enableBehindBlur];
-}
-
-//void enableWidgetBlendingBlur(QWidget* wgt)
-//{
-//    NSView *nsview = (NSView *) wgt->winId();
-//    NSWindow *nswindow = [nsview window];
-//    [nswindow enableBlendingBlur];
-//}
 
 @interface CreateNoteService : NSObject
 
@@ -886,17 +825,6 @@ int getSystemPatchVersion()
     Gestalt(gestaltSystemVersionBugFix, &bugfix);
     return bugfix;
 }
-
-
-bool systemWidgetBlurAvailable()
-{
-    return false;
-//    int major = getSystemMajorVersion();
-//    int minor = getSystemMinorVersion();
-//    //10.11
-//    return (major >= 11) || (major == 10 && minor >= 11);
-}
-
 
 bool isDarkMode()
 {

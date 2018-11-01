@@ -93,14 +93,6 @@ WizSingleDocumentViewer::WizSingleDocumentViewer(WizExplorerApp& app, const QStr
     containerLayout->addStretch(0);
     containerLayout->addWidget(m_docView);
     containerLayout->addStretch(0);
-
-//#ifdef Q_OS_MAC
-//    if (systemWidgetBlurAvailable())
-//    {
-//        setAutoFillBackground(false);
-//        enableWidgetBehindBlur(this);
-//    }
-//#endif
 }
 
 WizSingleDocumentViewer::~WizSingleDocumentViewer()

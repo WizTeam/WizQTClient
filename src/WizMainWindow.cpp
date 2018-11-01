@@ -169,11 +169,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_bQuickDownloadMessageEnable(false)
     , m_quiting(false)
 {
-#ifdef QT_DEBUG
-    int ret = WizToolsSmartCompare("H", "d");
-    qDebug() << ret;
-#endif
-
     WizGlobal::setMainWindow(this);
     WizKMSyncThread::setQuickThread(m_syncQuick);
     //
@@ -192,12 +187,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     qApp->installEventFilter(this);
 #ifdef Q_OS_MAC
     installEventFilter(this);
-
-    if (systemWidgetBlurAvailable())
-    {
-        setAutoFillBackground(false);
-        setAttribute(Qt::WA_TranslucentBackground, true);
-    }
 
 #endif
 
@@ -537,22 +526,6 @@ void WizMainWindow::keyPressEvent(QKeyEvent* ev)
     //
     _baseClass::keyPressEvent(ev);
 }
-
-
-#ifdef Q_OS_MAC
-void WizMainWindow::paintEvent(QPaintEvent*event)
-{
-    if (systemWidgetBlurAvailable())
-    {
-        QPainter pt(this);
-
-        pt.setCompositionMode( QPainter::CompositionMode_Clear );
-        pt.fillRect(rect(), Qt::SolidPattern );
-    }
-
-    QMainWindow::paintEvent(event);
-}
-#endif
 
 #ifdef USECOCOATOOLBAR
 void WizMainWindow::showEvent(QShowEvent* event)
@@ -1893,16 +1866,7 @@ void WizMainWindow::initClient()
     m_clienWgt = new QWidget(this);
     setCentralWidget(m_clienWgt);
 
-    if (systemWidgetBlurAvailable())
-    {
-        enableWidgetBehindBlur(m_clienWgt);
-    }
-    else
-    {
-        QPalette pal = m_doc->palette();
-        pal.setColor(QPalette::Window, QColor("#F6F6F6"));
-        m_doc->setPalette(pal);
-    }
+    m_doc->setStyleSheet("{background-color:#f6f6f6");
 
 #else
     setCentralWidget(rootWidget());
