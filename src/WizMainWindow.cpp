@@ -351,9 +351,11 @@ bool WizMainWindow::eventFilter(QObject* watched, QEvent* event)
 
                 if (!(oldState & Qt::WindowFullScreen) && (windowState() & Qt::WindowFullScreen))
                 {
-                    //NOTE:全屏时隐藏搜索提示
-                    m_searchWidget->hideCompleter();
-                    m_searchWidget->setCompleterUsable(false);
+                    if (m_searchWidget) {
+                        //NOTE:全屏时隐藏搜索提示
+                        m_searchWidget->hideCompleter();
+                        m_searchWidget->setCompleterUsable(false);
+                    }
                 }
             }
         }
@@ -1793,8 +1795,10 @@ void WizMainWindow::initToolBar()
     m_toolBar->addWidget(m_userInfoWidget, "", "");
     //
     m_searchWidget = m_toolBar->getSearchWidget();
-    m_searchWidget->setUserSettings(m_settings);
-    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(isHighPix ? 217 : 230, 0));
+    if (m_searchWidget) {
+        m_searchWidget->setUserSettings(m_settings);
+        m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(isHighPix ? 217 : 230, 0));
+    }
 
 #else
     layoutTitleBar();
@@ -3078,7 +3082,9 @@ void WizMainWindow::on_actionManual_triggered()
 
 void WizMainWindow::on_actionSearch_triggered()
 {
-    m_searchWidget->focus();
+    if (m_searchWidget) {
+        m_searchWidget->focus();
+    }
 
     WizGetAnalyzer().logAction("MenuBarSearch");
 }
@@ -3086,14 +3092,18 @@ void WizMainWindow::on_actionSearch_triggered()
 void WizMainWindow::resetSearchStatus()
 {
     quitSearchStatus();
-    m_searchWidget->clear();
+    if (m_searchWidget) {
+        m_searchWidget->clear();
+    }
     m_category->restoreSelection();
 }
 
 void WizMainWindow::on_actionResetSearch_triggered()
 {
     resetSearchStatus();
-    m_searchWidget->focus();
+    if (m_searchWidget) {
+        m_searchWidget->focus();
+    }
     //
     WizGetAnalyzer().logAction("MenuBarResetSearch");
 }
@@ -3162,7 +3172,9 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
     m_category->saveSelection();
     //
     QString kbGuid = m_category->storedSelectedItemKbGuid();
-    m_searchWidget->setCurrentKb(kbGuid);
+    if (m_searchWidget) {
+        m_searchWidget->setCurrentKb(kbGuid);
+    }
     //
     m_strSearchKeywords = keywords;
     if (keywords.isEmpty()) {
@@ -3382,7 +3394,9 @@ void WizMainWindow::on_category_itemSelectionChanged()
     }
     //
     QString kbGuid = m_category->selectedItemKbGUID();
-    m_searchWidget->setCurrentKb(kbGuid);
+    if (m_searchWidget) {
+        m_searchWidget->setCurrentKb(kbGuid);
+    }
 }
 
 void WizMainWindow::on_documents_itemSelectionChanged()
@@ -4011,8 +4025,11 @@ void WizMainWindow::quitSearchStatus()
     // 如果当前是搜索模式，在退出搜索模式时清除搜索框中的内容
     if (m_documents->acceptAllSearchItems())
     {
-        m_searchWidget->clear();
-        m_searchWidget->clearFocus();
+        if (m_searchWidget) {
+            m_searchWidget->clear();
+            m_searchWidget->clearFocus();
+        }
+        //
         m_strSearchKeywords.clear();
     }
 
