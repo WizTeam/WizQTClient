@@ -121,7 +121,11 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     ui->btn_close->setVisible(false);
     //
     WizWindowTitleBar* title = titleBar();
-    title->setPalette(QPalette(QColor::fromRgb(0x44, 0x8A, 0xFF)));
+    if (isDarkMode()) {
+        title->setPalette(QPalette(QColor("#363636")));
+    } else {
+        title->setPalette(QPalette(QColor("#448aff")));
+    }
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
 #endif
 
@@ -152,9 +156,12 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     connect(ui->btn_selectServer, SIGNAL(clicked()), SLOT(showServerListMenu()));
     connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(onUserNameEdited(QString)));
     //
-#ifdef Q_OS_MAC
     if (isDarkMode()) {
+#ifdef Q_OS_MAC
         QString style = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+#else
+        QString style = QString("background-color:%1;color:#ffffff").arg(WizColorLineEditorBackground.name());
+#endif
         m_lineEditNewPassword->setStyleSheet(style);
         m_lineEditNewUserName->setStyleSheet(style);
         m_lineEditRepeatPassword->setStyleSheet(style);
@@ -162,7 +169,6 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
         m_lineEditUserName->setStyleSheet(style);
         m_lineEditServer->setStyleSheet(style);
     }
-#endif
     //
     connect(&m_wizBoxSearchingTimer, SIGNAL(timeout()), SLOT(onWizBoxSearchingTimeOut()));
 #ifndef Q_OS_MAC
@@ -206,6 +212,11 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     }
     setMinimumSize(minSize);
     //
+    if (isDarkMode()) {
+        uiWidget->setStyleSheet("background-color:#363636;");
+        ui->widget->setStyleSheet("background-color:#363636;");
+        ui->widget_titleBar->setStyleSheet("background-color:#363636;");
+    }
     //
     ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
         //
@@ -537,13 +548,13 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
         if (strLocal.startsWith("zh_")) {
             m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "dark_loginLogoCn");
         } else {
-            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "dark_loginLogoUS");
+            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "dark_loginLogoUs");
         }
     } else {
         if (strLocal.startsWith("zh_")) {
             m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
         } else {
-            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
+            m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUs");
         }
     }
     //
@@ -552,8 +563,6 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
         ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
                                             "background-position: center; background-repeat: no-repeat; background-color:transparent}").arg(m_wizLogoPath));
         ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:transparent}"));
-        ui->widget_titleBar->setStyleSheet("background-color:transparent");
-        ui->widget->setStyleSheet("background-color:transparent");
     } else {
         ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
                                             "background-position: center; background-repeat: no-repeat; background-color:#448aff}").arg(m_wizLogoPath));
@@ -586,6 +595,11 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
                                                          "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
                                                  .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
         m_titleBar->closeButton()->setFixedSize(::WizSmartScaleUI(16), ::WizSmartScaleUI(16));
+        //
+        if (isDarkMode()) {
+            //m_titleBar->setStyleSheet("background-color:#363636");
+            //m_titleBar->setStyleSheet("background-color:red");
+        }
     }
 #endif
 
@@ -596,6 +610,15 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->cbx_remberPassword->setStyleSheet(QString("QCheckBox{background:none;border:none;}"
                                              "QCheckBox:focus{background:none;border:none;}"
                                              "QCheckBox::pressed{background:none;border:none;}"));
+
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        //indicator is not visible
+        //QString style = QString("QCheckBox:indicator{color:#ffffff;background-color:%1;}").arg(WizColorLineEditorBackground.name());
+        //ui->cbx_autologin->setStyleSheet(style);
+        //ui->cbx_remberPassword->setStyleSheet(style);
+    }
+#endif
     //
     QString strLoginTopLineEditor = WizGetSkinResourceFileName(strThemeName, "loginTopLineEditor");
     QString strLoginMidLineEditor = WizGetSkinResourceFileName(strThemeName, "loginMidLineEditor");
@@ -639,12 +662,12 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strBtnDisable = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
     //
     m_buttonLogin->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
-                              QColor("#ffffff"), QColor("b1b1b1"));
+                              QColor("#ffffff"), QColor("#b1b1b1"));
     m_buttonLogin->setText(tr("Login"));
     m_buttonLogin->setEnabled(false);
 
     m_buttonSignUp->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
-                                   QColor("#ffffff"), QColor("b1b1b1"));
+                                   QColor("#ffffff"), QColor("#b1b1b1"));
     m_buttonSignUp->setText(tr("Create Account"));
     m_buttonSignUp->setEnabled(false);
     //
@@ -653,6 +676,13 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
                                                "background-position: center; background-repeat: no-repeat}").arg(strSeparator));
    //
     ui->label_noaccount->setStyleSheet(QString("QLabel {border: none; color: #5f5f5f;}"));
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        m_buttonLogin->setStyleSheet("QPushButton{color:#ffffff}QPushButton:disabled{color:#b1b1b1}");
+    }
+#endif
+    //
 #ifdef Q_OS_MAC
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
                                                  "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
@@ -698,7 +728,7 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
         //
         QString menuStyle = QString("QMenu {background-color: #272727; border-style: solid; border-color: #3399ff; border-width: 1px; padding: 0px 0px 0px 0px;  menu-scrollable: 1;}"
                                     "QMenu::item {padding: 4px 10px 4px 25px; color: #a6a6a6;  background-color: #272727;}"
-                                    "QMenu::item:selected {background-color: #0058d1; color:0xffffff }"
+                                    "QMenu::item:selected {background-color: #0058d1; color:#ffffff }"
                                     "QMenu::item:disabled {color: #5c5c5c; }"
                                     "QMenu::indicator { width: 16px; height: 16px; margin-left: 5px;} "
                                     "QMenu::indicator:non-exclusive:checked { image: url(%1); }").arg(status_switchserver_selected);
@@ -715,6 +745,10 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
                                      "QMenu::indicator { width: 16px; height: 16px; margin-left: 5px;} "
                                      "QMenu::indicator:non-exclusive:checked { image: url(%1); }").arg(status_switchserver_selected));
     }
+    //
+#ifndef Q_OS_MAC
+    m_buttonLogin->setMinimumHeight(WizSmartScaleUI(28));
+#endif
 }
 
 bool WizLoginDialog::checkSignMessage()

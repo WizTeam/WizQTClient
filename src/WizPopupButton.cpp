@@ -103,7 +103,11 @@ WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* par
 
     QMenu* menu = new QMenu(this);
     if (isDarkMode()) {
-        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:0xffffff }");
+#ifdef Q_OS_MAC
+        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#else
+        QString menuStyle = QString("QMenu::item {color:#a6a6a6 }QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#endif
         menu->setStyleSheet(menuStyle);
     }
     createAction(tr("Thumbnail view"), WizDocumentListView::TypeThumbnail, menu, group);
@@ -120,7 +124,7 @@ WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* par
 
 QSize WizViewTypePopupButton::sizeHint() const
 {
-    return QSize(32 + 10, fontMetrics().height() + 10);
+    return QSize(WizSmartScaleUI(32 + 10), fontMetrics().height() + WizSmartScaleUI(10));
 }
 
 void WizViewTypePopupButton::on_action_triggered()
@@ -156,7 +160,11 @@ WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *paren
 
     QMenu* menu = new QMenu(this);
     if (isDarkMode()) {
-        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:0xffffff }");
+#ifdef Q_OS_MAC
+        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#else
+        QString menuStyle = QString("QMenu::item {color:#a6a6a6 }QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#endif
         menu->setStyleSheet(menuStyle);
     }
 
@@ -211,13 +219,7 @@ void WizSortingPopupButton::on_sortingTypeChanged(int type)
 
 QSize WizSortingPopupButton::sizeHint () const
 {
-//#ifdef Q_OS_MAC
-//    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 16);
-//#else
-//    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 12);
-//#endif
-
-    return QSize(32 + 10, fontMetrics().height() + 10);
+    return QSize(WizSmartScaleUI(32 + 10), fontMetrics().height() + WizSmartScaleUI(10));
 }
 
 void WizSortingPopupButton::on_action_triggered()

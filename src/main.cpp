@@ -189,6 +189,16 @@ int mainCore(int argc, char *argv[])
                         padding:0px 1px; \
                         background-color: #F8F8F8; \
                         border:0px;}");
+
+#ifndef Q_OS_MAC
+        QString menuStyle = QString("QMenu {color:white;}"
+                                    "QMenu::item {color: #a6a6a6;}"
+                                    "QMenu::item:selected {background-color: #0058d1; color:#ffffff }"
+                                    "QMenu::item:disabled {color: #5c5c5c; }"
+                                    );
+        a.setStyleSheet(menuStyle);
+
+#endif
     } else {
         a.setStyleSheet("QToolTip { \
                         font: 12px; \

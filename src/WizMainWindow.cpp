@@ -187,8 +187,13 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     qApp->installEventFilter(this);
 #ifdef Q_OS_MAC
     installEventFilter(this);
-
+#else
+    if (isDarkMode()) {
+        setStyleSheet("background-color:#363636");
+    }
 #endif
+
+
 
     // search and full text search
     m_searcher->start(QThread::HighPriority);
@@ -954,7 +959,8 @@ void WizMainWindow::initActions()
     m_actions->init();
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_animateSync->setSingleIcons("sync");
+    QSize iconSize = QSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
+    m_animateSync->setSingleIcons("sync", iconSize);
     //
     connect(m_actions, SIGNAL(insertTableSelected(int,int)), SLOT(on_actionMenuFormatInsertTable(int,int)));
 
@@ -1813,7 +1819,11 @@ void WizMainWindow::initToolBar()
 #else
     layoutTitleBar();
     //
-    QSize iconSize = QSize(WizSmartScaleUI(24), WizSmartScaleUI(24));
+    if (isDarkMode()) {
+        m_toolBar->setStyleSheet("background-color:#363636");
+    }
+    //
+    QSize iconSize = QSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
     m_toolBar->setIconSize(iconSize);
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);

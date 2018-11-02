@@ -13,6 +13,9 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     , m_app(app)
     , m_bSaveForSession(false)
 {
+#ifndef Q_OS_MAC
+    setStyleSheet(QString("color:#a6a6a6;font-size:%1px").arg(WizSmartScaleUI(14)));
+#endif
     ui->setupUi(this);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
     ui->editUserCipher->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -31,8 +34,8 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     QString strIconDown = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done_down", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
 //            + "mac_icons_password_done_down.png";
 
-    ui->editUserCipher->setFixedHeight(19);
-    QSize szBtn(19, 19);
+    ui->editUserCipher->setFixedHeight(WizSmartScaleUI(19));
+    QSize szBtn(WizSmartScaleUI(19), WizSmartScaleUI(19));
     ui->buttonOk->setMinimumSize(szBtn);
     ui->buttonOk->setMaximumSize(szBtn);
     ui->buttonOk->setIconNormal(strIconNormal);
@@ -54,7 +57,7 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
 
 QSize WizUserCipherForm::sizeHint()
 {
-    return QSize(350, 120);
+    return QSize(WizSmartScaleUI(350), WizSmartScaleUI(120));
 }
 
 void WizUserCipherForm::showEvent(QShowEvent* event)
@@ -100,13 +103,13 @@ void WizUserCipherForm::cipherError()
     QPoint pos = ui->editUserCipher->pos();
     m_animation->setDuration(500);
     m_animation->setEasingCurve(QEasingCurve::InOutQuad);
-    m_animation->setStartValue(QPoint(pos.x() + 5, pos.y()));
-    m_animation->setEndValue(QPoint(pos.x() - 5, pos.y()));
+    m_animation->setStartValue(QPoint(pos.x() + WizSmartScaleUI(5), pos.y()));
+    m_animation->setEndValue(QPoint(pos.x() - WizSmartScaleUI(5), pos.y()));
     m_animation->start();
 
     m_animation->setDuration(250);
     m_animation->setEasingCurve(QEasingCurve::InOutQuad);
-    m_animation->setStartValue(QPoint(pos.x() - 5, pos.y()));
+    m_animation->setStartValue(QPoint(pos.x() - WizSmartScaleUI(5), pos.y()));
     m_animation->setEndValue(pos);
     m_animation->start();
 

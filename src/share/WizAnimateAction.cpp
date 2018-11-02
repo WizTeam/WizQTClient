@@ -31,7 +31,7 @@ void WizAnimateAction::setToolButton(QToolButton* button)
     m_iconDefault = m_target->icon();
 }
 
-void WizAnimateAction::setSingleIcons(const QString& strIconBaseName)
+void WizAnimateAction::setSingleIcons(const QString& strIconBaseName, QSize size)
 {
     int index = 1;
     while (1)
@@ -43,8 +43,15 @@ void WizAnimateAction::setSingleIcons(const QString& strIconBaseName)
         if (icon.isNull())
             return;
         //
-        QList<QSize> sizes = icon.availableSizes();
-
+        if (!size.isEmpty())
+        {
+            QPixmap pixmap = icon.pixmap(size);
+            if (pixmap.size() != size) {
+                pixmap = pixmap.scaled(size);
+            }
+            icon = QIcon(pixmap);
+        }
+        //
         m_icons.push_back(icon);
 
         index++;

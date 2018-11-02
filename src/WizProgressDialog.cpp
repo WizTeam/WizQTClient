@@ -1,6 +1,7 @@
 ﻿#include "WizProgressDialog.h"
 #include "ui_WizProgressDialog.h"
 #include<QDebug>
+#include "share/WizUIBase.h"
 
 WizProgressDialog::WizProgressDialog(QWidget *parent, bool showStop) :
     QDialog(parent),
@@ -11,6 +12,12 @@ WizProgressDialog::WizProgressDialog(QWidget *parent, bool showStop) :
 
     ui->btn_stop->setVisible(showStop);
     ui->btn_hide->setVisible(showStop);
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        setStyleSheet("color:#e9e9e9");
+    }
+#endif
 }
 
 WizProgressDialog::~WizProgressDialog()

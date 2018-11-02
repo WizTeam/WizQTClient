@@ -27,6 +27,13 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
 {
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        setStyleSheet("color:#e9e9e9");
+    }
+#endif
+    //
     ui->setupUi(this);
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
@@ -190,6 +197,7 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
         ui->spinBox_left->setStyleSheet(darkStyleSheet);
         ui->spinBox_right->setStyleSheet(darkStyleSheet);
         ui->spinBox_top->setStyleSheet(darkStyleSheet);
+        //
     }
 
 

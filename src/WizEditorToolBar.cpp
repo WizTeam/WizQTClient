@@ -390,7 +390,6 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
     static QPixmap normalPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground", true));
     static QPixmap focusPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground_on", true));
     //
-#ifdef Q_OS_MAC
     static bool first = true;
     if (first) {
         first = false;
@@ -399,7 +398,6 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
             focusPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#888888"));
         }
     }
-#endif
     //
     static QPixmap normalPixBackgroundMid = normalPixBackground.copy(6, 0, 2, normalPixBackground.height());
     static QPixmap focusPixBackgroundMid = focusPixBackground.copy(6, 0, 2, focusPixBackground.height());
@@ -1058,7 +1056,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_comboFontFamily->setFixedWidth(122);
 
     m_comboFontSize = new CWizToolComboBox(this);
-    m_comboFontSize->setFixedWidth(52);
+    m_comboFontSize->setFixedWidth(WizSmartScaleUI(52));
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
     if (isDarkMode()) {
@@ -1091,6 +1089,12 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     }
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
+#else
+    if (isDarkMode()) {
+        m_comboParagraph->setStyleSheet("color:#ffffff");
+        m_comboFontFamily->setStyleSheet("color:#ffffff");
+        m_comboFontSize->setStyleSheet("color:#ffffff");
+    }
 #endif
 
     QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/', QString::SkipEmptyParts);

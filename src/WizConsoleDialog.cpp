@@ -27,6 +27,13 @@ WizConsoleDialog::WizConsoleDialog(WizExplorerApp& app, QWidget* parent)
     , m_bAutoScroll(true)
     , m_nPos(0)
 {
+    if (isDarkMode()) {
+#ifndef Q_OS_MAC
+        QString darkStyleSheet = QString("color:#a6a6a6").arg(WizColorLineEditorBackground.name());
+        setStyleSheet(darkStyleSheet);
+#endif
+    }
+
     m_ui->setupUi(this);
     //setWindowFlags(Qt::Tool);
 
@@ -42,13 +49,13 @@ WizConsoleDialog::WizConsoleDialog(WizExplorerApp& app, QWidget* parent)
     connect(m_ui->editConsole, SIGNAL(textChanged()), SLOT(onConsoleTextChanged()));
     connect(m_ui->editConsole->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(onConsoleSliderMoved(int)));
     //
+    //
+    load();
+    //
     if (isDarkMode()) {
         QString darkStyleSheet = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
         m_ui->editConsole->setStyleSheet(darkStyleSheet);
     }
-
-    //
-    load();
 }
 
 WizConsoleDialog::~WizConsoleDialog()

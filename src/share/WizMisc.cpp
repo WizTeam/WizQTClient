@@ -1704,6 +1704,9 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
         }
     }
 
+#ifdef QT_DEBUG
+            qDebug() << strName;
+#endif
     return QString();
 }
 
@@ -1853,7 +1856,7 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, co
 {
     QSize size = iconSize;
     if (size.isEmpty() || size.isNull() || !size.isValid()) {
-        size = QSize(16, 16);
+        size = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
     }
     //
     QString fileName = WizGetSkinResourcePath(strSkinName) + strIconName + ".svg";

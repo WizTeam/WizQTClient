@@ -68,7 +68,7 @@ void WizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewIt
 
     QRect rcIcon = treeWidget()->style()->subElementRect(QStyle::SE_ItemViewItemDecoration, vopt, treeWidget());
     if (!vopt->icon.isNull()) {
-        const int iconSize = 14;
+        const int iconSize = WizSmartScaleUI(16);
         rcIcon.adjust(-6, 0, 0, 0);
         rcIcon.setTop(vopt->rect.top() + (vopt->rect.height() - iconSize) / 2);
         rcIcon.setWidth(iconSize);

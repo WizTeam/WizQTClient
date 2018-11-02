@@ -168,7 +168,15 @@ WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     m_layout->addWidget(m_leftIcon);
     m_layout->addWidget(m_edit);
     m_layout->addWidget(m_rightIcon);
-
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        QString style = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        m_leftIcon->setStyleSheet(style);
+        m_rightIcon->setStyleSheet(style);
+        m_edit->setStyleSheet("color:#ffffff");
+    }
+#endif
 }
 
 WizIconLineEditContainer::~WizIconLineEditContainer()

@@ -403,9 +403,9 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
                     if ((opt->state & QStyle::State_Selected)) {        //(opt->state & State_HasFocus)
-                        drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(8, 0, 0, 0));
+                        drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(0, 0, 0, 0));
                     } else {
-                        drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
+                        drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(0, 0, 0, 0));
                     }
                 }
                 return;
@@ -535,6 +535,7 @@ protected:
         switch (element)
         {
         case CE_PushButton:
+        case CE_PushButtonBevel:
             {
                 const QStyleOptionButton* vopt = qstyleoption_cast<const QStyleOptionButton *>(option);
                 ATLASSERT(vopt);
