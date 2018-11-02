@@ -671,7 +671,7 @@ void WizMainWindow::setSystemTrayIconVisible(bool bVisible)
     {
 #ifdef Q_OS_MAC
         m_tray = new WizTrayIcon(*this, this);
-#elif
+#else
         m_tray = new WizTrayIcon(*this, QApplication::windowIcon(), this);
 #endif
         initTrayIcon(m_tray);

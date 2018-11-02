@@ -6,11 +6,11 @@
 WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
     , m_bgColor("transparent")
-    , m_handleColor("#C1C1C1") //无法设置为半透明，某些电脑系统会崩溃
+    , m_handleColor("#88C1C1C1")
     , m_bLeftBorder(false)
 {
     if (isDarkMode()) {
-        m_handleColor = "#686868"; //无法设置为半透明，某些电脑系统会崩溃
+        m_handleColor = "#88686868";
     }
 
     // FIXME:  hard code

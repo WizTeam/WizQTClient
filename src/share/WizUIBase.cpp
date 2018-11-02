@@ -132,6 +132,7 @@ QPixmap qpixmapWithTintColor(const QPixmap& pixmap, QColor tintColor)
 
 #ifndef Q_OS_MAC
 bool isDarkMode() {
-    return false;
+    return true;
 }
 #endif
+

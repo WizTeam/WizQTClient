@@ -521,7 +521,14 @@ void WizTagBar::applyStyleSheet()
 }
 
 QIcon WizTagItem::m_iconDelete;
+#ifdef Q_OS_MAC
 const QSize DELETE_ICON_SIZE = QSize(WizSmartScaleUI(TAGITEM_DELETEICONSIZE), WizSmartScaleUI(TAGITEM_DELETEICONSIZE));
+#else
+QSize tagItemGetIconSize() {
+    return QSize(WizSmartScaleUI(TAGITEM_DELETEICONSIZE), WizSmartScaleUI(TAGITEM_DELETEICONSIZE));
+}
+#define DELETE_ICON_SIZE tagItemGetIconSize()
+#endif
 
 WizTagItem::WizTagItem(const QString guid, const QString text, QWidget* parent)
     : QWidget(parent)

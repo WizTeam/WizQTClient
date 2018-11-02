@@ -15,6 +15,7 @@
 #include "../share/WizMisc.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
+#include "../share/WizUIBase.h".h"
 
 #include "utils/WizLogger.h"
 
