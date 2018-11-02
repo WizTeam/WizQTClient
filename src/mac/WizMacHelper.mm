@@ -846,6 +846,22 @@ bool isDarkMode()
     return ret;
 }
 
+bool isMojaveOrHigher()
+{
+    static bool isMojave = false;
+    static bool first = true;
+    if (first) {
+        first = false;
+        int major = getSystemMajorVersion();
+        int minor = getSystemMinorVersion();
+        if ((major >= 11) || (major == 10 && minor >= 14)) {
+            isMojave = true;
+        }
+    }
+    return isMojave;
+}
+
+
 void updateShareExtensionAccount(const QString& userId, const QString& userGUID, const QString& myWiz, const QString& displayName)
 {
     NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:WizShareSettingsName];

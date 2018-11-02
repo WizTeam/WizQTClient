@@ -660,10 +660,20 @@ void WizMainWindow::on_quickSync_request(const QString& strKbGUID)
 
 void WizMainWindow::setSystemTrayIconVisible(bool bVisible)
 {
-//        //
+#ifdef Q_OS_MAC
+    if (isMojaveOrHigher()) {
+        //在某些用户系统上面会导致崩溃
+        return;
+    }
+#endif
+    //
     if (!m_tray)
     {
+#ifdef Q_OS_MAC
+        m_tray = new WizTrayIcon(*this, this);
+#elif
         m_tray = new WizTrayIcon(*this, QApplication::windowIcon(), this);
+#endif
         initTrayIcon(m_tray);
         m_tray->show();
     }
@@ -2287,7 +2297,9 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
         QVariant param(isNetworkError);
 
         if (isNetworkError) {
-            m_tray->showMessage(tr("Sync failed"), tr("Bad network connection, can not sync now. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
+            if (m_tray) {
+                m_tray->showMessage(tr("Sync failed"), tr("Bad network connection, can not sync now. Please try again later. (code: %1)").arg(nErrorCode), icon, delay, param);
+            }
             return;
         } else {
             //
@@ -2304,7 +2316,9 @@ void WizMainWindow::on_syncDone(int nErrorCode, bool isNetworkError, const QStri
                 message = WizFormatString0(QObject::tr("Group notes count limit exceeded!"));
             }
             //
-            m_tray->showMessage(tr("Sync failed"), message, icon, delay, param);
+            if (m_tray) {
+                m_tray->showMessage(tr("Sync failed"), message, icon, delay, param);
+            }
             return;
         }
     }
@@ -2457,7 +2471,9 @@ void WizMainWindow::on_promptVipServiceExpr(WIZGROUPDATA group)
 
 void WizMainWindow::on_bubbleNotification_request(const QVariant& param)
 {
-    m_tray->showMessage(param);
+    if (m_tray) {
+        m_tray->showMessage(param);
+    }
 }
 
 void WizMainWindow::on_actionNewNote_triggered()
@@ -3922,6 +3938,7 @@ void WizMainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)
 
 void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 {
+    //
     Q_ASSERT(trayIcon);
     m_trayMenu = new QMenu(this);
     QAction* actionShow = m_trayMenu->addAction(tr("Show/Hide MainWindow"));
@@ -3930,7 +3947,6 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     QAction* actionNewNote = m_trayMenu->addAction(tr("New Note"));
     connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
 
-    //
     m_trayMenu->addSeparator();
     QAction* actionHideTrayIcon = m_trayMenu->addAction(tr("Hide TrayIcon"));
     connect(actionHideTrayIcon, SIGNAL(triggered()), SLOT(on_hideTrayIcon_clicked()));
@@ -3948,11 +3964,12 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     //
     //
     trayIcon->setContextMenu(m_trayMenu);
+    //
 #ifdef Q_OS_MAC
     QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
     QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
     QIcon icon;
-    icon.setIsMask(true);
+    //icon.setIsMask(true);
     icon.addFile(normal, QSize(), QIcon::Normal, QIcon::Off);
     icon.addFile(selected, QSize(), QIcon::Selected, QIcon::Off);
     if (!icon.isNull())

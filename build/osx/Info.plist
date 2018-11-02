@@ -57,7 +57,9 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSServices</key>
+    <key>NSRequiresAquaSystemAppearance</key>
+    <false/>
+    <key>NSServices</key>
 	<array>
 		<dict>
 			<key>NSMenuItem</key>
