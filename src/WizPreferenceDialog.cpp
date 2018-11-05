@@ -401,11 +401,13 @@ void WizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
     mainWindow->setSystemTrayIconVisible(checked);
 }
 
+#ifndef Q_OS_MAC
 void WizPreferenceWindow::on_checkBoxDarkMode_clicked(bool checked)
 {
     WizSettings wizSettings(Utils::WizPathResolve::globalSettingsFile());
     wizSettings.setDarkMode(checked);
 }
+#endif
 
 void WizPreferenceWindow::on_comboBox_unit_currentIndexChanged(int index)
 {
