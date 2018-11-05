@@ -1705,7 +1705,7 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     }
 
 #ifdef QT_DEBUG
-            qDebug() << strName;
+     qDebug() << strName;
 #endif
     return QString();
 }
@@ -1849,6 +1849,30 @@ QIcon WizLoadPngSkinIcon(const QString& strSkinName, const QString& strIconName,
             addPngToIcon(icon, fileName, options.selectedColor, QIcon::Active);
         }
     }
+    //
+#ifndef Q_OS_MAC
+    QString x2FileName = WizGetSkinResourcePath(strSkinName) + strIconName + "@2x.png";
+    if (!QFile::exists(x2FileName))
+        return icon;
+    //
+    if (isDarkMode()) {
+        //
+        addPngToIcon(icon, x2FileName, options.darkColor, QIcon::Normal);
+        //
+        if (options.darkSelectedColor != Qt::transparent) {
+            addPngToIcon(icon, x2FileName, options.darkSelectedColor, QIcon::Selected);
+            addPngToIcon(icon, x2FileName, options.darkSelectedColor, QIcon::Active);
+        }
+    } else {
+        addPngToIcon(icon, x2FileName, Qt::transparent, QIcon::Normal);
+        if (options.selectedColor != Qt::transparent) {
+            addPngToIcon(icon, x2FileName, options.selectedColor, QIcon::Selected);
+            addPngToIcon(icon, x2FileName, options.selectedColor, QIcon::Active);
+        }
+    }
+#endif
+    //
+    //
     return icon;
 }
 

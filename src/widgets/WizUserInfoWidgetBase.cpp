@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include "utils/WizStyleHelper.h"
+#include "share/WizQtHelper.h"
 #ifdef Q_OS_MAC
 #include "mac/WizMacHelper.h"
 #endif
@@ -24,9 +25,9 @@ void WizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
 
-    int nAvatarWidth = 32;
-    int nArrawWidth = 10;
-    int nMargin = 4;
+    int nAvatarWidth = WizSmartScaleUI(32);
+    int nArrawWidth = WizSmartScaleUI(10);
+    int nMargin = WizSmartScaleUI(4);
 
     QStyleOptionToolButton opt;
     initStyleOption(&opt);
@@ -68,17 +69,26 @@ void WizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
     // draw vip indicator
     QRect rectVip = rectText;
     QIcon iconVip = getVipIcon();
-    QSize iconSize(16, 16);
-    if (iconVip.availableSizes().size() != 0)
-    {
-        iconSize = iconVip.availableSizes().first();
-    }
+    QSize iconSize(WizSmartScaleUI(21), WizSmartScaleUI(12));
     rectVip.setLeft(rectVip.right() + nMargin);
     rectVip.setRight(rectVip.left() + iconSize.width());
 //    rectVip.setBottom(rectVip.top() + rectVip.height()/2);
 //    rectVip.setTop(rectVip.top() + (rectVip.height() - iconSize.height()) / 2);
     if (!iconVip.isNull()) {
+#ifdef Q_OS_MAC
         iconVip.paint(&p, rectVip, Qt::AlignLeft|Qt::AlignVCenter);
+#else
+        if (iconSize.width() % 21 == 0) {
+            iconVip.paint(&p, rectVip, Qt::AlignLeft|Qt::AlignVCenter);
+        } else {
+
+            QPixmap pixmap = iconVip.pixmap(iconSize);
+            pixmap = pixmap.scaled(iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            rectVip.setTop(rectVip.center().y() - iconSize.height() / 2);
+            rectVip.setSize(iconSize);
+            p.drawPixmap(rectVip, pixmap);
+        }
+#endif
     }
 
     // draw arraw
@@ -97,7 +107,7 @@ void WizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
     if (hitButton(event->pos())) {
         //QPoint pos(event->pos().x(), sizeHint().height());
         // FIXME
-        QPoint pos(32 + 4, 32 - fontMetrics().height() / 2);
+        QPoint pos(WizSmartScaleUI(32) + WizSmartScaleUI(4), WizSmartScaleUI(32) - fontMetrics().height() / 2);
         menu()->popup(mapToGlobal(pos), defaultAction());
     }
 }
@@ -105,7 +115,7 @@ void WizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
 bool WizUserInfoWidgetBase::hitButton(const QPoint& pos) const
 {
     // FIXME
-    QRect rectArrow(32 + 8, 32 - fontMetrics().height() - 4, sizeHint().width() - 32 - 4, fontMetrics().height());
+    QRect rectArrow(WizSmartScaleUI(32) + WizSmartScaleUI(8), WizSmartScaleUI(32) - fontMetrics().height() - WizSmartScaleUI(4), sizeHint().width() - WizSmartScaleUI(32) - WizSmartScaleUI(4), fontMetrics().height());
     return rectArrow.contains(pos) ? true : false;
 }
 

@@ -281,7 +281,7 @@ QIcon WizUserInfoWidget::getVipIcon()
 QSize WizUserInfoWidget::sizeHint() const
 {
     // FIXME: builtin avatar size (36, 36), margin = 4 * 2, arraw width = 10
-    int vipIconWidth = 35;
-    return QSize(36+ textWidth() + 8 + vipIconWidth, 36);
+    int vipIconWidth = WizSmartScaleUI(35);
+    return QSize(WizSmartScaleUI(36)+ textWidth() + WizSmartScaleUI(8) + vipIconWidth, WizSmartScaleUI(36));
 }
 

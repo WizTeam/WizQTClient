@@ -144,8 +144,8 @@ int mainCore(int argc, char *argv[])
     QApplication::setFont(appFont);
 #endif
 
-   qInstallMessageHandler(Utils::WizLogger::messageHandler);
-   QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    qInstallMessageHandler(Utils::WizLogger::messageHandler);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));

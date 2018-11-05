@@ -3,6 +3,8 @@
 #include <QPixmap>
 #include <QImage>
 #include <QColor>
+#include "WizSettings.h"
+#include "utils/WizPathResolve.h"
 
 static int ComputeOverlay(int upperLayerValue, int lowerLayerValue)
 {
@@ -131,8 +133,17 @@ QPixmap qpixmapWithTintColor(const QPixmap& pixmap, QColor tintColor)
 }
 
 #ifndef Q_OS_MAC
-bool isDarkMode() {
-    return true;
+bool isDarkMode()
+{
+    static bool first = true;
+    static bool darkMode = false;
+    if (first) {
+        first = false;
+        WizSettings wizSettings(Utils::WizPathResolve::globalSettingsFile());
+        darkMode = wizSettings.isDarkMode();
+    }
+
+    return darkMode;
 }
 #endif
 

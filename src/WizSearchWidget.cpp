@@ -24,11 +24,12 @@ WizSearchView::WizSearchView(QWidget* parent /* = 0 */)
     setContentsMargins(1, 0, 1, 1);
 
     m_editSearch = new WizSearchEdit(this);
-    m_editSearch->setTextMargins(25, 1, 0, 1);
-
-    m_editSearch->setStyleSheet("QLineEdit{background-color:#eeeeee;border:1px solid #aeaeae; border-radius:10px;}"
-                                "QLineEdit::focus{background-color:#ffffff;border:1px solid #6699cb; border-radius:10px;}");
-
+    m_editSearch->setTextMargins(WizSmartScaleUI(25), 1, 0, 1);
+    //
+    QString styleSheet = QString("QLineEdit{background-color:#eeeeee;border:1px solid #aeaeae; border-radius:%1px;}"
+                                 "QLineEdit::focus{background-color:#ffffff;border:1px solid #6699cb; border-radius:%1px;}")
+            .arg(WizSmartScaleUI(10));
+    m_editSearch->setStyleSheet(styleSheet);
 
     // avoid focus rect on OSX, this should be a bug of qt style sheet
     m_editSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);    
@@ -117,7 +118,7 @@ void WizSearchEdit::paintEvent(QPaintEvent* event)
     QPainter pt(this);
     QSize szIcon = m_searchIcon.size();
     WizScaleIconSizeForRetina(szIcon);
-    QRect rcIcon(QPoint(4, (height() - szIcon.height()) / 2 + 1),
+    QRect rcIcon(QPoint(WizSmartScaleUI(4), (height() - szIcon.height()) / 2 + 1),
                  szIcon);
     pt.drawPixmap(rcIcon, m_searchIcon);
 
@@ -125,7 +126,7 @@ void WizSearchEdit::paintEvent(QPaintEvent* event)
     {
         szIcon = m_deleteIcon.size();
         WizScaleIconSizeForRetina(szIcon);
-        rcIcon = QRect(QPoint(width() - szIcon.width() - 4, (height() - szIcon.height()) / 2),
+        rcIcon = QRect(QPoint(width() - szIcon.width() - WizSmartScaleUI(4), (height() - szIcon.height()) / 2),
                        szIcon);
         pt.drawPixmap(rcIcon, m_deleteIcon);
     }
@@ -144,7 +145,7 @@ void WizSearchEdit::mousePressEvent(QMouseEvent* event)
 
     if (!text().isEmpty())
     {
-        QRect rect(QPoint(width() - m_deleteIcon.width() - 4, (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
+        QRect rect(QPoint(width() - m_deleteIcon.width() - WizSmartScaleUI(4), (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
         if (rect.contains(event->pos()))
         {
             setText("");
@@ -171,7 +172,7 @@ void WizSearchEdit::mouseMoveEvent(QMouseEvent* event)
     {
         if (!text().isEmpty())
         {
-            QRect rect(QPoint(width() - m_deleteIcon.width() - 4, (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
+            QRect rect(QPoint(width() - m_deleteIcon.width() - WizSmartScaleUI(4), (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
             if (rect.contains(event->pos()))
             {
                 if (cursor().shape() != Qt::ArrowCursor)

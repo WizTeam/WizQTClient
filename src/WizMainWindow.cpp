@@ -1865,9 +1865,12 @@ void WizMainWindow::initToolBar()
     //
     QToolButton* buttonNew = new QToolButton(m_toolBar);
     buttonNew->setMenu(m_newNoteExtraMenu);
-    buttonNew->setDefaultAction(newNoteAction);//m_newNoteExtraMenu->actionAt(QPoint(0 ,0)));
+    buttonNew->setDefaultAction(newNoteAction);
     buttonNew->setPopupMode(QToolButton::MenuButtonPopup);
-    //buttonNew->setAction(newNoteAction);
+    QString newButtonStyleSheet = QString("QToolButton{border:%1px solid transparent;padding-right:%2px;}QToolButton::menu-button{border:%1px solid transparent;}")
+            .arg(WizSmartScaleUI(2))
+            .arg(WizSmartScaleUI(8));
+    buttonNew->setStyleSheet(newButtonStyleSheet);
     m_toolBar->addWidget(buttonNew);
     //
     m_toolBar->addWidget(new WizSpacer(m_toolBar));
@@ -2050,6 +2053,12 @@ QWidget* WizMainWindow::createNoteListView()
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        m_documents->setStyleSheet("background-color:#272727");
+    }
+#endif
 
     return m_noteListWidget;
 }
