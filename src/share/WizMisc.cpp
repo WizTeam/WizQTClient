@@ -1692,7 +1692,7 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
 
     QStringList suffixList;
     suffixList << ".svg" << ".png";
-
+    //
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {
         QStringList::const_iterator it;
@@ -1766,16 +1766,16 @@ void svgAddToIcon(QIcon& icon, const QByteArray& svgContent, const QSize& size, 
     p2.setDevicePixelRatio(2);
     icon.addPixmap(p2, mode);
 #else
-    static int rate = 0;
-    if (!rate) {
-        //
-        rate = WizSmartScaleUI(100);
-    }
-    //
-    QSize sizeScaled = QSize(WizSmartScaleUI(size.width()), WizSmartScaleUI(size.height()));
-    QPixmap p2 = svg2Pixmap(svgContent, sizeScaled, Qt::transparent);
-    p2.setDevicePixelRatio(rate / 100.0);
-    icon.addPixmap(p2, mode);
+//    static int rate = 0;
+//    if (!rate) {
+//        //
+//        rate = WizSmartScaleUI(100);
+//    }
+//    //
+//    QSize sizeScaled = QSize(WizSmartScaleUI(size.width()), WizSmartScaleUI(size.height()));
+//    QPixmap p2 = svg2Pixmap(svgContent, sizeScaled, Qt::transparent);
+//    p2.setDevicePixelRatio(rate / 100.0);
+//    icon.addPixmap(p2, mode);
 #endif
 }
 
@@ -1829,10 +1829,33 @@ void addPngToIcon(QIcon& icon, const QString& fileName, QColor color, QIcon::Mod
     }
 }
 
-QIcon WizLoadPngSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize, const WizIconOptions& options)
+void WizScaleIconToSize(QIcon& icon, QSize size)
 {
-    QString fileName = WizGetSkinResourcePath(strSkinName) + strIconName + ".png";
+    QIcon::Mode states[] = {QIcon::Normal, QIcon::Selected, QIcon::Active};
     //
+    for (auto mode : states) {
+        //
+        QPixmap pixmap = icon.pixmap(size, mode);
+        if (pixmap.size() != size) {
+            //
+            if (pixmap.size().width() < size.width()) {
+                auto sizes = icon.availableSizes();
+                for (auto s : sizes) {
+                    if (s.width() >= size.width()) {
+                        pixmap = icon.pixmap(s);
+                        break;
+                    }
+                }
+            }
+            //
+            pixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            icon.addPixmap(pixmap, mode);
+        }
+    }
+}
+
+QIcon WizLoadPngSkinIcon(const QString& fileName, const QSize& iconSize, const WizIconOptions& options)
+{
     QIcon icon;
     if (isDarkMode()) {
         //
@@ -1851,7 +1874,9 @@ QIcon WizLoadPngSkinIcon(const QString& strSkinName, const QString& strIconName,
     }
     //
 #ifndef Q_OS_MAC
-    QString x2FileName = WizGetSkinResourcePath(strSkinName) + strIconName + "@2x.png";
+    QString path = Utils::WizMisc::extractFilePath(fileName);
+    QString name = Utils::WizMisc::extractFileTitle(fileName);
+    QString x2FileName = path + name + "@2x.png";
     if (!QFile::exists(x2FileName))
         return icon;
     //
@@ -1870,6 +1895,11 @@ QIcon WizLoadPngSkinIcon(const QString& strSkinName, const QString& strIconName,
             addPngToIcon(icon, x2FileName, options.selectedColor, QIcon::Active);
         }
     }
+    //
+    if (!iconSize.isEmpty()) {
+        //
+        WizScaleIconToSize(icon, iconSize);
+    }
 #endif
     //
     //
@@ -1883,9 +1913,13 @@ QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, co
         size = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
     }
     //
-    QString fileName = WizGetSkinResourcePath(strSkinName) + strIconName + ".svg";
+    QString fileName = WizGetSkinResourceFileName(strSkinName, strIconName);
     if (!QFile::exists(fileName)) {
-        return WizLoadPngSkinIcon(strSkinName, strIconName, iconSize, options);
+        return QIcon();
+    }
+
+    if (Utils::WizMisc::extractFileExt(fileName) == ".png") {
+        return WizLoadPngSkinIcon(fileName, iconSize, options);
     }
     //
     QIcon icon = svg2Icon(fileName, size, options);

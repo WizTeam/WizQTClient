@@ -209,11 +209,10 @@ const int EXTRABUTTONRIGHTMARGIN = 10;
 
 QRect WizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bool ignoreIconExist) const
 {
-    QSize szBtn(16, 16);
+    QSize szBtn(WizSmartScaleUI(16), WizSmartScaleUI(16));
     if (!m_extraButtonIcon.isNull())
     {
         szBtn = m_extraButtonIcon.size();
-        WizScaleIconSizeForRetina(szBtn);
     }
     else if (!ignoreIconExist)
     {

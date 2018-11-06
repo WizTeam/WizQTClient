@@ -1015,7 +1015,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* par
                                              "background-repeat: no-repeat;"
                                              "background-position: center;").arg(
                                          Utils::WizStyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
-    m_btnSelectSender->setFixedWidth(7);
+    m_btnSelectSender->setFixedWidth(WizSmartScaleUI(7));
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
 

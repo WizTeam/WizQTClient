@@ -4,6 +4,7 @@
 
 #include "WizMisc.h"
 #include "WizSettings.h"
+#include "WizUIBase.h"
 
 #include <QTimer>
 #include <QAction>
@@ -31,27 +32,6 @@ void WizAnimateAction::setToolButton(QToolButton* button)
     m_iconDefault = m_target->icon();
 }
 
-QIcon WizScaleIcon(const QIcon& icon, QSize size)
-{
-    QPixmap pixmap = icon.pixmap(size);
-    if (pixmap.size() != size) {
-        //
-        if (pixmap.size().width() < size.width()) {
-            auto sizes = icon.availableSizes();
-            for (auto s : sizes) {
-                if (s.width() >= size.width()) {
-                    pixmap = icon.pixmap(s);
-                    break;
-                }
-            }
-        }
-        //
-        pixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
-    //
-    return QIcon(pixmap);
-}
-
 void WizAnimateAction::setSingleIcons(const QString& strIconBaseName, QSize size)
 {
     QString themeName = Utils::WizStyleHelper::themeName();
@@ -62,13 +42,6 @@ void WizAnimateAction::setSingleIcons(const QString& strIconBaseName, QSize size
         QIcon icon = WizLoadSkinIcon(themeName, iconName, size);
         if (icon.isNull())
             return;
-        //
-#ifndef Q_OS_MAC
-        if (!size.isEmpty())
-        {
-            icon = WizScaleIcon(icon, size);
-        }
-#endif
         //
         m_icons.push_back(icon);
 

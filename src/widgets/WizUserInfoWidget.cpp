@@ -80,6 +80,12 @@ WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionLogout);
     //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        m_menuMain->setStyleSheet("background-color:#272727");
+    }
+#endif
+    //
     setMenu(m_menuMain);
 }
 

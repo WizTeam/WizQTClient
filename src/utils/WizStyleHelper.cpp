@@ -15,7 +15,7 @@
 #include "../share/WizMisc.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
-#include "../share/WizUIBase.h".h"
+#include "../share/WizUIBase.h"
 
 #include "utils/WizLogger.h"
 
@@ -27,6 +27,7 @@
 namespace Utils {
 
 WizSettings* WizStyleHelper::m_settings = 0;
+#define BADGE_ICON_SIZE QSize(WizSmartScaleUI(14), WizSmartScaleUI(14))
 
 void WizStyleHelper::initPainterByDevice(QPainter* p)
 {
@@ -82,31 +83,10 @@ QString WizStyleHelper::skinResourceFileName(const QString& strName, bool need2x
                                         (use2x ? strName + "@2x" : strName));
 }
 
-QIcon WizStyleHelper::loadIcon(const QString& strName)
+QIcon WizStyleHelper::loadIcon(const QString& strName, QSize size)
 {
     QString strThemeName = themeName();
-    QString strIconNormal = ::WizGetSkinResourceFileName(strThemeName, strName);
-    QString strIconActive1 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_on");
-    QString strIconActive2 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_selected");
-
-    if (!QFile::exists(strIconNormal)) {
-        qWarning() << "load icon failed, filePath:" << strIconNormal << " name : " << strName;
-        return QIcon();
-    }
-
-    QIcon icon;
-    icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
-
-    // used for check state
-    if (QFile::exists(strIconActive1)) {
-        icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::On);
-    }
-
-    // used for sunken state
-    if (QFile::exists(strIconActive2)) {
-        icon.addFile(strIconActive2, QSize(), QIcon::Active, QIcon::Off);
-    }
-
+    QIcon icon = WizLoadSkinIcon(strThemeName, strName, size);
     return icon;
 }
 
@@ -523,15 +503,18 @@ QColor WizStyleHelper::listViewMultiLineOtherLine(bool bSelected)
 QIcon WizStyleHelper::listViewBadge(int type)
 {
     switch (type) {
-    case BadgeAttachment:
-        return loadIcon("document_containsattach");
-        break;
-    case BadgeEncryptedInTitle:
-        return loadIcon("document_encryptedInTitle");
-        break;        
-    case BadgeEncryptedInSummary:
-        return loadIcon("document_encryptedInSummary");
-        break;
+    case BadgeAttachment: {
+        static QIcon icon  = loadIcon("document_containsattach", BADGE_ICON_SIZE);
+        return icon;
+    }
+    case BadgeEncryptedInTitle: {
+        static QIcon icon  = loadIcon("document_encryptedInTitle", BADGE_ICON_SIZE);
+        return icon;
+    }
+    case BadgeEncryptedInSummary: {
+        static QIcon icon  = loadIcon("document_encryptedInTitle", BADGE_ICON_SIZE);
+        return icon;
+    }
     default:
         break;
     }
@@ -820,15 +803,8 @@ QRect WizStyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, in
 QRect WizStyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType,  bool bFocus, bool bSelect)
 {
     QIcon attachIcon(listViewBadge(nType));
-    QList<QSize> sizes = attachIcon.availableSizes();
-    QSize iconSize = sizes.first();
-    if (WizIsHighPixel() && sizes.count() >=2)
-    {
-        iconSize = QSize(sizes.last().width() / 2, sizes.last().height() / 2);
-    }
-//    int nLeftMargin = 2;
-//    QRect rcb(rc.x() + (rc.width() - iconSize.width()) / 2, rc.y() + (rc.height() - iconSize.height()) / 2,
-//              iconSize.width(), iconSize.height());//
+    //
+    QSize iconSize = BADGE_ICON_SIZE;
     QRect rcb = rc.adjusted(0, margin(), 0, 0);
     rcb.setSize(iconSize);
     if (bSelect && bFocus) {
@@ -1067,8 +1043,8 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
     if (!title.isEmpty()) {
         bool drawEncrpytIconInTitle = nBadgeType & DocTypeEncrytedInTitle;
         bool drawAttachmentInTitle = nBadgeType & DocTypeContainsAttachment;
-        int nSpace4AttachIcon = drawEncrpytIconInTitle * 16 + drawAttachmentInTitle * 16;
-        QRect rcTitle = rcd.adjusted(0, 4, 0, 0);
+        int nSpace4AttachIcon = drawEncrpytIconInTitle * WizSmartScaleUI(16) + drawAttachmentInTitle * WizSmartScaleUI(16);
+        QRect rcTitle = rcd.adjusted(0, WizSmartScaleUI(4), 0, 0);
         //
         if (nBadgeType & DocTypeAlwaysOnTop)
         {
@@ -1091,7 +1067,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
         rcAttach.setHeight(nFontHeight);
         if (drawEncrpytIconInTitle) {
             QRect rcEncrypt = Utils::WizStyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
-            rcAttach.setCoords(rcEncrypt.right() + 4, rcAttach.top(), rcd.right(), rcTitle.bottom());
+            rcAttach.setCoords(rcEncrypt.right() + WizSmartScaleUI(4), rcAttach.top(), rcd.right(), rcTitle.bottom());
         }
 
         if (drawAttachmentInTitle) {
@@ -1105,7 +1081,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
     nFontHeight = Utils::WizStyleHelper::fontThumb(fontThumb);
     QPixmap pixGreyPoint(Utils::WizStyleHelper::skinResourceFileName("document_grey_point", true));
     QRect rcLead = rcd;   //排序类型或标签等
-    int nLeadHeight;
+    int nLeadHeight = 0;
     if (!lead.isEmpty()) {
         for (int i = 0; i < lead.count(); i++) {
             QString strInfo(lead.at(i));
@@ -1113,7 +1089,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
                 continue;
 
             if (i > 0) {
-                QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
+                QRect rcGreyPoint = rcLead.adjusted(0, WizSmartScaleUI(8), 0, 0);
                 rcGreyPoint.setWidth(4);
                 rcGreyPoint.setHeight(4);
                 Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
@@ -1128,7 +1104,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
     }
 
     if (!location.isEmpty()) {
-        QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
+        QRect rcGreyPoint = rcLead.adjusted(0, WizSmartScaleUI(8), 0, 0);
         rcGreyPoint.setWidth(4);
         rcGreyPoint.setHeight(4);
         Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
@@ -1141,10 +1117,10 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
         nLeadHeight = rcLead.height();
     }
 
-    QRect rcSummary(rcd.adjusted(0, nLeadHeight + 8, 0, 0));
+    QRect rcSummary(rcd.adjusted(0, nLeadHeight + WizSmartScaleUI(8), 0, 0));
     if (nBadgeType & DocTypeEncrytedInSummary) {
         QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
-        QSize sz = badgeIcon.availableSizes().first();
+        QSize sz = BADGE_ICON_SIZE;
         QRect rcPix(rcSummary.x() + (rcSummary.width() - sz.width()) / 2, rcSummary.y() + (rcSummary.height() - sz.height()) / 2,
                     sz.width(), sz.height());
         if (bSelected && bFocused) {
@@ -1157,12 +1133,12 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
 
         if (!thumbPix.isNull()) {
             QRect rcPix = drawThumbnailPixmap(p, rcd, thumbPix);
-            rcSummary.setRight(rcPix.left() - 4);
+            rcSummary.setRight(rcPix.left() - WizSmartScaleUI(4));
         }
 
         if (!abs.isEmpty()) {          //  笔记内容
             QString strText(abs);
-            rcSummary.adjust(0, -4, 0, 0);
+            rcSummary.adjust(0, WizSmartScaleUI(-4), 0, 0);
             p->setClipRect(rcSummary);
             QColor colorSummary = Utils::WizStyleHelper::listViewItemSummary(bSelected, bFocused);
             if (!strText.isEmpty()) {

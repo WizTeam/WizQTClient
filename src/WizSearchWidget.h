@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QWidget>
+#include <QIcon>
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -37,8 +38,8 @@ protected:
     void mouseMoveEvent(QMouseEvent* event);
 
 private:
-    QPixmap m_searchIcon;
-    QPixmap m_deleteIcon;
+    QIcon m_searchIcon;
+    QIcon m_deleteIcon;
     QMenu* m_menu;
 };
 

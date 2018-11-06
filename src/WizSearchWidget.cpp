@@ -84,15 +84,15 @@ void WizSearchView::on_searchTextChanged(QString str)
     //    }
 }
 
+#define SEARCH_ICON_SIZE  QSize(WizSmartScaleUI(20), WizSmartScaleUI(16))
+#define DELETE_ICON_SIZE  QSize(WizSmartScaleUI(16), WizSmartScaleUI(16))
 
 WizSearchEdit::WizSearchEdit(QWidget* parent)
     : QLineEdit(parent)
     , m_menu(new QMenu(this))
 {    
-    QString strSearchIcon = Utils::WizStyleHelper::skinResourceFileName("mactoolbarsearch", true);
-    m_searchIcon = QPixmap(strSearchIcon);
-    QString strDeleteIcon = Utils::WizStyleHelper::skinResourceFileName("mactoolbardelete", true);
-    m_deleteIcon = QPixmap(strDeleteIcon);
+    m_searchIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "mactoolbarsearch", SEARCH_ICON_SIZE);
+    m_deleteIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "mactoolbardelete", DELETE_ICON_SIZE);
 
     m_menu->addAction(tr("Advanced search"), this, SLOT(on_actionAdvancedSearch()));
     m_menu->addAction(tr("Add custom search"), this, SLOT(on_addCustomSearch()));
@@ -116,25 +116,23 @@ void WizSearchEdit::paintEvent(QPaintEvent* event)
     QLineEdit::paintEvent(event);
 
     QPainter pt(this);
-    QSize szIcon = m_searchIcon.size();
-    WizScaleIconSizeForRetina(szIcon);
+    QSize szIcon = SEARCH_ICON_SIZE;
     QRect rcIcon(QPoint(WizSmartScaleUI(4), (height() - szIcon.height()) / 2 + 1),
                  szIcon);
-    pt.drawPixmap(rcIcon, m_searchIcon);
+    m_searchIcon.paint(&pt, rcIcon);
 
     if (!text().isEmpty())
     {
-        szIcon = m_deleteIcon.size();
-        WizScaleIconSizeForRetina(szIcon);
+        szIcon = DELETE_ICON_SIZE;
         rcIcon = QRect(QPoint(width() - szIcon.width() - WizSmartScaleUI(4), (height() - szIcon.height()) / 2),
                        szIcon);
-        pt.drawPixmap(rcIcon, m_deleteIcon);
+        m_deleteIcon.paint(&pt, rcIcon);
     }
 }
 
 void WizSearchEdit::mousePressEvent(QMouseEvent* event)
 {
-    QRect rcBtnSearch(geometry().topLeft(), m_searchIcon.size());
+    QRect rcBtnSearch(geometry().topLeft(), SEARCH_ICON_SIZE);
     if (rcBtnSearch.contains(event->pos()))
     {
         event->accept();
@@ -145,7 +143,7 @@ void WizSearchEdit::mousePressEvent(QMouseEvent* event)
 
     if (!text().isEmpty())
     {
-        QRect rect(QPoint(width() - m_deleteIcon.width() - WizSmartScaleUI(4), (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
+        QRect rect(QPoint(width() - DELETE_ICON_SIZE.width() - WizSmartScaleUI(4), (height() - DELETE_ICON_SIZE.height()) / 2), DELETE_ICON_SIZE);
         if (rect.contains(event->pos()))
         {
             setText("");
@@ -160,7 +158,7 @@ void WizSearchEdit::mouseMoveEvent(QMouseEvent* event)
 {
     QLineEdit::mouseMoveEvent(event);
 
-    QRect rcBtnSearch(geometry().topLeft(), m_searchIcon.size());
+    QRect rcBtnSearch(geometry().topLeft(), SEARCH_ICON_SIZE);
     if (rcBtnSearch.contains(event->pos()))
     {
         if (cursor().shape() != Qt::ArrowCursor)
@@ -172,7 +170,7 @@ void WizSearchEdit::mouseMoveEvent(QMouseEvent* event)
     {
         if (!text().isEmpty())
         {
-            QRect rect(QPoint(width() - m_deleteIcon.width() - WizSmartScaleUI(4), (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
+            QRect rect(QPoint(width() - DELETE_ICON_SIZE.width() - WizSmartScaleUI(4), (height() - DELETE_ICON_SIZE.height()) / 2), DELETE_ICON_SIZE);
             if (rect.contains(event->pos()))
             {
                 if (cursor().shape() != Qt::ArrowCursor)

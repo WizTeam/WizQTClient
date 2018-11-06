@@ -953,13 +953,14 @@ void WizMainWindow::restoreStatus()
 
 void WizMainWindow::initActions()
 {
-#ifdef Q_OS_LINUX
+#ifndef Q_OS_MAC
     m_actions->init(!m_useSystemBasedStyle);
+    QSize iconSize = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
 #else
     m_actions->init();
+    QSize iconSize = QSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    QSize iconSize = QSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
     m_animateSync->setSingleIcons("sync", iconSize);
     //
     connect(m_actions, SIGNAL(insertTableSelected(int,int)), SLOT(on_actionMenuFormatInsertTable(int,int)));
@@ -1823,7 +1824,7 @@ void WizMainWindow::initToolBar()
         m_toolBar->setStyleSheet("background-color:#363636");
     }
     //
-    QSize iconSize = QSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
+    QSize iconSize = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
     m_toolBar->setIconSize(iconSize);
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
@@ -1867,9 +1868,14 @@ void WizMainWindow::initToolBar()
     buttonNew->setMenu(m_newNoteExtraMenu);
     buttonNew->setDefaultAction(newNoteAction);
     buttonNew->setPopupMode(QToolButton::MenuButtonPopup);
-    QString newButtonStyleSheet = QString("QToolButton{border:%1px solid transparent;padding-right:%2px;}QToolButton::menu-button{border:%1px solid transparent;}")
+    //
+    QString strIconPath = ::WizGetSkinResourcePath(userSettings().skin()) + "arrow.png";
+    QString newButtonStyleSheet = QString("QToolButton{border:%1px solid transparent;padding-right:%2px;}"
+                                          "QToolButton::menu-button{border:%1px solid transparent;}"
+                                          "QToolButton::menu-arrow{image: url(%3)}")
             .arg(WizSmartScaleUI(2))
-            .arg(WizSmartScaleUI(8));
+            .arg(WizSmartScaleUI(16))
+            .arg(strIconPath);
     buttonNew->setStyleSheet(newButtonStyleSheet);
     m_toolBar->addWidget(buttonNew);
     //
@@ -1909,6 +1915,7 @@ void WizMainWindow::initClient()
     QPalette pal = m_clienWgt->palette();
     pal.setColor(QPalette::Window, QColor(Qt::transparent));
     pal.setColor(QPalette::Base, QColor(Qt::transparent));
+
     m_clienWgt->setPalette(pal);
     m_clienWgt->setAutoFillBackground(true);
 
