@@ -999,8 +999,14 @@ QList<WizWindowInfo> WizGetActiveWindows()
             }
         }
     }
-    CFRelease(windowList);
-    CFRelease(processName);
+    //
+    if (windowList) {
+        CFRelease(windowList);
+    }
+    //
+    if (processName) {
+        CFRelease(processName);
+    }
 
     return windowTitles;
 }
