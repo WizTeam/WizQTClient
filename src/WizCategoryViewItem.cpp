@@ -552,7 +552,7 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
     if (isPressed)
     {
         rcb.adjust(0, 0, 0, 2);
-        QPixmap pixBg(Utils::WizStyleHelper::skinResourceFileName("category_unreadButton_selected", true));
+        QPixmap pixBg(Utils::WizStyleHelper::loadPixmap("category_unreadButton_selected"));
         p->drawPixmap(rcb, pixBg);
         rcb.adjust(0, 0, 0, -2);
         p->drawText(rcb, Qt::AlignCenter, text);
@@ -560,7 +560,7 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
     else
     {
         rcb.adjust(0, 0, 0, 2);
-        QPixmap pixBg(Utils::WizStyleHelper::skinResourceFileName("category_unreadButton", true));
+        QPixmap pixBg(Utils::WizStyleHelper::loadPixmap("category_unreadButton"));
         p->drawPixmap(rcb, pixBg);
         rcb.adjust(0, 0, 0, -2);
         p->drawText(rcb, Qt::AlignCenter, text);

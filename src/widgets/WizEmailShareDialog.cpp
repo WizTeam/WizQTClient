@@ -44,7 +44,7 @@ WizEmailShareDialog::WizEmailShareDialog(WizExplorerApp& app, QWidget *parent)
 {
     ui->setupUi(this);
 //    ui->checkBox_saveNotes->setVisible(false);
-    QPixmap pix(Utils::WizStyleHelper::skinResourceFileName("send_email"));
+    QPixmap pix(Utils::WizStyleHelper::loadPixmap("send_email"));
     QIcon icon = WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "send_email", pix.size(), ICON_OPTIONS);
     ui->toolButton_send->setIcon(icon);
     ui->toolButton_send->setIconSize(pix.size());

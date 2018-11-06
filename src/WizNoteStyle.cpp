@@ -82,19 +82,12 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     {
         QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
-        bool bHightPixel = WizIsHighPixel();
-        QString strIconName = bHightPixel ? "branch_expanded@2x.png" : "branch_expanded.png";
-        m_expandedImage.load(strSkinPath + strIconName);
-        strIconName = bHightPixel ? "branch_collapsed@2x.png" : "branch_collapsed.png";
-        m_collapsedImage.load(strSkinPath + strIconName);
-        strIconName = bHightPixel ? "branch_expandedSelected@2x.png" : "branch_expandedSelected.png";
-        m_expandedImageSelected.load(strSkinPath + strIconName);
-        strIconName = bHightPixel ? "branch_collapsedSelected@2x.png" : "branch_collapsedSelected.png";
-        m_collapsedImageSelected.load(strSkinPath + strIconName);
-        m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
-
-//        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
-//        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
+        m_expandedImage = Utils::WizStyleHelper::loadPixmap("branch_expanded").toImage();
+        m_collapsedImage = Utils::WizStyleHelper::loadPixmap("branch_collapsed").toImage();
+        m_expandedImageSelected = Utils::WizStyleHelper::loadPixmap("branch_expandedSelected").toImage();
+        m_collapsedImageSelected = Utils::WizStyleHelper::loadPixmap("branch_collapsedSelected").toImage();
+        m_imgDefaultAvatar = Utils::WizStyleHelper::loadPixmap("avatar_default").toImage();
+        //
         m_imagePushButton.setImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
         m_imagePushButtonHot.setImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
         m_imagePushButtonPressed.setImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));

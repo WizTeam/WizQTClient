@@ -1,6 +1,6 @@
 ﻿#include "WizScrollBar.h"
 #include "share/WizUIBase.h"
-
+#include "share/WizQtHelper.h"
 #include <QtGui>
 
 WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
@@ -27,7 +27,7 @@ WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
 
 QSize WizScrollBar::sizeHint() const
 {
-    return m_bLeftBorder ? QSize(13, 1) : QSize(12, 1);
+    return m_bLeftBorder ? QSize(WizSmartScaleUI(13), 1) : QSize(WizSmartScaleUI(12), 1);
 }
 
 void WizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -119,12 +119,12 @@ void WizScrollBar::setHandleVisible(bool visible)
         }\
         QScrollBar::handle {\
             background: %3;\
-            min-height: 30px;\
+            min-height: %4px;\
         }\
         QScrollBar::handle:vertical {\
-            margin: 0px 3px 0px 3px;\
-            border-radius:3px;\
-            width:6px; \
+            margin: 0px %5px 0px %5px;\
+            border-radius:%5px;\
+            width:%6px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -135,8 +135,14 @@ void WizScrollBar::setHandleVisible(bool visible)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(m_bgColor).arg(m_bLeftBorder ? leftBorder : "")
-        .arg(visible ? m_handleColor : "transparent"));
+        }")
+        .arg(m_bgColor)
+        .arg(m_bLeftBorder ? leftBorder : "")
+        .arg(visible ? m_handleColor : "transparent")
+        .arg(WizSmartScaleUI(30))
+        .arg(WizSmartScaleUI(3))
+        .arg(WizSmartScaleUI(6))
+        );
 }
 
 

@@ -1155,8 +1155,8 @@ QPixmap CreateDocumentDragBadget(const CWizDocumentDataArray& arrayDocument)
 
         QRect rcIcon(rcItem.left(), rcItem.top() + (rcItem.height() - nIconHeight)/2,
                      nIconHeight, nIconHeight);
-        QPixmap pixIcon(Utils::WizStyleHelper::skinResourceFileName(
-                            doc.nProtected == 1 ? "document_badge_encrypted" : "document_badge", true));
+        QPixmap pixIcon(Utils::WizStyleHelper::loadPixmap(
+                            doc.nProtected == 1 ? "document_badge_encrypted" : "document_badge"));
         pt.drawPixmap(rcIcon, pixIcon);
 
         //
@@ -2248,7 +2248,7 @@ void WizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt
     if (WizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
         p->save();
-        int nRightMargin = 12;
+        int nRightMargin = WizSmartScaleUI(12);
         QStyleOptionViewItem newVopt(*vopt);
         //newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
         pItem->draw(p, &newVopt, viewType());
@@ -2315,29 +2315,24 @@ void WizDocumentListView::paintEvent(QPaintEvent *e)
     QPainter p(viewport());
     //
     if (m_emptyFolder.isNull()) {
-        QString fileName = Utils::WizStyleHelper::skinResourceFileName("empty_folder", true);
-        m_emptyFolder = QPixmap(fileName);
+        m_emptyFolder = QPixmap(Utils::WizStyleHelper::loadPixmap("empty_folder"));
     }
     if (m_emptySearch.isNull()) {
-        QString fileName = Utils::WizStyleHelper::skinResourceFileName("empty_search", true);
-        m_emptySearch = QPixmap(fileName);
+        m_emptySearch = QPixmap(Utils::WizStyleHelper::loadPixmap("empty_search"));
     }
     //
     QPixmap pixmap = isSearchResult() ? m_emptySearch : m_emptyFolder;
     QSize imageSize = pixmap.size();
     QRect rc = rect();
     //
-    imageSize.setWidth(imageSize.width() / pixmap.devicePixelRatio());
-    imageSize.setHeight(imageSize.height() / pixmap.devicePixelRatio());
-    //
     QString text = isSearchResult()
             ? tr("No search results...\nTry to change another keyword or advanced searching")
             : tr("Nothing in here\nGo to create a note");
     //
-    int spacing = 10;
+    int spacing = WizSmartScaleUI(10);
     //
     QRect textRect = rc;
-    textRect.adjust(16, 0, -16, 0);
+    textRect.adjust(WizSmartScaleUI(16), 0, WizSmartScaleUI(-16), 0);
     QFontMetrics fm(p.font());
     int textHeight = fm.boundingRect(textRect, Qt::TextWordWrap, text).height();
     int totalHeight = imageSize.height() + textHeight + spacing;

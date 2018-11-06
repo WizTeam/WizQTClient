@@ -1796,7 +1796,7 @@ void WizMainWindow::initToolBar()
 
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 116 : 124;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
-    QPixmap pixExtraMenu = Utils::WizStyleHelper::skinResourceFileName("actionNewNoteExtraMenu", true);
+    QPixmap pixExtraMenu = Utils::WizStyleHelper::loadPixmap("actionNewNoteExtraMenu");
     if (isDarkMode()) {
         pixExtraMenu = qpixmapWithTintColor(pixExtraMenu, QColor("#ffffff"));
     }

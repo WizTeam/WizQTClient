@@ -1691,7 +1691,13 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     };
 
     QStringList suffixList;
-    suffixList << ".svg" << ".png";
+
+    QString ext = Utils::WizMisc::extractFileExt(strName);
+    if (ext.isEmpty()) {
+        suffixList << ".svg" << ".png";
+    } else {
+        suffixList << "";
+    }
     //
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {
@@ -2589,18 +2595,6 @@ double calScaleFactor()
     return scaleFactor;
 }
 
-void WizScaleIconSizeForRetina(QSize& size)
-{
-#ifdef Q_OS_MAC
-    if (qApp->devicePixelRatio() >= 2)
-    {
-        size.scale(size.width() / 2, size.height() / 2, Qt::IgnoreAspectRatio);
-    }
-#endif
-}
-
-
-
 bool WizIsHighPixel()
 {
 #ifdef Q_OS_MAC
@@ -2707,7 +2701,7 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName,
 
     int dateWidth = fm.width(dateInfo);
     infoRect.adjust(dateWidth + 4, 0, 0, 0);
-    QPixmap pixGreyPoint(Utils::WizStyleHelper::skinResourceFileName("document_grey_point", true));
+    QPixmap pixGreyPoint(Utils::WizStyleHelper::loadPixmap("document_grey_point"));
     QRect rcPix = infoRect.adjusted(0, 6, 0, 0);
     rcPix.setSize(QSize(4, 4));
     p.drawPixmap(rcPix, pixGreyPoint);

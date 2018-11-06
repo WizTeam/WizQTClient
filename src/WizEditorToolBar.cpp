@@ -232,7 +232,7 @@ public:
             {
                 //set default data
                 styledItem.bBold = false;
-                styledItem.nFontSize = 14;
+                styledItem.nFontSize = WizSmartScaleUI(14);
                 styledItem.strFontFamily = text;
             }
             opt.font.setPointSize(styledItem.nFontSize);
@@ -250,10 +250,10 @@ public:
             QPixmap pix = icon.pixmap(QSize(nIconSize, nIconSize), QIcon::Normal, (opt.state & QStyle::State_MouseOver) ? QIcon::On : QIcon::Off);
             if (!pix.isNull())
             {
-                painter->drawPixmap(opt.rect.x() + 4, opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , pix);
+                painter->drawPixmap(opt.rect.x() + WizSmartScaleUI(4), opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , pix);
             }
         }
-        opt.rect.setX(opt.rect.x() + nIconSize + 4);
+        opt.rect.setX(opt.rect.x() + nIconSize + WizSmartScaleUI(4));
 
         QStyledItemDelegate::paint(painter, opt, index);
     }
@@ -297,7 +297,7 @@ public:
 
         if (index.data(WizFontFamilyHelperRole).toString() == WIZSEPARATOR)
         {
-            return QSize(opt.rect.width(), 5);
+            return QSize(opt.rect.width(), WizSmartScaleUI(5));
         }
 
         //
@@ -311,7 +311,7 @@ public:
         QFontMetrics fm(font);
         QRect rc = fm.boundingRect(opt.text);
         //
-        QSize size(rc.width() + 4, rc.height() + 4);
+        QSize size(rc.width() + WizSmartScaleUI(4), rc.height() + WizSmartScaleUI(4));
         return size;
     }
 
@@ -384,11 +384,9 @@ extern QPixmap qpixmapWithTintColor(const QPixmap& image, QColor tintColor);
 
 void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, bool bDrawRight, bool hasFocus)
 {
-    int nScale = WizIsHighPixel() ? 2 : 1;
-
     // load file
-    static QPixmap normalPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground", true));
-    static QPixmap focusPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground_on", true));
+    static QPixmap normalPixBackground = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolButtonBackground"));
+    static QPixmap focusPixBackground = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolButtonBackground_on"));
     //
     static bool first = true;
     if (first) {
@@ -399,14 +397,14 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
         }
     }
     //
-    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(6, 0, 2, normalPixBackground.height());
-    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(6, 0, 2, focusPixBackground.height());
-    QRect rcLeft(rect.x(), rect.y(), 6, rect.size().height());
-    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, 6 * nScale, normalPixBackground.height());
-    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, 6 * nScale, focusPixBackground.height());
-    int rightWidth = 8;
-    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, normalPixBackground.height());
-    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, focusPixBackground.height());
+    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(WizSmartScaleUI(6), 0, WizSmartScaleUI(2), normalPixBackground.height());
+    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(WizSmartScaleUI(6), 0, WizSmartScaleUI(2), focusPixBackground.height());
+    QRect rcLeft(rect.x(), rect.y(), WizSmartScaleUI(6), rect.size().height());
+    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, WizSmartScaleUI(6), normalPixBackground.height());
+    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, WizSmartScaleUI(6), focusPixBackground.height());
+    int rightWidth = WizSmartScaleUI(8);
+    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - rightWidth, 0, rightWidth, normalPixBackground.height());
+    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - rightWidth, 0, rightWidth, focusPixBackground.height());
     QRect rcRight(rect.size().width() - rightWidth, rect.y(), rightWidth, rect.size().height());
 
     const QPixmap& pixLeft = hasFocus ? focusPixBackgroundLeft : normalPixBackgroundLeft;
@@ -414,7 +412,7 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
     const QPixmap& pixRight = hasFocus ? focusPixBackgroundRight : normalPixBackgroundRight;
     //
     painter->drawPixmap(rcLeft, bDrawLeft ? pixLeft : pixMid);
-    painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixMid);
+    painter->drawPixmap(rect.x() + WizSmartScaleUI(5), rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixMid);
     painter->drawPixmap(rcRight, bDrawRight ? pixRight : pixMid);
 }
 
@@ -436,15 +434,15 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
         QStyleOption subOpt = opt;
 
         QRect rectSub = cm->style()->subControlRect(QStyle::CC_ComboBox, &opt, QStyle::SC_ComboBoxArrow);
-        rectSub.adjust(6, 0, -12, 0);
+        rectSub.adjust(WizSmartScaleUI(6), 0, WizSmartScaleUI(-12), 0);
 
 
-        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - 3, 0, -rectSub.height()/2 + 3);
+        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - WizSmartScaleUI(3), 0, -rectSub.height()/2 + WizSmartScaleUI(3));
         QRect rcArrow = opt.rect;
-        rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 8);
+        rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - WizSmartScaleUI(8));
         rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
         rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
-        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarComboboxArrow", true));
+        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolbarComboboxArrow"));
         static bool first = true;
         if (first) {
             first = false;
@@ -623,7 +621,7 @@ protected:
             rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 3);
             rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
             rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
-            static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+            static QPixmap arrow = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolbarDownArrow"));
             static bool first = true;
             if (first) {
                 first = false;
@@ -725,7 +723,7 @@ protected:
         }
 
         //arrow
-        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolbarDownArrow"));
 #ifdef Q_OS_MAC
         int arrowHeight = arrow.height() * (WizIsHighPixel() ? 0.5f : 1);
         //

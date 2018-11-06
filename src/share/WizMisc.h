@@ -167,8 +167,6 @@ struct WizIconOptions
 
 QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize = QSize(16, 16), const WizIconOptions& options = WizIconOptions());
 
-void WizScaleIconSizeForRetina(QSize& size);
-
 bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName, const QSize& iconSize);
 
 QString WizGetHtmlBodyContent(const QString& strHtml);

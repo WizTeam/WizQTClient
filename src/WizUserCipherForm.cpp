@@ -27,12 +27,9 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     ui->checkSave->setVisible(false);
 
 
-    QString strIconNormal = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
-//            + "mac_icons_password_done.png";
-    QString strIconHot = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done_hot", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
-//            + "mac_icons_password_done_hot.png";
-    QString strIconDown = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done_down", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
-//            + "mac_icons_password_done_down.png";
+    QPixmap strIconNormal = Utils::WizStyleHelper::loadPixmap("mac_icons_password_done");
+    QPixmap strIconHot = Utils::WizStyleHelper::loadPixmap("mac_icons_password_done_hot");
+    QPixmap strIconDown = Utils::WizStyleHelper::loadPixmap("mac_icons_password_done_down");
 
     ui->editUserCipher->setFixedHeight(WizSmartScaleUI(19));
     QSize szBtn(WizSmartScaleUI(19), WizSmartScaleUI(19));

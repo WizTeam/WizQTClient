@@ -65,8 +65,9 @@ public:
 
 
     static QString themeName();
-    static QString skinResourceFileName(const QString& strName, bool need2x = false);
+    static QPixmap loadPixmap(const QString& strName);
     static QIcon loadIcon(const QString& strName, QSize size = QSize());
+    static QString createTempPixmap(const QString& strName); //used for style sheet
 
     static QRegion borderRadiusRegion(const QRect& rect);
     static QRegion borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,

@@ -1014,7 +1014,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* par
     m_btnSelectSender->setStyleSheet(QString("border:0px;background-image:url(%1); "
                                              "background-repeat: no-repeat;"
                                              "background-position: center;").arg(
-                                         Utils::WizStyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
+                                         Utils::WizStyleHelper::createTempPixmap("messageSelectorDownArrow")));
     m_btnSelectSender->setFixedWidth(WizSmartScaleUI(7));
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
@@ -1308,7 +1308,7 @@ void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
         addUser(sender);
     }
 
-    QPixmap pix(Utils::WizStyleHelper::skinResourceFileName("avatar_all"));
+    QPixmap pix(Utils::WizStyleHelper::loadPixmap("avatar_all"));
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(ALLMENBERS, "", pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), WizSmartScaleUI(22)));
     m_userList->addItem(selectorItem);

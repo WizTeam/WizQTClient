@@ -837,7 +837,7 @@ void WizLoginDialog::initAnimationWaitingDialog(const QString& text)
 {
     m_animationWaitingDialog = new QDialog();
     m_animationWaitingDialog->setWindowFlags(Qt::FramelessWindowHint);
-    m_animationWaitingDialog->setFixedSize(150, 100);
+    m_animationWaitingDialog->setFixedSize(WizSmartScaleUI(150), WizSmartScaleUI(100));
     QPalette pl = m_animationWaitingDialog->palette();
     m_animationWaitingDialog->setStyleSheet("QDialog{background-color:#000000;} ");
     pl.setColor(QPalette::Window, QColor(0, 0, 0, 200));
@@ -847,20 +847,24 @@ void WizLoginDialog::initAnimationWaitingDialog(const QString& text)
 
     QHBoxLayout* closeLayout = new QHBoxLayout();
     QToolButton* closeButton = new QToolButton(m_animationWaitingDialog);
-    QString strBtnCloseNormal = Utils::WizStyleHelper::skinResourceFileName("linuxlogindialoclose_white");
-    QString strBtnCloseHover = Utils::WizStyleHelper::skinResourceFileName("linuxwindowclose_on");
-    QString strBtnCloseDown = Utils::WizStyleHelper::skinResourceFileName("linuxwindowclose_selected"); // ::WizGetSkinResourceFileName(strThemeName, "linuxwindowclose_selected");
+    QString strBtnCloseNormal = Utils::WizStyleHelper::createTempPixmap("linuxlogindialoclose_white");
+    QString strBtnCloseHover = Utils::WizStyleHelper::createTempPixmap("linuxwindowclose_on");
+    QString strBtnCloseDown = Utils::WizStyleHelper::createTempPixmap("linuxwindowclose_selected");
     closeButton->setStyleSheet(QString("QToolButton{ image:url(%1); background:transparent; padding:0px; border:0px; height: 16px; width: 16px;}"
-                                                     "QToolButton:hover{ image:url(%2); height: 16px; width: 16px;}"
-                                                     "QToolButton:pressed{ image:url(%3); height: 16px; width: 16px;}")
-                                             .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
+                                                     "QToolButton:hover{ image:url(%2); height: %4px; width: %4px;}"
+                                                     "QToolButton:pressed{ image:url(%3); height: %4px; width: %4px;}")
+                               .arg(strBtnCloseNormal)
+                               .arg(strBtnCloseHover)
+                               .arg(strBtnCloseDown)
+                               .arg(WizSmartScaleUI(16))
+                               );
     closeLayout->setContentsMargins(0, 0, 0, 0);
     closeLayout->addStretch();
     closeLayout->addWidget(closeButton);
     connect(closeButton, SIGNAL(clicked()), m_animationWaitingDialog, SLOT(reject()));
     //
     QLabel* labelSearching = new QLabel(m_animationWaitingDialog);
-    labelSearching->setFixedSize(32, 32);
+    labelSearching->setFixedSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
     QMovie* movie =new QMovie(m_animationWaitingDialog);
     movie->setFileName(":/searching.gif");
     labelSearching->setMovie(movie);
@@ -870,7 +874,7 @@ void WizLoginDialog::initAnimationWaitingDialog(const QString& text)
     labelLayout->addWidget(labelSearching);
     labelLayout->addStretch();
     QHBoxLayout* textLayout = new QHBoxLayout();
-    textLayout->setContentsMargins(0, 5, 0, 0);
+    textLayout->setContentsMargins(0, WizSmartScaleUI(5), 0, 0);
     textLayout->addStretch();
     QLabel* labelText = new QLabel(m_animationWaitingDialog);
     labelText->setText(text);
@@ -880,7 +884,7 @@ void WizLoginDialog::initAnimationWaitingDialog(const QString& text)
     textLayout->addWidget(labelText);
     textLayout->addStretch();
     QVBoxLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 15);
+    layout->setContentsMargins(0, 0, 0, WizSmartScaleUI(15));
     layout->addLayout(closeLayout);
     layout->addLayout(labelLayout);
     layout->addLayout(textLayout);

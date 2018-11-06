@@ -13,6 +13,7 @@
 
 #include "WizPathResolve.h"
 #include "../share/WizMisc.h"
+#include "../utils/WizMisc.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
 #include "../share/WizUIBase.h"
@@ -76,12 +77,95 @@ QString WizStyleHelper::themeName()
     return strTheme;
 }
 
-QString WizStyleHelper::skinResourceFileName(const QString& strName, bool need2x)
+//QString WizStyleHelper::skinResourceFileName(const QString& strName, bool need2x)
+//{
+//    bool use2x = need2x && ::WizIsHighPixel();
+//    return ::WizGetSkinResourceFileName(themeName(),
+//                                        (use2x ? strName + "@2x" : strName));
+//}
+
+QPixmap WizStyleHelper::loadPixmap(const QString& strName)
 {
-    bool use2x = need2x && ::WizIsHighPixel();
-    return ::WizGetSkinResourceFileName(themeName(),
-                                        (use2x ? strName + "@2x" : strName));
+    QString fileName = ::WizGetSkinResourceFileName(themeName(), strName);
+#ifdef Q_OS_MAC
+    return QPixmap(fileName);
+#else
+    QString ext = Utils::WizMisc::extractFileExt(fileName);
+    if (ext != ".png") {
+        qDebug() << "load pixmap support png only";
+        return QPixmap();
+    }
+    //
+    QPixmap org(fileName);
+    QSize orgSize = org.size();
+    QSize scaledSize = QSize(WizSmartScaleUI(orgSize.width()), WizSmartScaleUI(orgSize.height()));
+    if (orgSize == scaledSize) {
+        return org;
+    }
+    //
+    QString x2fileName = ::WizGetSkinResourceFileName(themeName(), strName + "@2x");
+    if (QFile::exists(x2fileName)) {
+        QPixmap x2(x2fileName);
+        qDebug() << x2.devicePixelRatio();
+        x2.setDevicePixelRatio(1);
+        if (x2.size() == scaledSize) {
+            return x2;
+        }
+        //
+        QPixmap ret = x2.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        return ret;
+    } else {
+        QPixmap ret = org.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        return ret;
+    }
+#endif
 }
+
+QString WizStyleHelper::createTempPixmap(const QString& strName)
+{
+
+    QString fileName = ::WizGetSkinResourceFileName(themeName(), strName);
+#ifdef Q_OS_MAC
+    return fileName;
+#else
+    QString ext = Utils::WizMisc::extractFileExt(fileName);
+    if (ext != ".png") {
+        qDebug() << "load pixmap support png only";
+        return fileName;
+    }
+    //
+    QPixmap org(fileName);
+    QSize orgSize = org.size();
+    QSize scaledSize = QSize(WizSmartScaleUI(orgSize.width()), WizSmartScaleUI(orgSize.height()));
+    if (orgSize == scaledSize) {
+        return fileName;
+    }
+    //
+    QString tempFileName = Utils::WizPathResolve::tempPath() + strName
+            + WizIntToStr(scaledSize.width()) + "x" + WizIntToStr(scaledSize.height())
+            + ".png";
+    if (QFile::exists(tempFileName)) {
+        return tempFileName;
+    }
+    //
+    QString x2fileName = ::WizGetSkinResourceFileName(themeName(), strName + "@2x");
+    if (QFile::exists(x2fileName)) {
+        QPixmap x2(x2fileName);
+        if (x2.size() == scaledSize) {
+            return x2fileName;
+        }
+        //
+        QPixmap ret = x2.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        ret.save(tempFileName);
+        return tempFileName;
+    } else {
+        QPixmap ret = org.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        ret.save(tempFileName);
+        return tempFileName;
+    }
+#endif
+}
+
 
 QIcon WizStyleHelper::loadIcon(const QString& strName, QSize size)
 {
@@ -182,11 +266,11 @@ QString WizStyleHelper::wizCommonStyleSheet()
         qss.close();
 
         //
-        style.replace("WizComboBoxDownArrow", skinResourceFileName("comboBox_downArrow", true));
-        style.replace("WizSpinBoxUpButton", skinResourceFileName("spinbox_upButton"));
-        style.replace("WizSpinBoxUpButtonPressed", skinResourceFileName("spinbox_upButton_selected"));
-        style.replace("WizSpinBoxDownButton", skinResourceFileName("spinbox_downButton"));
-        style.replace("WizSpinBoxDownButtonPressed", skinResourceFileName("spinbox_downButton_selected"));
+        style.replace("WizComboBoxDownArrow", createTempPixmap("comboBox_downArrow"));
+        style.replace("WizSpinBoxUpButton", createTempPixmap("spinbox_upButton"));
+        style.replace("WizSpinBoxUpButtonPressed", createTempPixmap("spinbox_upButton_selected"));
+        style.replace("WizSpinBoxDownButton", createTempPixmap("spinbox_downButton"));
+        style.replace("WizSpinBoxDownButtonPressed", createTempPixmap("spinbox_downButton_selected"));
 
     }
     return style;
@@ -196,16 +280,16 @@ QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 {
     return QString("QScrollBar {\
             background: #FFFFFF;\
-            width: 12px; \
+            width: %1px; \
         }\
         QScrollBar::handle:vertical {\
-            width: 6px; \
+            width: %2px; \
             background:#DADADA; \
-            border-radius:3px;\
-            min-height:20; \
-            margin-top:%1px; \
-            margin-right:3px; \
-            margin-left:3px; \
+            border-radius:%3px;\
+            min-height:%4px; \
+            margin-top:%5px; \
+            margin-right:%6px; \
+            margin-left:%7px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -216,7 +300,15 @@ QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(marginTop);
+        }")
+        .arg(WizSmartScaleUI(12))
+        .arg(WizSmartScaleUI(6))
+        .arg(WizSmartScaleUI(3))
+        .arg(WizSmartScaleUI(20))
+        .arg(WizSmartScaleUI(marginTop))
+        .arg(WizSmartScaleUI(3))
+        .arg(WizSmartScaleUI(3))
+        ;
 }
 
 QSize WizStyleHelper::treeViewItemIconSize()
@@ -1079,7 +1171,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
 
     QFont fontThumb;
     nFontHeight = Utils::WizStyleHelper::fontThumb(fontThumb);
-    QPixmap pixGreyPoint(Utils::WizStyleHelper::skinResourceFileName("document_grey_point", true));
+    QPixmap pixGreyPoint(Utils::WizStyleHelper::loadPixmap("document_grey_point"));
     QRect rcLead = rcd;   //排序类型或标签等
     int nLeadHeight = 0;
     if (!lead.isEmpty()) {
