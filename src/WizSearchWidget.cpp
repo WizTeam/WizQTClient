@@ -5,6 +5,7 @@
 #else
 #include "share/WizSettings.h"
 #include "share/WizAnalyzer.h"
+#include "share/WizUIBase.h"
 #include "WizDef.h"
 #include "utils/WizStyleHelper.h"
 
@@ -26,9 +27,17 @@ WizSearchView::WizSearchView(QWidget* parent /* = 0 */)
     m_editSearch = new WizSearchEdit(this);
     m_editSearch->setTextMargins(WizSmartScaleUI(25), 1, 0, 1);
     //
-    QString styleSheet = QString("QLineEdit{background-color:#eeeeee;border:1px solid #aeaeae; border-radius:%1px;}"
-                                 "QLineEdit::focus{background-color:#ffffff;border:1px solid #6699cb; border-radius:%1px;}")
-            .arg(WizSmartScaleUI(10));
+    QString styleSheet;
+    if (isDarkMode()) {
+        styleSheet = QString("QLineEdit{color:#ffffff;background-color:#686868;border:1px solid #333333; border-radius:%1px;}"
+                                     "QLineEdit::focus{background-color:#686868;border:1px solid #6699cb; border-radius:%1px;}")
+                .arg(WizSmartScaleUI(10));
+    } else {
+        styleSheet = QString("QLineEdit{background-color:#eeeeee;border:1px solid #aeaeae; border-radius:%1px;}"
+                                     "QLineEdit::focus{background-color:#ffffff;border:1px solid #6699cb; border-radius:%1px;}")
+                .arg(WizSmartScaleUI(10));
+    }
+
     m_editSearch->setStyleSheet(styleSheet);
 
     // avoid focus rect on OSX, this should be a bug of qt style sheet
@@ -86,17 +95,18 @@ void WizSearchView::on_searchTextChanged(QString str)
 
 #define SEARCH_ICON_SIZE  QSize(WizSmartScaleUI(20), WizSmartScaleUI(16))
 #define DELETE_ICON_SIZE  QSize(WizSmartScaleUI(16), WizSmartScaleUI(16))
+static const WizIconOptions ICON_OPTIONS(WIZ_TINT_COLOR, WizColorButtonIcon, WIZ_TINT_COLOR);
+
 
 WizSearchEdit::WizSearchEdit(QWidget* parent)
     : QLineEdit(parent)
     , m_menu(new QMenu(this))
 {    
-    m_searchIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "mactoolbarsearch", SEARCH_ICON_SIZE);
-    m_deleteIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "mactoolbardelete", DELETE_ICON_SIZE);
+    m_searchIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "mactoolbarsearch", SEARCH_ICON_SIZE, ICON_OPTIONS);
+    m_deleteIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "mactoolbardelete", DELETE_ICON_SIZE, ICON_OPTIONS);
 
     m_menu->addAction(tr("Advanced search"), this, SLOT(on_actionAdvancedSearch()));
     m_menu->addAction(tr("Add custom search"), this, SLOT(on_addCustomSearch()));
-
 }
 
 void WizSearchEdit::on_actionAdvancedSearch()

@@ -1758,7 +1758,11 @@ void WizMainWindow::layoutTitleBar()
     //
     QLabel* label = new QLabel(this);
     label->setFixedHeight(1);
-    label->setStyleSheet(QString("QLabel{background-color:#aeaeae; border: none;}"));
+    if (isDarkMode()) {
+        label->setStyleSheet(QString("QLabel{background-color:#000000; border: none;}"));
+    } else {
+        label->setStyleSheet(QString("QLabel{background-color:#aeaeae; border: none;}"));
+    }
 
     layout->addItem(layoutTitle);
     layout->addWidget(label);
