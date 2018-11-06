@@ -1781,7 +1781,15 @@ void WizMainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
     m_toolBar->showInWindow(this);
-
+    //
+    //reset mac toolbar icons
+    QString skin = userSettings().skin();
+    QSize size = QSize(32, 32);
+    const WizIconOptions ICON_OPTIONS = WizIconOptions(Qt::transparent, "#a6a6a6", Qt::transparent);
+    m_actions->actionFromName(WIZACTION_GLOBAL_SYNC)->setIcon(::WizLoadSkinIcon(skin, WIZACTION_GLOBAL_SYNC, size, ICON_OPTIONS));
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setIcon(::WizLoadSkinIcon(skin, WIZACTION_GLOBAL_GOBACK, size, ICON_OPTIONS));
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setIcon(::WizLoadSkinIcon(skin, WIZACTION_GLOBAL_GOFORWARD, size, ICON_OPTIONS));
+    //
     m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(false);
     m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(false);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
