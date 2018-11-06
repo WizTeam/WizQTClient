@@ -1182,12 +1182,12 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     QString titleHtmlColorHtml = "<font color='" + titleHtmlColor + "'>";
     QString titleHtmlColorHtmlEnd = "</font>";
     //
-    QString title2 = "<div style='font-size:14px;line-height:130%'>" + titleHtmlColorHtml + newTitle + titleHtmlColorHtmlEnd + "</div>";
+    QString title2 = QString("<div style='font-size:%1px;line-height:130%'>").arg(WizSmartScaleUI(14)) + titleHtmlColorHtml + newTitle + titleHtmlColorHtmlEnd + "</div>";
     //
     QString info2 = infoHtmlColorHtml + info + infoHtmlColorHtmlEnd;
     QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
     //
-    QString other = "<div style='font-size:12px;line-height:140%'>" + info2  + "<br />" + abs2 + "</div>";
+    QString other =  QString("<div style='font-size:%1px;line-height:140%'>").arg(WizSmartScaleUI(12)) + info2  + "<br />" + abs2 + "</div>";
 
     QString html = title2 + other;
     //
