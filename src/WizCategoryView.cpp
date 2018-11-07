@@ -3420,8 +3420,7 @@ void WizCategoryView::resetSections()
                     WizOEMSettings oemSettings(m_dbMgr.db().getAccountPath());
                     if(CATEGORY_TEAM_GROUPS == sectionName && !oemSettings.isForbidCreateBiz())
                     {
-                        QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "category_create_group.png";
-                        pExistingSection->setExtraButtonIcon(strIconPath);
+                        pExistingSection->setExtraButtonIcon("category_create_group");
                     }
                     insertTopLevelItem(i, pExistingSection);
                     i++;
@@ -3776,8 +3775,7 @@ void WizCategoryView::setBizRootItemExtraButton(WizCategoryViewItemBase* pItem, 
         WizDatabase& db = m_dbMgr.db();
         if (bizData.bizIsDue || db.isBizServiceExpr(bizData.bizGUID))
         {
-            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
-            pItem->setExtraButtonIcon(strIconPath);
+            pItem->setExtraButtonIcon("bizDue");
         }
         else
         {
@@ -3793,8 +3791,7 @@ void WizCategoryView::setGroupRootItemExtraButton(WizCategoryViewItemBase* pItem
         WizDatabase& db = m_dbMgr.db(gData.strGroupGUID);
         if (db.isStorageLimit() || db.isTrafficLimit() || db.isNoteCountLimit())
         {
-            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "groupLimit.png";
-            pItem->setExtraButtonIcon(strIconPath);
+            pItem->setExtraButtonIcon("groupLimit");
         }
         else
         {
