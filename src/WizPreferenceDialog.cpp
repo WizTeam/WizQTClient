@@ -27,9 +27,23 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
 {
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        setStyleSheet("color:#e9e9e9");
+    }
+#endif
+    //
     ui->setupUi(this);
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
+    //
+#ifdef Q_OS_MAC
+    ui->checkBoxDarkMode->setVisible(false);
+#else
+    ui->checkBoxDarkMode->setChecked(isDarkMode());
+#endif
+
 
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
 
@@ -173,7 +187,7 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
             arg(m_app.userSettings().defaultFontFamily())
             .arg(m_app.userSettings().defaultFontSize());
     ui->editFont->setText(strFont);
-
+    //
     connect(ui->buttonFontSelect, SIGNAL(clicked()), SLOT(onButtonFontSelect_clicked()));
 
     //
@@ -182,9 +196,23 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     ui->spinBox_left->setValue(m_app.userSettings().printMarginValue(wizPositionLeft));
     ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
+    //
+    if (isDarkMode()) {
+        QString darkStyleSheet = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        ui->editFont->setStyleSheet(darkStyleSheet);
+        ui->spinBox_bottom->setStyleSheet(darkStyleSheet);
+        ui->spinBox_left->setStyleSheet(darkStyleSheet);
+        ui->spinBox_right->setStyleSheet(darkStyleSheet);
+        ui->spinBox_top->setStyleSheet(darkStyleSheet);
+        //
+    }
+
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
-    updateEditorBackgroundColor(strColor);
+    if (isDarkMode()) {
+        strColor = WizColorLineEditorBackground.name();
+    }
+    updateEditorBackgroundColor(strColor, false);
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
@@ -373,6 +401,14 @@ void WizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
     mainWindow->setSystemTrayIconVisible(checked);
 }
 
+#ifndef Q_OS_MAC
+void WizPreferenceWindow::on_checkBoxDarkMode_clicked(bool checked)
+{
+    WizSettings wizSettings(Utils::WizPathResolve::globalSettingsFile());
+    wizSettings.setDarkMode(checked);
+}
+#endif
+
 void WizPreferenceWindow::on_comboBox_unit_currentIndexChanged(int index)
 {
     m_app.userSettings().setPrintMarginUnit(index);
@@ -414,20 +450,25 @@ void WizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
     if (dlg.exec() == QDialog::Accepted)
     {
         QString strColor = dlg.currentColor().name();
-        updateEditorBackgroundColor(strColor);
+        updateEditorBackgroundColor(strColor, true);
     }
 }
 
 void WizPreferenceWindow::on_pushButtonClearBackground_clicked()
 {
-    updateEditorBackgroundColor("");
+    updateEditorBackgroundColor("", true);
 }
 
-void WizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
+void WizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName, bool save)
 {
-    m_app.userSettings().setEditorBackgroundColor(strColorName);
+    if (save) {
+        m_app.userSettings().setEditorBackgroundColor(strColorName);
+    }
+    //
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                             "{ border: 1px; background: %1; height:20px;} ").arg(strColorName));
+                                                             "{ border: 1px; background: %1; height:%2px;} ")
+                                                 .arg(strColorName)
+                                                 .arg(WizSmartScaleUI(20)));
     ui->pushButtonBackgroundColor->setText(strColorName.isEmpty() ? tr("Click to select color") : QString());
     ui->pushButtonClearBackground->setVisible(!strColorName.isEmpty());
 

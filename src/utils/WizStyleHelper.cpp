@@ -13,8 +13,10 @@
 
 #include "WizPathResolve.h"
 #include "../share/WizMisc.h"
+#include "../utils/WizMisc.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
+#include "../share/WizUIBase.h"
 
 #include "utils/WizLogger.h"
 
@@ -22,9 +24,11 @@
 #include "mac/WizMacHelper.h"
 #endif
 
+
 namespace Utils {
 
 WizSettings* WizStyleHelper::m_settings = 0;
+#define BADGE_ICON_SIZE QSize(WizSmartScaleUI(14), WizSmartScaleUI(14))
 
 void WizStyleHelper::initPainterByDevice(QPainter* p)
 {
@@ -73,38 +77,100 @@ QString WizStyleHelper::themeName()
     return strTheme;
 }
 
-QString WizStyleHelper::skinResourceFileName(const QString& strName, bool need2x)
+//QString WizStyleHelper::skinResourceFileName(const QString& strName, bool need2x)
+//{
+//    bool use2x = need2x && ::WizIsHighPixel();
+//    return ::WizGetSkinResourceFileName(themeName(),
+//                                        (use2x ? strName + "@2x" : strName));
+//}
+
+QPixmap WizStyleHelper::loadPixmap(const QString& strName)
 {
-    bool use2x = need2x && ::WizIsHighPixel();
-    return ::WizGetSkinResourceFileName(themeName(),
-                                        (use2x ? strName + "@2x" : strName));
+    QString fileName = ::WizGetSkinResourceFileName(themeName(), strName);
+#ifdef Q_OS_MAC
+    return QPixmap(fileName);
+#else
+    QString ext = Utils::WizMisc::extractFileExt(fileName);
+    if (ext != ".png") {
+        qDebug() << "load pixmap support png only";
+        return QPixmap();
+    }
+    //
+    QPixmap org(fileName);
+    QSize orgSize = org.size();
+    QSize scaledSize = QSize(WizSmartScaleUI(orgSize.width()), WizSmartScaleUI(orgSize.height()));
+    if (orgSize == scaledSize) {
+        return org;
+    }
+    //
+    QString x2fileName = ::WizGetSkinResourceFileName(themeName(), strName + "@2x");
+    if (QFile::exists(x2fileName)) {
+        QPixmap x2(x2fileName);
+        qDebug() << x2.devicePixelRatio();
+        x2.setDevicePixelRatio(1);
+        if (x2.size() == scaledSize) {
+            return x2;
+        }
+        //
+        QPixmap ret = x2.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        return ret;
+    } else {
+        QPixmap ret = org.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        return ret;
+    }
+#endif
 }
 
-QIcon WizStyleHelper::loadIcon(const QString& strName)
+QString WizStyleHelper::createTempPixmap(const QString& strName)
+{
+
+    QString fileName = ::WizGetSkinResourceFileName(themeName(), strName);
+#ifdef Q_OS_MAC
+    return fileName;
+#else
+    QString ext = Utils::WizMisc::extractFileExt(fileName);
+    if (ext != ".png") {
+        qDebug() << "load pixmap support png only";
+        return fileName;
+    }
+    //
+    QPixmap org(fileName);
+    QSize orgSize = org.size();
+    QSize scaledSize = QSize(WizSmartScaleUI(orgSize.width()), WizSmartScaleUI(orgSize.height()));
+    if (orgSize == scaledSize) {
+        return fileName;
+    }
+    //
+    QString tempFileName = Utils::WizPathResolve::tempPath() + strName
+            + WizIntToStr(scaledSize.width()) + "x" + WizIntToStr(scaledSize.height())
+            + ".png";
+    if (QFile::exists(tempFileName)) {
+        return tempFileName;
+    }
+    //
+    QString x2fileName = ::WizGetSkinResourceFileName(themeName(), strName + "@2x");
+    if (QFile::exists(x2fileName)) {
+        QPixmap x2(x2fileName);
+        if (x2.size() == scaledSize) {
+            return x2fileName;
+        }
+        //
+        QPixmap ret = x2.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        ret.save(tempFileName);
+        return tempFileName;
+    } else {
+        QPixmap ret = org.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        ret.save(tempFileName);
+        return tempFileName;
+    }
+#endif
+}
+
+
+QIcon WizStyleHelper::loadIcon(const QString& strName, QSize size)
 {
     QString strThemeName = themeName();
-    QString strIconNormal = ::WizGetSkinResourceFileName(strThemeName, strName);
-    QString strIconActive1 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_on");
-    QString strIconActive2 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_selected");
-
-    if (!QFile::exists(strIconNormal)) {
-        qWarning() << "load icon failed, filePath:" << strIconNormal << " name : " << strName;
-        return QIcon();
-    }
-
-    QIcon icon;
-    icon.addFile(strIconNormal, QSize(), QIcon::Normal, QIcon::Off);
-
-    // used for check state
-    if (QFile::exists(strIconActive1)) {
-        icon.addFile(strIconActive1, QSize(), QIcon::Active, QIcon::On);
-    }
-
-    // used for sunken state
-    if (QFile::exists(strIconActive2)) {
-        icon.addFile(strIconActive2, QSize(), QIcon::Active, QIcon::Off);
-    }
-
+    QIcon icon = WizLoadSkinIcon(strThemeName, strName, size);
     return icon;
 }
 
@@ -200,11 +266,11 @@ QString WizStyleHelper::wizCommonStyleSheet()
         qss.close();
 
         //
-        style.replace("WizComboBoxDownArrow", skinResourceFileName("comboBox_downArrow", true));
-        style.replace("WizSpinBoxUpButton", skinResourceFileName("spinbox_upButton"));
-        style.replace("WizSpinBoxUpButtonPressed", skinResourceFileName("spinbox_upButton_selected"));
-        style.replace("WizSpinBoxDownButton", skinResourceFileName("spinbox_downButton"));
-        style.replace("WizSpinBoxDownButtonPressed", skinResourceFileName("spinbox_downButton_selected"));
+        style.replace("WizComboBoxDownArrow", createTempPixmap("comboBox_downArrow"));
+        style.replace("WizSpinBoxUpButton", createTempPixmap("spinbox_upButton"));
+        style.replace("WizSpinBoxUpButtonPressed", createTempPixmap("spinbox_upButton_selected"));
+        style.replace("WizSpinBoxDownButton", createTempPixmap("spinbox_downButton"));
+        style.replace("WizSpinBoxDownButtonPressed", createTempPixmap("spinbox_downButton_selected"));
 
     }
     return style;
@@ -214,16 +280,16 @@ QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 {
     return QString("QScrollBar {\
             background: #FFFFFF;\
-            width: 12px; \
+            width: %1px; \
         }\
         QScrollBar::handle:vertical {\
-            width: 6px; \
+            width: %2px; \
             background:#DADADA; \
-            border-radius:3px;\
-            min-height:20; \
-            margin-top:%1px; \
-            margin-right:3px; \
-            margin-left:3px; \
+            border-radius:%3px;\
+            min-height:%4px; \
+            margin-top:%5px; \
+            margin-right:%6px; \
+            margin-left:%7px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -234,7 +300,15 @@ QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(marginTop);
+        }")
+        .arg(WizSmartScaleUI(12))
+        .arg(WizSmartScaleUI(6))
+        .arg(WizSmartScaleUI(3))
+        .arg(WizSmartScaleUI(20))
+        .arg(WizSmartScaleUI(marginTop))
+        .arg(WizSmartScaleUI(3))
+        .arg(WizSmartScaleUI(3))
+        ;
 }
 
 QSize WizStyleHelper::treeViewItemIconSize()
@@ -477,67 +551,27 @@ QColor WizStyleHelper::listViewItemBackground(int stat)
 
 QColor WizStyleHelper::listViewItemType(bool bSelected, bool bFocused)
 {
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/TypeFocus", "#3177EE").toString());
-//        } else {
-//            return QColor(getValue("Documents/TypeLoseFocus", "#3177EE").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Type", "#3177EE").toString());
-//    }
+    return QColor(getValue("Documents/Type", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/TitleFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/TitleLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Title", "#464646").toString());
-//    }
+    return QColor(getValue("Documents/Title", "#464646").toString());
 }
 
 QColor WizStyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/LeadFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/LeadLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
-//    }
+    return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
 }
 
 QColor WizStyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
-{   
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/LocationFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/LocationLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Location", "#3177EE").toString());
-//    }
+{
+    return QColor(getValue("Documents/Location", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 {    
-//    if (bSelected) {
-//        if (bFocused) {
-//            return QColor(getValue("Documents/SummaryFocus", "#ffffff").toString());
-//        } else {
-//            return QColor(getValue("Documents/SummaryLoseFocus", "#6a6a6a").toString());
-//        }
-//    } else {
-        return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
-//    }
+    return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
 }
 
 QColor WizStyleHelper::listViewMultiLineFirstLine(bool bSelected)
@@ -561,15 +595,18 @@ QColor WizStyleHelper::listViewMultiLineOtherLine(bool bSelected)
 QIcon WizStyleHelper::listViewBadge(int type)
 {
     switch (type) {
-    case BadgeAttachment:
-        return loadIcon("document_containsattach");
-        break;
-    case BadgeEncryptedInTitle:
-        return loadIcon("document_encryptedInTitle");
-        break;        
-    case BadgeEncryptedInSummary:
-        return loadIcon("document_encryptedInSummary");
-        break;
+    case BadgeAttachment: {
+        static QIcon icon  = loadIcon("document_containsattach", BADGE_ICON_SIZE);
+        return icon;
+    }
+    case BadgeEncryptedInTitle: {
+        static QIcon icon  = loadIcon("document_encryptedInTitle", BADGE_ICON_SIZE);
+        return icon;
+    }
+    case BadgeEncryptedInSummary: {
+        static QIcon icon  = loadIcon("document_encryptedInTitle", BADGE_ICON_SIZE);
+        return icon;
+    }
     default:
         break;
     }
@@ -619,7 +656,11 @@ void WizStyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Wi
     case ListBGTypeActive:
     {
         QRect rcBg = rc.adjusted(1, 1, -2, -borderMargin);
-        drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
+        if (isDarkMode()) {
+            drawSelectBorder(p, rcBg, QColor("#0058de"), 2);
+        } else {
+            drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
+        }
     }
 //        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
@@ -854,15 +895,8 @@ QRect WizStyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, in
 QRect WizStyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType,  bool bFocus, bool bSelect)
 {
     QIcon attachIcon(listViewBadge(nType));
-    QList<QSize> sizes = attachIcon.availableSizes();
-    QSize iconSize = sizes.first();
-    if (WizIsHighPixel() && sizes.count() >=2)
-    {
-        iconSize = QSize(sizes.last().width() / 2, sizes.last().height() / 2);
-    }
-//    int nLeftMargin = 2;
-//    QRect rcb(rc.x() + (rc.width() - iconSize.width()) / 2, rc.y() + (rc.height() - iconSize.height()) / 2,
-//              iconSize.width(), iconSize.height());//
+    //
+    QSize iconSize = BADGE_ICON_SIZE;
     QRect rcb = rc.adjusted(0, margin(), 0, 0);
     rcb.setSize(iconSize);
     if (bSelect && bFocus) {
@@ -1026,11 +1060,6 @@ int WizStyleHelper::titleEditorHeight()
     return WizSmartScaleUI(30);
 }
 
-int WizStyleHelper::titleIconHeight()
-{
-    return WizSmartScaleUI(12);
-}
-
 int WizStyleHelper::editToolBarHeight()
 {
     return WizSmartScaleUI(30);
@@ -1064,7 +1093,14 @@ int WizStyleHelper::editComboFontSize()
 QVariant WizStyleHelper::getValue(const QString& key, const QVariant& defaultValue)
 {
     if (!m_settings) {
-        m_settings = new WizSettings(WizPathResolve::themePath(themeName()) + "skin.ini");
+        QString fileName = WizPathResolve::themePath(themeName()) + "skin.ini";
+        if (isDarkMode()) {
+            QString darkFileName = WizPathResolve::themePath(themeName()) + "skin_dark.ini";
+            if (WizPathFileExists(darkFileName)) {
+                fileName = darkFileName;
+            }
+        }
+        m_settings = new WizSettings(fileName);
     }
 
     return m_settings->value(key, defaultValue);
@@ -1099,8 +1135,8 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
     if (!title.isEmpty()) {
         bool drawEncrpytIconInTitle = nBadgeType & DocTypeEncrytedInTitle;
         bool drawAttachmentInTitle = nBadgeType & DocTypeContainsAttachment;
-        int nSpace4AttachIcon = drawEncrpytIconInTitle * 16 + drawAttachmentInTitle * 16;
-        QRect rcTitle = rcd.adjusted(0, 4, 0, 0);
+        int nSpace4AttachIcon = drawEncrpytIconInTitle * WizSmartScaleUI(16) + drawAttachmentInTitle * WizSmartScaleUI(16);
+        QRect rcTitle = rcd.adjusted(0, WizSmartScaleUI(4), 0, 0);
         //
         if (nBadgeType & DocTypeAlwaysOnTop)
         {
@@ -1123,7 +1159,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
         rcAttach.setHeight(nFontHeight);
         if (drawEncrpytIconInTitle) {
             QRect rcEncrypt = Utils::WizStyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
-            rcAttach.setCoords(rcEncrypt.right() + 4, rcAttach.top(), rcd.right(), rcTitle.bottom());
+            rcAttach.setCoords(rcEncrypt.right() + WizSmartScaleUI(4), rcAttach.top(), rcd.right(), rcTitle.bottom());
         }
 
         if (drawAttachmentInTitle) {
@@ -1135,9 +1171,9 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
 
     QFont fontThumb;
     nFontHeight = Utils::WizStyleHelper::fontThumb(fontThumb);
-    QPixmap pixGreyPoint(Utils::WizStyleHelper::skinResourceFileName("document_grey_point", true));
+    QPixmap pixGreyPoint(Utils::WizStyleHelper::loadPixmap("document_grey_point"));
     QRect rcLead = rcd;   //排序类型或标签等
-    int nLeadHeight;
+    int nLeadHeight = 0;
     if (!lead.isEmpty()) {
         for (int i = 0; i < lead.count(); i++) {
             QString strInfo(lead.at(i));
@@ -1145,7 +1181,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
                 continue;
 
             if (i > 0) {
-                QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
+                QRect rcGreyPoint = rcLead.adjusted(0, WizSmartScaleUI(8), 0, 0);
                 rcGreyPoint.setWidth(4);
                 rcGreyPoint.setHeight(4);
                 Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
@@ -1160,7 +1196,7 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
     }
 
     if (!location.isEmpty()) {
-        QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
+        QRect rcGreyPoint = rcLead.adjusted(0, WizSmartScaleUI(8), 0, 0);
         rcGreyPoint.setWidth(4);
         rcGreyPoint.setHeight(4);
         Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
@@ -1173,10 +1209,10 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
         nLeadHeight = rcLead.height();
     }
 
-    QRect rcSummary(rcd.adjusted(0, nLeadHeight + 8, 0, 0));
+    QRect rcSummary(rcd.adjusted(0, nLeadHeight + WizSmartScaleUI(8), 0, 0));
     if (nBadgeType & DocTypeEncrytedInSummary) {
         QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
-        QSize sz = badgeIcon.availableSizes().first();
+        QSize sz = BADGE_ICON_SIZE;
         QRect rcPix(rcSummary.x() + (rcSummary.width() - sz.width()) / 2, rcSummary.y() + (rcSummary.height() - sz.height()) / 2,
                     sz.width(), sz.height());
         if (bSelected && bFocused) {
@@ -1189,12 +1225,12 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
 
         if (!thumbPix.isNull()) {
             QRect rcPix = drawThumbnailPixmap(p, rcd, thumbPix);
-            rcSummary.setRight(rcPix.left() - 4);
+            rcSummary.setRight(rcPix.left() - WizSmartScaleUI(4));
         }
 
         if (!abs.isEmpty()) {          //  笔记内容
             QString strText(abs);
-            rcSummary.adjust(0, -4, 0, 0);
+            rcSummary.adjust(0, WizSmartScaleUI(-4), 0, 0);
             p->setClipRect(rcSummary);
             QColor colorSummary = Utils::WizStyleHelper::listViewItemSummary(bSelected, bFocused);
             if (!strText.isEmpty()) {
@@ -1238,12 +1274,12 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     QString titleHtmlColorHtml = "<font color='" + titleHtmlColor + "'>";
     QString titleHtmlColorHtmlEnd = "</font>";
     //
-    QString title2 = "<div style='font-size:14px;line-height:130%'>" + titleHtmlColorHtml + newTitle + titleHtmlColorHtmlEnd + "</div>";
+    QString title2 = QString("<div style='font-size:%1px;line-height:130%'>").arg(WizSmartScaleUI(14)) + titleHtmlColorHtml + newTitle + titleHtmlColorHtmlEnd + "</div>";
     //
     QString info2 = infoHtmlColorHtml + info + infoHtmlColorHtmlEnd;
     QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
     //
-    QString other = "<div style='font-size:12px;line-height:140%'>" + info2  + "<br />" + abs2 + "</div>";
+    QString other =  QString("<div style='font-size:%1px;line-height:140%'>").arg(WizSmartScaleUI(12)) + info2  + "<br />" + abs2 + "</div>";
 
     QString html = title2 + other;
     //

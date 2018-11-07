@@ -1,10 +1,10 @@
-﻿#ifndef WIZMACHELPER_H
-#define WIZMACHELPER_H
+﻿#ifndef WIZUIHELPER_H
+#define WIZUIHELPER_H
 
 #include <QtGui>
 #include <QSplitter>
 
-//#include "WizDef.h"
+#include "WizUIBase.h"
 
 QBrush WizGetLeftViewBrush();
 
@@ -48,4 +48,5 @@ protected:
     virtual QSplitterHandle* createHandle();    
 };
 
-#endif // WIZMACHELPER_H
+
+#endif // WIZUIHELPER_H

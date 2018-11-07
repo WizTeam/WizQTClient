@@ -82,22 +82,12 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
     {
         QString strSkinPath = ::WizGetSkinResourcePath(strSkinName);
 
-        bool bHightPixel = WizIsHighPixel();
-        QString strIconName = bHightPixel ? "branch_expanded@2x.png" : "branch_expanded.png";
-        m_expandedImage.load(strSkinPath + strIconName);
-        strIconName = bHightPixel ? "branch_collapsed@2x.png" : "branch_collapsed.png";
-        m_collapsedImage.load(strSkinPath + strIconName);
-        strIconName = bHightPixel ? "branch_expandedSelected@2x.png" : "branch_expandedSelected.png";
-        m_expandedImageSelected.load(strSkinPath + strIconName);
-        strIconName = bHightPixel ? "branch_collapsedSelected@2x.png" : "branch_collapsedSelected.png";
-        m_collapsedImageSelected.load(strSkinPath + strIconName);
-        m_imgDefaultAvatar.load(strSkinPath + "avatar_default.png");
-
-        //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
-        //m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
-
-//        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
-//        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
+        m_expandedImage = Utils::WizStyleHelper::loadPixmap("branch_expanded").toImage();
+        m_collapsedImage = Utils::WizStyleHelper::loadPixmap("branch_collapsed").toImage();
+        m_expandedImageSelected = Utils::WizStyleHelper::loadPixmap("branch_expandedSelected").toImage();
+        m_collapsedImageSelected = Utils::WizStyleHelper::loadPixmap("branch_collapsedSelected").toImage();
+        m_imgDefaultAvatar = Utils::WizStyleHelper::loadPixmap("avatar_default").toImage();
+        //
         m_imagePushButton.setImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
         m_imagePushButtonHot.setImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
         m_imagePushButtonPressed.setImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
@@ -229,6 +219,10 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
     int lineHeight = fm.height() + 2;
 
     QColor color("#535353");
+    if (isDarkMode()) {
+        color = QColor("#AAAAAA");
+    }
+    //
     for (int line = 0; line < wrapTextLineText && line < lineCount; line++)
     {        
         CString strText = view->itemText(vopt->index, line);
@@ -336,6 +330,8 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const WizDocumentListView *view = dynamic_cast<const WizDocumentListView *>(widget))
             {
+                QSize sz = view->size();
+                QRect rc = vopt->rect;
 //                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
                 view->drawItem(painter, vopt);
                 //drawDocumentListViewItem(vopt, painter, view);
@@ -400,9 +396,9 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
                     if ((opt->state & QStyle::State_Selected)) {        //(opt->state & State_HasFocus)
-                        drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(8, 0, 0, 0));
+                        drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(0, 0, 0, 0));
                     } else {
-                        drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
+                        drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(0, 0, 0, 0));
                     }
                 }
                 return;
@@ -532,6 +528,7 @@ protected:
         switch (element)
         {
         case CE_PushButton:
+        case CE_PushButtonBevel:
             {
                 const QStyleOptionButton* vopt = qstyleoption_cast<const QStyleOptionButton *>(option);
                 ATLASSERT(vopt);

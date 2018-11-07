@@ -15,11 +15,7 @@ WizButton::WizButton(QWidget* parent)
 
 QSize WizButton::sizeHint() const
 {
-#ifdef Q_OS_LINUX
-    return QSize(32, 32);
-#else
-    return QSize(WizSmartScaleUI(24), WizSmartScaleUI(24));
-#endif
+    return QSize(WizSmartScaleUI(32), WizSmartScaleUI(32));
 }
 
 void WizButton::setAction(QAction* action)
@@ -42,6 +38,10 @@ void WizButton::paintEvent(QPaintEvent *event)
     QIcon::State state = QIcon::Off;
     if (opt.state & QStyle::State_On)
         state = QIcon::On;
+    //
+    QRect rc = opt.rect;
+    rc.setSize(iconSize());
+    rc.moveCenter(opt.rect.center());
 
-    opt.icon.paint(&p, opt.rect, Qt::AlignCenter, mode, state);
+    opt.icon.paint(&p, rc, Qt::AlignCenter, mode, state);
 }

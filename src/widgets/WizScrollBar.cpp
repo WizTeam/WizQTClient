@@ -1,13 +1,17 @@
 ﻿#include "WizScrollBar.h"
-
+#include "share/WizUIBase.h"
+#include "share/WizQtHelper.h"
 #include <QtGui>
 
 WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
     , m_bgColor("transparent")
-    , m_handleColor("#C1C1C1")
+    , m_handleColor("#88C1C1C1")
     , m_bLeftBorder(false)
 {
+    if (isDarkMode()) {
+        m_handleColor = "#88686868";
+    }
 
     // FIXME:  hard code
     setHandleVisible(true);
@@ -23,7 +27,7 @@ WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
 
 QSize WizScrollBar::sizeHint() const
 {
-    return m_bLeftBorder ? QSize(13, 1) : QSize(12, 1);
+    return m_bLeftBorder ? QSize(WizSmartScaleUI(13), 1) : QSize(WizSmartScaleUI(12), 1);
 }
 
 void WizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -102,6 +106,12 @@ void WizScrollBar::on_scrollTimeout()
 
 void WizScrollBar::setHandleVisible(bool visible)
 {
+    QString leftBorder;
+    if (isDarkMode()) {
+        leftBorder = "border-left:1px solid #000000;";
+    } else {
+        leftBorder = "border-left:1px solid #e7e7e7;";
+    }
     setStyleSheet(
         QString("QScrollBar {\
             background: %1;\
@@ -109,12 +119,12 @@ void WizScrollBar::setHandleVisible(bool visible)
         }\
         QScrollBar::handle {\
             background: %3;\
-            min-height: 30px;\
+            min-height: %4px;\
         }\
         QScrollBar::handle:vertical {\
-            margin: 0px 3px 0px 3px;\
-            border-radius:3px;\
-            width:6px; \
+            margin: 0px %5px 0px %5px;\
+            border-radius:%5px;\
+            width:%6px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -125,8 +135,14 @@ void WizScrollBar::setHandleVisible(bool visible)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(m_bgColor).arg(m_bLeftBorder ? "border-left:1px solid #e7e7e7;" : "")
-        .arg(visible ? m_handleColor : "transparent"));
+        }")
+        .arg(m_bgColor)
+        .arg(m_bLeftBorder ? leftBorder : "")
+        .arg(visible ? m_handleColor : "transparent")
+        .arg(WizSmartScaleUI(30))
+        .arg(WizSmartScaleUI(3))
+        .arg(WizSmartScaleUI(6))
+        );
 }
 
 

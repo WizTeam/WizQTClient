@@ -16,6 +16,7 @@
 #include "share/WizDatabaseManager.h"
 #include "share/jsoncpp/json/json.h"
 #include "utils/WizStyleHelper.h"
+#include "share/WizUIBase.h"
 
 #define EMAIL_CONTACTS "EMAILCONTACTS"
 
@@ -33,6 +34,8 @@ enum returnCode {
     codeErrorServer = 500           //:服务器错误
 };
 
+const WizIconOptions ICON_OPTIONS = WizIconOptions(Qt::transparent, "#a6a6a6", Qt::transparent);
+
 WizEmailShareDialog::WizEmailShareDialog(WizExplorerApp& app, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::WizEmailShareDialog)
@@ -41,11 +44,11 @@ WizEmailShareDialog::WizEmailShareDialog(WizExplorerApp& app, QWidget *parent)
 {
     ui->setupUi(this);
 //    ui->checkBox_saveNotes->setVisible(false);
-    QPixmap pix(Utils::WizStyleHelper::skinResourceFileName("send_email"));
-    QIcon icon(Utils::WizStyleHelper::skinResourceFileName("send_email"));
+    QPixmap pix(Utils::WizStyleHelper::loadPixmap("send_email"));
+    QIcon icon = WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "send_email", pix.size(), ICON_OPTIONS);
     ui->toolButton_send->setIcon(icon);
     ui->toolButton_send->setIconSize(pix.size());
-    ui->toolButton_contacts->setIcon(QIcon(Utils::WizStyleHelper::skinResourceFileName("document_badge")));
+    ui->toolButton_contacts->setIcon(WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "document_badge", QSize(), ICON_OPTIONS));
     ui->toolButton_contacts->setToolTip(tr("Show frequent contacts list"));
 
     m_contactDialog = new QDialog(this);
@@ -66,6 +69,14 @@ WizEmailShareDialog::WizEmailShareDialog(WizExplorerApp& app, QWidget *parent)
 
     bool autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
     ui->checkBox_saveNotes->setChecked(autoInsert);
+    //
+    if (isDarkMode()) {
+        QString darkStyleSheet = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        ui->lineEdit_subject->setStyleSheet(darkStyleSheet);
+        ui->lineEdit_to->setStyleSheet(darkStyleSheet);
+        ui->textEdit_notes->setStyleSheet(darkStyleSheet);
+        m_contactList->setStyleSheet(darkStyleSheet);
+    }
 }
 
 WizEmailShareDialog::~WizEmailShareDialog()

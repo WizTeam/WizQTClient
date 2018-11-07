@@ -454,7 +454,7 @@ int WizSmartScaleUI(int spec)
         else
         {
             // 当程序窗口还没有初始化时，将得不到程序关联屏幕的相关数据，应该在窗口初始化完成后调用本函数。
-            Q_ASSERT(false);
+            //Q_ASSERT(false);
         }
     }
     //

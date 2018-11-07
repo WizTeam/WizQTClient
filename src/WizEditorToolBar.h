@@ -153,7 +153,6 @@ protected Q_SLOTS:
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
     void on_btnStrikeThrough_clicked();
-    void on_btnJustify_clicked();
     void on_btnJustifyLeft_clicked();
     void on_btnJustifyCenter_clicked();
     void on_btnJustifyRight_clicked();

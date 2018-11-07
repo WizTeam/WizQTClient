@@ -136,6 +136,9 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 {
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage(this);
     setPage(page);
+    if (isDarkMode()) {
+        page->setBackgroundColor(QColor("#272727"));
+    }
 
     connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
     connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
@@ -990,6 +993,14 @@ QString WizDocumentWebView::getHighlightKeywords()
 
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
+    WizDocumentWebView* self = this;
+    if (isDarkMode()) {
+        //
+        QTimer::singleShot(1000, [=] {
+            self->setVisible(true);
+        });
+    }
+    //
     if (!ok)
         return;
     //
@@ -1004,10 +1015,11 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     //
     QString noteType = getNoteType();
     //
-    QString strCode = WizFormatString6("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\", %5, \"%6\");",
+    QString strCode = WizFormatString7("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\", %5, \"%6\", %7);",
                                        editorPath, lang, userGUID, userAlias,
                                        ignoreTable ? "true" : "false",
-                                       noteType);
+                                       noteType,
+                                       isDarkMode() ? "true" : "false");
     qDebug() << strCode;
     if (m_currentEditorMode == modeEditor)
     {
@@ -1249,12 +1261,11 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
 #ifdef DEBUG_EDITOR
-    QString strEditorJS = "http://192.168.1.73:8080/libs/wizEditor/wizEditorForMac.js";
-    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
+    QString strEditorJS = "http://192.168.1.73:8080/libs/wizDocument/wizEditorForMac.js";
 #else
     QString strEditorJS = "file:///" +  strHtmlEditorPath + "wizEditorForMac.js";
-    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
 #endif
+    QString strInit = "file:///" + strHtmlEditorPath + "editorHelper.js";
     //
     files.clear();
     files[strEditorJS] = "";
@@ -1378,6 +1389,11 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     replaceDefaultCss(strHtml);
     //
     ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
+    //
+    if (isDarkMode()) {
+        page()->setBackgroundColor(QColor("#272727"));
+        setVisible(false);
+    }
     //
     m_strNoteHtmlFileName = strFileName;
     load(QUrl::fromLocalFile(strFileName));
@@ -2319,6 +2335,14 @@ void WizDocumentWebView::saveCurrentNote()
     });
 }
 
+void WizDocumentWebView::doPaste()
+{
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        onPasteCommand();
+        //
+    });
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 

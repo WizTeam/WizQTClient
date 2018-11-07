@@ -135,29 +135,30 @@ bool WizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRect
 {
     if (const WizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
-        QString strIconPath;
         WizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
         WizMainWindow* mainWindow = WizGlobal::mainWindow();
-        bool isRetina = WizIsHighPixel();
-        strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
+        //
+        const QSize iconSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
+        static QIcon download = WizLoadSkinIcon(mainWindow->userSettings().skin(), "document_needDownload", iconSize);
+        static QIcon upload = WizLoadSkinIcon(mainWindow->userSettings().skin(), "document_needUpload", iconSize);
+        static QPixmap pixmapDownload = download.pixmap(iconSize);
+        static QPixmap pixmapUpload = upload.pixmap(iconSize);
+        //
         if (!db.isAttachmentDownloaded(item->attachment().strGUID))
         {
-            strIconPath += isRetina ? "document_needDownload@2x.png" : "document_needDownload.png";
+            extraPix = pixmapDownload;
         }
         else if (db.isAttachmentModified(item->attachment().strGUID))
         {
-            strIconPath += isRetina ? "document_needUpload@2x.png" : "document_needUpload.png";
+            extraPix = pixmapUpload;
         }
         else
             return false;
-
-        extraPix = QPixmap(strIconPath);
-        QSize szImage = extraPix.size();
-        WizScaleIconSizeForRetina(szImage);
+        //
         int nMargin = -1;
-        rcImage.setLeft(itemBound.right() - szImage.width() - nMargin);
-        rcImage.setTop(itemBound.bottom() - szImage.height() - nMargin);
-        rcImage.setSize(szImage);
+        rcImage.setLeft(itemBound.right() - iconSize.width() - nMargin);
+        rcImage.setTop(itemBound.bottom() - iconSize.height() - nMargin);
+        rcImage.setSize(iconSize);
 
         return true;
     }
@@ -676,7 +677,12 @@ WizAttachmentListWidget::WizAttachmentListWidget(QWidget* parent)
 #endif
     setPalette(pal);
 
-    setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
+    m_list->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
+    //
+    if (isDarkMode()) {
+        setStyleSheet("background-color: #333333");
+        m_list->setStyleSheet("background-color: #272727");
+    }
 }
 
 bool WizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)

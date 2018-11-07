@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>370</width>
-    <height>169</height>
+    <width>575</width>
+    <height>259</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <property name="spacing">
-      <number>0</number>
+      <number>8</number>
      </property>
      <item>
       <spacer name="verticalSpacer">
@@ -53,7 +53,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout">
          <property name="spacing">
-          <number>2</number>
+          <number>8</number>
          </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
@@ -115,52 +115,30 @@
           </layout>
          </item>
          <item>
-          <widget class="QLineEdit" name="editUserCipher"/>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="leftMargin">
-          <number>10</number>
-         </property>
-         <item>
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Preferred</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>10</width>
-             <height>23</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="WizImageButton" name="buttonOk">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>26</width>
-             <height>26</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QLineEdit" name="editUserCipher"/>
+           </item>
+           <item>
+            <widget class="WizImageButton" name="buttonOk">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>26</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -240,9 +218,6 @@
    <header>widgets/WizImageButton.h</header>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>editUserCipher</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

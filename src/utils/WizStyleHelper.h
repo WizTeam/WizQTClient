@@ -65,8 +65,9 @@ public:
 
 
     static QString themeName();
-    static QString skinResourceFileName(const QString& strName, bool need2x = false);
-    static QIcon loadIcon(const QString& strName);
+    static QPixmap loadPixmap(const QString& strName);
+    static QIcon loadIcon(const QString& strName, QSize size = QSize());
+    static QString createTempPixmap(const QString& strName); //used for style sheet
 
     static QRegion borderRadiusRegion(const QRect& rect);
     static QRegion borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
@@ -155,7 +156,6 @@ public:
     static int editorButtonHeight();
     static QMargins editorBarMargins();
     static int titleEditorHeight();
-    static int titleIconHeight();
     static int editToolBarHeight();
     static int editIconHeight();
     static int infoBarHeight();

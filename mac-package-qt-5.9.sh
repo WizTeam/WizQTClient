@@ -10,7 +10,7 @@ echo "build version : " $REV
 package_home="./macos-package"
 package_output_path="$HOME"
 
-QTDIR="/Users/weishijun/Qt5.9.4/5.9.4/clang_64"
+QTDIR="/Users/weishijun/Qt5.9.7/5.9.7/clang_64"
 
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \

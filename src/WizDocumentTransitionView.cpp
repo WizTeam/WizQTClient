@@ -6,12 +6,19 @@
 #include <QToolButton>
 
 #include "share/WizAnimateAction.h"
+#include "share/WizUIBase.h"
 
 WizDocumentTransitionView::WizDocumentTransitionView(QWidget *parent) :
     QWidget(parent)
   , m_mode(-1)
   , m_objGUID(QString())
 {
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        setStyleSheet("color:#e9e9e9");
+    }
+#endif
+
     m_labelHint = new QLabel(this);
 
     m_toolButton = new QToolButton(this);
@@ -37,7 +44,7 @@ WizDocumentTransitionView::WizDocumentTransitionView(QWidget *parent) :
     layout->addStretch(1);
     layout->setAlignment(m_labelHint, Qt::AlignCenter);
     setLayout(layout);
-
+    //
 }
 
 void WizDocumentTransitionView::showAsMode(const QString& strObjGUID, TransitionMode mode)

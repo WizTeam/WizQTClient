@@ -4,6 +4,7 @@
 
 #include "share/WizMisc.h"
 #include "utils/WizPathResolve.h"
+#include "WizUIBase.h"
 #include <QLabel>
 
 QBrush WizGetLeftViewBrush()
@@ -44,8 +45,7 @@ public:
     {
         QPainter painter(this);
 
-        // FIXME: hard-coded
-        QColor bgColor = QColor("#dbdbdb");
+        QColor bgColor = QColor(isDarkMode() ? "#000000" : "#dbdbdb");
         painter.setPen(bgColor);
         painter.setBrush(bgColor);
         painter.fillRect(event->rect(), bgColor);
@@ -91,4 +91,3 @@ QSplitterHandle *WizSplitter::createHandle()
     CWizSplitterHandle* spliter =  new CWizSplitterHandle(orientation(), this);
     return spliter;
 }
-

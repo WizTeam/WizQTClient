@@ -29,6 +29,7 @@
 #include "WizDocumentWebView.h"
 #include "WizActions.h"
 #include "utils/WizLogger.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizObjectDataDownloader.h"
 #include "share/WizAnalyzer.h"
 #include "WizDef.h"
@@ -52,6 +53,8 @@ const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
 #define WIZRECENTFONTLIST  "RecentlyUsedFont"
 
 #define WIZSHOWEXTRABUTTONITEMS "ShowExtraButtonItems"
+
+static const WizIconOptions ICON_OPTIONS(WIZ_TINT_COLOR, WizColorButtonIcon, WIZ_TINT_COLOR);
 
 struct WizComboboxStyledItem
 {    
@@ -229,7 +232,7 @@ public:
             {
                 //set default data
                 styledItem.bBold = false;
-                styledItem.nFontSize = 14;
+                styledItem.nFontSize = WizSmartScaleUI(14);
                 styledItem.strFontFamily = text;
             }
             opt.font.setPointSize(styledItem.nFontSize);
@@ -247,10 +250,10 @@ public:
             QPixmap pix = icon.pixmap(QSize(nIconSize, nIconSize), QIcon::Normal, (opt.state & QStyle::State_MouseOver) ? QIcon::On : QIcon::Off);
             if (!pix.isNull())
             {
-                painter->drawPixmap(opt.rect.x() + 4, opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , pix);
+                painter->drawPixmap(opt.rect.x() + WizSmartScaleUI(4), opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , pix);
             }
         }
-        opt.rect.setX(opt.rect.x() + nIconSize + 4);
+        opt.rect.setX(opt.rect.x() + nIconSize + WizSmartScaleUI(4));
 
         QStyledItemDelegate::paint(painter, opt, index);
     }
@@ -294,7 +297,7 @@ public:
 
         if (index.data(WizFontFamilyHelperRole).toString() == WIZSEPARATOR)
         {
-            return QSize(opt.rect.width(), 5);
+            return QSize(opt.rect.width(), WizSmartScaleUI(5));
         }
 
         //
@@ -308,7 +311,7 @@ public:
         QFontMetrics fm(font);
         QRect rc = fm.boundingRect(opt.text);
         //
-        QSize size(rc.width() + 4, rc.height() + 4);
+        QSize size(rc.width() + WizSmartScaleUI(4), rc.height() + WizSmartScaleUI(4));
         return size;
     }
 
@@ -377,23 +380,31 @@ QIcon createColorIcon(QColor color)
 #define TOOLBUTTON_ARRWO_WIDTH  WizSmartScaleUI(16)
 
 
-void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
+extern QPixmap qpixmapWithTintColor(const QPixmap& image, QColor tintColor);
 
 void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, bool bDrawRight, bool hasFocus)
 {
-    int nScale = WizIsHighPixel() ? 2 : 1;
-
     // load file
-    static QPixmap normalPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground", true));
-    static QPixmap focusPixBackground = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolButtonBackground_on", true));
-    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(6, 0, 2, normalPixBackground.height());
-    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(6, 0, 2, focusPixBackground.height());
-    QRect rcLeft(rect.x(), rect.y(), 6, rect.size().height());
-    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, 6 * nScale, normalPixBackground.height());
-    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, 6 * nScale, focusPixBackground.height());
-    int rightWidth = 8;
-    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, normalPixBackground.height());
-    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, focusPixBackground.height());
+    static QPixmap normalPixBackground = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolButtonBackground"));
+    static QPixmap focusPixBackground = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolButtonBackground_on"));
+    //
+    static bool first = true;
+    if (first) {
+        first = false;
+        if (isDarkMode()) {
+            normalPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#333333"));
+            focusPixBackground = qpixmapWithTintColor(normalPixBackground, QColor("#888888"));
+        }
+    }
+    //
+    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(WizSmartScaleUI(6), 0, WizSmartScaleUI(2), normalPixBackground.height());
+    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(WizSmartScaleUI(6), 0, WizSmartScaleUI(2), focusPixBackground.height());
+    QRect rcLeft(rect.x(), rect.y(), WizSmartScaleUI(6), rect.size().height());
+    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, WizSmartScaleUI(6), normalPixBackground.height());
+    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, WizSmartScaleUI(6), focusPixBackground.height());
+    int rightWidth = WizSmartScaleUI(8);
+    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - rightWidth, 0, rightWidth, normalPixBackground.height());
+    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - rightWidth, 0, rightWidth, focusPixBackground.height());
     QRect rcRight(rect.size().width() - rightWidth, rect.y(), rightWidth, rect.size().height());
 
     const QPixmap& pixLeft = hasFocus ? focusPixBackgroundLeft : normalPixBackgroundLeft;
@@ -401,7 +412,7 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
     const QPixmap& pixRight = hasFocus ? focusPixBackgroundRight : normalPixBackgroundRight;
     //
     painter->drawPixmap(rcLeft, bDrawLeft ? pixLeft : pixMid);
-    painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixMid);
+    painter->drawPixmap(rect.x() + WizSmartScaleUI(5), rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixMid);
     painter->drawPixmap(rcRight, bDrawRight ? pixRight : pixMid);
 }
 
@@ -409,7 +420,11 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 {
     QStylePainter painter(cm);
 
-    opt.palette.setColor(QPalette::Text, "#646464");
+    if (isDarkMode()) {
+        opt.palette.setColor(QPalette::Text, "#AAAAAA");
+    } else {
+        opt.palette.setColor(QPalette::Text, "#646464");
+    }
     painter.setPen(cm->palette().color(QPalette::Text));
 
     drawButtonBackground(&painter, opt.rect, true, true, opt.state & QStyle::State_MouseOver);
@@ -419,15 +434,22 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
         QStyleOption subOpt = opt;
 
         QRect rectSub = cm->style()->subControlRect(QStyle::CC_ComboBox, &opt, QStyle::SC_ComboBoxArrow);
-        rectSub.adjust(6, 0, -12, 0);
+        rectSub.adjust(WizSmartScaleUI(6), 0, WizSmartScaleUI(-12), 0);
 
 
-        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - 3, 0, -rectSub.height()/2 + 3);
+        subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - WizSmartScaleUI(3), 0, -rectSub.height()/2 + WizSmartScaleUI(3));
         QRect rcArrow = opt.rect;
-        rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 8);
+        rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - WizSmartScaleUI(8));
         rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
         rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
-        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarComboboxArrow", true));
+        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolbarComboboxArrow"));
+        static bool first = true;
+        if (first) {
+            first = false;
+            if (isDarkMode()) {
+                arrow = qpixmapWithTintColor(arrow, WizColorButtonIcon);
+            }
+        }
         painter.drawPixmap(rcArrow, arrow);
     }
 
@@ -438,45 +460,14 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 
     QRect editRect = cm->style()->subControlRect(QStyle::CC_ComboBox, &opt, QStyle::SC_ComboBoxEditField);
     if (!opt.currentText.isEmpty()) {
-        painter.drawItemText(editRect.adjusted(1, 0, -1, 0),
+        QPoint center = editRect.center();
+        center.setY(opt.rect.center().y());
+        editRect.moveCenter(center);
+        painter.drawItemText(editRect,//.adjusted(1, 0, -1, 0),
                      cm->style()->visualAlignment(opt.direction, Qt::AlignLeft | Qt::AlignVCenter),
                      opt.palette, opt.state & QStyle::State_Enabled, opt.currentText, QPalette::Text);
     }
 }
-
-void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt)
-{
-    p->save();
-
-    int xOffset = opt.direction == Qt::LeftToRight ? 2 : -1;
-    QMatrix matrix;
-    matrix.translate(opt.rect.center().x() + xOffset, opt.rect.center().y() + 2);
-    QPainterPath path;
-    switch(pe) {
-    default:
-    case QStyle::PE_IndicatorArrowDown:
-        break;
-    case QStyle::PE_IndicatorArrowUp:
-        matrix.rotate(180);
-        break;
-    case QStyle::PE_IndicatorArrowLeft:
-        matrix.rotate(90);
-        break;
-    case QStyle::PE_IndicatorArrowRight:
-        matrix.rotate(-90);
-        break;
-    }
-    path.moveTo(0, 2.3);
-    path.lineTo(-2.3, -2.3);
-    path.lineTo(2.3, -2.3);
-    p->setMatrix(matrix);
-    p->setPen(Qt::NoPen);
-    p->setBrush(QColor(0, 0, 0, 255));
-    p->setRenderHint(QPainter::Antialiasing);
-    p->drawPath(path);
-    p->restore();
-}
-
 
 WizDblclickableToolButton::WizDblclickableToolButton(QWidget *parent)
     : QToolButton(parent)
@@ -545,6 +536,31 @@ public:
         m_horizontalPadding_rgiht = rightPadding;
     }
 
+//    void setIcon(const QIcon &icon)
+//    {
+//        if (isDarkMode()) {
+//            //
+//            QList<QSize> sizes = icon.availableSizes();
+//            QIcon iconNew;
+//            for (auto size: sizes) {
+//                QPixmap pixmap = icon.pixmap(size);
+//                QPixmap pixmapNew = qpixmapWithTintColor(pixmap, "#cccccc");
+//                QString strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(WizGetTickCount()) + ".png";
+//                if (pixmap.size().width() / size.width() == 2) {
+//                    strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(WizGetTickCount()) + "@2x.png";
+//                }
+//                pixmapNew.save(strTempFileName);
+//                iconNew.addFile(strTempFileName);
+//                WizDeleteFile(strTempFileName);
+//            }
+//            //
+//            WizDblclickableToolButton::setIcon(iconNew);
+//        } else {
+//            WizDblclickableToolButton::setIcon(icon);
+//        }
+//    }
+
+
 protected:
     virtual void leaveEvent(QEvent* event)
     {
@@ -585,11 +601,8 @@ protected:
         p.setClipRect(opt.rect);
 
         QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-        if (mode == QIcon::Normal && (opt.state & QStyle::State_Sunken))
-            mode = QIcon::Active;
-        QIcon::State state = QIcon::Off;
         if (opt.state & QStyle::State_On)
-            state = QIcon::On;
+            mode = QIcon::Active;
 
         bool bDrawLeft = (m_position == left) || (m_position == NoPosition);
         bool bDrawRight = (m_position == right) || (m_position == NoPosition);
@@ -600,7 +613,7 @@ protected:
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         if (opt.arrowType == Qt::RightArrow)
             rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_MARGIN_WIDTH);
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
 
         if (opt.arrowType == Qt::RightArrow)
         {
@@ -608,7 +621,14 @@ protected:
             rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 3);
             rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
             rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
-            static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+            static QPixmap arrow = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolbarDownArrow"));
+            static bool first = true;
+            if (first) {
+                first = false;
+                if (isDarkMode()) {
+                    arrow = qpixmapWithTintColor(arrow, WizColorButtonIcon);
+                }
+            }
             p.drawPixmap(rcArrow, arrow);
 
         }
@@ -642,7 +662,6 @@ public:
       , m_color(Qt::transparent)
     {
         setCheckable(false);
-//        setIconSize(QSize(Utils::WizStyleHelper::editorButtonHeight(), Utils::WizStyleHelper::editorButtonHeight()));
         setPopupMode(QToolButton::MenuButtonPopup);
     }
 
@@ -686,15 +705,12 @@ protected:
 
         //
         QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-        if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
-            mode = QIcon::Active;
-        QIcon::State state = QIcon::Off;
         if (opt.state & QStyle::State_On)
-            state = QIcon::On;
+            mode = QIcon::Active;
 
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width() - ColorButtonRightArrowWidth) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
 
         QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 6, opt.iconSize.width() - 2, 2);
         p.fillRect(QRect(rectColor), m_color);
@@ -707,9 +723,17 @@ protected:
         }
 
         //arrow
-        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+        static QPixmap arrow = QPixmap(Utils::WizStyleHelper::loadPixmap("editorToolbarDownArrow"));
 #ifdef Q_OS_MAC
         int arrowHeight = arrow.height() * (WizIsHighPixel() ? 0.5f : 1);
+        //
+        static bool first = true;
+        if (first) {
+            first = false;
+            if (isDarkMode()) {
+                arrow = qpixmapWithTintColor(arrow, WizColorButtonIcon);
+            }
+        }
 #else
         int arrowHeight = TOOLBUTTON_ARRWO_WIDTH;
 #endif
@@ -956,11 +980,14 @@ public:
     {
         setFixedWidth(1);
         setFixedHeight(Utils::WizStyleHelper::editorButtonHeight());
-        setStyleSheet("background-color:#E7E7E7;");
+        if (isDarkMode()) {
+            setStyleSheet("background-color:#333333;");
+        } else {
+            setStyleSheet("background-color:#E7E7E7;");
+        }
         setAutoFillBackground(true);
     }
 };
-
 
 QWidget* createMoveAbleWidget(QWidget* parent)
 {
@@ -1027,23 +1054,45 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_comboFontFamily->setFixedWidth(122);
 
     m_comboFontSize = new CWizToolComboBox(this);
-    m_comboFontSize->setFixedWidth(48);
+    m_comboFontSize->setFixedWidth(WizSmartScaleUI(52));
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
-    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#F6F6F6;}"
-                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    if (isDarkMode()) {
+        m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#323232;}"
+                                        "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    } else {
+        m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#F6F6F6;}"
+                                        "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    }
+
     WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
     m_comboParagraph->setItemDelegate(paragraphDelegate);
     //
-    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#F6F6F6;}"
-                                     "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    if (isDarkMode()) {
+        m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#323232;}"
+                                         "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    } else {
+        m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#F6F6F6;}"
+                                         "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    }
     WizToolComboboxItemDelegate* fontFamilyDelegate = new WizToolComboboxItemDelegate(m_comboFontFamily, m_comboFontFamily, paraItems, nParagraphItemCount);
     m_comboFontFamily->setItemDelegate(fontFamilyDelegate);
     //
-    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#F6F6F6;}"
-                                   "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    if (isDarkMode()) {
+        m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#323232;}"
+                                       "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    } else {
+        m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#F6F6F6;}"
+                                       "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    }
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
+#else
+    if (isDarkMode()) {
+        m_comboParagraph->setStyleSheet("color:#ffffff");
+        m_comboFontFamily->setStyleSheet("color:#ffffff");
+        m_comboFontSize->setStyleSheet("color:#ffffff");
+    }
 #endif
 
     QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/', QString::SkipEmptyParts);
@@ -1087,8 +1136,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     QSize editIconSize = QSize(Utils::WizStyleHelper::editIconHeight(), Utils::WizStyleHelper::editIconHeight());
 
     m_btnFormatPainter = new CWizToolButton(this);
-    m_btnFormatPainter->setIcon(::WizLoadSkinIcon(skin, "formatter", editIconSize));
-    //m_btnFormatPainter->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
+    m_btnFormatPainter->setIcon(::WizLoadSkinIcon(skin, "formatter", editIconSize, ICON_OPTIONS));
     m_btnFormatPainter->setToolTip(tr("Format Painter"));
     m_btnFormatPainter->setCheckable(true);
     m_btnFormatPainter->setChecked(false);
@@ -1097,17 +1145,15 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     connect(m_btnFormatPainter, SIGNAL(dblClicked()), SLOT(on_btnFormatPainter_dblClicked()));
     //
     m_btnRemoveFormat = new CWizToolButton(this);
-    m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat", editIconSize));
-    //m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
+    m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat", editIconSize, ICON_OPTIONS));
     m_btnRemoveFormat->setToolTip(tr("Remove Format"));
     m_btnRemoveFormat->setCheckable(false);
     m_btnRemoveFormat->setPosition(CWizToolButton::right);
     connect(m_btnRemoveFormat, SIGNAL(clicked()), SLOT(on_btnRemoveFormat_clicked()));
 
     m_btnForeColor = new CWizToolButtonColor(this);
-    m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor", editIconSize));
+    m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor", editIconSize, ICON_OPTIONS));
     m_btnForeColor->setColor(QColor("#ff0000"));
-    //m_btnForeColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatForeColor")).size());
     m_btnForeColor->setToolTip(tr("ForeColor"));
     m_btnForeColor->setCheckable(false);
     m_btnForeColor->setPosition(CWizToolButton::left);
@@ -1117,9 +1163,8 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnForeColor->setMenu(foreColorMenu);
 
     m_btnBackColor = new CWizToolButtonColor(this);
-    m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor", editIconSize));
+    m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor", editIconSize, ICON_OPTIONS));
     m_btnBackColor->setColor(QColor("#ffff00"));
-    //m_btnBackColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBackColor")).size());
     m_btnBackColor->setToolTip(tr("BackColor"));
     m_btnBackColor->setCheckable(false);
     m_btnBackColor->setPosition(CWizToolButton::right);
@@ -1129,57 +1174,50 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnBackColor->setMenu(backColorMenu);
 
     m_btnBold = new CWizToolButton(this);
-    m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold", editIconSize));
-    //m_btnBold->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBold")).size());
+    m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold", editIconSize, ICON_OPTIONS));
     m_btnBold->setToolTip(tr("Bold %1B").arg(commandKey()));
     m_btnBold->setPosition(CWizToolButton::left);
     connect(m_btnBold, SIGNAL(clicked()), SLOT(on_btnBold_clicked()));
 
     m_btnItalic = new CWizToolButton(this);
-    m_btnItalic->setIcon(::WizLoadSkinIcon(skin, "actionFormatItalic", editIconSize));
-    //m_btnItalic->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatItalic")).size());
+    m_btnItalic->setIcon(::WizLoadSkinIcon(skin, "actionFormatItalic", editIconSize, ICON_OPTIONS));
     m_btnItalic->setToolTip(tr("Italic %1I").arg(commandKey()));
     m_btnItalic->setPosition(CWizToolButton::Center);
     connect(m_btnItalic, SIGNAL(clicked()), SLOT(on_btnItalic_clicked()));
 
     m_btnShowExtra = new CWizToolButton(this);
-    m_btnShowExtra->setIcon(::WizLoadSkinIcon(skin, "actionFormatExtra", editIconSize));
-    //m_btnShowExtra->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatExtra")).size());
+    m_btnShowExtra->setIcon(::WizLoadSkinIcon(skin, "actionFormatExtra", editIconSize, ICON_OPTIONS));
     m_btnShowExtra->setToolTip(tr("Extra"));
     m_btnShowExtra->setPosition(CWizToolButton::NoPosition);
     connect(m_btnShowExtra, SIGNAL(clicked()), SLOT(on_btnShowExtra_clicked()));
 
     m_btnUnderLine = new CWizToolButton(this);
-    m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine", editIconSize));
-    //m_btnUnderLine->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatUnderLine")).size());
+    m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine", editIconSize, ICON_OPTIONS));
     m_btnUnderLine->setToolTip(tr("Underline %1U").arg(commandKey()));
     m_btnUnderLine->setPosition(CWizToolButton::Center);
     connect(m_btnUnderLine, SIGNAL(clicked()), SLOT(on_btnUnderLine_clicked()));
 
     m_btnStrikeThrough = new CWizToolButton(this);
-    m_btnStrikeThrough->setIcon(::WizLoadSkinIcon(skin, "actionFormatStrikeThrough", editIconSize));
-    //m_btnStrikeThrough->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatStrikeThrough")).size());
+    m_btnStrikeThrough->setIcon(::WizLoadSkinIcon(skin, "actionFormatStrikeThrough", editIconSize, ICON_OPTIONS));
     m_btnStrikeThrough->setToolTip(tr("Strike Through %1%2K").arg(optionKey()).arg(commandKey()));
     m_btnStrikeThrough->setPosition(CWizToolButton::right);
     connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
 
     m_btnJustify = new CWizToolButton(this);
-    m_btnJustify->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft", editIconSize));
-    //m_btnJustify->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatJustifyLeft")).size());
+    m_btnJustify->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft", editIconSize, ICON_OPTIONS));
     m_btnJustify->setCheckable(false);
     m_btnJustify->setArrowType(Qt::RightArrow);
     m_btnJustify->setPopupMode(QToolButton::MenuButtonPopup);
     m_btnJustify->setToolTip(tr("Justify"));
     m_btnJustify->setPosition(CWizToolButton::NoPosition);
-    connect(m_btnJustify, SIGNAL(clicked()), SLOT(on_btnJustify_clicked()));
     m_menuJustify = new QMenu(m_btnJustify);
-    m_actionJustifyLeft = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"),
+    m_actionJustifyLeft = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft", QSize(), ICON_OPTIONS),
                              tr("Justify Left"), this, SLOT(on_btnJustifyLeft_clicked()));
     m_actionJustifyLeft->setCheckable(true);
-    m_actionJustifyCenter = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter"),
+    m_actionJustifyCenter = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter", QSize(), ICON_OPTIONS),
                              tr("Justify Center"), this, SLOT(on_btnJustifyCenter_clicked()));
     m_actionJustifyCenter->setCheckable(true);
-    m_actionJustifyRight = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyRight"),
+    m_actionJustifyRight = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyRight", QSize(), ICON_OPTIONS),
                              tr("Justify Right"), this, SLOT(on_btnJustifyRight_clicked()));
     m_actionJustifyRight->setCheckable(true);
     m_btnJustify->setMenu(m_menuJustify);
@@ -1191,21 +1229,19 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     alignGroup->addAction(m_actionJustifyRight);
 
     m_btnUnorderedList = new CWizToolButton(this);
-    m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList", editIconSize));
-    //m_btnUnorderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertUnorderedList")).size());
+    m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList", editIconSize, ICON_OPTIONS));
     m_btnUnorderedList->setToolTip(tr("UnorderedList %1%2U").arg(optionKey()).arg(commandKey()));
     m_btnUnorderedList->setPosition(CWizToolButton::left);
     connect(m_btnUnorderedList, SIGNAL(clicked()), SLOT(on_btnUnorderedList_clicked()));
 
     m_btnOrderedList = new CWizToolButton(this);
-    m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList", editIconSize));
-    //m_btnOrderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertOrderedList")).size());
+    m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList", editIconSize, ICON_OPTIONS));
     m_btnOrderedList->setToolTip(tr("OrderedList %1%2O").arg(optionKey()).arg(commandKey()));
     m_btnOrderedList->setPosition(CWizToolButton::right);
     connect(m_btnOrderedList, SIGNAL(clicked()), SLOT(on_btnOrderedList_clicked()));
 
     QWidgetAction* tableAction = new QWidgetAction(this);
-    tableAction->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable", editIconSize));
+    tableAction->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable", editIconSize, ICON_OPTIONS));
     tableAction->setText(tr("Insert Table"));
     WizTableSelectorWidget* tableWidget = new WizTableSelectorWidget(this);
     tableAction->setDefaultWidget(tableWidget);
@@ -1218,9 +1254,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     //
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
-//    m_btnTable->setHorizontalPadding(8);
-    m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable", editIconSize));
-    //m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
+    m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable", editIconSize, ICON_OPTIONS));
     m_btnTable->setToolTip(tr("Insert Table"));
     m_btnTable->setPosition(CWizToolButton::Center);
     m_btnTable->setMenu(menuTable);
@@ -1230,16 +1264,14 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
     m_btnHorizontal->setHorizontalPadding(9);
-    m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal", editIconSize));
-    //m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
+    m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal", editIconSize, ICON_OPTIONS));
     m_btnHorizontal->setToolTip(tr("Insert Horizontal %1%2H").arg(shiftKey()).arg(commandKey()));
     m_btnHorizontal->setPosition(CWizToolButton::Center);
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
 
     m_btnCheckList = new CWizToolButton(this);
     m_btnCheckList->setCheckable(false);
-    m_btnCheckList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCheckList", editIconSize));
-    //m_btnCheckList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertCheckList")).size());
+    m_btnCheckList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCheckList", editIconSize, ICON_OPTIONS));
     m_btnCheckList->setToolTip(tr("Insert Checklist %1O").arg(commandKey()));
     m_btnCheckList->setPosition(CWizToolButton::left);
     connect(m_btnCheckList, SIGNAL(clicked()), SLOT(on_btnCheckList_clicked()));
@@ -1247,8 +1279,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnInsertLink = new CWizToolButton(this);
     m_btnInsertLink->setCheckable(false);
     m_btnInsertLink->setHorizontalPadding(6, 10);
-    m_btnInsertLink->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertLink", editIconSize));
-    //m_btnInsertLink->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertLink")).size());
+    m_btnInsertLink->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertLink", editIconSize, ICON_OPTIONS));
     m_btnInsertLink->setToolTip(tr("Insert Link %1K").arg(commandKey()));
     m_btnInsertLink->setPosition(CWizToolButton::Center);
     connect(m_btnInsertLink, SIGNAL(clicked()), SLOT(on_btnInsertLink_clicked()));
@@ -1256,8 +1287,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnInsertImage = new CWizToolButton(this);
     m_btnInsertImage->setCheckable(false);
     m_btnInsertImage->setHorizontalPadding(8);
-    m_btnInsertImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage", editIconSize));
-    //m_btnInsertImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertImage")).size());
+    m_btnInsertImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage", editIconSize, ICON_OPTIONS));
     m_btnInsertImage->setToolTip(tr("Insert Image %1%2I").arg(shiftKey()).arg(commandKey()));
     m_btnInsertImage->setPosition(CWizToolButton::Center);
     connect(m_btnInsertImage, SIGNAL(clicked()), SLOT(on_btnInsertImage_clicked()));
@@ -1265,24 +1295,20 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnInsertDate = new CWizToolButton(this);
     m_btnInsertDate->setCheckable(false);
     m_btnInsertDate->setHorizontalPadding(8, 10);
-    m_btnInsertDate->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertDate", editIconSize));
-    //m_btnInsertDate->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertDate")).size());
+    m_btnInsertDate->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertDate", editIconSize, ICON_OPTIONS));
     m_btnInsertDate->setToolTip(tr("Insert Date %1%2D").arg(shiftKey()).arg(commandKey()));
     m_btnInsertDate->setPosition(CWizToolButton::right);
     connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnInsertDate_clicked()));
 
     m_btnMobileImage = new CWizToolButton(this);
-//    m_btnMobileImage->setHorizontalPadding(6);
-    m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage", editIconSize));
-    //m_btnMobileImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionMobileImage")).size());
+    m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage", editIconSize, ICON_OPTIONS));
     m_btnMobileImage->setToolTip(tr("Receive mobile image"));
     m_btnMobileImage->setPosition(CWizToolButton::Center);
     connect(m_btnMobileImage, SIGNAL(clicked()), SLOT(on_btnMobileImage_clicked()));
 
     m_btnSearchReplace = new CWizToolButton(this);
     m_btnSearchReplace->setCheckable(false);
-    m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace", editIconSize));
-    //m_btnSearchReplace->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatSearchReplace")).size());
+    m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace", editIconSize, ICON_OPTIONS));
     m_btnSearchReplace->setToolTip(tr("Find & Replace %1F").arg(commandKey()));
     m_btnSearchReplace->setPosition(CWizToolButton::right);
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
@@ -1300,8 +1326,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
 
     m_btnInsertCode = new CWizToolButton(this);
     m_btnInsertCode->setCheckable(false);
-    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode", editIconSize));
-    //m_btnInsertCode->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertCode")).size());
+    m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode", editIconSize, ICON_OPTIONS));
     m_btnInsertCode->setToolTip(tr("Insert code %1%2C").arg(shiftKey()).arg(commandKey()));
     m_btnInsertCode->setPosition(CWizToolButton::left);
     connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
@@ -1614,6 +1639,7 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     QList<QAction*> actions = menu->actions();
     for (QAction* action : actions)
     {
+        qDebug() << action->iconText();
         QWebEnginePage::WebAction a = menuText2WebAction(page, action->iconText());
         switch (a)
         {
@@ -1749,6 +1775,9 @@ QMenu* WizEditorToolBar::createColorMenu(const char *slot, const char *slotColor
     pBtnOtherColor->setFixedSize(QSize(WizSmartScaleUI(110), WizSmartScaleUI(20)));
     pBtnOtherColor->setAutoRaise(true);
     pBtnOtherColor->setToolTip(tr("show more colors..."));
+    if (isDarkMode()) {
+        pBtnOtherColor->setStyleSheet("color:#AAAAAA");
+    }
     connect(pBtnOtherColor, SIGNAL(clicked()), this, slotColorBoard);
 
     // 基本色
@@ -2651,19 +2680,6 @@ void WizEditorToolBar::on_btnStrikeThrough_clicked()
     WizAnalyzer::getAnalyzer().logAction("editorToolBarStrikeThrough");
     if (m_editor) {
         m_editor->editorCommandExecuteStrikeThrough();
-    }
-}
-
-void WizEditorToolBar::on_btnJustify_clicked()
-{    
-    WizAnalyzer::getAnalyzer().logAction("editorToolBarJustify");
-    //
-    QPoint pos = m_btnJustify->mapToGlobal(QPoint(0, m_btnJustify->height()));
-    m_menuJustify->move(pos);
-    QAction*action = m_menuJustify->exec();
-    if (action)
-    {
-        m_btnJustify->setIcon(action->icon());
     }
 }
 

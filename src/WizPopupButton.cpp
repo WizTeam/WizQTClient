@@ -7,10 +7,14 @@
 #include "WizDocumentListView.h"
 #include <QApplication>
 
+#define DOCUMENT_LIST_HEADER_ICON_SIZE QSize(WizSmartScaleUI(23), WizSmartScaleUI(23))
+const WizIconOptions HEADER_ICON_OPTIONS = WizIconOptions(Qt::transparent, "#5c5c5c", Qt::white);
+
+
 WizPopupButton::WizPopupButton(WizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
     , m_app(app)
-    , m_iconSize(23, 14)
+    , m_iconSize(DOCUMENT_LIST_HEADER_ICON_SIZE)
 {
     setPopupMode(QToolButton::InstantPopup);
 
@@ -34,7 +38,7 @@ void WizPopupButton::paintEvent(QPaintEvent* event)
     // FIXME
     p.setPen("#787878");
     if (opt.state & QStyle::State_Sunken) {
-        p.fillRect(opt.rect, QColor("#dadada"));
+        p.fillRect(opt.rect, QColor(isDarkMode() ? "#686868" : "#dadada"));
     }    
 
     if (!opt.icon.isNull()) {
@@ -87,7 +91,6 @@ void WizPopupButton::setActionChecked(const QMenu* menu, int type)
     }
 }
 
-
 /* ------------------------ CWizViewTypePopupButton ------------------------ */
 WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* parent)
     : WizPopupButton(app, parent)
@@ -99,26 +102,29 @@ WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* par
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
+    if (isDarkMode()) {
+#ifdef Q_OS_MAC
+        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#else
+        QString menuStyle = QString("QMenu::item {color:#a6a6a6 }QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#endif
+        menu->setStyleSheet(menuStyle);
+    }
     createAction(tr("Thumbnail view"), WizDocumentListView::TypeThumbnail, menu, group);
     createAction(tr("Two line view"), WizDocumentListView::TypeTwoLine, menu, group);
     createAction(tr("One line view"), WizDocumentListView::TypeOneLine, menu, group);
     setMenu(menu);
 
-//    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
-//    m_iconOneLine.addFile(strSkinPath + "view_one_line.png");
-//    m_iconTwoLine.addFile(strSkinPath + "view_two_line.png");
-//    m_iconThumbnail.addFile(strSkinPath + "view_thumbnail.png");
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_view_type");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_view_type", DOCUMENT_LIST_HEADER_ICON_SIZE, HEADER_ICON_OPTIONS);
     setIcon(icon);
 
     int type = m_app.userSettings().get("VIEW_TYPE").toInt();
     setActionChecked(menu, type);
-//    setActionIcon(type);
 }
 
 QSize WizViewTypePopupButton::sizeHint() const
 {
-    return QSize(32 + 10, fontMetrics().height() + 10);
+    return QSize(WizSmartScaleUI(32 + 10), fontMetrics().height() + WizSmartScaleUI(10));
 }
 
 void WizViewTypePopupButton::on_action_triggered()
@@ -136,29 +142,11 @@ void WizViewTypePopupButton::on_action_triggered()
     Q_EMIT viewTypeChanged(type);
 }
 
-//void CWizViewTypePopupButton::setActionIcon(int type)
-//{
-//    switch (type) {
-//    case CWizDocumentListView::TypeOneLine:
-//        setIcon(m_iconOneLine);
-//        break;
-//    case CWizDocumentListView::TypeTwoLine:
-//        setIcon(m_iconTwoLine);
-//        break;
-//    case CWizDocumentListView::TypeThumbnail:
-//        setIcon(m_iconThumbnail);
-//        break;
-//    default:
-//        Q_ASSERT(0);
-//    }
-//}
-
 void WizViewTypePopupButton::on_viewTypeChanged(int type)
 {
     setActionChecked(menu(), type);
 //    setActionIcon(type);
 }
-
 
 /* ------------------------ CWizSortingPopupButton ------------------------ */
 WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *parent)
@@ -171,6 +159,15 @@ WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *paren
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
+    if (isDarkMode()) {
+#ifdef Q_OS_MAC
+        QString menuStyle = QString("QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#else
+        QString menuStyle = QString("QMenu::item {color:#a6a6a6 }QMenu::item:selected {background-color: #0058d1; color:#ffffff }");
+#endif
+        menu->setStyleSheet(menuStyle);
+    }
+
 
     createAction(tr("Sorting by created time"), SortingByCreatedTime, menu, group);
     createAction(tr("Sorting by updated time"), SortingByModifiedTime, menu, group);
@@ -210,7 +207,7 @@ WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *paren
         m_app.userSettings().set("SORT_TYPE", QString::number(type));
     }
 
-    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_sort_type");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_sort_type", DOCUMENT_LIST_HEADER_ICON_SIZE, HEADER_ICON_OPTIONS);
     setIcon(icon);
 }
 
@@ -222,13 +219,7 @@ void WizSortingPopupButton::on_sortingTypeChanged(int type)
 
 QSize WizSortingPopupButton::sizeHint () const
 {
-//#ifdef Q_OS_MAC
-//    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 16);
-//#else
-//    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 12);
-//#endif
-
-    return QSize(32 + 10, fontMetrics().height() + 10);
+    return QSize(WizSmartScaleUI(32 + 10), fontMetrics().height() + WizSmartScaleUI(10));
 }
 
 void WizSortingPopupButton::on_action_triggered()

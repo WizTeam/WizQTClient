@@ -58,7 +58,11 @@ public:
     void setProxyPassword(const QString& val);
     bool getProxyStatus();
     void setProxyStatus(bool val);
-
+    //
+#ifndef Q_OS_MAC
+    bool isDarkMode();
+    void setDarkMode(bool b);
+#endif
 };
 
 

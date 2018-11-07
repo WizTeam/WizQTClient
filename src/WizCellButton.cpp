@@ -12,14 +12,15 @@
 #include "utils/WizStyleHelper.h"
 #include "share/WizMisc.h"
 #include "share/WizQtHelper.h"
+#include "share/WizUIBase.h"
 
 
 WizCellButton::WizCellButton(ButtonType type, QWidget *parent)
     : QToolButton(parent)
+    , m_buttonType(type)
     , m_state(0)
     , m_count(0)
-    , m_buttonType(type)
-    , m_iconSize(WizSmartScaleUI(14), WizSmartScaleUI(14))
+    , m_iconSize(WizSmartScaleUI(16), WizSmartScaleUI(16))
 {    
 }
 
@@ -27,6 +28,16 @@ void WizCellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
 {
     m_iconNomal = icon;
     m_strTipsNormal = strTips;
+
+    QIcon i = m_iconNomal;
+    if (i.isNull()) {
+        m_iconSize = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
+    } else {
+        auto sizes = m_iconNomal.availableSizes();
+        if (sizes.length() > 0) {
+            m_iconSize = sizes[0];
+        }
+    }
 
     setToolTip(strTips);
 }
@@ -75,8 +86,8 @@ void WizCellButton::setCount(int count)
     m_count = count;
     update();
 }
-
 const int nTextWidth = 14;
+
 void WizCellButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -86,13 +97,10 @@ void WizCellButton::paintEvent(QPaintEvent *event)
     QPainter p(this);
 
     QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-    if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
+    if (m_state == Checked)
         mode = QIcon::Active;
-    QIcon::State state = QIcon::Off;
-    if (opt.state & QStyle::State_On)
-        state = QIcon::On;    
-
-    QSize size = m_iconSize;// opt.icon.actualSize(iconSize());
+    //
+    QSize size = m_iconSize;
     int nLeft = (opt.rect.width() - size.width()) / 2;
     if (WithCountInfo == m_buttonType)
     {
@@ -102,11 +110,11 @@ void WizCellButton::paintEvent(QPaintEvent *event)
     QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
     if (opt.icon.isNull())
     {
-        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
     else
     {
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
 
     if (WithCountInfo == m_buttonType)
@@ -143,7 +151,6 @@ QString WizCellButton::countInfo() const
 namespace RoundCellButtonConst {
     const int margin = 8;
     const int spacing = 8;
-    const int iconHeight = 14;
     const int fontSize = 12;
     const int buttonHeight = 18;
 }
@@ -152,8 +159,6 @@ namespace RoundCellButtonConst {
 WizRoundCellButton::WizRoundCellButton(QWidget* parent)
     : WizCellButton(ImageOnly, parent)
 {
-    m_iconSize = QSize(iconWidth(), WizSmartScaleUI(RoundCellButtonConst::iconHeight));
-
     setMaximumWidth(0);
     m_animation = new QPropertyAnimation(this, "maximumWidth", this);
 }
@@ -195,31 +200,13 @@ QString WizRoundCellButton::text() const
     return "";
 }
 
-int WizRoundCellButton::iconWidth() const
-{
-    return WizSmartScaleUI(RoundCellButtonConst::iconHeight);
-
-//    switch (m_state) {
-//    case Normal:
-//        return 12;
-//        break;
-//    case Checked:
-//    case Badge:
-//        return 13;
-//        break;
-//    default:
-//        Q_ASSERT(0);
-//        break;
-//    }
-}
-
 int WizRoundCellButton::buttonWidth() const
 {
     QFont f;
     f.setPixelSize(WizSmartScaleUI(RoundCellButtonConst::fontSize));
     QFontMetrics fm(f);
     int width = RoundCellButtonConst::margin * 2.5 + RoundCellButtonConst::spacing
-            + iconWidth() + fm.width(text());
+            + m_iconSize.width() + fm.width(text());
     return width;
 }
 
@@ -237,28 +224,29 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
     QPainter p(this);
 
     QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
-    if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
+    if (m_state == Checked)
         mode = QIcon::Active;
-    QIcon::State state = QIcon::Off;
-    if (opt.state & QStyle::State_On)
-        state = QIcon::On;
 
     p.setPen(Qt::NoPen);
-    p.setBrush(QColor((mode & QIcon::Active) ? "#D3D3D3" : "#E6E6E6"));
+    if (isDarkMode()) {
+        p.setBrush(Qt::transparent);
+    } else {
+        p.setBrush(QColor((mode & QIcon::Active) ? "#D3D3D3" : "#E6E6E6"));
+    }
     p.setRenderHint(QPainter::Antialiasing, true);
     p.drawRoundedRect(opt.rect, 8, 10);
 
     QSize size = m_iconSize;
     int nLeft = RoundCellButtonConst::margin;
 
-    QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, iconWidth(), size.height());
+    QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
     if (opt.icon.isNull())
     {
-        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
     else
     {
-        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+        opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode);
     }
 
     QFont f = p.font();
@@ -266,7 +254,7 @@ void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
     QFontMetrics fm(f);
     QRect rcText(rcIcon.right() + RoundCellButtonConst::spacing, (opt.rect.height() - fm.height()) / 2,
                  opt.rect.right() - rcIcon.right() - RoundCellButtonConst::spacing, fm.height());
-    p.setPen(QColor("#535353"));
+    p.setPen(QColor(isDarkMode() ? "#a6a6a6" : "#535353"));
     p.setFont(f);
     p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, text());
 }

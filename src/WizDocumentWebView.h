@@ -233,6 +233,7 @@ public:
     Q_INVOKABLE QString getLocalLanguage();
     Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
     Q_INVOKABLE void saveCurrentNote();
+    Q_INVOKABLE void doPaste();
 
     Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)

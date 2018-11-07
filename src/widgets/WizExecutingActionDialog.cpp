@@ -17,13 +17,14 @@ WizExecutingActionDialog::WizExecutingActionDialog(QString description, int thre
 {
     setWindowFlags(Qt::FramelessWindowHint);
     setPalette(QPalette(QColor(0, 0, 0)));
+    setFixedSize(QSize(WizSmartScaleUI(180), WizSmartScaleUI(150)));
     //
     ui->setupUi(this);
     //
     QString strThemeName = Utils::WizStyleHelper::themeName();
-    QString fileName = ::WizGetSkinResourceFileName(strThemeName, "executing_action");
+    QString fileName = ::WizGetSkinResourceFileName(strThemeName, "executing_action.gif");
     QMovie *movie = new QMovie(fileName);
-    movie->setScaledSize(QSize(50, 50));
+    movie->setScaledSize(QSize(WizSmartScaleUI(50), WizSmartScaleUI(50)));
     ui->movie->setMovie(movie);
     movie->start();
     //

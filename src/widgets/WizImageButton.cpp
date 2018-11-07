@@ -1,4 +1,5 @@
 ﻿#include "WizImageButton.h"
+#include "share/WizQtHelper.h"
 #include <QStylePainter>
 #include <QStyleOptionButton>
 #include <QPixmap>
@@ -18,17 +19,17 @@ void WizImageButton::setIcon(const QIcon& icon)
     m_currentIcon = m_normalIcon;
 }
 
-void WizImageButton::setIconNormal(const QString& icoFile)
+void WizImageButton::setIconNormal(const QPixmap& icoFile)
 {
     m_normalIcon = QPixmap(icoFile);
 }
 
-void WizImageButton::setIconHot(const QString& icoFile)
+void WizImageButton::setIconHot(const QPixmap& icoFile)
 {
     m_hotIcon = QPixmap(icoFile);
 }
 
-void WizImageButton::setIconDown(const QString& icoFile)
+void WizImageButton::setIconDown(const QPixmap& icoFile)
 {
     m_downIcon = QPixmap(icoFile);
 }
@@ -54,6 +55,12 @@ void WizImageButton::setStatusDown()
 {
     m_currentIcon = m_downIcon;
     update();
+}
+
+QSize WizImageButton::sizeHint() const
+{
+    int size = WizSmartScaleUI(16);
+    return QSize(size, size);
 }
 
 void WizImageButton::paintEvent(QPaintEvent* event)

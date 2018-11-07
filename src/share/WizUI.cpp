@@ -9,6 +9,7 @@
 
 #include "WizSettings.h"
 #include "WizNoteStyle.h"
+#include "WizUIBase.h"
 
 BOOL WizSkin9GridImage::clear()
 {
@@ -62,12 +63,17 @@ BOOL WizSkin9GridImage::splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* p
     return TRUE;
 }
 
-BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLeft)
+BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLeft, QColor darkColor)
 {
     clear();
     //
     if (!m_img.load(strImageFileName))
         return FALSE;
+    //
+    if (isDarkMode() && darkColor != Qt::transparent) {
+        m_img = qimageWithTintColor(m_img, darkColor);
+    }
+
     //
     int nImageWidth = m_img.width();
     int nImageHeight = m_img.height();
@@ -75,11 +81,15 @@ BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLe
     return splitRect(QRect(0, 0, nImageWidth, nImageHeight), ptTopLeft, m_arrayImageGrid, 9);
 }
 
-BOOL WizSkin9GridImage::setImage(const QImage& image, QPoint ptTopLeft)
+BOOL WizSkin9GridImage::setImage(const QImage& image, QPoint ptTopLeft, QColor darkColor)
 {
     clear();
     //
-    m_img = image;
+    if (isDarkMode() && darkColor != Qt::transparent) {
+        m_img = qimageWithTintColor(image, darkColor);
+    } else {
+        m_img = image;
+    }
     //
     int nImageWidth = m_img.width();
     int nImageHeight = m_img.height();
@@ -131,9 +141,6 @@ void WizSkin9GridImage::drawBorder(QPainter* p, QRect rc) const
     }
 }
 
-
-
-
 WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     : QWidget(parent)
     , m_background(NULL)
@@ -145,8 +152,13 @@ WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     m_layout = new QHBoxLayout(this);
     m_edit = new QLineEdit(this);
     m_edit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
-                          "selection-background-color: #8ECAF1;}"));
+    if (isDarkMode()) {
+        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#999999; "
+                              "selection-background-color: #cccccc;}"));
+    } else {
+        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
+                              "selection-background-color: #8ECAF1;}"));
+    }
     m_leftIcon = new QLabel(this);
     m_rightIcon = new QLabel(this);
     //
@@ -156,7 +168,15 @@ WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     m_layout->addWidget(m_leftIcon);
     m_layout->addWidget(m_edit);
     m_layout->addWidget(m_rightIcon);
-
+    //
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        QString style = QString("background-color:%1").arg(WizColorLineEditorBackground.name());
+        m_leftIcon->setStyleSheet(style);
+        m_rightIcon->setStyleSheet(style);
+        m_edit->setStyleSheet("color:#ffffff");
+    }
+#endif
 }
 
 WizIconLineEditContainer::~WizIconLineEditContainer()
@@ -164,10 +184,10 @@ WizIconLineEditContainer::~WizIconLineEditContainer()
     if (m_background)
         delete m_background;
 }
-void WizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
+void WizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt, QColor darkColor)
 {
     m_background = new WizSkin9GridImage();
-    m_background->setImage(fileName, pt);
+    m_background->setImage(fileName, pt, darkColor);
 }
 
 void WizIconLineEditContainer::setLeftIcon(QString fileName)
@@ -268,3 +288,4 @@ QWidget* WizInitWidgetMarginsEx(const QString& strSkinName, QWidget* widget, con
 
     return wrap;
 }
+

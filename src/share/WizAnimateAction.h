@@ -56,7 +56,7 @@ public:
     WizAnimateAction(QObject* parent);
     void setAction(QAction* action);
     void setToolButton(QToolButton* button);
-    void setSingleIcons(const QString& strIconBaseName);
+    void setSingleIcons(const QString& strIconBaseName, QSize size = QSize());
     void setTogetherIcon(const QString& strIconBaseName);
     void startPlay();
     void stopPlay();
@@ -65,7 +65,6 @@ public:
 private:    
     WizAnimateContainerBase* m_target;
     int m_nIconIndex;
-    QIcon m_iconDefault;
     QList<QIcon> m_icons;
     QTimer* m_timer;
 

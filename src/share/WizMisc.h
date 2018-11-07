@@ -145,18 +145,27 @@ void WizGetSkins(QStringList& skins);
 QString WizGetSkinResourcePath(const QString& strSkinName);
 QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale);
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName);
-QPixmap WizLoadPixmap(const QString& strSkinName, const QString& strIconName, const QSize& iconSize);
-QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
-QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize, QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
-QIcon WizLoadSkinIcon(const QString& strSkinName, QColor forceground, const QString& strIconName);
-QIcon WizLoadSkinIcon2(const QString& strSkinName, const QColor& blendColor, const QString& strIconName);
 
-bool WizImageBlending(QImage& img, const QColor& blendColor, QIcon::Mode mode = QIcon::Normal);
-void WizLoadSkinIcon3(QIcon& icon, const QString& strSkinName, const QString& strIconName,
-                      QIcon::Mode mode, QIcon::State state, const QColor& blendColor);
-QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
+struct WizIconOptions
+{
+    QColor selectedColor;
+    QColor darkColor;
+    QColor darkSelectedColor;
+    WizIconOptions()
+        : selectedColor(Qt::transparent)
+        , darkColor(Qt::transparent)
+        , darkSelectedColor(Qt::transparent)
+    {
+    }
+    WizIconOptions(QColor selected, QColor dark, QColor darkSelected)
+        : selectedColor(selected)
+        , darkColor(dark)
+        , darkSelectedColor(darkSelected)
+    {
+    }
+};
 
-void WizScaleIconSizeForRetina(QSize& size);
+QIcon WizLoadSkinIcon(const QString& strSkinName, const QString& strIconName, const QSize& iconSize = QSize(16, 16), const WizIconOptions& options = WizIconOptions());
 
 bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName, const QSize& iconSize);
 
@@ -186,7 +195,10 @@ bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData);
 
 //web dialog
 void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url,
-                               QWidget* parent = 0, const QSize& sz = QSize(800, 480), bool dialogResizable = false);
+                               QWidget* parent = 0, const QSize& sz = QSize(WizSmartScaleUI(800), WizSmartScaleUI(480)), bool dialogResizable = false);
+void WizShowWebDialogWithTokenDelayed(const QString& windowTitle, const QString& url,
+                               QWidget* parent = 0, const QSize& sz = QSize(WizSmartScaleUI(800), WizSmartScaleUI(480)), bool dialogResizable = false);
+
 void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent = 0);
 void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent = 0);
 

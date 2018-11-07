@@ -49,18 +49,14 @@ WizTagListWidget::WizTagListWidget(QWidget* parent)
     connect(m_list, SIGNAL(itemChanged(QListWidgetItem*)),
             SLOT(on_list_itemChanged(QListWidgetItem*)));
 
-    QPalette pal;
-#ifdef Q_OS_LINUX
-    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
-#elif defined(Q_OS_MAC)
-    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
-#endif
-    setStyleSheet("QWidget{background:#F7F7F7;}");
-
-    m_list->setPalette(pal);
-//    m_list->setContentsMargins(10, 6, 0, 6);
-    m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px;}" \
-                          "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px;}");
+    if (isDarkMode()) {
+        m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px; background-color:#272727}" \
+                              "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px; color:#a6a6a6}");
+    } else {
+        m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px;}" \
+                              "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px;}");
+    }
+    //
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
@@ -82,10 +78,12 @@ WizTagListWidget::WizTagListWidget(QWidget* parent)
 void WizTagListWidget::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
-
+    WizPopupWidget::showEvent(event);
+    //
 //    m_tagsEdit->clear();
 //    m_tagsEdit->clearFocus();
     m_list->setFocus();
+    //
 }
 
 void WizTagListWidget::reloadTags()

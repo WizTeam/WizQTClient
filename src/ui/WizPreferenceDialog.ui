@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>583</width>
-    <height>385</height>
+    <width>665</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -91,6 +91,13 @@
         <widget class="QCheckBox" name="checkBoxManuallySort">
          <property name="text">
           <string>Manually sorting folders</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxDarkMode">
+         <property name="text">
+          <string>Dark appearance (Restart needed)</string>
          </property>
         </widget>
        </item>

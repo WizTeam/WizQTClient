@@ -39,10 +39,10 @@ protected:
     ButtonType m_buttonType;
     int m_state;
     int m_count;
-    QSize m_iconSize;
     QIcon m_iconNomal;
     QIcon m_iconChecked;
     QIcon m_iconBadge;
+    QSize m_iconSize;
     QString m_strTipsNormal;
     QString m_strTipsChecked;
     QString m_strTipsBagde;
@@ -66,7 +66,6 @@ public:
     void setBadgeIcon(const QIcon& icon, const QString& text, const QString& strTips);
 
     QString text() const;
-    int iconWidth() const;
     int buttonWidth() const;
 
 public slots:

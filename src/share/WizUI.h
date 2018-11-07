@@ -18,8 +18,8 @@ protected:
     BOOL clear();
 public:
     static BOOL splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* parrayRect, int nArrayCount);
-    BOOL setImage(const CString& strImageFileName, QPoint ptTopLeft);
-    BOOL setImage(const QImage& image, QPoint ptTopLeft);
+    BOOL setImage(const CString& strImageFileName, QPoint ptTopLeft, QColor darkColor = Qt::transparent);
+    BOOL setImage(const QImage& image, QPoint ptTopLeft, QColor darkColor = Qt::transparent);
     //
     void draw(QPainter* p, QRect rc, int nAlpha) const;
     void drawBorder(QPainter* p, QRect rc) const;
@@ -42,7 +42,7 @@ private:
     QLabel* m_leftIcon;
     QLabel* m_rightIcon;
 public:
-    void setBackgroundImage(QString fileName, QPoint pt);
+    void setBackgroundImage(QString fileName, QPoint pt, QColor darkColor = Qt::transparent);
     void setLeftIcon(QString fileName);
     void setRightIcon(QString fileName);
     void setPlaceholderText(const QString& strText);

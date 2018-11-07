@@ -52,6 +52,9 @@ public Q_SLOTS:
 private slots:
     void on_checkBox_stateChanged(int arg1);
     void on_checkBoxTrayIcon_toggled(bool checked);
+#ifndef Q_OS_MAC
+    void on_checkBoxDarkMode_clicked(bool checked);
+#endif
     void on_comboBox_unit_currentIndexChanged(int index);
     void on_spinBox_top_valueChanged(double arg1);
     void on_spinBox_bottom_valueChanged(double arg1);
@@ -75,7 +78,7 @@ private:
     QPointer<QFontDialog> m_fontDialog;
 
     void setSyncGroupTimeLine(int nDays);
-    void updateEditorBackgroundColor(const QString& strColorName);
+    void updateEditorBackgroundColor(const QString& strColorName, bool save);
 };
 
 

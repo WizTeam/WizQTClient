@@ -9,6 +9,8 @@
 #include <QStringList>
 #include <QEventLoop>
 #include <QDebug>
+#include <QPixmap>
+#include <qmacfunctions.h>
 #include "html/WizHtmlCollector.h"
 
 #import <WebKit/WebKit.h>
@@ -53,67 +55,6 @@
 }
 @end
 
-// @interface NSView (Vibrancy)
-
-// //Returns NSVisualEffectView
-// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode;
-
-// @end
-
-// @implementation NSView (Vibrancy)
-
-// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
-// {
-//     Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
-//     if (vibrantClass)
-//     {
-//         NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
-//         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-//         [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
-//         [vibrant setBlendingMode:mode];
-
-//         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
-
-//         return vibrant;
-//     }
-//     return nil;
-// }
-
-// @end
-
-
-// @implementation NSWindow (BackgroundBlur)
-
-// - (void)enableBehindBlur
-// {
-//     [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
-
-// //    DBSCustomView *view = [[DBSCustomView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
-// //    [self.contentView addSubview:view];
-// }
-
-
-// //- (void)enableBlendingBlur
-// //{
-// //    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
-// //}
-
-// @end
-
-
-void enableWidgetBehindBlur(QWidget* wgt)
-{
-    // NSView *nsview = (NSView *) wgt->winId();
-    // NSWindow *nswindow = [nsview window];
-    // [nswindow enableBehindBlur];
-}
-
-//void enableWidgetBlendingBlur(QWidget* wgt)
-//{
-//    NSView *nsview = (NSView *) wgt->winId();
-//    NSWindow *nswindow = [nsview window];
-//    [nswindow enableBlendingBlur];
-//}
 
 @interface CreateNoteService : NSObject
 
@@ -863,29 +804,6 @@ void adjustSubViews(QWidget* wgt)
 }
 
 
-
-
-int getSystemMinorVersion()
-{
-    SInt32 minor;
-//    SInt32 major, minor, bugfix;
-//    Gestalt(gestaltSystemVersionMajor, &major);
-    Gestalt(gestaltSystemVersionMinor, &minor);
-//    Gestalt(gestaltSystemVersionBugFix, &bugfix);
-//    NSOperatingSystemVersion systemVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
-//    return systemVersion.minorVersion;
-
-    return minor;
-}
-
-
-bool systemWidgetBlurAvailable()
-{
-    return false;
-    return (getSystemMinorVersion() >= 15) || (getSystemMinorVersion() == 10 && getSystemPatchVersion() >= 4);
-}
-
-
 int getSystemMajorVersion()
 {
     SInt32 major;
@@ -894,6 +812,12 @@ int getSystemMajorVersion()
     return major;
 }
 
+int getSystemMinorVersion()
+{
+    SInt32 minor;
+    Gestalt(gestaltSystemVersionMinor, &minor);
+    return minor;
+}
 
 int getSystemPatchVersion()
 {
@@ -901,6 +825,42 @@ int getSystemPatchVersion()
     Gestalt(gestaltSystemVersionBugFix, &bugfix);
     return bugfix;
 }
+
+bool isDarkMode()
+{
+    static bool first = true;
+    static bool ret = false;
+    if (first) {
+        first = false;
+        //
+        int major = getSystemMajorVersion();
+        int minor = getSystemMinorVersion();
+        //return false;
+        if ((major >= 11) || (major == 10 && minor >= 14)) {
+            NSDictionary *dict = [[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain];
+            id style = [dict objectForKey:@"AppleInterfaceStyle"];
+            bool darkModeOn = ( style && [style isKindOfClass:[NSString class]] && NSOrderedSame == [style caseInsensitiveCompare:@"dark"] );
+            ret = darkModeOn;
+        }
+    }
+    return ret;
+}
+
+bool isMojaveOrHigher()
+{
+    static bool isMojave = false;
+    static bool first = true;
+    if (first) {
+        first = false;
+        int major = getSystemMajorVersion();
+        int minor = getSystemMinorVersion();
+        if ((major >= 11) || (major == 10 && minor >= 14)) {
+            isMojave = true;
+        }
+    }
+    return isMojave;
+}
+
 
 void updateShareExtensionAccount(const QString& userId, const QString& userGUID, const QString& myWiz, const QString& displayName)
 {
@@ -1039,8 +999,14 @@ QList<WizWindowInfo> WizGetActiveWindows()
             }
         }
     }
-    CFRelease(windowList);
-    CFRelease(processName);
+    //
+    if (windowList) {
+        CFRelease(windowList);
+    }
+    //
+    if (processName) {
+        CFRelease(processName);
+    }
 
     return windowTitles;
 }

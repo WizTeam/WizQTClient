@@ -4,6 +4,7 @@
 
 #include "WizMisc.h"
 #include "WizSettings.h"
+#include "WizUIBase.h"
 
 #include <QTimer>
 #include <QAction>
@@ -22,27 +23,24 @@ WizAnimateAction::WizAnimateAction(QObject* parent)
 void WizAnimateAction::setAction(QAction* action)
 {
     m_target = new WizAnimateActionContainer(action, this);
-    m_iconDefault = m_target->icon();
 }
 
 void WizAnimateAction::setToolButton(QToolButton* button)
 {
     m_target = new WizAnimateButtonContainer(button, this);
-    m_iconDefault = m_target->icon();
 }
 
-void WizAnimateAction::setSingleIcons(const QString& strIconBaseName)
+void WizAnimateAction::setSingleIcons(const QString& strIconBaseName, QSize size)
 {
+    QString themeName = Utils::WizStyleHelper::themeName();
     int index = 1;
     while (1)
     {
-        CString strFileName = ::WizGetSkinResourceFileName(Utils::WizStyleHelper::themeName(), strIconBaseName + WizIntToStr(index));
-        if (strFileName.isEmpty())
-            return;
-        QIcon icon(strFileName);
+        QString iconName = strIconBaseName + WizIntToStr(index);
+        QIcon icon = WizLoadSkinIcon(themeName, iconName, size);
         if (icon.isNull())
             return;
-
+        //
         m_icons.push_back(icon);
 
         index++;
@@ -122,7 +120,7 @@ void WizAnimateAction::stopPlay()
 
     m_target->setProperty("animationStatus", 0);
 
-    m_target->setIcon(m_iconDefault);
+    m_target->setIcon(m_target->icon());
     m_timer->stop();
 }
 

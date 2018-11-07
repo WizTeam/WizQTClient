@@ -144,8 +144,8 @@ int mainCore(int argc, char *argv[])
     QApplication::setFont(appFont);
 #endif
 
-   qInstallMessageHandler(Utils::WizLogger::messageHandler);
-   QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    qInstallMessageHandler(Utils::WizLogger::messageHandler);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
@@ -182,12 +182,31 @@ int mainCore(int argc, char *argv[])
     QSslConfiguration::setDefaultConfiguration(conf);
 #endif
 
-    a.setStyleSheet("QToolTip { \
-                    font: 12px; \
-                    color:#000000; \
-                    padding:0px 1px; \
-                    background-color: #F8F8F8; \
-                    border:0px;}");
+    if (isDarkMode()) {
+        a.setStyleSheet("QToolTip { \
+                        font: 12px; \
+                        color:#cccccc; \
+                        padding:0px 1px; \
+                        background-color: #F8F8F8; \
+                        border:0px;}");
+
+#ifndef Q_OS_MAC
+        QString menuStyle = QString("QMenu {color:white;}"
+                                    "QMenu::item {color: #a6a6a6;}"
+                                    "QMenu::item:selected {background-color: #0058d1; color:#ffffff }"
+                                    "QMenu::item:disabled {color: #5c5c5c; }"
+                                    );
+        a.setStyleSheet(menuStyle);
+
+#endif
+    } else {
+        a.setStyleSheet("QToolTip { \
+                        font: 12px; \
+                        color:#000000; \
+                        padding:0px 1px; \
+                        background-color: #F8F8F8; \
+                        border:0px;}");
+    }
 
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);

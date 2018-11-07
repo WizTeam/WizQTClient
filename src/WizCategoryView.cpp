@@ -1953,7 +1953,7 @@ bool WizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const Q
         return false;
 
     QString strTitle =Utils::WizMisc::extractFileName(attachList.first());
-    if (!createDocument(data, "<p><br/></p>", strTitle))
+    if (!createDocument(data, "<div><br/></div>", strTitle))
         return false;
 
     WizDatabase& db = m_dbMgr.db(data.strKbGUID);
@@ -3647,7 +3647,7 @@ void WizCategoryView::importFiles(QStringList& strFileList)
 
 bool WizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
-    return createDocument(data, "<!DOCTYPE html><html><head></head><body><p><br/></p></body></html>", tr("Untitled"));
+    return createDocument(data, "<!DOCTYPE html><html><head></head><body><div><br/></div></body></html>", tr("Untitled"));
 }
 
 void WizCategoryView::on_updatePersonalTagDocumentCount_timeout()
