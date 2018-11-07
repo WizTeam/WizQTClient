@@ -194,6 +194,8 @@ set(wiznote_SOURCES
     main.cpp
     WizInitBizCertDialog.cpp
     share/WizDocumentStyle.cpp
+
+    WizPlugins.cpp
 )
 
 set(wiznote_HEADERS
@@ -358,6 +360,8 @@ set(wiznote_HEADERS
     WizInitBizCertDialog.h
     share/WizDocumentStyle.h
     WizCombineNotesDialog.h
+
+    WizPlugins.h
 )
 
 set(wiznote_FORMS
@@ -432,7 +436,7 @@ if(UNIX)
         find_library(_COCOA_LIBRARY Cocoa)
         find_library(_WEBENGINE_LIBRARY WebEngine)
         find_library(_WEBENGINEWIDGETS_LIBRARY WebEngineWidgets)
-        find_library(_WEBENGINE_LIBRARY WebEngine)
+        find_library(_WEBCHANNEL_LIBRARY WebChannel)
         find_library(_STORE_LIBRARY StoreKit)
         find_library(_IO_LIBRARY IOKit)
         find_package(Qt5Svg)
@@ -537,6 +541,7 @@ if(UNIX)
 				cryptlib
                 Qt5::Svg
 				Qt5::WebEngine
+                Qt5::WebChannel
 				Qt5::WebEngineWidgets
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
@@ -548,6 +553,7 @@ if(UNIX)
 				cryptlib
                 Qt5::Svg
                 Qt5::WebEngine
+                Qt5::WebChannel
 				Qt5::WebEngineWidgets
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
 				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
@@ -562,6 +568,7 @@ if(UNIX)
 			cryptlib
             Qt5::Svg
             Qt5::WebEngine
+            Qt5::WebChannel
 			Qt5::WebEngineWidgets
 			${CMAKE_DL_LIBS}
 		)
@@ -572,6 +579,7 @@ else(NOT UNIX)
 		cryptlib
         Qt5::Svg
         Qt5::WebEngine
+        Qt5::WebChannel
 		Qt5::WebEngineWidgets
 		${CMAKE_DL_LIBS}
                 Qt5::WinMain

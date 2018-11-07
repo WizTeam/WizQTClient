@@ -7,6 +7,7 @@ class WizWebEngineView;
 class QMovie;
 class QLabel;
 
+
 class WizLocalProgressWebView : public QWidget
 {
     Q_OBJECT

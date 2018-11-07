@@ -11,11 +11,19 @@ class QWebChannel;
 
 class WizWebEngineView;
 
+struct WizWebEngineViewInjectObject
+{
+    QString name;
+    QObject* object;
+};
+
+typedef std::vector<WizWebEngineViewInjectObject> WizWebEngineViewInjectObjects;
+
 class WizWebEnginePage: public QWebEnginePage
 {
     Q_OBJECT
 public:
-    explicit WizWebEnginePage(QObject* parent = 0);
+    explicit WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent = 0);
     //
     void stopCurrentNavigation() { m_continueNavigate = false; }
 protected:
@@ -31,26 +39,20 @@ private:
 };
 
 
+
 class WizWebEngineView : public QWebEngineView
 {
     Q_OBJECT
 
 public:
     WizWebEngineView(QWidget* parent);
+    WizWebEngineView(const WizWebEngineViewInjectObjects& objects, QWidget* parent);
     virtual ~WizWebEngineView();
-public:
-    void addToJavaScriptWindowObject(QString name, QObject* obj);
-    void closeAll();
 public Q_SLOTS:
     void innerLoadFinished(bool);
     void openLinkInDefaultBrowser(QUrl url);
 Q_SIGNALS:
     void loadFinishedEx(bool);
-private:
-    QWebSocketServer* m_server;
-    WebSocketClientWrapper* m_clientWrapper;
-    QWebChannel* m_channel;
-    QString m_objectNames;
 protected:
     void wheelEvent(QWheelEvent *event);
 };
