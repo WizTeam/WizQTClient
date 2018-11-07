@@ -185,18 +185,11 @@ void WizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 
 void WizCategoryViewItemBase::setExtraButtonIcon(const QString& file)
 {
-    if (WizIsHighPixel())
-    {
-        int nIndex = file.lastIndexOf('.');
-        QString strFile = file.left(nIndex) + "@2x" + file.right(file.length() - nIndex);
-        if (QFile::exists(strFile))
-        {
-            m_extraButtonIcon = QPixmap(strFile);
-            return;
-        }
+    if (file.isEmpty()) {
+        m_extraButtonIcon = QPixmap();
+    } else {
+        m_extraButtonIcon = Utils::WizStyleHelper::loadPixmap(file);
     }
-
-    m_extraButtonIcon = QPixmap(file);
 }
 
 bool WizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
@@ -212,7 +205,6 @@ QRect WizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, boo
     QSize szBtn(WizSmartScaleUI(16), WizSmartScaleUI(16));
     if (!m_extraButtonIcon.isNull())
     {
-        szBtn = m_extraButtonIcon.size();
     }
     else if (!ignoreIconExist)
     {

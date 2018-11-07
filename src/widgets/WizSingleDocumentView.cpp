@@ -131,8 +131,6 @@ void WizSingleDocumentViewer::closeEvent(QCloseEvent *ev)
 {
     m_docView->waitForDone();
     //
-    m_docView->web()->closeAll();
-    //
     QWidget::closeEvent(ev);
 }
 

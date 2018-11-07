@@ -70,8 +70,8 @@ enum WizLinkType {
     WizLink_Attachment
 };
 
-WizDocumentWebViewPage::WizDocumentWebViewPage(WizDocumentWebView* parent)
-    : WizWebEnginePage(parent)
+WizDocumentWebViewPage::WizDocumentWebViewPage(const std::vector<WizWebEngineViewInjectObject>& objects, WizDocumentWebView* parent)
+    : WizWebEnginePage(objects, parent)
     , m_engineView(parent)
 {
     Q_ASSERT(m_engineView);
@@ -134,7 +134,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     , m_searchReplaceWidget(nullptr)
     , m_ignoreActiveWindowEvent(false)
 {
-    WizDocumentWebViewPage* page = new WizDocumentWebViewPage(this);
+    WizDocumentWebViewPage* page = new WizDocumentWebViewPage({{"WizExplorerApp", m_app.object()}, {"WizQtEditor", this}}, this);
     setPage(page);
     if (isDarkMode()) {
         page->setBackgroundColor(QColor("#272727"));
@@ -168,8 +168,6 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
     //
     //
-    addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-    addToJavaScriptWindowObject("WizQtEditor", this);
 
     connect(this, SIGNAL(loadFinishedEx(bool)), SLOT(onEditorLoadFinished(bool)));
     //

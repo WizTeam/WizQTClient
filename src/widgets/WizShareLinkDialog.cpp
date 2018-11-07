@@ -21,7 +21,7 @@
 WizShareLinkDialog::WizShareLinkDialog(WizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
     : WizWebEngineViewContainerDialog(parent, f)
     , m_settings(settings)
-    , m_view(new WizWebEngineView(this))
+    , m_view(new WizWebEngineView({{"external", this}, {"wizQt", this}}, this))
 {
     //setWindowFlags(Qt::CustomizeWindowHint);
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -31,10 +31,6 @@ WizShareLinkDialog::WizShareLinkDialog(WizUserSettings& settings, QWidget* paren
     m_view->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     //
-    m_view->addToJavaScriptWindowObject("external", this);
-    m_view->addToJavaScriptWindowObject("wizQt", this);
-    //m_view->addToJavaScriptWindowObject("customObject", this);
-
 }
 
 WizShareLinkDialog::~WizShareLinkDialog()

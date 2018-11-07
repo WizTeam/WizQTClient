@@ -197,7 +197,13 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
 
     loadDefaultUser();
     //
-#ifndef Q_OS_MAC
+#ifdef Q_OS_MAC
+    if (isDarkMode()) {
+        ui->widget->setStyleSheet("background-color:transparent;");
+        ui->widget_titleBar->setStyleSheet("background-color:transparent;");
+    }
+    //
+#else
     //
     QSize totalSizeHint = layout()->totalSizeHint();
     //
