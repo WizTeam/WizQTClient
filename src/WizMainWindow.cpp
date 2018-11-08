@@ -3752,6 +3752,11 @@ QObject* WizMainWindow::DatabaseManager()
     return &m_dbMgr;
 }
 
+QObject* WizMainWindow::CurrentDocumentBrowserObject()
+{
+    return m_doc->web();
+}
+
 QObject* WizMainWindow::CreateWizObject(const QString& strObjectID)
 {
     CString str(strObjectID);
