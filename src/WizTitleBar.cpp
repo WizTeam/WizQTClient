@@ -181,7 +181,9 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
 //    layoutInfo2->addWidget(m_emailBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_attachBtn);
-    layoutInfo2->addWidget(m_commentsBtn);    
+    layoutInfo2->addWidget(m_commentsBtn);
+    //
+    initPlugins(layoutInfo2);
 
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
     layoutInfo1->setContentsMargins(Utils::WizStyleHelper::editorBarMargins());
@@ -204,6 +206,21 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
             SLOT(on_commentTokenAcquired(QString)));
     connect(m_commentManager, SIGNAL(commentCountAcquired(QString,int)),
             SLOT(on_commentCountAcquired(QString,int)));
+}
+
+void WizTitleBar::initPlugins(QLayout* layout)
+{
+    int nTitleHeight = Utils::WizStyleHelper::titleEditorHeight();
+    m_plugins = WizPlugins::plugins().pluginsByType("document");
+    for (auto data : m_plugins) {
+        //
+        WizCellButton* button = new WizCellButton(WizCellButton::ImageOnly, this);
+        button->setFixedHeight(nTitleHeight);
+        button->setNormalIcon(data->icon(), data->name());
+        //connect(button, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
+        layout->addWidget(button);
+        //
+    }
 }
 
 WizDocumentView* WizTitleBar::noteView()

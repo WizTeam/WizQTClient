@@ -1684,6 +1684,13 @@ QString WizGetSystemCustomSkinPath(const QString& strSkinName)
 
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName)
 {
+    if (strSkinName.isEmpty()) {
+        if (strName.indexOf("/") != -1)
+            return strName;
+        if (strName.indexOf("\\") != -1)
+            return strName;
+    }
+    //
     QString arrayPath[] =
     {
         WizGetSystemCustomSkinPath(strSkinName),
