@@ -5,6 +5,14 @@ new QWebChannel(qt.webChannelTransport, function (channel) {
         var key = objectNames[i];
         window[key] = channel.objects[key];
     }
+    //
+    if (typeof initForWebEngine !== 'undefined') {
+        try {
+            initForWebEngine();
+        } catch (err) {
+            console.error(err);
+        }
+    }
 });
 
 

@@ -351,9 +351,13 @@ function QObject(name, data, webChannel)
                     var result = object.unwrapQObject(response);
                     if (callback) {
                         if (result && result instanceof QObject && result.resultAcquired && result.resultAcquired.connect) {
-                          result.resultAcquired.connect((r) => {
-                            (callback)(r);
-                          });
+                            if (result.acquired) {
+                                (callback)(result.result);
+                            } else {
+                                result.resultAcquired.connect(function (r) {
+                                  (callback)(r);
+                                });
+                            }
                         } else {
                           (callback)(result);
                         }

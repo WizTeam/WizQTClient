@@ -77,6 +77,8 @@ public Q_SLOTS:
 
     void on_commentTokenAcquired(QString token);
     void on_commentCountAcquired(QString GUID, int count);
+    //
+    void onPluginButtonClicked();
 
     void onEditorChanged();
     void onEditorFocusIn();
@@ -137,6 +139,7 @@ private:
     WizAnimateAction* m_editButtonAnimation;
     //
     std::vector<WizPluginData*> m_plugins;
+    std::map<QString, WizPluginPopupWidget*>m_pluginWidget;
 };
 
 

@@ -1,0 +1,31 @@
+body{
+	background-color: #272727;
+	color: #bdbdbd
+}
+a{
+	color: #bdbdbd
+}
+div.category{
+	color: #bdbdbd
+}
+div.title{
+	color: #bdbdbd
+}
+div.bookmark{
+	color: #bdbdbd
+}
+div.bookmark:hover {
+    background-color: #2f353e;
+}
+a.bookmark{
+	color: #bdbdbd
+}
+span.tag{
+	color: #bdbdbd
+}
+span.bk-action-del{
+	color: #bdbdbd
+}
+hr.seperator{
+    background-color: #838b98
+}

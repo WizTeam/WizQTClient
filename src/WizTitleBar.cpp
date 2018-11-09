@@ -215,12 +215,47 @@ void WizTitleBar::initPlugins(QLayout* layout)
     for (auto data : m_plugins) {
         //
         WizCellButton* button = new WizCellButton(WizCellButton::ImageOnly, this);
+        button->setUserObject(data);
         button->setFixedHeight(nTitleHeight);
         button->setNormalIcon(data->icon(), data->name());
-        //connect(button, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
+        connect(button, SIGNAL(clicked()), SLOT(onPluginButtonClicked()));
         layout->addWidget(button);
         //
     }
+}
+
+void WizTitleBar::onPluginButtonClicked()
+{
+    WizCellButton* button = dynamic_cast<WizCellButton *>(sender());
+    if (!button) {
+        return;
+    }
+    //
+    WizPluginData* data = dynamic_cast<WizPluginData *>(button->userObject());
+    if (!data) {
+        return;
+    }
+    //
+    QString guid = data->guid();
+    auto it = m_pluginWidget.find(guid);
+    WizPluginPopupWidget* widget;
+    if (it == m_pluginWidget.end()) {
+        widget = new WizPluginPopupWidget(m_app, data, this);
+        m_pluginWidget.insert(std::make_pair(guid, widget));
+    } else {
+        widget = it->second;
+    }
+    //
+    QPoint pt = mapToGlobal(button->geometry().center());
+    pt.setY(pt.y() + button->rect().height() / 2);
+    data->emitShowEvent();
+    if (isDarkMode()) {
+        widget->web()->setVisible(false);
+        QTimer::singleShot(500, [=] {
+            widget->web()->setVisible(true);
+        });
+    }
+    widget->showAtPoint(pt);
 }
 
 WizDocumentView* WizTitleBar::noteView()

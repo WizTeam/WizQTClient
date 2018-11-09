@@ -133,8 +133,8 @@ protected:
 
 private:
     WizDatabaseManager& m_dbMgr;
-    WizProgressDialog* m_progress;
     WizUserSettings* m_settings;
+    WizProgressDialog* m_progress;
     WizKMSyncThread* m_syncFull;
     WizKMSyncThread* m_syncQuick;
     WizUserVerifyDialog* m_userVerifyDialog;

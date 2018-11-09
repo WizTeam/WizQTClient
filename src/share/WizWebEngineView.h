@@ -26,11 +26,14 @@ public:
     WizWebEngineAsyncMethodResultObject(QObject* parent);
     virtual ~WizWebEngineAsyncMethodResultObject();
     Q_PROPERTY(QVariant result READ result NOTIFY resultAcquired)
+    Q_PROPERTY(QVariant acquired READ acquired)
 public:
     void setResult(const QVariant& result);
 private:
     QVariant m_result;
+    bool m_acquired;
     QVariant result() const { return m_result; }
+    bool acquired() const { return m_acquired; }
 Q_SIGNALS:
     void resultAcquired(const QVariant& ret);
 };

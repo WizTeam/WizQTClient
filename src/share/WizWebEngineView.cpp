@@ -102,22 +102,12 @@ QWebEngineProfile* createWebEngineProfile(const WizWebEngineViewInjectObjects& o
         profile->scripts()->insert(script);
     }
     //
-    {
-        QString code = "if (typeof initForWebEngine !== 'undefined') { initForWebEngine(); }";
-        QWebEngineScript script;
-        script.setSourceCode(code);
-        script.setName("InitForWebEngine.js");
-        script.setWorldId(QWebEngineScript::MainWorld);
-        script.setInjectionPoint(QWebEngineScript::DocumentReady);
-        script.setRunsOnSubFrames(false);
-        profile->scripts()->insert(script);
-    }
-    //
     return profile;
 }
 
 WizWebEngineAsyncMethodResultObject::WizWebEngineAsyncMethodResultObject(QObject* parent)
     : QObject(parent)
+    , m_acquired(false)
 {
 }
 
@@ -127,6 +117,7 @@ WizWebEngineAsyncMethodResultObject::~WizWebEngineAsyncMethodResultObject()
 
 void WizWebEngineAsyncMethodResultObject::setResult(const QVariant& result)
 {
+    m_acquired = true;
     m_result = result;
     emit resultAcquired(m_result);
 }

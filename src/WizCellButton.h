@@ -30,6 +30,8 @@ public:
     void setCheckedIcon(const QIcon& icon, const QString& strTips);
     void setBadgeIcon(const QIcon& icon, const QString& strTips);
     int state() const { return m_state; }
+    void setUserObject(QObject* obj) { m_userObject = obj; }
+    QObject* userObject() const { return m_userObject; }
 
 public slots:
     void setState(int state);
@@ -46,6 +48,7 @@ protected:
     QString m_strTipsNormal;
     QString m_strTipsChecked;
     QString m_strTipsBagde;
+    QObject* m_userObject;
 
     //QIcon m_backgroundIcon;
 
