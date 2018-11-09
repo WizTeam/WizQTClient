@@ -133,8 +133,8 @@ protected:
 
 private:
     WizDatabaseManager& m_dbMgr;
-    WizProgressDialog* m_progress;
     WizUserSettings* m_settings;
+    WizProgressDialog* m_progress;
     WizKMSyncThread* m_syncFull;
     WizKMSyncThread* m_syncQuick;
     WizUserVerifyDialog* m_userVerifyDialog;
@@ -472,6 +472,10 @@ public:
 
     QObject* DatabaseManager();
     Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
+
+    QObject* CurrentDocumentBrowserObject();
+    Q_PROPERTY(QObject* CurrentDocumentBrowserObject READ CurrentDocumentBrowserObject)
+
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);

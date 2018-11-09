@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Outline</title>
+  <link type="text/css" href="style.css" rel="stylesheet" />
+  <style type="text/css">
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", Helvetica, Arial, sans-serif, serif, PMingLiU;
+      color: black;
+      background-color: #fff;
+      font-size: 10.5pt;
+      line-height: 1.5;
+    }
+
+    .box {
+      /*vertical-align: middle;
+            text-align: left;
+            display: block;*/
+      font-size: 14px;
+      /*height: 2em;*/
+      margin-left: 10px;
+      margin-bottom: 10px;
+    }
+
+    table {
+      empty-cells: show;
+      margin: 0;
+      padding: 0;
+    }
+
+    font {
+      font-size: 1em;
+    }
+
+    ul {
+      padding: 0 0 0 0;
+    }
+
+    ol {
+      padding: 0;
+    }
+
+    .h1 {
+      margin-left: 4px;
+    }
+
+    .h2 {
+      margin-left: 30px;
+    }
+
+    .h3 {
+      margin-left: 50px;
+    }
+
+    .h4 {
+      margin-left: 70px;
+    }
+
+    .h5 {
+      margin-left: 90px;
+    }
+
+    .h6 {
+      margin-left: 110px;
+    }
+
+    span {
+      margin: 0 8px 0 0;
+    }
+
+    span.h1,
+    span.head {
+      color: #b2b2b2;
+    }
+
+    span.h1:hover,
+    span.head:hover {
+      color: #448aff;
+    }
+
+    span.tag {
+      color: #448aff;
+      position: absolute;
+      left: 0;
+      top: 10px;
+      height: 2.4em;
+      width: 20px;
+    }
+
+    div.bookmark {
+      vertical-align: middle;
+      text-align: left;
+      display: block;
+      height: 34px;
+      line-height: 2.4em;
+      overflow: hidden;
+      font-size: 14px;
+      margin-left: 10px;
+      position: relative;
+      padding-left: 20px;
+      padding-right: 25px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #448aff;
+    }
+
+    div.bookmark:hover {
+      background-color: #ebebeb;
+    }
+
+    a.bookmark {
+      color: #448aff;
+    }
+
+    p {
+      padding: 0;
+    }
+
+    div.category {
+      color: #cccccc;
+      font-size: 12px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      margin-left: 8px;
+    }
+
+    div.title {
+      font-size: 1em;
+      color: #333333;
+      margin-left: 18px;
+      margin-top: 10px;
+    }
+
+    div.subtitle {
+      font-size: 0.8em;
+      color: #999999;
+      margin-left: 18px;
+      margin-top: 5px;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      line-height: 1.2em;
+      font-size: 1em;
+      color: #26a8fa;
+      margin: 0.2em 0.4em 0.2em 0;
+      padding: 0.1em 0.1em 0.1em 0;
+    }
+
+    sup,
+    sub {
+      font-size: .7em;
+    }
+
+    img {
+      border-style: none;
+      margin-bottom: 0.5em;
+    }
+
+    a {
+      outline: none;
+      color: #666666;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    a:active,
+    a:hover,
+    a:hover>span {
+      color: #448aff;
+    }
+
+    a:visited {
+      color: #666666;
+    }
+
+    a.head {
+      margin-left: 0;
+    }
+
+    hr {
+      border: 0;
+      background-color: #EEE;
+      border-bottom: #c9d7f1 1px solid;
+      height: 0;
+      width: 99.9%;
+      text-align: left;
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+
+    hr.seperator {
+      width: 100%;
+      height: 1px;
+      border: none;
+      background-color: #efefef;
+      margin-top: 35px;
+      margin-bottom: 15px;
+    }
+
+    div.my_group {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input,
+    select,
+    textarea,
+    option {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    input.bk-action-del {
+      color: black;
+      cursor: pointer;
+      margin: 0.6em 1em 0 0.2em;
+    }
+
+    span.bk-action-del {
+      color: #666666;
+      position: absolute;
+      right: 0;
+      top: 6px;
+      height: 15px;
+      width: 15px;
+      margin: 4px;
+    }
+
+    span.bk-action-del:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <script language="javascript">
+    //
+    let inited = false;
+    var objApp;
+    var pluginPath;
+    var pluginData;
+    var objWindow;
+    var browserObject;
+    var htmltext = "";
+    var htmlOutlineText = "";
+    var htmlBookmarkText = "";
+    var arrayBookmarks = [];
+    var isAddOutlineContents = false;
+    var isAddBookmarks = false;
+    var isCurDocEditing = false;
+    var strings = {};
+    var languangeFileName;
+
+    async function initForWebEngine() {
+      if (!window.WizExplorerApp) return;
+      if (inited) return;
+      //
+      objApp = window.WizExplorerApp;
+      pluginData = window.WizPluginData;
+      pluginPath = pluginData.path;
+      objWindow = objApp.Window;
+      browserObject = objWindow.CurrentDocumentBrowserObject;
+      strings = JSON.parse(pluginData.strings);
+      objApp.LoadStringFromFile = LoadStringFromFile;
+      //
+      languangeFileName = pluginPath + "plugin.ini";
+      //
+      loadData();
+      //
+      pluginData.documentChanged.connect(() => {
+        clear();
+      });
+      //
+      pluginData.willShow.connect(() => {
+        loadData();
+      });
+      //
+      try {
+        //isCurDocEditing = objWindow.IsDocumentEditing(objWizDocument.GUID);
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+    //
+    initForWebEngine();
+    //
+    function LoadStringFromFile(file, key) {
+      return strings[key];
+    }
+
+    //
+    function getImageUrl(imageFileName) {
+      if (imageFileName.length == 0)
+        return null;
+      //
+      if (100 == scaleType)
+        return imageFileName;
+      //
+      var pos = imageFileName.lastIndexOf('.');
+      var str = imageFileName.substring(0, pos) + "@" + scaleType + imageFileName.substring(pos, imageFileName.length);
+      return str;
+    }
+
+    function Show() {
+      if (isAddOutlineContents && isAddBookmarks) {
+        document.body.innerHTML = htmlOutlineText + htmlBookmarkText;
+      }
+    }
+
+    function htmlEncode(str) {
+      var s = "";
+      if (str.length == 0) return "";
+      s = str.replace(/&/g, "&amp;");
+      s = s.replace(/</g, "&lt;");
+      s = s.replace(/>/g, "&gt;");
+      s = s.replace(/ /g, "&nbsp;");
+      s = s.replace(/\'/g, "&#39;");
+      s = s.replace(/\"/g, "&quot;");
+      s = s.replace(/\n/g, "<br>");
+      return s;
+    }
+    //
+    function clear() {
+      htmltext = "";
+      htmlOutlineText = "";
+      htmlBookmarkText = "";
+      arrayBookmarks = [];
+      document.body.innerHTML = "";
+    }
+    //
+    function loadData() {
+      clear();
+      loadContents();
+      loadBookmarks();
+    }
+    // add outline contents
+    function loadContents() {
+      var scriptfile = pluginPath + "getOutlineContents.js";
+      browserObject.ExecuteScriptFile(scriptfile, function (text) {
+
+        var added = false;
+        //
+        if (text && text.length > 0) {
+          //
+          var arrayOutlineContent = JSON.parse(text);
+          for (var i = 0; i < arrayOutlineContent.length; i++) {
+            var elemtext = arrayOutlineContent[i];
+            var text = elemtext.text;
+            text = text.trim();
+            text = text.replace(/\n/g, " ");
+            text = htmlEncode(text);
+            var tagName = elemtext.tagName;
+            var offsetTop = Number(elemtext.offsetTop);
+            var html = "";
+            //
+            if (tagName == "h1") {
+              html = '<div class="box h1"><a class="head" href="javascript:void(0);" onclick="gotoElem(' +
+                offsetTop + ');"><span class="h1 wiz_pc_icon icon-dot_main"></span>' + text + '</a></div>';
+              //
+              added = true;
+            } else if (tagName == "h2") {
+              html = '<div class="box h2"><a class="head" href="javascript:void(0);" onclick="gotoElem(' +
+                offsetTop + ');"><span class="head wiz_pc_icon icon-dot_common"></span>' + text + '</a></div>';
+              //
+              added = true;
+            } else if (tagName == "h3") {
+              html = '<div class="box h3"><a class="head" href="javascript:void(0);" onclick="gotoElem(' +
+                offsetTop + ');"><span class="head wiz_pc_icon icon-dot_common"></span>' + text + '</a></div>';
+              //
+              added = true;
+            } else if (tagName == "h4") {
+              html = '<div class="box h4"><a class="head" href="javascript:void(0);" onclick="gotoElem(' +
+                offsetTop + ');"><span class="head wiz_pc_icon icon-dot_common"></span>' + text + '</a></div>';
+              //
+              added = true;
+            } else if (tagName == "h5") {
+              html = '<div class="box h5"><a class="head" href="javascript:void(0);" onclick="gotoElem(' +
+                offsetTop + ');"><span class="head wiz_pc_icon icon-dot_common"></span>' + text + '</a></div>';
+              //
+              added = true;
+            } else if (tagName == "h6") {
+              html = '<div class="box h6"><a class="head" href="javascript:void(0);" onclick="gotoElem(' +
+                offsetTop + ');"><span class="head wiz_pc_icon icon-dot_common"></span>' + text + '</a></div>';
+              //
+              added = true;
+            }
+            htmlOutlineText += html;
+          }
+        }
+        var tsOutline = objApp.LoadStringFromFile(languangeFileName, "strOutline");
+        var tsNoOutlineTitle = objApp.LoadStringFromFile(languangeFileName, "strNoOutlineTitle");
+        var tsNoOutlineSubTitle = objApp.LoadStringFromFile(languangeFileName, "strNoOutlineSubTitle");
+        //
+        if (added) {
+          htmlOutlineText = '<div><div class="category">' + tsOutline + '</div><div id="heads">' + htmlOutlineText +
+            '</div></div>';
+        } else {
+          htmlOutlineText = '<div><div class="category">' + tsOutline + '</div><div class="title">' +
+            tsNoOutlineTitle + '</div><div class="subtitle">' + tsNoOutlineSubTitle + '</div></div>';
+        }
+        isAddOutlineContents = true;
+        Show();
+      });
+    }
+    //
+    function loadBookmarks() {
+      var scriptfile = pluginPath + "getBookmarks.js";
+      browserObject.ExecuteScriptFile(scriptfile, function (text) {
+        var added = false;
+        //
+        if (text && text.length > 0) {
+          var tsDelete = objApp.LoadStringFromFile(languangeFileName, "strDelete");
+          var index = 0;
+          for (var i = 0; i < text.length; i++) {
+            var name = text[i];
+
+            name = htmlEncode(name);
+            if (isCurDocEditing) {
+              var html =
+                "<div class='bookmark' index=%1><span class='tag wiz_pc_icon icon-tag'></span><a class='bookmark' href='javascript:void(0);' onclick=\"gotoBookmark('" +
+                name + "');\">" + name + "</a><span class='bk-action-del wiz_pc_icon icon-cancel'></span></div>";
+              html = html.replace('%1', index).replace('%2', tsDelete);
+              htmlBookmarkText += html;
+              //
+              arrayBookmarks.push(name);
+              index++;
+            } else {
+              var html =
+                "<div class='bookmark' ><span class='tag wiz_pc_icon icon-tag'></span><a class='bookmark' href='javascript:void(0);' onclick=\"gotoBookmark('" +
+                name + "');\"><nobr>" + name + "</nobr></a></div>";
+              htmlBookmarkText += html;
+            }
+            added = true;
+          }
+        }
+        var tsBookmark = objApp.LoadStringFromFile(languangeFileName, "strBookmark");
+        var tsNoBookmark = objApp.LoadStringFromFile(languangeFileName, "strNoBookmark");
+        //
+        var html = '<hr class="seperator" />';
+        if (added) {
+          htmlBookmarkText = '<div id="wiz-outline-bookmarks"><div class="category">' + tsBookmark + '</div>' +
+            htmlBookmarkText + '</div>';
+        } else {
+          htmlBookmarkText = '<div id="wiz-outline-bookmarks"><div class="category">' + tsBookmark +
+            '</div><div class="title">' + tsNoBookmark + '</div></div>';
+        }
+        htmlBookmarkText = html + htmlBookmarkText;
+        isAddBookmarks = true;
+        Show();
+        //
+        //
+        (function initBookmarkMenu() {
+          //
+          function deleteBookmark(name) {
+            var elems = document.getElementsByName(name);
+            if (elems && elems.length > 0) {
+              for (var i = 0; i < elems.length; i++) {
+                var elem = elems[i];
+                elem.name = "";
+              }
+            }
+          }
+          browserObject.ExecuteScript(deleteBookmark.toString());
+          //
+          function onActionDelete(e) {
+            var p = e.target.parentElement;
+            if (!p)
+              return;
+            var index = Number(p.getAttribute("index"));
+            if (index < 0)
+              return;
+            //
+            p.parentNode.removeChild(p);
+            //
+            var name = arrayBookmarks[index];
+            browserObject.ExecuteFunction1("deleteBookmark", name);
+          }
+          var arrBtns = document.getElementsByClassName("bk-action-del");
+          //
+          for (var i = 0; i < arrBtns.length; i++) {
+            var btn = arrBtns[i];
+            //
+            btn.addEventListener('click', onActionDelete);
+          }
+        })();
+      });
+    }
+
+    //
+    //
+    function gotoOutlineElem(pos) {
+      try {
+        document.body.scrollTop = pos;
+        document.documentElement.scrollTop = pos;
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function gotoElem(pos) {
+      browserObject.ExecuteScript(gotoOutlineElem.toString());
+      browserObject.ExecuteFunction1("gotoOutlineElem", pos);
+    }
+    //
+    //
+    function gotoBookmarkElem(name) {
+      var elem = document.getElementsByName(name);
+      if (elem == null)
+        return;
+      if (elem.length == "undefined") {
+        elem.scrollIntoView(true);
+      } else {
+        elem[0].scrollIntoView(true);
+      }
+    }
+    function gotoBookmark(name) {
+      browserObject.ExecuteScript(gotoBookmarkElem.toString());
+      browserObject.ExecuteFunction1("gotoBookmarkElem", name);
+    }
+  </script>
+</body>
+
+</html>

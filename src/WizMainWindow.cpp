@@ -114,8 +114,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     : _baseClass(parent, true)
 #endif
     , m_dbMgr(dbMgr)
-    , m_progress(new WizProgressDialog(this))
     , m_settings(new WizUserSettings(dbMgr.db()))
+    , m_progress(new WizProgressDialog(this))
     , m_syncQuick(new WizKMSyncThread(dbMgr.db(), true, this))
     , m_syncFull(new WizKMSyncThread(dbMgr.db(), false, this))
     , m_searcher(new WizSearcher(m_dbMgr, this))
@@ -137,7 +137,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_newNoteButton(NULL)
     #else
     , m_toolBar(new QToolBar(this))
-//    , m_toolBar(nullptr)
     #endif
     , m_useSystemBasedStyle(true)
 #else
@@ -3750,6 +3749,11 @@ QObject* WizMainWindow::DocumentsCtrl()
 QObject* WizMainWindow::DatabaseManager()
 {
     return &m_dbMgr;
+}
+
+QObject* WizMainWindow::CurrentDocumentBrowserObject()
+{
+    return m_doc->web();
 }
 
 QObject* WizMainWindow::CreateWizObject(const QString& strObjectID)

@@ -2323,6 +2323,10 @@ void WizDocumentListView::paintEvent(QPaintEvent *e)
     //
     QPixmap pixmap = isSearchResult() ? m_emptySearch : m_emptyFolder;
     QSize imageSize = pixmap.size();
+#ifdef Q_OS_MAC
+    imageSize.setWidth(int(imageSize.width() / pixmap.devicePixelRatio()));
+    imageSize.setHeight(int(imageSize.height() / pixmap.devicePixelRatio()));
+#endif
     QRect rc = rect();
     //
     QString text = isSearchResult()

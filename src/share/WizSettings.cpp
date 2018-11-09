@@ -175,16 +175,19 @@ CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
     return settings.getString("Shortcut", strName, strDef);
 }
 
+WizUserSettings* WizUserSettings::s_currentSettings = nullptr;
 
 WizUserSettings::WizUserSettings(const QString& strAccountFolderName)
     : m_strAccountFolderName(strAccountFolderName)
     , m_db(NULL)
 {
+    s_currentSettings = this;
 }
 
 WizUserSettings::WizUserSettings(WizDatabase& db)
     : m_db(&db)
 {
+    s_currentSettings = this;
 }
 
 void WizUserSettings::setAccountFolderName(const QString& strAccountFolderName)

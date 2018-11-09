@@ -61,6 +61,7 @@
 #include "WizSearchReplaceWidget.h"
 
 #include "html/WizHtmlReader.h"
+#include "WizPlugins.h"
 
 #include "WizTitleBar.h"
 
@@ -1025,7 +1026,6 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     }
     else
     {
-
         QString keywords = getHighlightKeywords();
         if (keywords.isEmpty()) {
             //
@@ -1041,6 +1041,8 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     qDebug() << strCode;
     //
     page()->runJavaScript(strCode);
+    //
+    WizPlugins::plugins().notifyDocumentChanged();
 }
 
 

@@ -71,8 +71,11 @@ QWebEngineProfile* createWebEngineProfile(const WizWebEngineViewInjectObjects& o
         return nullptr;
     //
     QWebEngineProfile *profile = new QWebEngineProfile("WizNoteWebEngineProfile", parent);
-    QString jsWebChannel ;
-    WizLoadTextFromResource(":/qtwebchannel/qwebchannel.js", jsWebChannel);
+    //
+    QString jsWebChannelFileName = Utils::WizPathResolve::resourcesPath() + "files/webengine/wizwebchannel.js";
+    QString jsWebChannel;
+    WizLoadUnicodeTextFromFile(jsWebChannelFileName, jsWebChannel);
+    //
     QString initFileName = Utils::WizPathResolve::resourcesPath() + "files/webengine/wizwebengineviewinit.js";
     QString jsInit;
     WizLoadUnicodeTextFromFile(initFileName, jsInit);
@@ -99,18 +102,24 @@ QWebEngineProfile* createWebEngineProfile(const WizWebEngineViewInjectObjects& o
         profile->scripts()->insert(script);
     }
     //
-    {
-        QString code = "if (typeof initForWebEngine !== 'undefined') { initForWebEngine(); }";
-        QWebEngineScript script;
-        script.setSourceCode(code);
-        script.setName("InitForWebEngine.js");
-        script.setWorldId(QWebEngineScript::MainWorld);
-        script.setInjectionPoint(QWebEngineScript::DocumentReady);
-        script.setRunsOnSubFrames(false);
-        profile->scripts()->insert(script);
-    }
-    //
     return profile;
+}
+
+WizWebEngineAsyncMethodResultObject::WizWebEngineAsyncMethodResultObject(QObject* parent)
+    : QObject(parent)
+    , m_acquired(false)
+{
+}
+
+WizWebEngineAsyncMethodResultObject::~WizWebEngineAsyncMethodResultObject()
+{
+}
+
+void WizWebEngineAsyncMethodResultObject::setResult(const QVariant& result)
+{
+    m_acquired = true;
+    m_result = result;
+    emit resultAcquired(m_result);
 }
 
 WizWebEnginePage::WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent)
@@ -209,6 +218,116 @@ WizWebEngineView::WizWebEngineView(const WizWebEngineViewInjectObjects& objects,
 
 WizWebEngineView::~WizWebEngineView()
 {
+}
+
+QVariant WizWebEngineView::ExecuteScript(QString script)
+{
+    auto result = QSharedPointer<WizWebEngineAsyncMethodResultObject>(new WizWebEngineAsyncMethodResultObject(nullptr), &QObject::deleteLater);
+    //
+    page()->runJavaScript(script, [=](const QVariant &v) {
+        result->setResult(v);
+        QTimer::singleShot(1000, [=]{
+            auto r = result;
+            r = nullptr;
+        });
+    });
+
+    QVariant v;
+    v.setValue<QObject*>(result.get());
+    return v;
+}
+
+QVariant WizWebEngineView::ExecuteScriptFile(QString fileName)
+{
+    QString script;
+    if (!WizLoadUnicodeTextFromFile(fileName, script)) {
+        return QVariant();
+    }
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction0(QString function)
+{
+    QString script = QString("%1();").arg(function);
+    return ExecuteScript(script);
+}
+
+
+QString toArgument(const QVariant& v)
+{
+    switch (v.type()) {
+    case QVariant::Bool:
+        return v.toBool() ? "true" : "false";
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong:
+        return QString("%1").arg(v.toLongLong());
+    case QVariant::Double: {
+        double f = v.toDouble();
+        QString str;
+        str.sprintf("%f", f);
+        return str;
+    }
+    case QVariant::Date:
+    case QVariant::Time:
+    case QVariant::DateTime:
+        return QString("new Date(%1)").arg(v.toDateTime().toTime_t() * 1000);
+    case QVariant::String: {
+            QString s = v.toString();
+            s.replace("\\", "\\\\");
+            s.replace("\r", "\\r");
+            s.replace("\n", "\\n");
+            s.replace("\t", "\\t");
+            s.replace("\"", "\\\"");
+            return "\"" + s + "\"";
+        }
+    default:
+        qDebug() << "Unsupport type: " << v.type();
+        return "undefined";
+    }
+}
+
+QVariant WizWebEngineView::ExecuteFunction1(QString function, const QVariant& arg1)
+{
+    QString script = QString("%1(%2);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            ;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction2(QString function, const QVariant& arg1, const QVariant& arg2)
+{
+    QString script = QString("%1(%2, %3);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            .arg(toArgument(arg2))
+            ;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction3(QString function, const QVariant& arg1, const QVariant& arg2, const QVariant& arg3)
+{
+    QString script = QString("%1(%2, %3, %4);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            .arg(toArgument(arg2))
+            .arg(toArgument(arg3))
+            ;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction4(QString function, const QVariant& arg1, const QVariant& arg2, const QVariant& arg3, const QVariant& arg4)
+{
+    QString script = QString("%1(%2, %3, %4, %5);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            .arg(toArgument(arg2))
+            .arg(toArgument(arg3))
+            .arg(toArgument(arg4))
+            ;
+    return ExecuteScript(script);
 }
 
 
