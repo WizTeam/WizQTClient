@@ -10,6 +10,7 @@
 #include <QDateTime>
 
 #include <QTextStream>
+#include "share/WizUIBase.h"
 
 WizAboutDialog::WizAboutDialog(QWidget *parent)
     : QDialog(parent)
@@ -77,4 +78,9 @@ WizAboutDialog::WizAboutDialog(QWidget *parent)
     layout->setAlignment(labelCopyright, Qt::AlignCenter);
 
     setWindowTitle(tr("About WizNote"));
+    //
+    //
+    if (isDarkMode()) {
+        textCredits->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
+    }
 }

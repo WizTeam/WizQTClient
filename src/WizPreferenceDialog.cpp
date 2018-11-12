@@ -19,6 +19,9 @@
 #include "sync/WizApiEntry.h"
 
 #include "widgets/WizExecutingActionDialog.h"
+#ifdef Q_OS_MAC
+#include "mac/WizMacHelper.h"
+#endif
 
 
 WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
@@ -216,6 +219,13 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
+    //
+#ifdef Q_OS_MAC
+    if (isMojaveOrHigher()) {
+        //
+        ui->checkBoxTrayIcon->setVisible(false);
+    }
+#endif
 }
 
 void WizPreferenceWindow::showPrintMarginPage()

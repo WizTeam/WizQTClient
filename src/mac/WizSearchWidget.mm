@@ -368,14 +368,6 @@ QString WizSearchView::getCurrentCompleterText()
     return m_completer->getCurrentText();
 }
 
-void WizSearchView::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
-{
-    if (m_completer)
-    {
-        m_completer->setPopupOffset(popupWgtWidth, offset);
-    }
-}
-
 void WizSearchView::setSizeHint(QSize sizeHint)
 {
     m_sizeHint = sizeHint;
@@ -421,6 +413,30 @@ void WizSearchView::clearSearchFocus()
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:nil];
 }
+
+QRect WizSearchView::globalRect()
+{
+    NSView* view = cocoaView();
+    if (!view) {
+        return QRect();
+    }
+    //
+    NSRect rc = view.bounds;
+    rc = [view convertRect:rc toView:nil];
+    //
+    NSWindow* window = view.window;
+    rc = [window convertRectToScreen:rc];
+    //
+    NSScreen* screen = window.screen;
+    NSRect rcScreen = screen.frame;
+
+    QRect ret(int(rc.origin.x), int(rc.origin.y), int(rc.size.width), int(rc.size.height));
+    //
+    ret.moveTop(int(rcScreen.size.height) - ret.y() - ret.height());
+    //
+    return ret;
+}
+
 
 
 #endif

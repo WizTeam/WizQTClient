@@ -695,7 +695,11 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
 void WizDocumentWebView::editorResetFont()
 {
     WIZDOCUMENTDATA data = view()->note();
-    trySaveDocument(data, false, [=](const QVariant& vRet){
+    if (data.strGUID.isEmpty()) {
+        return;
+    }
+    //
+    trySaveDocument(data, false, [=](const QVariant&){
         //
         reloadNoteData(data);
     });
@@ -1253,7 +1257,9 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 }
 
 
-//#define DEBUG_EDITOR
+#ifdef QT_DEBUG
+#define DEBUG_EDITOR
+#endif
 
 void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)
 {

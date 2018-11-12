@@ -1825,7 +1825,6 @@ void WizMainWindow::initToolBar()
     m_searchWidget = m_toolBar->getSearchWidget();
     if (m_searchWidget) {
         m_searchWidget->setUserSettings(m_settings);
-        m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(isHighPix ? 217 : 230, 0));
     }
 
 #else
