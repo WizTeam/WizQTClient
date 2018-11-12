@@ -13,4 +13,6 @@ QImage qimageWithTintColor(const QImage& image, QColor tintColor);
 #define WIZ_TINT_COLOR_STRING   "#448adf"
 #define WIZ_TINT_COLOR          QColor(WIZ_TINT_COLOR_STRING)
 
+void WizApplyDarkModeStyles(QWidget* widget);
+
 #endif // WIZUIBASE_H

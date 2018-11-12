@@ -11,7 +11,7 @@ WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
     , ui(new Ui::WizLineInputDialog)
 {
     ui->setupUi(this);
-    setFixedSize(size());
+    //setFixedSize(size());
 
     setWindowTitle(strTitle);
     ui->labelHint->setText(strHint);
@@ -28,6 +28,7 @@ WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
     //
     if (isDarkMode()) {
         ui->editInput->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
+        WizApplyDarkModeStyles(this);
     }
 }
 

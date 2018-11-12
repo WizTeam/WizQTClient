@@ -6,6 +6,10 @@
 #include "WizSettings.h"
 #include "utils/WizPathResolve.h"
 
+#include <QLabel>
+#include <QAbstractButton>
+#include <QLineEdit>
+
 static int ComputeOverlay(int upperLayerValue, int lowerLayerValue)
 {
     int a = lowerLayerValue;
@@ -147,3 +151,21 @@ bool isDarkMode()
 }
 #endif
 
+void WizApplyDarkModeStyles(QWidget* widget)
+{
+#ifndef Q_OS_MAC
+    if (isDarkMode()) {
+        for (QObject* child : widget->children()) {
+            if (QWidget* widget = dynamic_cast<QLabel*>(child)) {
+                widget->setStyleSheet("color:#a6a6a6");
+            } else if (QWidget* widget = dynamic_cast<QLineEdit*>(child)) {
+                widget->setStyleSheet("color:#a6a6a6");
+            } else if (QWidget* widget = dynamic_cast<QAbstractButton*>(child)) {
+                widget->setStyleSheet("color:#a6a6a6");
+            } else if (QWidget* widget = dynamic_cast<QWidget*>(child)) {
+                WizApplyDarkModeStyles(widget);
+            }
+        }
+    }
+#endif
+}

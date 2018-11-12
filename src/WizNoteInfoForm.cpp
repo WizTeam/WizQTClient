@@ -55,18 +55,10 @@ WizNoteInfoForm::WizNoteInfoForm(QWidget *parent)
     } else {
         setStyleSheet("background-color:#FFFFFF; border-radius:4px;");
     }
-#ifndef Q_OS_MAC
+
     if (isDarkMode()) {
-        for (QObject* child : children()) {
-            if (QWidget* widget = dynamic_cast<QLabel*>(child)) {
-                widget->setStyleSheet("color:#a6a6a6");
-            } else if (QWidget* widget = dynamic_cast<QLineEdit*>(child)) {
-                widget->setStyleSheet("color:#a6a6a6");
-            }
-        }
+        WizApplyDarkModeStyles(this);
     }
-#endif
-    //
 }
 
 WizNoteInfoForm::~WizNoteInfoForm()
