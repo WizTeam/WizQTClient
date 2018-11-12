@@ -63,6 +63,7 @@ class WizRoundCellButton : public WizCellButton
     Q_OBJECT
 public:
     explicit WizRoundCellButton(QWidget* parent = 0);
+    ~WizRoundCellButton();
 
     void setNormalIcon(const QIcon& icon, const QString& text, const QString& strTips);
     void setCheckedIcon(const QIcon& icon, const QString& text, const QString& strTips);

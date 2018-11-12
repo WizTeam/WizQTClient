@@ -168,6 +168,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
         m_lineEditPassword->setStyleSheet(style);
         m_lineEditUserName->setStyleSheet(style);
         m_lineEditServer->setStyleSheet(style);
+        //
     }
     //
     connect(&m_wizBoxSearchingTimer, SIGNAL(timeout()), SLOT(onWizBoxSearchingTimeOut()));
@@ -623,6 +624,12 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
         //QString style = QString("QCheckBox:indicator{color:#ffffff;background-color:%1;}").arg(WizColorLineEditorBackground.name());
         //ui->cbx_autologin->setStyleSheet(style);
         //ui->cbx_remberPassword->setStyleSheet(style);
+        ui->cbx_autologin->setStyleSheet(QString("QCheckBox{background:none;border:none;color:#a6a6a6;}"
+                                                 "QCheckBox:focus{background:none;border:none;}"
+                                                 "QCheckBox::pressed{background:none;border:none;}"));
+        ui->cbx_remberPassword->setStyleSheet(QString("QCheckBox{background:none;border:none;color:#a6a6a6;}"
+                                                 "QCheckBox:focus{background:none;border:none;}"
+                                                 "QCheckBox::pressed{background:none;border:none;}"));
     }
 #endif
     //

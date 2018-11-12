@@ -275,7 +275,7 @@ WizPluginData::WizPluginData(QString path, QObject* parent)
     m_type = plugin.getString(section, "Type");
     m_guid = plugin.getString(section, "AppGUID");
     m_scriptFileName = m_path + "index.html";
-    m_icon = WizLoadSkinIcon("", m_path + "plugin.svg", QSize(14, 14), ICON_OPTIONS);
+    m_icon = WizLoadSkinIcon("", m_path + "plugin.svg", QSize(WizSmartScaleUI(14), WizSmartScaleUI(14)), ICON_OPTIONS);
 }
 //
 void WizPluginData::emitDocumentChanged()

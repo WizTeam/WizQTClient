@@ -188,7 +188,7 @@ private:
 
     WizDocumentSelectionView* m_documentSelection;
     WizDocumentView* m_doc;
-    std::shared_ptr<WizSplitter> m_splitter;
+    WizSplitter* m_splitter;
     QWidget* m_docListContainer;
     WizSingleDocumentViewDelegate* m_singleViewDelegate;
 

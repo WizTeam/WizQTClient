@@ -1934,8 +1934,8 @@ void WizMainWindow::initClient()
     layout->setSpacing(0);
     m_clienWgt->setLayout(layout);
 
-    m_splitter = std::make_shared<WizSplitter>();
-    layout->addWidget(m_splitter.get());
+    m_splitter = new WizSplitter();
+    layout->addWidget(m_splitter);
 
     pal.setColor(QPalette::Window, Utils::WizStyleHelper::treeViewBackground());
     m_category->setPalette(pal);
@@ -1987,7 +1987,7 @@ void WizMainWindow::initClient()
 
     m_msgListWidget->hide();
     //
-    connect(m_splitter.get(), SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
+    connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
 }
 
 QWidget* WizMainWindow::createNoteListView()

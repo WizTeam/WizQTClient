@@ -29,8 +29,6 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
     tCreated = info.tCreated;
-    //
-    Q_ASSERT(!strKbServer.isEmpty());
 }
 
 WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info, const WIZGROUPDATA& group)
@@ -52,8 +50,6 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info, const WIZGROUPDATA& group)
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
     tCreated = info.tCreated;
-    //
-    Q_ASSERT(!strKbServer.isEmpty());
 }
 
 bool WIZUSERINFO::fromJson(const Json::Value& value)

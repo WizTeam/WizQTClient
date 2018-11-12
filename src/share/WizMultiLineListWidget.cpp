@@ -1,6 +1,7 @@
 ﻿#include "WizMultiLineListWidget.h"
 
 #include <QStyledItemDelegate>
+#include "share/WizQtHelper.h"
 
 
 
@@ -14,14 +15,14 @@ public:
     {
     }
 
-//    virtual QSize sizeHint(const QStyleOptionViewItem &option,
-//                           const QModelIndex &index) const
-//    {
-//        QSize sz = QStyledItemDelegate::sizeHint(option, index);
-//        //
-//        sz.setHeight(sz.height() + (option.fontMetrics.height() + 2) * (m_lineCount - 1) + 2 + 16);
-//        return sz;
-//    }
+    virtual QSize sizeHint(const QStyleOptionViewItem &option,
+                           const QModelIndex &index) const
+    {
+        QSize sz = QStyledItemDelegate::sizeHint(option, index);
+        //
+        sz.setHeight((option.fontMetrics.height() + WizSmartScaleUI(2)) * m_lineCount + WizSmartScaleUI(8));
+        return sz;
+    }
     //
     int lineCount() const
     {
@@ -47,7 +48,7 @@ bool WizMultiLineListWidget::imageAlignLeft() const
 }
 int WizMultiLineListWidget::imageWidth() const
 {
-    return 32;
+    return WizSmartScaleUI(32);
 }
 
 QString WizMultiLineListWidget::itemText(const QModelIndex& index, int line) const

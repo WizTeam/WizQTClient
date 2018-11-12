@@ -16,6 +16,7 @@
 #include <QWebEngineProfile>
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
+#include <QTimer>
 
 class WizInvisibleWebEngineView : public QWebEngineView
 {
@@ -233,7 +234,7 @@ QVariant WizWebEngineView::ExecuteScript(QString script)
     });
 
     QVariant v;
-    v.setValue<QObject*>(result.get());
+    v.setValue<QObject*>(result.data());
     return v;
 }
 
