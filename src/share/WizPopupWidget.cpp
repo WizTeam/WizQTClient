@@ -22,7 +22,7 @@ WizPopupWidget::WizPopupWidget(QWidget* parent)
 
 #ifdef Q_OS_LINUX
     if (isDarkMode()) {
-        setStyleSheet("QWidget{background:#272727;}");
+        setStyleSheet("QWidget{background:#373737;}");
     } else {
         setStyleSheet("QWidget{background:#D7D7D7;}");
     }
