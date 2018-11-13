@@ -684,6 +684,12 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
     {
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
     }
+    //
+    if (isDarkMode()) {
+        backgroundColor = "#272727";
+    }
+    //
+
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
     //
     const QString customCssId("wiz_custom_css");
