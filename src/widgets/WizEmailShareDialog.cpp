@@ -45,9 +45,11 @@ WizEmailShareDialog::WizEmailShareDialog(WizExplorerApp& app, QWidget *parent)
     ui->setupUi(this);
 //    ui->checkBox_saveNotes->setVisible(false);
     QPixmap pix(Utils::WizStyleHelper::loadPixmap("send_email"));
-    QIcon icon = WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "send_email", pix.size(), ICON_OPTIONS);
+    QSize size = pix.size();
+    size /= pix.devicePixelRatio();
+    QIcon icon = WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "send_email", size, ICON_OPTIONS);
     ui->toolButton_send->setIcon(icon);
-    ui->toolButton_send->setIconSize(pix.size());
+    ui->toolButton_send->setIconSize(size);
     ui->toolButton_contacts->setIcon(WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "document_badge", QSize(), ICON_OPTIONS));
     ui->toolButton_contacts->setToolTip(tr("Show frequent contacts list"));
 
@@ -76,6 +78,7 @@ WizEmailShareDialog::WizEmailShareDialog(WizExplorerApp& app, QWidget *parent)
         ui->lineEdit_to->setStyleSheet(darkStyleSheet);
         ui->textEdit_notes->setStyleSheet(darkStyleSheet);
         m_contactList->setStyleSheet(darkStyleSheet);
+        ui->toolButton_settings->setStyleSheet("color:#a6a6a6");
     }
 }
 
@@ -290,6 +293,10 @@ void WizEmailShareDialog::on_toolButton_settings_clicked()
     layout->addWidget(checkbox);
     layout->addWidget(label);
     layout->addWidget(textEdit);
+    //
+    if (isDarkMode()) {
+        textEdit->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
+    }
 
     bool autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
     checkbox->setChecked(autoInsert);
