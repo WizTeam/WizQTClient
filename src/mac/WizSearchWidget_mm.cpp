@@ -44,7 +44,6 @@ public:
 
 
         painter->save();
-        painter->setPen(Qt::black);
         if ((option.state & QStyle::State_Selected))
         {
             painter->setPen(Qt::NoPen);
@@ -96,9 +95,9 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_treeWgt->setAttribute(Qt::WA_MacShowFocusRect, false);
     //
     if (isDarkMode()) {
-        m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; color: #aaaaaa; background-color:#666666;}  "
-                                 "QTreeView::item{background-color:#666666; color:#a6a6a6}  "
-                                 "QTreeView::branch { color:#a6a6a6; border-left:20px solid #666666;  margin-left:20px; }");
+        m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; color: #c6c6c6; background-color:#666666;}  "
+                                 "QTreeView::item{background-color:#666666; color:#c6c6c6}  "
+                                 "QTreeView::branch { color:#c6c6c6; border-left:20px solid #666666;  margin-left:20px; }");
         m_treeWgt->header()->setStyleSheet("QHeaderView:section{ background-color:#666666; height:20px; "
                                            "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
     } else {
