@@ -59,7 +59,6 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
         }
         //
         WizEditor.init(editorOptions);
-        WizEditor.link.on();
         WizEditor.addListener(WizEditor.ListenerType.SelectionChange, WizOnSelectionChange)
         return true;
     }
