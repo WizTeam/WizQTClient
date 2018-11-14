@@ -1283,6 +1283,11 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     files[strEditorJS] = "";
     files[strInit] = "";
     //
+    if (isDarkMode()) {
+        QString darkCss = "file:///" +  strHtmlEditorPath + "wizDarkMode.css";
+        files[darkCss] = "";
+    }
+    //
     /*
      *
      * 渐变式加载笔记，暂时不需要
