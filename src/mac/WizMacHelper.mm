@@ -837,8 +837,21 @@ bool isDarkMode()
         int minor = getSystemMinorVersion();
         //return false;
         if ((major >= 11) || (major == 10 && minor >= 14)) {
-            NSDictionary *dict = [[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain];
-            id style = [dict objectForKey:@"AppleInterfaceStyle"];
+            //
+            NSDictionary *dictApp = [[NSBundle mainBundle] infoDictionary];
+            id requireAquaSystemAppearance = [dictApp valueForKey:@"NSRequiresAquaSystemAppearance"];
+            if (requireAquaSystemAppearance && [requireAquaSystemAppearance isKindOfClass:[NSNumber class]]) {
+                //
+                NSNumber* v = requireAquaSystemAppearance;
+                if ([v boolValue]) {
+                    ret = false;
+                    return false;
+                }
+            }
+            //
+            //
+            NSDictionary *dictGlobal = [[NSUserDefaults standardUserDefaults] persistentDomainForName:NSGlobalDomain];
+            id style = [dictGlobal objectForKey:@"AppleInterfaceStyle"];
             bool darkModeOn = ( style && [style isKindOfClass:[NSString class]] && NSOrderedSame == [style caseInsensitiveCompare:@"dark"] );
             ret = darkModeOn;
         }
