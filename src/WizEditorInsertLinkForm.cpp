@@ -1,6 +1,6 @@
 ﻿#include "WizEditorInsertLinkForm.h"
 #include "ui_WizEditorInsertLinkForm.h"
-
+#include "share/WizUIBase.h"
 #include <QUrl>
 
 WizEditorInsertLinkForm::WizEditorInsertLinkForm(QWidget *parent) :
@@ -9,6 +9,12 @@ WizEditorInsertLinkForm::WizEditorInsertLinkForm(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowModality(Qt::ApplicationModal);
+    //
+    if (isDarkMode()) {
+        ui->editUrl->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
+        WizApplyDarkModeStyles(this);
+    }
+    //
 }
 
 WizEditorInsertLinkForm::~WizEditorInsertLinkForm()
