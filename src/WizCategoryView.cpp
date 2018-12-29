@@ -4714,35 +4714,35 @@ void WizCategoryView::initQuickSearches()
     pSearchRoot->addChild(pSearchByDTAccessed);
 
     WizCategoryViewTimeSearchItem* pCreatedToday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since Today"), "DT_CREATED > %1", DateInterval_Today);
-    WizCategoryViewTimeSearchItem* pCreatedYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since Yestoday"), "DT_CREATED > %1", DateInterval_Yestoday);
-    WizCategoryViewTimeSearchItem* pCreatedDayBeforeYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since the day before yestoday"), "DT_CREATED > %1", DateInterval_TheDayBeforeYestoday);
+    WizCategoryViewTimeSearchItem* pCreatedYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since Yesterday"), "DT_CREATED > %1", DateInterval_Yesterday);
+    WizCategoryViewTimeSearchItem* pCreatedDayBeforeYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since the day before yesterday"), "DT_CREATED > %1", DateInterval_TheDayBeforeYesterday);
     WizCategoryViewTimeSearchItem* pCreatedOneWeek = new WizCategoryViewTimeSearchItem(m_app, tr("Created since one week"), "DT_CREATED > %1", DateInterval_LastWeek);
     WizCategoryViewTimeSearchItem* pCreatedOneMonth = new WizCategoryViewTimeSearchItem(m_app, tr("Created since one month"), "DT_CREATED > %1", DateInterval_LastMonth);
     pSearchByDTCreated->addChild(pCreatedToday);
-    pSearchByDTCreated->addChild(pCreatedYestoday);
-    pSearchByDTCreated->addChild(pCreatedDayBeforeYestoday);
+    pSearchByDTCreated->addChild(pCreatedYesterday);
+    pSearchByDTCreated->addChild(pCreatedDayBeforeYesterday);
     pSearchByDTCreated->addChild(pCreatedOneWeek);
     pSearchByDTCreated->addChild(pCreatedOneMonth);
 
     WizCategoryViewTimeSearchItem* pModifiedToday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since Today"), "DT_MODIFIED > %1", DateInterval_Today);
-    WizCategoryViewTimeSearchItem* pModifiedYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since Yestoday"), "DT_MODIFIED > %1", DateInterval_Yestoday);
-    WizCategoryViewTimeSearchItem* pModifiedDayBeforeYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since the day before yestoday"), "DT_MODIFIED > %1", DateInterval_TheDayBeforeYestoday);
+    WizCategoryViewTimeSearchItem* pModifiedYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since Yesterday"), "DT_MODIFIED > %1", DateInterval_Yesterday);
+    WizCategoryViewTimeSearchItem* pModifiedDayBeforeYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since the day before yesterday"), "DT_MODIFIED > %1", DateInterval_TheDayBeforeYesterday);
     WizCategoryViewTimeSearchItem* pModifiedOneWeek = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since one week"), "DT_MODIFIED > %1", DateInterval_LastWeek);
     WizCategoryViewTimeSearchItem* pModifiedOneMonth = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since one month"), "DT_MODIFIED > %1", DateInterval_LastMonth);
     pSearchByDTModified->addChild(pModifiedToday);
-    pSearchByDTModified->addChild(pModifiedYestoday);
-    pSearchByDTModified->addChild(pModifiedDayBeforeYestoday);
+    pSearchByDTModified->addChild(pModifiedYesterday);
+    pSearchByDTModified->addChild(pModifiedDayBeforeYesterday);
     pSearchByDTModified->addChild(pModifiedOneWeek);
     pSearchByDTModified->addChild(pModifiedOneMonth);
 
     WizCategoryViewTimeSearchItem* pAccessedToday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since Today"), "DT_ACCESSED > %1", DateInterval_Today);
-    WizCategoryViewTimeSearchItem* pAccessedYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since Yestoday"), "DT_ACCESSED > %1", DateInterval_Yestoday);
-    WizCategoryViewTimeSearchItem* pAccessedDayBeforeYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since the day before yestoday"), "DT_ACCESSED > %1", DateInterval_TheDayBeforeYestoday);
+    WizCategoryViewTimeSearchItem* pAccessedYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since Yesterday"), "DT_ACCESSED > %1", DateInterval_Yesterday);
+    WizCategoryViewTimeSearchItem* pAccessedDayBeforeYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since the day before yesterday"), "DT_ACCESSED > %1", DateInterval_TheDayBeforeYesterday);
     WizCategoryViewTimeSearchItem* pAccessedOneWeek = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since one week"), "DT_ACCESSED > %1", DateInterval_LastWeek);
     WizCategoryViewTimeSearchItem* pAccessedOneMonth = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since one month"), "DT_ACCESSED > %1", DateInterval_LastMonth);
     pSearchByDTAccessed->addChild(pAccessedToday);
-    pSearchByDTAccessed->addChild(pAccessedYestoday);
-    pSearchByDTAccessed->addChild(pAccessedDayBeforeYestoday);
+    pSearchByDTAccessed->addChild(pAccessedYesterday);
+    pSearchByDTAccessed->addChild(pAccessedDayBeforeYesterday);
     pSearchByDTAccessed->addChild(pAccessedOneWeek);
     pSearchByDTAccessed->addChild(pAccessedOneMonth);
 

@@ -32,8 +32,8 @@ enum ItemType
 
 enum DateInterval{
     DateInterval_Today,
-    DateInterval_Yestoday,
-    DateInterval_TheDayBeforeYestoday,
+    DateInterval_Yesterday,
+    DateInterval_TheDayBeforeYesterday,
     DateInterval_LastWeek,
     DateInterval_LastMonth,
     DateInterval_LastYear

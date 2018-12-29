@@ -2208,10 +2208,10 @@ QString WizCategoryViewTimeSearchItem::getSQLWhere()
     case DateInterval_Today:
         dt = dt.addDays(-1);
         break;
-    case DateInterval_Yestoday:
+    case DateInterval_Yesterday:
         dt = dt.addDays(-2);
         break;
-    case DateInterval_TheDayBeforeYestoday:
+    case DateInterval_TheDayBeforeYesterday:
         dt = dt.addDays(-3);
         break;
     case DateInterval_LastWeek:
