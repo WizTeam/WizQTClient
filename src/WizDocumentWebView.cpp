@@ -143,6 +143,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 
     connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
     connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
+    connect(page, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(onOpenLinkInNewWindow(QUrl)));
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -1055,6 +1056,11 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     WizPlugins::plugins().notifyDocumentChanged();
 }
 
+bool WizDocumentWebView::isInternalUrl(const QUrl& url)
+{
+    return url.scheme().toLower() == "wiz";
+}
+
 
 void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
@@ -1063,6 +1069,11 @@ void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::Navigatio
     //
     page->stopCurrentNavigation();
     //
+    onOpenLinkInNewWindow(url);
+}
+
+void WizDocumentWebView::onOpenLinkInNewWindow(QUrl url)
+{
     if (isInternalUrl(url))
     {
         QString strUrl = url.toString();
@@ -1093,11 +1104,6 @@ void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::Navigatio
         QDesktopServices::openUrl(strUrl);
         return;
     }
-}
-
-bool WizDocumentWebView::isInternalUrl(const QUrl& url)
-{
-    return url.scheme().toLower() == "wiz";
 }
 
 bool WizStringList2Map(const QStringList& list, QMap<QString, QString>& map)

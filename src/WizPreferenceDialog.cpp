@@ -368,6 +368,10 @@ void WizApplyDarkModeStyles_Mac(QObject* parent)
                     widget->setStyleSheet("color:#a6a6a6;background-color:#333333");
                 } else if (QWidget* widget = dynamic_cast<QLineEdit*>(child)) {
                     widget->setStyleSheet("color:#a6a6a6;background-color:#333333");
+#ifndef Q_OS_MAC
+                } else if (QWidget* widget = dynamic_cast<QAbstractButton*>(child)) {
+                    widget->setStyleSheet("color:#a6a6a6");
+#endif
                 } else if (className == "QFontListView") {
                     childWidget->setStyleSheet("color:#a6a6a6;background-color:#333333");
                 }

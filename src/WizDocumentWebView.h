@@ -308,6 +308,7 @@ public Q_SLOTS:
 
     void onEditorLoadFinished(bool ok);
     void onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page);
+    void onOpenLinkInNewWindow(QUrl url);
 
     void onTimerAutoSaveTimout();
 
