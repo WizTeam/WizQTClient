@@ -3141,14 +3141,12 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
                                       int nFlags,
                                       bool notifyDataModify /*= true*/)
 {
-    m_mtxTempFile.lock();
     QString strProcessedHtml(strHtml);
     QString strResourcePath = GetResoucePathFromFile(strURL);
     if (!strResourcePath.isEmpty()) {
         QUrl urlResource = QUrl::fromLocalFile(strResourcePath);
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
-    m_mtxTempFile.unlock();
     //
     if (isEncryptAllData())
         data.nProtected = 1;
@@ -4274,9 +4272,6 @@ bool WizDatabase::documentToTempHtmlFile(const WIZDOCUMENTDATA& document,
 bool WizDatabase::documentToHtmlFile(const WIZDOCUMENTDATA& document,
                                           const QString& strPath)
 {
-    QMutexLocker locker(&m_mtxTempFile);
-    //
-    //
     //避免编辑的时候临时文件被删除导致图片等丢失
     //::WizDeleteAllFilesInFolder(strPath);
     ::WizEnsurePathExists(strPath);

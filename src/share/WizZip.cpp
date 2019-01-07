@@ -10,6 +10,7 @@
 #include <QDebug>
 
 #include "utils/WizMisc.h"
+#include "utils/WizLogger.h"
 
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
@@ -54,10 +55,12 @@ static bool copyData(QIODevice &inFile, QIODevice &outFile)
         memset(buf, 0, 4096);
         qint64 readLen = inFile.read(buf, 4096);
         if (readLen <= 0) {
+            TOLOG1("Failed to read file: %1", inFile.errorString());
             delete [] buf;
             return false;
         }
         if (outFile.write(buf, readLen) != readLen) {
+            TOLOG1("Failed to write file: %1", outFile.errorString());
             delete [] buf;
             return false;
         }
@@ -262,6 +265,7 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
 
     // Copio i dati
     if (!copyData(inFile, outFile) || inFile.getZipError()!=UNZ_OK) {
+        TOLOG1("failed to copy zip file data, %1", WizIntToStr(inFile.getZipError()));
         removeFile(QStringList(fileDest));
         return false;
     }
@@ -653,6 +657,7 @@ QStringList JlCompress::extractDir(QString fileCompressed, QString dir) {
     // Apro lo zip
     QuaZip* zip = new QuaZip(QFileInfo(fileCompressed).absoluteFilePath());
     if(!zip->open(QuaZip::mdUnzip)) {
+        TOLOG1("Failed to open zip file: %1", WizIntToStr(zip->getZipError()));
         delete zip;
         return QStringList();
     }
@@ -667,6 +672,7 @@ QStringList JlCompress::extractDir(QString fileCompressed, QString dir) {
             continue;
         QString absFilePath = directory.absoluteFilePath(fileName);
         if (!extractFile(zip, fileName, absFilePath)) {
+            TOLOG2("Failed to extract zip file: %1, %2", WizIntToStr(zip->getZipError()), fileName);
             delete zip;
             removeFile(lst);
             return QStringList();
@@ -677,6 +683,7 @@ QStringList JlCompress::extractDir(QString fileCompressed, QString dir) {
     // Chiudo il file zip
     zip->close();
     if(zip->getZipError()!=0) {
+        TOLOG1("Failed to extract zip file: %1", WizIntToStr(zip->getZipError()));
         delete zip;
         removeFile(lst);
         return QStringList();
@@ -988,6 +995,10 @@ bool WizUnzipFile::close()
 bool WizUnzipFile::extractZip(const CString& strZipFileName, const CString& strDestPath)
 {
     QStringList sl = JlCompress::extractDir(strZipFileName, strDestPath);
+    if (sl.empty()) {
+        TOLOG2("no files extracted: %1, %2", strZipFileName, strDestPath);
+        return false;
+    }
     return !sl.empty();
 }
 
