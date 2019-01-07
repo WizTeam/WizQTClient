@@ -2452,7 +2452,11 @@ void WizCategoryView::on_action_renameItem()
             {
                 //user can not rename predefined folders name
                 if (WizIsPredefinedLocation(pFolder->location()))
+                {
+                    QMessageBox::information(0, tr("Info"), tr("The default folder can not be renamed."));
+
                     return;
+                }
             }
         }
         p->setFlags(p->flags() | Qt::ItemIsEditable);

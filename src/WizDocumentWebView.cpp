@@ -708,7 +708,10 @@ void WizDocumentWebView::editorResetFont()
     //
     trySaveDocument(data, false, [=](const QVariant&){
         //
-        reloadNoteData(data);
+        QTimer::singleShot(300, [=]() {
+            reloadNoteData(data);
+        });
+        //
     });
 }
 
