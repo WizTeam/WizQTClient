@@ -443,7 +443,11 @@ void WizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataAr
 
 void WizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
-    WizDatabase& db = m_dbMgr.db();
+    if (arrayDocument.empty()) {
+        return;
+    }
+    WizDatabase& db = m_dbMgr.db(arrayDocument[0].strKbGUID);
+    //
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
@@ -456,7 +460,11 @@ void WizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray
 void WizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
                                                         const QString& targetFolder, bool keepDocTime, bool keepTag)
 {
-    WizDatabase& db = m_dbMgr.db();
+    if (arrayDocument.empty()) {
+        return;
+    }
+    WizDatabase& db = m_dbMgr.db(arrayDocument[0].strKbGUID);
+    //
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
@@ -470,7 +478,11 @@ void WizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataAr
 void WizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
                                                       const WIZTAGDATA& targetTag, bool keepDocTime)
 {
-    WizDatabase& db = m_dbMgr.db();
+    if (arrayDocument.empty()) {
+        return;
+    }
+    WizDatabase& db = m_dbMgr.db(arrayDocument[0].strKbGUID);
+    //
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
