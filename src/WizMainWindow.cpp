@@ -16,6 +16,7 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QCheckBox>
+#include <QStackedWidget>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -922,6 +923,7 @@ void WizMainWindow::saveStatus()
     QSettings* settings = WizGlobal::globalSettings();
     settings->setValue("Window/Geometry", saveGeometry());
     settings->setValue("Window/Splitter", m_splitter->saveState());
+    settings->setValue("Window/SubSplitter", m_subSplitter->saveState());
 }
 
 void WizMainWindow::restoreStatus()
@@ -929,6 +931,7 @@ void WizMainWindow::restoreStatus()
     QSettings* settings = WizGlobal::globalSettings();
     QByteArray geometry = settings->value("Window/Geometry").toByteArray();
     QByteArray splitterState = settings->value("Window/Splitter").toByteArray();
+    QByteArray subSplitterState = settings->value("Window/SubSplitter").toByteArray();
     // main window
     if (geometry.isEmpty()) {
 
@@ -948,6 +951,7 @@ void WizMainWindow::restoreStatus()
 
     restoreGeometry(geometry);
     m_splitter->restoreState(splitterState);
+    m_subSplitter->restoreState(subSplitterState);
 }
 
 void WizMainWindow::initActions()
@@ -1966,11 +1970,31 @@ void WizMainWindow::initClient()
     layoutList->addWidget(createNoteListView());
     layoutList->addWidget(createMessageListView());
     m_docListContainer->setLayout(layoutList);
-    m_splitter->addWidget(m_docListContainer);
-    m_splitter->addWidget(documentPanel);
+    //
+    WizSplitter* subSplitter = new WizSplitter(m_splitter);
+    subSplitter->addWidget(m_docListContainer);
+    subSplitter->addWidget(documentPanel);
+    subSplitter->setStretchFactor(0, 0);
+    subSplitter->setStretchFactor(1, 1);
+    m_subSplitter = subSplitter;
+    //
+    WizWebEngineView* webView = new WizWebEngineView(m_splitter);
+    m_mainWebView = webView;
+    //
+    QStackedWidget* subContainer = new QStackedWidget(m_splitter);
+    subContainer->addWidget(subSplitter);
+    subContainer->addWidget(webView);
+    m_subContainer = subContainer;
+    //
+    m_splitter->addWidget(subContainer);
     m_splitter->setStretchFactor(0, 0);
-    m_splitter->setStretchFactor(1, 0);
-    m_splitter->setStretchFactor(2, 1);
+    m_splitter->setStretchFactor(1, 1);
+    //
+//    m_splitter->addWidget(m_docListContainer);
+//    m_splitter->addWidget(documentPanel);
+//    m_splitter->setStretchFactor(0, 0);
+//    m_splitter->setStretchFactor(1, 0);
+//    m_splitter->setStretchFactor(2, 1);
 
     // set minimum width
     bool isHighPix = WizIsHighPixel();
@@ -3376,7 +3400,12 @@ void WizMainWindow::on_category_itemSelectionChanged()
         return;
 
     static QTime lastTime(0, 0, 0);
-    QTreeWidgetItem *currentItem = category->currentItem();
+    WizCategoryViewItemBase *currentItem = category->currentCategoryItem<WizCategoryViewItemBase>();
+    //
+    if (!currentItem->isWebView()) {
+        m_subContainer->setCurrentIndex(0);
+    }
+    //
     static QTreeWidgetItem *oldItem = currentItem;
     QTime last = lastTime;
     QTime now = QTime::currentTime();
@@ -3389,7 +3418,7 @@ void WizMainWindow::on_category_itemSelectionChanged()
     //
     if (WizCategoryViewTrashItem* pItem = dynamic_cast<WizCategoryViewTrashItem *>(currentItem))
     {
-        m_category->on_action_deleted_recovery();
+        showTrash();
         return;
     }
 
@@ -3453,15 +3482,36 @@ void WizMainWindow::on_category_itemSelectionChanged()
     }
 }
 
-void WizMainWindow::showSharedNotes()
+void WizMainWindow::showTrash()
 {
     ::WizGetAnalyzer().logAction("categoryMenuRecovery");
+    WizCategoryViewTrashItem* trashItem = m_category->currentCategoryItem<WizCategoryViewTrashItem>();
+    if (trashItem)
+    {
+        WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+            QString strToken = WizToken::token();
+            QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                m_subContainer->setCurrentIndex(1);
+                m_mainWebView->load(strUrl);
+            });
+        });
+    }
+}
+
+void WizMainWindow::showSharedNotes()
+{
+    ::WizGetAnalyzer().logAction("categoryMenuSharedNotes");
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         QString strToken = WizToken::token();
         QString strUrl = WizCommonApiEntry::getUrlByCommand("share_list");
         strUrl = strUrl.replace("{token}", strToken);
         WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-            WizShowWebDialogWithToken(tr("Shared Notes"), strUrl, 0, QSize(800, 480), true);
+            //
+            m_subContainer->setCurrentIndex(1);
+            m_mainWebView->load(strUrl);
+            //
+            //WizShowWebDialogWithToken(tr("Shared Notes"), strUrl, 0, QSize(800, 480), true);
         });
     });
 }

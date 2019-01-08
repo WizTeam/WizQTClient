@@ -1971,7 +1971,8 @@ WizCategoryViewTrashItem::WizCategoryViewTrashItem(WizExplorerApp& app,
 void WizCategoryViewTrashItem::showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (WizCategoryView* view = dynamic_cast<WizCategoryView *>(pCtrl)) {
-        view->showTrashContextMenu(pos);
+        //no menu
+        //view->showTrashContextMenu(pos);
     }
 }
 
@@ -2306,7 +2307,7 @@ void WizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewIt
 WizCategoryViewMySharesItem::WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_MySharesItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_shares", QSize(), ICON_OPTIONS);
+    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_share", QSize(), ICON_OPTIONS);
     setIcon(0, icon);
     setText(0, strName);
 }

@@ -1364,13 +1364,6 @@ void WizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
-    QAction* actionRecovery = new QAction("ActionRecovery", this);
-    actionRecovery->setData(ActionRecovery);
-    actionRecovery->setText(CATEGORY_ACTION_RECOVERY_DELETED_NOTES);
-    addAction(actionRecovery);
-    connect(actionRecovery, SIGNAL(triggered()), SLOT(on_action_deleted_recovery()));
-    //
-
 
 //    QAction* actionQuitGroup = new QAction("QuitGroup", this);
 //    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
@@ -1431,7 +1424,6 @@ void WizCategoryView::initMenus()
     // trash menu
     m_menuTrash = std::make_shared<QMenu>();
     m_menuTrash->addAction(actionTrash);
-    m_menuTrash->addAction(actionRecovery);
 
     // folder root menu
     m_menuFolderRoot = std::make_shared<QMenu>();
@@ -2752,21 +2744,7 @@ void WizCategoryView::on_action_group_deleteFolder_confirmed(int result)
     }
 }
 
-void WizCategoryView::on_action_deleted_recovery()
-{
-    ::WizGetAnalyzer().logAction("categoryMenuRecovery");
-    WizCategoryViewTrashItem* trashItem = currentCategoryItem<WizCategoryViewTrashItem>();
-    if (trashItem)
-    {
-        WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-            QString strToken = WizToken::token();
-            QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
-            });
-        });
-    }
-}
+
 
 void WizCategoryView::on_action_itemAttribute()
 {
@@ -3487,7 +3465,7 @@ void WizCategoryView::updatePersonalFolderDocumentCount_impl()
     // trash item
     for (int i = pFolderRoot->childCount() - 1; i >= 0; i--) {
         if (WizCategoryViewTrashItem* pTrash = dynamic_cast<WizCategoryViewTrashItem*>(pFolderRoot->child(i))) {
-            pTrash->setDocumentsCount(-1, m_dbMgr.db().getTrashDocumentCount());
+            //pTrash->setDocumentsCount(-1, m_dbMgr.db().getTrashDocumentCount());
         }
     }
 

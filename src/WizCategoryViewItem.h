@@ -88,7 +88,8 @@ public:
     virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
     virtual bool extraButtonClickTest();
     virtual QString getExtraButtonToolTip() const;
-
+    //
+    virtual bool isWebView() const { return false; }
     //
     virtual QString countString() const { return m_countString; }
 
@@ -591,6 +592,7 @@ public:
     virtual bool acceptDrop(const WizCategoryViewItemBase* pItem) const;
     virtual bool dragAble() const { return false; }
     virtual int getSortOrder() const { return 12; }
+    virtual bool isWebView() const { return true; }
     //
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
 };
@@ -607,6 +609,7 @@ public:
     { Q_UNUSED(arrayDocument); }
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 13; }
+    virtual bool isWebView() const { return true; }
 };
 
 #endif // WIZCATEGORYVIEWITEM_H

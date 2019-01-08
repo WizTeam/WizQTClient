@@ -22,6 +22,7 @@ class QLabel;
 class QSystemTrayIcon;
 class QComboBox;
 class QActionGroup;
+class QStackedWidget;
 struct TemplateData;
 
 class WizProgressDialog;
@@ -37,6 +38,7 @@ class WizAnimateAction;
 class WizOptionsWidget;
 class WizIAPDialog;
 class WizTemplatePurchaseDialog;
+class WizWebEngineView;
 
 class WizSearchView;
 class WizSearcher;
@@ -189,6 +191,9 @@ private:
     WizDocumentSelectionView* m_documentSelection;
     WizDocumentView* m_doc;
     WizSplitter* m_splitter;
+    WizSplitter* m_subSplitter;
+    QStackedWidget* m_subContainer;
+    WizWebEngineView* m_mainWebView;
     QWidget* m_docListContainer;
     WizSingleDocumentViewDelegate* m_singleViewDelegate;
 
@@ -268,7 +273,8 @@ public:
     //
     void refreshAd();
     //
-    void showSharedNotes();
+    void showTrash();
+    void showSharedNotes(); 
 signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);
