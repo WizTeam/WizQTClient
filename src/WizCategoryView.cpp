@@ -2308,7 +2308,10 @@ void WizCategoryView::on_action_user_moveFolder()
     selector->setAcceptRoot(true);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_moveFolder_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizCategoryView::on_action_user_moveFolder_confirmed(int result)
@@ -2396,7 +2399,10 @@ void WizCategoryView::on_action_user_copyFolder()
     selector->setCopyStyle(!isGroup);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_copyFolder_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizCategoryView::on_action_user_copyFolder_confirmed(int result)

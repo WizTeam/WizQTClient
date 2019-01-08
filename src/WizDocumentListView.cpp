@@ -1793,7 +1793,10 @@ void WizDocumentListView::on_action_moveDocument()
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizDocumentListView::on_action_moveDocument_confirmed(int result)
@@ -1857,7 +1860,10 @@ void WizDocumentListView::on_action_copyDocument()
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_copyDocument_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizDocumentListView::on_action_copyDocument_confirmed(int result)
