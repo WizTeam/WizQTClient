@@ -134,6 +134,8 @@ WizWebSettingsWithTokenDialog* WizWebSettingsWithTokenDialog::delayShow(QString 
     dialog->m_delayShow = true;
     //
     dialog->load();
+    //
+    return dialog;
 }
 
 void WizWebSettingsWithTokenDialog::onLoaded(bool ok)
