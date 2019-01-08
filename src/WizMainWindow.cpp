@@ -3407,6 +3407,11 @@ void WizMainWindow::on_category_itemSelectionChanged()
         }
     }
         break;
+    case Category_MySharesItem:
+    {
+        showSharedNotes();
+    }
+        break;
     case Category_ShortcutItem:
     {
         WizCategoryViewShortcutItem* pShortcut = dynamic_cast<WizCategoryViewShortcutItem*>(categoryItem);
@@ -3448,6 +3453,18 @@ void WizMainWindow::on_category_itemSelectionChanged()
     }
 }
 
+void WizMainWindow::showSharedNotes()
+{
+    ::WizGetAnalyzer().logAction("categoryMenuRecovery");
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        QString strToken = WizToken::token();
+        QString strUrl = WizCommonApiEntry::getUrlByCommand("share_list");
+        strUrl = strUrl.replace("{token}", strToken);
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+            WizShowWebDialogWithToken(tr("Shared Notes"), strUrl, 0, QSize(800, 480), true);
+        });
+    });
+}
 void WizMainWindow::on_documents_itemSelectionChanged()
 {
     CWizDocumentDataArray arrayDocument;

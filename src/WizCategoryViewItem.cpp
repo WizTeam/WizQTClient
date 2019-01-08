@@ -2301,3 +2301,17 @@ void WizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewIt
     fontLink.setPixelSize(::WizSmartScaleUI(12));
     Utils::WizStyleHelper::drawSingleLineText(p, rc, str, Qt::AlignTop, Utils::WizStyleHelper::treeViewItemLinkText(), fontLink);
 }
+
+
+WizCategoryViewMySharesItem::WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName)
+    : WizCategoryViewItemBase(app, strName, "", Category_MySharesItem)
+{
+    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_shares", QSize(), ICON_OPTIONS);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+QString WizCategoryViewMySharesItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
+}

@@ -267,6 +267,8 @@ public:
     void createNoteByTemplateCore(const TemplateData& tmplData);
     //
     void refreshAd();
+    //
+    void showSharedNotes();
 signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);

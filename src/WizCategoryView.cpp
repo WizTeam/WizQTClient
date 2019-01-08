@@ -46,6 +46,7 @@
 #define CATEGORY_TEAM_GROUPS QObject::tr("Team Notes")
 #define CATEGORY_SHORTCUTS  QObject::tr("Shortcuts")
 #define CATEGORY_SEARCH     QObject::tr("Quick Search")
+#define CATEGORY_MYSHARES   QObject::tr("Shared Notes")
 #define CATEGORY_FOLDERS    QObject::tr("Folders")
 #define CATEGORY_TAGS       QObject::tr("Tags")
 #define CATEGORY_STYLES     QObject::tr("Styles")
@@ -3250,6 +3251,9 @@ void WizCategoryView::initTopLevelItems()
 
     WizCategoryViewSearchRootItem* pSearchRoot = new WizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
     addTopLevelItem(pSearchRoot);
+    //
+    WizCategoryViewMySharesItem* pShareItem = new WizCategoryViewMySharesItem(m_app, CATEGORY_MYSHARES);
+    addTopLevelItem(pShareItem);
 
     WizCategoryViewAllFoldersItem* pAllFoldersItem = new WizCategoryViewAllFoldersItem(m_app, CATEGORY_FOLDERS, m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllFoldersItem);

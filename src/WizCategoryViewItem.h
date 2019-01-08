@@ -27,7 +27,8 @@ enum ItemType
     Category_GroupRootItem,
     Category_GroupItem,
     Category_GroupNoTagItem,
-    Category_SectionItem
+    Category_SectionItem,
+    Category_MySharesItem,
 };
 
 enum DateInterval{
@@ -592,6 +593,20 @@ public:
     virtual int getSortOrder() const { return 12; }
     //
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
+};
+
+
+class WizCategoryViewMySharesItem : public WizCategoryViewItemBase
+{
+public:
+    WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName);
+    virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void getDocuments(WizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(arrayDocument); }
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 13; }
 };
 
 #endif // WIZCATEGORYVIEWITEM_H
