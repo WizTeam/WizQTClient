@@ -95,7 +95,7 @@
     <message>
         <location filename="../src/WizActions.cpp" line="71"/>
         <source>Logout...</source>
-        <translation>注销...</translation>
+        <translation>退出登录...</translation>
     </message>
     <message>
         <location filename="../src/WizActions.cpp" line="72"/>
@@ -4120,7 +4120,7 @@ Go to create a note</source>
     <message>
         <location filename="../src/WizMainWindow.cpp" line="3993"/>
         <source>Logout</source>
-        <translation>注销</translation>
+        <translation>退出登录</translation>
     </message>
     <message>
         <location filename="../src/WizMainWindow.cpp" line="3995"/>
@@ -5441,7 +5441,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="58"/>
         <source>Logout...</source>
-        <translation>注销...</translation>
+        <translation>退出登录...</translation>
     </message>
     <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="150"/>

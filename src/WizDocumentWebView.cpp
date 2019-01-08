@@ -2361,6 +2361,15 @@ void WizDocumentWebView::saveCurrentNote()
     });
 }
 
+void WizDocumentWebView::onReturn()
+{
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        tryResetTitle();
+        //
+    });
+}
+
 void WizDocumentWebView::doPaste()
 {
     WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{

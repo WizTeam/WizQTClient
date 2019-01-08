@@ -3830,6 +3830,10 @@ void WizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 
 bool WizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZTAGDATA& tag, QString& strLocation)
 {
+    if (m_selectedItem) {
+        this->restoreSelection();
+    }
+    //
     QTreeWidgetItem* item = currentItem();
     if (!item)
     {
