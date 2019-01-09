@@ -245,6 +245,9 @@ public:
     Q_PROPERTY(bool hasEditPermissionOnCurrentNote READ hasEditPermissionOnCurrentNote)
     //
 private:
+    //
+    void saveAsPDFCore(std::function<void()> callback);
+    //
     void loadDocumentInWeb(WizEditorMode editorMode);
     //
     void getAllEditorScriptAndStypeFileName(std::map<QString, QString>& arrayFile);

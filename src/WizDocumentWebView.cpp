@@ -2048,6 +2048,29 @@ void WizDocumentWebView::editorCommandExecuteScreenShot()
 
 void WizDocumentWebView::saveAsPDF()
 {
+    const QString styleId = "temp_mac_print_pdf";
+    if (isDarkMode()) {
+        //
+        const QString styleWhite = "html, .wiz-editor-body {background-color:white !important;}";
+        const QString scriptWhite = QString("WizEditor.insertCustomStyle('%1', '%2', true);WizEditor.nightMode.off();").arg(styleId).arg(styleWhite);
+        page()->runJavaScript(scriptWhite, [=](const QVariant&) {
+            //
+            saveAsPDFCore([=]{
+
+                const QString scriptDark = QString("WizEditor.removeStyleById('%1');WizEditor.nightMode.on();").arg(styleId);
+                page()->runJavaScript(scriptDark);
+                //
+            });
+            //
+        });
+
+    } else {
+        saveAsPDFCore([]{});
+    }
+}
+
+void WizDocumentWebView::saveAsPDFCore(std::function<void()> callback)
+{
     CString strTitle = view()->note().strTitle;
     WizMakeValidFileNameNoPath(strTitle);
     static QString strInitPath = QDir::homePath();
@@ -2067,7 +2090,6 @@ void WizDocumentWebView::saveAsPDF()
         ::WizDeleteFile(strFileName);
     }
     //
-    QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
     double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);
     double marginBottom = m_app.userSettings().printMarginValue(wizPositionBottom);
     double marginLeft = m_app.userSettings().printMarginValue(wizPositionLeft);
@@ -2076,7 +2098,12 @@ void WizDocumentWebView::saveAsPDF()
     //
     const QPageLayout layout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Portrait, margins);
     //
-    page()->printToPdf(strFileName, layout);
+    page()->printToPdf([=](const QByteArray&data){
+        ::WizSaveDataToFile(strFileName, data);
+        //
+        callback();
+        //
+    }, layout);
 }
 
 void WizDocumentWebView::saveAsHtml()

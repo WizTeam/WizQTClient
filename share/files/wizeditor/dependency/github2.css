@@ -189,8 +189,8 @@
 }
 
 .markdown-body dl dt {
-    font-size: 10pt;
-    font-size: 0.83rem;
+    /*font-size: 10pt;*/
+    /*font-size: 0.83rem;*/
     font-weight: bold;
     font-style: italic;
     padding: 0;
@@ -245,8 +245,8 @@
 }
 
 .markdown-body table tr th {
-    font-size: 10pt;
-    font-size: 0.83rem;
+    /*font-size: 10pt;*/
+    /*font-size: 0.83rem;*/
     font-weight: bold;
     border: 1px solid #cccccc;
     margin: 0;
@@ -257,8 +257,8 @@
     border: 1px solid #cccccc;
     margin: 0;
     padding: 6px 13px;
-    font-size: 10pt;
-    font-size: 0.83rem;
+    /*font-size: 10pt;*/
+    /*font-size: 0.83rem;*/
 }
 
 .markdown-body table tr th :first-child, .markdown-body table tr td :first-child {
@@ -391,8 +391,8 @@
 .markdown-body pre {
     background-color: #f8f8f8;
     border: 1px solid #cccccc;
-    font-size: 10pt;
-    font-size: 0.83rem;
+    /*font-size: 10pt;*/
+    /*font-size: 0.83rem;*/
     /*line-height: 14pt;*/
     /*line-height: 1.17rem;*/
     overflow: auto;
