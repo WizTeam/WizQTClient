@@ -130,10 +130,10 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     , m_bNewNote(false)
     , m_bNewNoteTitleInited(false)
     , m_bContentsChanged(false)
+    , m_ignoreActiveWindowEvent(false)
     , m_bInSeperateWindow(false)
     , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
-    , m_ignoreActiveWindowEvent(false)
 {
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage({{"WizExplorerApp", m_app.object()}, {"WizQtEditor", this}}, this);
     setPage(page);
