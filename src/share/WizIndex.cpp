@@ -422,6 +422,8 @@ bool WizIndex::createDocument(const CString& strTitle, const CString& strName, \
                           "", "", data.strType, "", "", "", 0, 0, nProtected, data);
 }
 
+#define ATTACHMENT_MAX_NAME     50
+
 bool WizIndex::createAttachment(const CString& strDocumentGUID, const CString& strName,
                                  const CString& strURL, const CString& strDescription,
                                  const CString& strDataMD5, WIZDOCUMENTATTACHMENTDATA& data)
@@ -435,10 +437,21 @@ bool WizIndex::createAttachment(const CString& strDocumentGUID, const CString& s
         TOLOG("NULL Pointer or name is empty: CreateAttachment!");
         return false;
     }
+    //
+    QString name = strName;
+    if (name.length() > ATTACHMENT_MAX_NAME) {
+        QString ext = Utils::WizMisc::extractFileExt(name);
+        QString title = Utils::WizMisc::extractFileTitle(name);
+        if (ext.length() < ATTACHMENT_MAX_NAME) {
+            name = title.left(ATTACHMENT_MAX_NAME - ext.length()) + ext;
+        } else {
+            name = title.left(ATTACHMENT_MAX_NAME);
+        }
+    }
 
 	data.strGUID = WizGenGUIDLowerCaseLetterOnly();
     data.strDocumentGUID = CString(strDocumentGUID).makeLower();
-    data.strName = strName;
+    data.strName = name;
     data.strDescription = strDescription;
     data.strURL = strURL;
 	data.tInfoModified = WizGetCurrentTime();

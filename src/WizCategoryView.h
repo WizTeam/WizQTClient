@@ -177,7 +177,6 @@ public:
         ActionCopyItem,
         ActionRenameItem,
         ActionDeleteItem,
-        ActionRecovery,
         ActionItemAttribute,
         ActionEmptyTrash,
         ActionQuitGroup,
