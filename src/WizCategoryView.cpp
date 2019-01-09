@@ -5598,7 +5598,6 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionNewItem)->setEnabled(false);
         findAction(ActionRenameItem)->setEnabled(false);
         findAction(ActionDeleteItem)->setEnabled(false);
-        findAction(ActionRecovery)->setEnabled(false);
 
         findAction(ActionCopyItem)->setEnabled(false);
         findAction(ActionMoveItem)->setEnabled(false);
@@ -5609,7 +5608,6 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionNewItem)->setEnabled(true);
         findAction(ActionRenameItem)->setEnabled(true);
         findAction(ActionDeleteItem)->setEnabled(true);
-        findAction(ActionRecovery)->setEnabled(true);
 
         findAction(ActionCopyItem)->setEnabled(true);
         findAction(ActionMoveItem)->setEnabled(true);
