@@ -1294,7 +1294,7 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     //
     if (isDarkMode()) {
         QString darkCss = "file:///" +  strHtmlEditorPath + "wizDarkMode.css";
-        files[darkCss] = "";
+        files[darkCss] = "wiz_dark_mode_style";
     }
     //
     /*
@@ -2052,7 +2052,7 @@ void WizDocumentWebView::saveAsPDF()
     if (isDarkMode()) {
         //
         const QString styleWhite = "html, .wiz-editor-body {background-color:white !important;}";
-        const QString scriptWhite = QString("WizEditor.insertCustomStyle('%1', '%2', true);WizEditor.nightMode.off();").arg(styleId).arg(styleWhite);
+        const QString scriptWhite = QString("WizEditor.insertCustomStyle('%1', '%2', true);WizEditor.nightMode.off();document.getElementsByName('wiz_dark_mode_style')[0].remove()").arg(styleId).arg(styleWhite);
         page()->runJavaScript(scriptWhite, [=](const QVariant&) {
             //
             saveAsPDFCore([=]{
