@@ -2408,6 +2408,10 @@ void WizMainWindow::refreshAd()
                     try {
                         //
                         QString name = QString::fromUtf8(d["adName"].asString().c_str());
+                        if (name.isEmpty()) {
+                            return;
+                        }
+                        //
                         if (m_dbMgr.db().getMetaDef("ad",  name) != "1") {
                             //
                             QString start = QString::fromUtf8(d["start"].asString().c_str());

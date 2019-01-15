@@ -1,10 +1,9 @@
 @font-face {
   font-family: 'wizEditorIcons';
-  src: url('fonts/wizEditorIcons.eot?pulzyt');
-  src: url('fonts/wizEditorIcons.eot?pulzyt#iefix') format('embedded-opentype'),
-  url('fonts/wizEditorIcons.ttf?pulzyt') format('truetype'),
-  url('fonts/wizEditorIcons.woff?pulzyt') format('woff'),
-  url('fonts/wizEditorIcons.svg?pulzyt#wizEditorIcons') format('svg');
+  src:
+    url('fonts/wizEditorIcons.ttf?jst8of') format('truetype'),
+    url('fonts/wizEditorIcons.woff?jst8of') format('woff'),
+    url('fonts/wizEditorIcons.svg?jst8of#wizEditorIcons') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -134,4 +133,8 @@
 
 .icon-image.editor-icon:before {
   content: "\e90d";
+}
+
+.icon-checkmark.editor-icon:before {
+  content: "\e90e";
 }
