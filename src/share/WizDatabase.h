@@ -117,7 +117,6 @@ private:
 
     bool m_bIsPersonal;
     QMap<QString, WizDatabase*> m_mapGroups;
-    QMutex m_mtxTempFile;
 
 private:
     QMutex m_mutexCache;

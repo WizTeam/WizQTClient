@@ -1684,6 +1684,13 @@ QString WizGetSystemCustomSkinPath(const QString& strSkinName)
 
 QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& strName)
 {
+    if (strSkinName.isEmpty()) {
+        if (strName.indexOf("/") != -1)
+            return strName;
+        if (strName.indexOf("\\") != -1)
+            return strName;
+    }
+    //
     QString arrayPath[] =
     {
         WizGetSystemCustomSkinPath(strSkinName),
@@ -2351,13 +2358,15 @@ void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, Q
     strFuncName = "Dialog"+strFuncName.replace(" ", "");
     WizFunctionDurationLogger logger(strFuncName);
 
-    WizWebSettingsWithTokenDialog pDlg(url, sz, parent);
+    WizWebSettingsWithTokenDialog* pDlg = new WizWebSettingsWithTokenDialog(url, sz, parent);
     if (dialogResizable)
     {
-        pDlg.setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+        pDlg->setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
     }
-    pDlg.setWindowTitle(windowTitle);
-    pDlg.exec();
+    pDlg->setWindowTitle(windowTitle);
+    pDlg->exec();
+    //
+    pDlg->deleteLater();
 }
 
 void WizShowWebDialogWithTokenDelayed(const QString& windowTitle, const QString& url, QWidget* parent, const QSize& sz, bool dialogResizable)

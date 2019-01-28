@@ -27,13 +27,14 @@ enum ItemType
     Category_GroupRootItem,
     Category_GroupItem,
     Category_GroupNoTagItem,
-    Category_SectionItem
+    Category_SectionItem,
+    Category_MySharesItem,
 };
 
 enum DateInterval{
     DateInterval_Today,
-    DateInterval_Yestoday,
-    DateInterval_TheDayBeforeYestoday,
+    DateInterval_Yesterday,
+    DateInterval_TheDayBeforeYesterday,
     DateInterval_LastWeek,
     DateInterval_LastMonth,
     DateInterval_LastYear
@@ -87,7 +88,8 @@ public:
     virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
     virtual bool extraButtonClickTest();
     virtual QString getExtraButtonToolTip() const;
-
+    //
+    virtual bool isWebView() const { return false; }
     //
     virtual QString countString() const { return m_countString; }
 
@@ -590,8 +592,24 @@ public:
     virtual bool acceptDrop(const WizCategoryViewItemBase* pItem) const;
     virtual bool dragAble() const { return false; }
     virtual int getSortOrder() const { return 12; }
+    virtual bool isWebView() const { return true; }
     //
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
+};
+
+
+class WizCategoryViewMySharesItem : public WizCategoryViewItemBase
+{
+public:
+    WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName);
+    virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos)
+    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void getDocuments(WizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(arrayDocument); }
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 13; }
+    virtual bool isWebView() const { return true; }
 };
 
 #endif // WIZCATEGORYVIEWITEM_H

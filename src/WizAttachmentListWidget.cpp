@@ -124,7 +124,7 @@ QPixmap WizAttachmentListView::itemImage(const QModelIndex& index) const
     if (const WizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
         QString path = m_dbMgr.db(item->attachment().strKbGUID).getAttachmentFileName(item->attachment().strGUID);
-        int nIconSize = WizIsHighPixel() ? 64 : 32;
+        int nIconSize = WizSmartScaleUI(32);
         return m_iconProvider.icon(path).pixmap(nIconSize, nIconSize);
     }
     //
@@ -643,7 +643,7 @@ WizAttachmentListWidget::WizAttachmentListWidget(QWidget* parent)
     , m_list(new WizAttachmentListView(this))
 {
     QString strTheme = Utils::WizStyleHelper::themeName();
-    setContentsMargins(0, 13, 0, 0);
+    setContentsMargins(0, WizSmartScaleUI(13), 0, 0);
 
     setFixedWidth(sizeHint().width());
 
@@ -651,18 +651,23 @@ WizAttachmentListWidget::WizAttachmentListWidget(QWidget* parent)
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);
     connect(actionAddAttach, SIGNAL(triggered()), SLOT(on_addAttachment_clicked()));
     m_btnAddAttachment = new WizButton(this);
-    m_btnAddAttachment->setFixedSize(14, 14);
+    m_btnAddAttachment->setFixedSize(WizSmartScaleUI(14), WizSmartScaleUI(14));
     m_btnAddAttachment->setAction(actionAddAttach);
 
+    QLabel* titleLabel = new QLabel(tr("Attachments"), this);
     QHBoxLayout* layoutHeader = new QHBoxLayout();
-    layoutHeader->setContentsMargins(12, 0, 12, 0);
-    layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
+    layoutHeader->setContentsMargins(WizSmartScaleUI(12), 0, WizSmartScaleUI(12), 0);
+    layoutHeader->addWidget(titleLabel);
     layoutHeader->addStretch();
     layoutHeader->addWidget(m_btnAddAttachment);
+    //
+    if (isDarkMode()) {
+        titleLabel->setStyleSheet("color:#a6a6a6");
+    }
 
     QVBoxLayout* layoutMain = new QVBoxLayout();
     layoutMain->setContentsMargins(0, 0, 0, 0);
-    layoutMain->setSpacing(5);
+    layoutMain->setSpacing(WizSmartScaleUI(5));
     setLayout(layoutMain);
 
     layoutMain->addLayout(layoutHeader);
@@ -680,8 +685,13 @@ WizAttachmentListWidget::WizAttachmentListWidget(QWidget* parent)
     m_list->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
     //
     if (isDarkMode()) {
+#ifdef Q_OS_MAC
         setStyleSheet("background-color: #333333");
         m_list->setStyleSheet("background-color: #272727");
+#else
+        setStyleSheet("background-color: #444444");
+        m_list->setStyleSheet("background-color: #373737");
+#endif
     }
 }
 
@@ -706,7 +716,7 @@ bool WizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
 
 QSize WizAttachmentListWidget::sizeHint() const
 {
-    return QSize(271, 310);
+    return QSize(WizSmartScaleUI(271), WizSmartScaleUI(310));
 }
 
 void WizAttachmentListWidget::hideEvent(QHideEvent* ev)

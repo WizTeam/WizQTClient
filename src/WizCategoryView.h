@@ -177,7 +177,6 @@ public:
         ActionCopyItem,
         ActionRenameItem,
         ActionDeleteItem,
-        ActionRecovery,
         ActionItemAttribute,
         ActionEmptyTrash,
         ActionQuitGroup,
@@ -411,8 +410,6 @@ public Q_SLOTS:
     void on_action_user_deleteTag_confirmed(int result);
     void on_action_group_deleteFolder();
     void on_action_group_deleteFolder_confirmed(int result);
-
-    void on_action_deleted_recovery();
 
     void on_action_itemAttribute();
     void on_action_groupAttribute();

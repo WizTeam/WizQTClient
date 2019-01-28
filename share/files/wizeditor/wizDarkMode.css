@@ -1,0 +1,30 @@
+img {filter: brightness(50%);-webkit-filter: brightness(50%);}
+svg, iframe {filter: brightness(70%);-webkit-filter: brightness(70%);}
+iframe#wiz-content-iframe-viewer {filter:none;-webkit-filter:none;}
+wiz_tmp_highlight_tag{background-color: #50a9fb !important;  color: black !important;}
+a, a:visited, a:active {color: #448aff !important;}
+div.wiz-code-container .CodeMirror {border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2) !important;}
+div.CodeMirror-selected {background-color: #49483E !important;}
+.wiz-editor-body .wiz_toc_layer {background-color: #2e2e2e !important;}
+.wiz-editor-body .wiz_toc_layer a, .wiz-editor-body .wiz_toc_layer a:visited, .wiz-editor-body .wiz_toc_layer a:active {background-color: #2e2e2e !important; color: #448aff !important;}
+.wiz-table-tools {background-color:#22272F !important; border-color: #3E495B !important;}
+.wiz-table-tools i.editor-icon {color: #97A3B8;}
+.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #2E353F !important;}
+.wiz-table-tools .wiz-table-menu-sub-item {color: #97A3B8 !important;}
+.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #484E5C !important;}
+.wiz-table-tools .wiz-table-menu-sub-item.split {border-top-color: #3E495B !important;}
+.wiz-table-tools .wiz-table-menu-sub, .wiz-table-tools .wiz-table-color-pad, .wiz-table-tools .wiz-table-cell-align {background-color: #22272F !important; border-color: #3E495B !important; box-shadow: none;}
+.wiz-table-tools .wiz-table-menu-sub:before  {display: none !important;}
+.wiz-table-tools .wiz-table-menu-sub:after  {border-bottom-color: #3E495B !important;top:-8px;}
+.wiz-table-tools .wiz-table-menu-sub > div, .wiz-table-tools .wiz-table-menu-sub-item.disabled:hover, .wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button, .wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item, .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {background-color: transparent !important;}
+#wiz-table-col-line, #wiz-table-row-line, #wiz-table-range-border_start_top, #wiz-table-range-border_range_top, #wiz-table-range-border_start_right, #wiz-table-range-border_range_right, #wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom, #wiz-table-range-border_start_left, #wiz-table-range-border_range_left,#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot  {background-color: #448aff !important;}
+.markdown-body table tr {background-color:transparent !important;}
+.markdown-body code, .markdown-body tt {background-color:#4c3d40 !important; color:#cf506f !important;}
+.wiz-editor-body .wiz-select-plugin-header  {background-color: transparent !important;}
+.wiz-editor-body .wiz-select-plugin-container, .wiz-editor-body .wiz-select-plugin-options  {background-color:#22272F !important; border-color: #3E495B !important;color: #97A3B8 !important;box-shadow:none;}
+.wiz-editor-body .wiz-select-plugin-header  {color: #97A3B8 !important;}
+.wiz-editor-body .wiz-select-plugin-options .wiz-select-plugin-options-item.selected, .wiz-editor-body .wiz-select-plugin-options .wiz-select-plugin-options-item:hover  {background-color: #2E353F !important;}
+.wiz-editor-body .wiz-select-plugin-header i  {border-left-color: #3E495B !important;}
+.wiz-editor-body .wiz-select-plugin-options .wiz-select-plugin-options-item div  {background-color: transparent !important;}
+.wiz-editor-body .wiz-select-plugin-options .wiz-select-plugin-options-item:hover div  {color: #FFFFFF !important;}
+.wiz-content-outer  {border-color: transparent !important;}

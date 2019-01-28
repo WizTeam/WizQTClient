@@ -27,7 +27,7 @@ public:
     static QString qtLocaleFileName(const QString& strLocale);
     static QString localeFileName(const QString& strLocale);
     static QString introductionNotePath();
-
+    static QString pluginsPath();
 
     // wiz template
     static QString customNoteTemplatesPath();

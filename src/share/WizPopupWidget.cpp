@@ -14,14 +14,18 @@
 WizPopupWidget::WizPopupWidget(QWidget* parent)
     : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
     , m_leftAlign(false)
-    , m_triangleMargin(10)
-    , m_triangleWidth(16)
-    , m_triangleHeight(8)
+    , m_triangleMargin(WizSmartScaleUI(10))
+    , m_triangleWidth(WizSmartScaleUI(16))
+    , m_triangleHeight(WizSmartScaleUI(8))
 {
-    setContentsMargins(8, 20, 8, 8);
+    setContentsMargins(WizSmartScaleUI(8), WizSmartScaleUI(20), WizSmartScaleUI(8), WizSmartScaleUI(8));
 
 #ifdef Q_OS_LINUX
-    setStyleSheet("QWidget{background:#D7D7D7;}");
+    if (isDarkMode()) {
+        setStyleSheet("QWidget{background:#373737;}");
+    } else {
+        setStyleSheet("QWidget{background:#D7D7D7;}");
+    }
 #elif defined(Q_OS_MAC)
     if (isDarkMode()) {
         setStyleSheet("QWidget{background:#272727;}");
@@ -33,7 +37,7 @@ WizPopupWidget::WizPopupWidget(QWidget* parent)
 
 QSize WizPopupWidget::sizeHint() const
 {
-    return QSize(320, 400);
+    return QSize(WizSmartScaleUI(320), WizSmartScaleUI(400));
 }
 
 QRect WizPopupWidget::getClientRect() const

@@ -1,6 +1,7 @@
 ﻿#include "WizLineInputDialog.h"
 #include "ui_WizLineInputDialog.h"
 #include <QPushButton>
+#include "share/WizUIBase.h"
 
 WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
                                          const QString& strHint,
@@ -10,7 +11,7 @@ WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
     , ui(new Ui::WizLineInputDialog)
 {
     ui->setupUi(this);
-    setFixedSize(size());
+    //setFixedSize(size());
 
     setWindowTitle(strTitle);
     ui->labelHint->setText(strHint);
@@ -24,6 +25,11 @@ WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
 
     connect(ui->editInput, SIGNAL(textChanged(QString)), SIGNAL(textChanged(QString)));
+    //
+    if (isDarkMode()) {
+        ui->editInput->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
+        WizApplyDarkModeStyles(this);
+    }
 }
 
 WizLineInputDialog::~WizLineInputDialog()

@@ -52,6 +52,7 @@ void WizFolderView::resizeEvent(QResizeEvent* event)
 void WizFolderView::showEvent(QShowEvent *event)
 {
     QTreeWidget::showEvent(event);
+    WizWaitCursor wait;
     clear();
     initFolders();
     initGroups();

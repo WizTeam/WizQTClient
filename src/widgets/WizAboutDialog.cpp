@@ -10,6 +10,7 @@
 #include <QDateTime>
 
 #include <QTextStream>
+#include "share/WizUIBase.h"
 
 WizAboutDialog::WizAboutDialog(QWidget *parent)
     : QDialog(parent)
@@ -60,7 +61,7 @@ WizAboutDialog::WizAboutDialog(QWidget *parent)
     textCredits->setHtml(strHtml);
 
     QLabel* labelCopyright = new QLabel(this);
-    labelCopyright->setText(tr("<span style=\"font-size:10px\">Copyright 2011-2017 Beijing Wozhi Technology Co., Ltd. All rights reserved.</span>"));
+    labelCopyright->setText(tr("<span style=\"font-size:10px\">Copyright 2011-2018 Beijing Wozhi Technology Co., Ltd. All rights reserved.</span>"));
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 10, 0, 10);
@@ -77,4 +78,9 @@ WizAboutDialog::WizAboutDialog(QWidget *parent)
     layout->setAlignment(labelCopyright, Qt::AlignCenter);
 
     setWindowTitle(tr("About WizNote"));
+    //
+    //
+    if (isDarkMode()) {
+        textCredits->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
+    }
 }

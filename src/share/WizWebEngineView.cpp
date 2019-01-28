@@ -13,6 +13,10 @@
 #include <QTimer>
 #include <QMimeData>
 #endif
+#include <QWebEngineProfile>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
+#include <QTimer>
 
 class WizInvisibleWebEngineView : public QWebEngineView
 {
@@ -61,10 +65,77 @@ public:
     }
 };
 
-WizWebEnginePage::WizWebEnginePage(QObject* parent)
-    : QWebEnginePage(parent)
+
+QWebEngineProfile* createWebEngineProfile(const WizWebEngineViewInjectObjects& objects, QObject* parent)
+{
+    if (objects.empty())
+        return nullptr;
+    //
+    QWebEngineProfile *profile = new QWebEngineProfile("WizNoteWebEngineProfile", parent);
+    //
+    QString jsWebChannelFileName = Utils::WizPathResolve::resourcesPath() + "files/webengine/wizwebchannel.js";
+    QString jsWebChannel;
+    WizLoadUnicodeTextFromFile(jsWebChannelFileName, jsWebChannel);
+    //
+    QString initFileName = Utils::WizPathResolve::resourcesPath() + "files/webengine/wizwebengineviewinit.js";
+    QString jsInit;
+    WizLoadUnicodeTextFromFile(initFileName, jsInit);
+    //
+    CWizStdStringArray names;
+    for (auto inject : objects) {
+        names.push_back("\"" + inject.name + "\"");
+    }
+    //
+    CString objectNames;
+    WizStringArrayToText(names, objectNames, ", ");
+    //
+    jsInit.replace("__objectNames__", objectNames);
+    //
+    QString jsAll = jsWebChannel + "\n" + jsInit;
+    //
+    {
+        QWebEngineScript script;
+        script.setSourceCode(jsAll);
+        script.setName("qwebchannel.js");
+        script.setWorldId(QWebEngineScript::MainWorld);
+        script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+        script.setRunsOnSubFrames(true);
+        profile->scripts()->insert(script);
+    }
+    //
+    return profile;
+}
+
+WizWebEngineAsyncMethodResultObject::WizWebEngineAsyncMethodResultObject(QObject* parent)
+    : QObject(parent)
+    , m_acquired(false)
+{
+}
+
+WizWebEngineAsyncMethodResultObject::~WizWebEngineAsyncMethodResultObject()
+{
+}
+
+void WizWebEngineAsyncMethodResultObject::setResult(const QVariant& result)
+{
+    m_acquired = true;
+    m_result = result;
+    emit resultAcquired(m_result);
+}
+
+WizWebEnginePage::WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent)
+    : QWebEnginePage(createWebEngineProfile(objects, parent), parent)
     , m_continueNavigate(true)
 {
+    if (!objects.empty()) {
+
+        QWebChannel* channel = new QWebChannel();
+        for (auto inject : objects) {
+            channel->registerObject(inject.name, inject.object);
+        }
+        //
+        setWebChannel(channel);
+    }
 }
 
 void WizWebEnginePage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
@@ -127,73 +198,137 @@ void WizWebEnginePage::triggerAction(WizWebEnginePage::WebAction action, bool ch
 
 WizWebEngineView::WizWebEngineView(QWidget* parent)
     : QWebEngineView(parent)
-    , m_server(NULL)
-    , m_clientWrapper(NULL)
-    , m_channel(NULL)
 {
-    WizWebEnginePage* p = new WizWebEnginePage(this);
+    std::vector<WizWebEngineViewInjectObject> objects;
+    WizWebEnginePage* p = new WizWebEnginePage(objects, this);
     setPage(p);
     //
     connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
-    //
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
-    //
-    // setup the QWebSocketServer
-    m_server = new QWebSocketServer(QStringLiteral("WizNote QWebChannel Server"), QWebSocketServer::NonSecureMode);
-    //
-    if (!m_server->listen(QHostAddress::LocalHost)) {
-        qFatal("Failed to open web socket server.");
-        return;
-    }
-
-    // wrap WebSocket clients in QWebChannelAbstractTransport objects
-    m_clientWrapper = new WebSocketClientWrapper(m_server);
-    //
-    // setup the channel
-    m_channel = new QWebChannel();
-    QObject::connect(m_clientWrapper, &WebSocketClientWrapper::clientConnected, m_channel, &QWebChannel::connectTo);
 }
 
-void WizWebEngineView::addToJavaScriptWindowObject(QString name, QObject* obj)
+WizWebEngineView::WizWebEngineView(const WizWebEngineViewInjectObjects& objects, QWidget* parent)
+    : QWebEngineView(parent)
 {
-    m_channel->registerObject(name, obj);
+    WizWebEnginePage* p = new WizWebEnginePage(objects, this);
+    setPage(p);
     //
-    if (m_objectNames.isEmpty())
-    {
-        m_objectNames = QString("\"%1\"").arg(name);
-    }
-    else
-    {
-        m_objectNames = m_objectNames + ", " + QString("\"%1\"").arg(name);
-    }
+    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
+    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
 }
 
 WizWebEngineView::~WizWebEngineView()
 {
-    closeAll();
 }
 
-void WizWebEngineView::closeAll()
+QVariant WizWebEngineView::ExecuteScript(QString script)
 {
-    if (m_server)
-    {
-        m_server->disconnect();
-        m_server->close();
-        //m_server->deleteLater();
-        //m_server = NULL;
+    auto result = QSharedPointer<WizWebEngineAsyncMethodResultObject>(new WizWebEngineAsyncMethodResultObject(nullptr), &QObject::deleteLater);
+    //
+    page()->runJavaScript(script, [=](const QVariant &v) {
+        result->setResult(v);
+        QTimer::singleShot(1000, [=]{
+            auto r = result;
+            r = nullptr;
+        });
+    });
+
+    QVariant v;
+    v.setValue<QObject*>(result.data());
+    return v;
+}
+
+QVariant WizWebEngineView::ExecuteScriptFile(QString fileName)
+{
+    QString script;
+    if (!WizLoadUnicodeTextFromFile(fileName, script)) {
+        return QVariant();
     }
-    if (m_clientWrapper)
-    {
-        m_clientWrapper->disconnect();
-        //m_clientWrapper->deleteLater();
-        //m_clientWrapper = NULL;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction0(QString function)
+{
+    QString script = QString("%1();").arg(function);
+    return ExecuteScript(script);
+}
+
+
+QString toArgument(const QVariant& v)
+{
+    switch (v.type()) {
+    case QVariant::Bool:
+        return v.toBool() ? "true" : "false";
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong:
+        return QString("%1").arg(v.toLongLong());
+    case QVariant::Double: {
+        double f = v.toDouble();
+        QString str;
+        str.sprintf("%f", f);
+        return str;
     }
-    if (m_channel)
-    {
-        m_channel->disconnect();
-        //m_channel->deleteLater();
-        //m_channel = NULL;
+    case QVariant::Date:
+    case QVariant::Time:
+    case QVariant::DateTime:
+        return QString("new Date(%1)").arg(v.toDateTime().toTime_t() * 1000);
+    case QVariant::String: {
+            QString s = v.toString();
+            s.replace("\\", "\\\\");
+            s.replace("\r", "\\r");
+            s.replace("\n", "\\n");
+            s.replace("\t", "\\t");
+            s.replace("\"", "\\\"");
+            return "\"" + s + "\"";
+        }
+    default:
+        qDebug() << "Unsupport type: " << v.type();
+        return "undefined";
     }
+}
+
+QVariant WizWebEngineView::ExecuteFunction1(QString function, const QVariant& arg1)
+{
+    QString script = QString("%1(%2);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            ;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction2(QString function, const QVariant& arg1, const QVariant& arg2)
+{
+    QString script = QString("%1(%2, %3);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            .arg(toArgument(arg2))
+            ;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction3(QString function, const QVariant& arg1, const QVariant& arg2, const QVariant& arg3)
+{
+    QString script = QString("%1(%2, %3, %4);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            .arg(toArgument(arg2))
+            .arg(toArgument(arg3))
+            ;
+    return ExecuteScript(script);
+}
+
+QVariant WizWebEngineView::ExecuteFunction4(QString function, const QVariant& arg1, const QVariant& arg2, const QVariant& arg3, const QVariant& arg4)
+{
+    QString script = QString("%1(%2, %3, %4, %5);")
+            .arg(function)
+            .arg(toArgument(arg1))
+            .arg(toArgument(arg2))
+            .arg(toArgument(arg3))
+            .arg(toArgument(arg4))
+            ;
+    return ExecuteScript(script);
 }
 
 
@@ -203,40 +338,11 @@ void WizWebEngineView::innerLoadFinished(bool ret)
     if (ret)
     {
         // 页面加载时设置合适的缩放比例
-        qreal zFactor = (1.0*WizSmartScaleUI(100)) / 100;
+        qreal zFactor = (1.0 * WizSmartScaleUI(100)) / 100;
         setZoomFactor(zFactor);
         //
-
-        if (m_server && m_server->isListening()
-                && m_clientWrapper
-                && m_channel)
-        {
-            QString jsWebChannel ;
-            if (WizLoadTextFromResource(":/qtwebchannel/qwebchannel.js", jsWebChannel))
-            {
-                page()->runJavaScript(jsWebChannel, [=](const QVariant&){
-                    //
-                    QString initFileName = Utils::WizPathResolve::resourcesPath() + "files/webengine/wizwebengineviewinit.js";
-                    QString jsInit;
-                    WizLoadUnicodeTextFromFile(initFileName, jsInit);
-                    //
-                    QString port = QString::asprintf("%d", int(m_server->serverPort()));
-                    //
-                    jsInit.replace("__port__", port).replace("__objectNames__", m_objectNames);
-                    //
-                    page()->runJavaScript(jsInit, [=](const QVariant&){
-                        //
-                        emit loadFinishedEx(ret);
-                        //
-                    });
-                });
-            }
-            else
-            {
-                qDebug() << "Can't load wen channel.js";
-                emit loadFinishedEx(ret);
-            }
-        }
+        //
+        emit loadFinishedEx(ret);
     }
     else
     {

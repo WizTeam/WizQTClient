@@ -146,7 +146,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
     p->setClipRect(vopt->rect);
 
     QRect textLine = vopt->rect;
-    textLine.adjust(14, 0, 0, 0);
+    textLine.adjust(WizSmartScaleUI(14), 0, 0, 0);
     p->setPen(Utils::WizStyleHelper::listViewItemSeperator());
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
@@ -161,35 +161,21 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
         QRect imageRect = textRect;
         if (imageAlignLeft)
         {
-            imageRect.setRight(imageRect.left() + imageWidth + 14);
-            textRect.setLeft(imageRect.right() + 12);
-            imageRect.setRight(imageRect.right() + 14);
+            imageRect.setRight(imageRect.left() + imageWidth + WizSmartScaleUI(14));
+            textRect.setLeft(imageRect.right() + WizSmartScaleUI(12));
+            imageRect.setRight(imageRect.right() + WizSmartScaleUI(14));
         }
         else
         {
-            imageRect.setLeft(imageRect.right() - imageWidth - 14);
-            textRect.setRight(imageRect.left() - 12);
-            imageRect.setLeft(imageRect.left() - 12);
+            imageRect.setLeft(imageRect.right() - imageWidth - WizSmartScaleUI(14));
+            textRect.setRight(imageRect.left() - WizSmartScaleUI(12));
+            imageRect.setLeft(imageRect.left() - WizSmartScaleUI(12));
         }
 
-//        int imgWidth = WizIsHighPixel() ? img.width() / 2 : img.width();
-//        int imgHeight = WizIsHighPixel() ? img.height() / 2 : img.height();
-//        if (imgWidth > imageRect.width() || imgHeight > imageRect.height())
-//        {
-//            double fRate = std::min<double>(double(imageRect.width()) / imgWidth, double(imageRect.height()) / imgHeight);
-//            int newWidth = int(imgWidth * fRate);
-//            int newHeight = int(imgHeight * fRate);
-//            //
-//            int adjustX = (imageRect.width() - newWidth) / 2;
-//            int adjustY = (imageRect.height() - newHeight) / 2;
-//            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
-//        }
-//        else
-//        {
-            int adjustX = (imageRect.width() - imageWidth) / 2;
-            int adjustY = (imageRect.height() - imageWidth) / 2;
-            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
-//        }
+        int adjustX = (imageRect.width() - imageWidth) / 2;
+        int adjustY = (imageRect.height() - imageWidth) / 2;
+        imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+        //
         p->drawPixmap(imageRect, img);
     }
 
@@ -210,13 +196,11 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
     }
 
     QFont font = p->font();
-    font.setPixelSize(12);
-    p->setFont(font);
     QFontMetrics fm(font);
 
-    textRect.adjust(0, 3, -8, -8);
+    textRect.adjust(0, WizSmartScaleUI(3), WizSmartScaleUI(-8), WizSmartScaleUI(-8));
     bool selected = vopt->state.testFlag(State_Selected);
-    int lineHeight = fm.height() + 2;
+    int lineHeight = fm.height() + WizSmartScaleUI(2);
 
     QColor color("#535353");
     if (isDarkMode()) {
@@ -230,7 +214,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
         QRect rc = textRect;
         rc.setTop(rc.top() + line * lineHeight);
         rc.setHeight(lineHeight);
-        rc.setWidth(190);
+        rc.setWidth(WizSmartScaleUI(190));
         ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, true);
     }
 

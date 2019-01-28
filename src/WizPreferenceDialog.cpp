@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QFontDialog>
 #include <QColorDialog>
+#include <QListWidget>
 #include <QTimer>
 
 #include "share/WizGlobal.h"
@@ -19,6 +20,9 @@
 #include "sync/WizApiEntry.h"
 
 #include "widgets/WizExecutingActionDialog.h"
+#ifdef Q_OS_MAC
+#include "mac/WizMacHelper.h"
+#endif
 
 
 WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
@@ -216,6 +220,13 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
+    //
+#ifdef Q_OS_MAC
+    if (isMojaveOrHigher()) {
+        //
+        ui->checkBoxTrayIcon->setVisible(false);
+    }
+#endif
 }
 
 void WizPreferenceWindow::showPrintMarginPage()
@@ -342,6 +353,36 @@ void WizPreferenceWindow::labelProxy_linkActivated(const QString& link)
     }
 }
 
+void WizApplyDarkModeStyles_Mac(QObject* parent)
+{
+    if (isDarkMode()) {
+        for (QObject* child : parent->children()) {
+
+            if (QWidget* childWidget = dynamic_cast<QWidget*>(child)) {
+                //
+                QString className = child->metaObject()->className();
+                //
+                qDebug() << className << childWidget->geometry();
+                //
+                if (QWidget* widget = dynamic_cast<QLabel*>(child)) {
+                    widget->setStyleSheet("color:#a6a6a6;background-color:#333333");
+                } else if (QWidget* widget = dynamic_cast<QLineEdit*>(child)) {
+                    widget->setStyleSheet("color:#a6a6a6;background-color:#333333");
+#ifndef Q_OS_MAC
+                } else if (QWidget* widget = dynamic_cast<QAbstractButton*>(child)) {
+                    widget->setStyleSheet("color:#a6a6a6");
+#endif
+                } else if (className == "QFontListView") {
+                    childWidget->setStyleSheet("color:#a6a6a6;background-color:#333333");
+                }
+            }
+            //
+            WizApplyDarkModeStyles_Mac(child);
+        }
+    }
+}
+
+
 void WizPreferenceWindow::onButtonFontSelect_clicked()
 {
     if (!m_fontDialog) {
@@ -350,6 +391,10 @@ void WizPreferenceWindow::onButtonFontSelect_clicked()
         // FIXME: Qt bugs here https://bugreports.qt-project.org/browse/QTBUG-27415
         // upgrade Qt library to 5.0 should fix this issue
         m_fontDialog->setOptions(QFontDialog::DontUseNativeDialog);
+        //
+        if (isDarkMode()) {
+            WizApplyDarkModeStyles_Mac(m_fontDialog);
+        }
     }
 
     QString strFont = m_app.userSettings().defaultFontFamily();

@@ -397,23 +397,39 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
         }
     }
     //
-    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(WizSmartScaleUI(6), 0, WizSmartScaleUI(2), normalPixBackground.height());
-    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(WizSmartScaleUI(6), 0, WizSmartScaleUI(2), focusPixBackground.height());
-    QRect rcLeft(rect.x(), rect.y(), WizSmartScaleUI(6), rect.size().height());
-    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, WizSmartScaleUI(6), normalPixBackground.height());
-    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, WizSmartScaleUI(6), focusPixBackground.height());
+    int leftWidth = WizSmartScaleUI(8);
     int rightWidth = WizSmartScaleUI(8);
-    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - rightWidth, 0, rightWidth, normalPixBackground.height());
-    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - rightWidth, 0, rightWidth, focusPixBackground.height());
-    QRect rcRight(rect.size().width() - rightWidth, rect.y(), rightWidth, rect.size().height());
+    int width = rect.size().width();
+    int height = rect.size().height();
+    double ratio = normalPixBackground.devicePixelRatio();
+    //
+    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(leftWidth, 0, WizSmartScaleUI(2), normalPixBackground.height());
+    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(leftWidth, 0, WizSmartScaleUI(2), focusPixBackground.height());
+    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, int(leftWidth * ratio), normalPixBackground.height());
+    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, int(leftWidth * ratio), focusPixBackground.height());
+    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - int(rightWidth * ratio), 0, int(rightWidth * ratio), normalPixBackground.height());
+    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - int(rightWidth * ratio), 0, int(rightWidth * ratio), focusPixBackground.height());
+
+    QRect rcLeft(rect.x(), rect.y(), leftWidth, height);
+    QRect rcRight(rect.size().width() - rightWidth, rect.y(), rightWidth, height);
 
     const QPixmap& pixLeft = hasFocus ? focusPixBackgroundLeft : normalPixBackgroundLeft;
     const QPixmap& pixMid = hasFocus ? focusPixBackgroundMid : normalPixBackgroundMid;
     const QPixmap& pixRight = hasFocus ? focusPixBackgroundRight : normalPixBackgroundRight;
     //
-    painter->drawPixmap(rcLeft, bDrawLeft ? pixLeft : pixMid);
-    painter->drawPixmap(rect.x() + WizSmartScaleUI(5), rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixMid);
-    painter->drawPixmap(rcRight, bDrawRight ? pixRight : pixMid);
+    if (bDrawLeft && bDrawRight) {
+        painter->drawPixmap(rcLeft, pixLeft);
+        painter->drawPixmap(rect.x() + leftWidth, rect.y(), width - leftWidth - rightWidth, height, pixMid);
+        painter->drawPixmap(rcRight, pixRight);
+    } else if (bDrawLeft) {
+        painter->drawPixmap(rcLeft, pixLeft);
+        painter->drawPixmap(rect.x() + leftWidth, rect.y(), width - leftWidth, height, pixMid);
+    } else if (bDrawRight) {
+        painter->drawPixmap(rect.x(), rect.y(), width - rightWidth, height, pixMid);
+        painter->drawPixmap(rcRight, pixRight);
+    } else {
+        painter->drawPixmap(rect, pixMid);
+    }
 }
 
 void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
@@ -1038,6 +1054,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
 
     m_comboParagraph = new CWizToolComboBox(this);    
     m_comboParagraph->setFixedWidth(90);
+    m_comboParagraph->setFixedHeight(Utils::WizStyleHelper::editorButtonHeight());
 
 
     WizComboboxStyledItem* paraItems = ParagraphItems();    
@@ -1052,9 +1069,12 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     //
     m_comboFontFamily = new CWizToolComboBox(this);
     m_comboFontFamily->setFixedWidth(122);
+    m_comboFontFamily->setFixedHeight(Utils::WizStyleHelper::editorButtonHeight());
 
     m_comboFontSize = new CWizToolComboBox(this);
     m_comboFontSize->setFixedWidth(WizSmartScaleUI(52));
+    m_comboFontSize->setFixedHeight(Utils::WizStyleHelper::editorButtonHeight());
+    //
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
     if (isDarkMode()) {

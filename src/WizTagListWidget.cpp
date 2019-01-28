@@ -50,8 +50,13 @@ WizTagListWidget::WizTagListWidget(QWidget* parent)
             SLOT(on_list_itemChanged(QListWidgetItem*)));
 
     if (isDarkMode()) {
+#ifdef Q_OS_MAC
         m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px; background-color:#272727}" \
                               "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px; color:#a6a6a6}");
+#else
+        m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px; background-color:#373737}" \
+                              "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px; color:#a6a6a6}");
+#endif
     } else {
         m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px;}" \
                               "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px;}");

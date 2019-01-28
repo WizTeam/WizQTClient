@@ -163,6 +163,11 @@ WizRoundCellButton::WizRoundCellButton(QWidget* parent)
     m_animation = new QPropertyAnimation(this, "maximumWidth", this);
 }
 
+WizRoundCellButton::~WizRoundCellButton()
+{
+
+}
+
 void WizRoundCellButton::setNormalIcon(const QIcon& icon, const QString& text, const QString& strTips)
 {
     WizCellButton::setNormalIcon(icon, strTips);

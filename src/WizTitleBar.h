@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QIcon>
 #include "share/WizObject.h"
+#include "WizPlugins.h"
 
 class QString;
 class QMenu;
@@ -76,6 +77,8 @@ public Q_SLOTS:
 
     void on_commentTokenAcquired(QString token);
     void on_commentCountAcquired(QString GUID, int count);
+    //
+    void onPluginButtonClicked();
 
     void onEditorChanged();
     void onEditorFocusIn();
@@ -100,6 +103,7 @@ private:
     void showInfoBar();
     void showEditorBar();
     void setTagBarVisible(bool visible);
+    void initPlugins(QLayout* layout);
     //
     WizDocumentWebView* m_editor;
     WizExplorerApp& m_app;
@@ -118,6 +122,8 @@ private:
     WizCellButton* m_attachBtn;
 //    CellButton* m_historyBtn;
     WizCellButton* m_infoBtn;    
+    //
+    std::vector<WizCellButton *> m_pluginsButton;
 
     QMenu* m_shareMenu;
 
@@ -131,6 +137,9 @@ private:
 
     QString m_strWebchannelUrl;
     WizAnimateAction* m_editButtonAnimation;
+    //
+    std::vector<WizPluginData*> m_plugins;
+    std::map<QString, WizPluginPopupWidget*>m_pluginWidget;
 };
 
 

@@ -108,14 +108,13 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     m_tab->setBackgroundRole(QPalette::HighlightedText);
 
     m_comments = m_commentWidget->web();
+    m_comments->setPage(new WizWebEnginePage({{"WizExplorerApp", m_app.object()}}, this));
     //m_comments->history()->setMaximumItemCount(0);
     m_comments->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     //m_comments->page()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
     connect(m_comments, SIGNAL(loadFinishedEx(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
 
-    m_comments->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-    //
     connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_commentWidget_statusChanged()));
 
     m_commentWidget->hide();

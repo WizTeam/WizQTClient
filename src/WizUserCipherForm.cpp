@@ -31,16 +31,20 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     QPixmap strIconHot = Utils::WizStyleHelper::loadPixmap("mac_icons_password_done_hot");
     QPixmap strIconDown = Utils::WizStyleHelper::loadPixmap("mac_icons_password_done_down");
 
-    ui->editUserCipher->setFixedHeight(WizSmartScaleUI(19));
-    QSize szBtn(WizSmartScaleUI(19), WizSmartScaleUI(19));
-    ui->buttonOk->setMinimumSize(szBtn);
-    ui->buttonOk->setMaximumSize(szBtn);
+#ifndef Q_OS_MAC
+    ui->editUserCipher->setFixedHeight(WizSmartScaleUI(22));
+#endif
+    QSize szBtn(WizSmartScaleUI(22), WizSmartScaleUI(22));
+    ui->buttonOk->setFixedSize(szBtn);
     ui->buttonOk->setIconNormal(strIconNormal);
     ui->buttonOk->setIconHot(strIconHot);
     ui->buttonOk->setIconDown(strIconDown);
     ui->buttonOk->setStatusNormal();
     ui->buttonOk->setLockNormalStatus(true);
 
+#ifdef Q_OS_MAC
+    ui->editUserCipher->setStyleSheet("margin-top:4px;padding-bottom:3px;");
+#endif
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos", this);
 

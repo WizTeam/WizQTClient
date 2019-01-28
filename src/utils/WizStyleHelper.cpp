@@ -88,7 +88,17 @@ QPixmap WizStyleHelper::loadPixmap(const QString& strName)
 {
     QString fileName = ::WizGetSkinResourceFileName(themeName(), strName);
 #ifdef Q_OS_MAC
-    return QPixmap(fileName);
+    if (WizIsHighPixel()) {
+        QString x2fileName = WizGetSkinResourceFileName(themeName(), strName + "@2x");
+        if (QFile::exists(x2fileName)) {
+            fileName = x2fileName;
+        }
+    }
+    QPixmap ret = QPixmap(fileName);
+#ifdef QT_DEBUG
+    qDebug() << ret.devicePixelRatio();
+#endif
+    return ret;
 #else
     QString ext = Utils::WizMisc::extractFileExt(fileName);
     if (ext != ".png") {

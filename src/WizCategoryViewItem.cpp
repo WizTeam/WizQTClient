@@ -185,18 +185,11 @@ void WizCategoryViewItemBase::setDocumentsCount(int nCurrent, int nTotal)
 
 void WizCategoryViewItemBase::setExtraButtonIcon(const QString& file)
 {
-    if (WizIsHighPixel())
-    {
-        int nIndex = file.lastIndexOf('.');
-        QString strFile = file.left(nIndex) + "@2x" + file.right(file.length() - nIndex);
-        if (QFile::exists(strFile))
-        {
-            m_extraButtonIcon = QPixmap(strFile);
-            return;
-        }
+    if (file.isEmpty()) {
+        m_extraButtonIcon = QPixmap();
+    } else {
+        m_extraButtonIcon = Utils::WizStyleHelper::loadPixmap(file);
     }
-
-    m_extraButtonIcon = QPixmap(file);
 }
 
 bool WizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
@@ -212,7 +205,6 @@ QRect WizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, boo
     QSize szBtn(WizSmartScaleUI(16), WizSmartScaleUI(16));
     if (!m_extraButtonIcon.isNull())
     {
-        szBtn = m_extraButtonIcon.size();
     }
     else if (!ignoreIconExist)
     {
@@ -1979,7 +1971,8 @@ WizCategoryViewTrashItem::WizCategoryViewTrashItem(WizExplorerApp& app,
 void WizCategoryViewTrashItem::showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (WizCategoryView* view = dynamic_cast<WizCategoryView *>(pCtrl)) {
-        view->showTrashContextMenu(pos);
+        //no menu
+        //view->showTrashContextMenu(pos);
     }
 }
 
@@ -2216,10 +2209,10 @@ QString WizCategoryViewTimeSearchItem::getSQLWhere()
     case DateInterval_Today:
         dt = dt.addDays(-1);
         break;
-    case DateInterval_Yestoday:
+    case DateInterval_Yesterday:
         dt = dt.addDays(-2);
         break;
-    case DateInterval_TheDayBeforeYestoday:
+    case DateInterval_TheDayBeforeYesterday:
         dt = dt.addDays(-3);
         break;
     case DateInterval_LastWeek:
@@ -2308,4 +2301,18 @@ void WizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewIt
     //fontLink.setItalic(true);
     fontLink.setPixelSize(::WizSmartScaleUI(12));
     Utils::WizStyleHelper::drawSingleLineText(p, rc, str, Qt::AlignTop, Utils::WizStyleHelper::treeViewItemLinkText(), fontLink);
+}
+
+
+WizCategoryViewMySharesItem::WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName)
+    : WizCategoryViewItemBase(app, strName, "", Category_MySharesItem)
+{
+    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_share", QSize(), ICON_OPTIONS);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+QString WizCategoryViewMySharesItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
 }

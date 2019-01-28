@@ -46,6 +46,7 @@
 #define CATEGORY_TEAM_GROUPS QObject::tr("Team Notes")
 #define CATEGORY_SHORTCUTS  QObject::tr("Shortcuts")
 #define CATEGORY_SEARCH     QObject::tr("Quick Search")
+#define CATEGORY_MYSHARES   QObject::tr("Shared Notes")
 #define CATEGORY_FOLDERS    QObject::tr("Folders")
 #define CATEGORY_TAGS       QObject::tr("Tags")
 #define CATEGORY_STYLES     QObject::tr("Styles")
@@ -1363,13 +1364,6 @@ void WizCategoryView::initMenus()
     addAction(actionTrash);
     connect(actionTrash, SIGNAL(triggered()), SLOT(on_action_emptyTrash()));
 
-    QAction* actionRecovery = new QAction("ActionRecovery", this);
-    actionRecovery->setData(ActionRecovery);
-    actionRecovery->setText(CATEGORY_ACTION_RECOVERY_DELETED_NOTES);
-    addAction(actionRecovery);
-    connect(actionRecovery, SIGNAL(triggered()), SLOT(on_action_deleted_recovery()));
-    //
-
 
 //    QAction* actionQuitGroup = new QAction("QuitGroup", this);
 //    actionQuitGroup->setShortcutContext(Qt::WidgetShortcut);
@@ -1430,7 +1424,6 @@ void WizCategoryView::initMenus()
     // trash menu
     m_menuTrash = std::make_shared<QMenu>();
     m_menuTrash->addAction(actionTrash);
-    m_menuTrash->addAction(actionRecovery);
 
     // folder root menu
     m_menuFolderRoot = std::make_shared<QMenu>();
@@ -2308,7 +2301,10 @@ void WizCategoryView::on_action_user_moveFolder()
     selector->setAcceptRoot(true);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_moveFolder_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizCategoryView::on_action_user_moveFolder_confirmed(int result)
@@ -2396,7 +2392,10 @@ void WizCategoryView::on_action_user_copyFolder()
     selector->setCopyStyle(!isGroup);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_copyFolder_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizCategoryView::on_action_user_copyFolder_confirmed(int result)
@@ -2452,7 +2451,11 @@ void WizCategoryView::on_action_renameItem()
             {
                 //user can not rename predefined folders name
                 if (WizIsPredefinedLocation(pFolder->location()))
+                {
+                    QMessageBox::information(0, tr("Info"), tr("The default folder can not be renamed."));
+
                     return;
+                }
             }
         }
         p->setFlags(p->flags() | Qt::ItemIsEditable);
@@ -2741,21 +2744,7 @@ void WizCategoryView::on_action_group_deleteFolder_confirmed(int result)
     }
 }
 
-void WizCategoryView::on_action_deleted_recovery()
-{
-    ::WizGetAnalyzer().logAction("categoryMenuRecovery");
-    WizCategoryViewTrashItem* trashItem = currentCategoryItem<WizCategoryViewTrashItem>();
-    if (trashItem)
-    {
-        WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-            QString strToken = WizToken::token();
-            QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
-            });
-        });
-    }
-}
+
 
 void WizCategoryView::on_action_itemAttribute()
 {
@@ -3240,6 +3229,9 @@ void WizCategoryView::initTopLevelItems()
 
     WizCategoryViewSearchRootItem* pSearchRoot = new WizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
     addTopLevelItem(pSearchRoot);
+    //
+    WizCategoryViewMySharesItem* pShareItem = new WizCategoryViewMySharesItem(m_app, CATEGORY_MYSHARES);
+    addTopLevelItem(pShareItem);
 
     WizCategoryViewAllFoldersItem* pAllFoldersItem = new WizCategoryViewAllFoldersItem(m_app, CATEGORY_FOLDERS, m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllFoldersItem);
@@ -3420,8 +3412,7 @@ void WizCategoryView::resetSections()
                     WizOEMSettings oemSettings(m_dbMgr.db().getAccountPath());
                     if(CATEGORY_TEAM_GROUPS == sectionName && !oemSettings.isForbidCreateBiz())
                     {
-                        QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "category_create_group.png";
-                        pExistingSection->setExtraButtonIcon(strIconPath);
+                        pExistingSection->setExtraButtonIcon("category_create_group");
                     }
                     insertTopLevelItem(i, pExistingSection);
                     i++;
@@ -3474,7 +3465,7 @@ void WizCategoryView::updatePersonalFolderDocumentCount_impl()
     // trash item
     for (int i = pFolderRoot->childCount() - 1; i >= 0; i--) {
         if (WizCategoryViewTrashItem* pTrash = dynamic_cast<WizCategoryViewTrashItem*>(pFolderRoot->child(i))) {
-            pTrash->setDocumentsCount(-1, m_dbMgr.db().getTrashDocumentCount());
+            //pTrash->setDocumentsCount(-1, m_dbMgr.db().getTrashDocumentCount());
         }
     }
 
@@ -3776,8 +3767,7 @@ void WizCategoryView::setBizRootItemExtraButton(WizCategoryViewItemBase* pItem, 
         WizDatabase& db = m_dbMgr.db();
         if (bizData.bizIsDue || db.isBizServiceExpr(bizData.bizGUID))
         {
-            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "bizDue.png";
-            pItem->setExtraButtonIcon(strIconPath);
+            pItem->setExtraButtonIcon("bizDue");
         }
         else
         {
@@ -3793,8 +3783,7 @@ void WizCategoryView::setGroupRootItemExtraButton(WizCategoryViewItemBase* pItem
         WizDatabase& db = m_dbMgr.db(gData.strGroupGUID);
         if (db.isStorageLimit() || db.isTrafficLimit() || db.isNoteCountLimit())
         {
-            QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "groupLimit.png";
-            pItem->setExtraButtonIcon(strIconPath);
+            pItem->setExtraButtonIcon("groupLimit");
         }
         else
         {
@@ -3823,6 +3812,10 @@ void WizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 
 bool WizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZTAGDATA& tag, QString& strLocation)
 {
+    if (m_selectedItem) {
+        this->restoreSelection();
+    }
+    //
     QTreeWidgetItem* item = currentItem();
     if (!item)
     {
@@ -4717,35 +4710,35 @@ void WizCategoryView::initQuickSearches()
     pSearchRoot->addChild(pSearchByDTAccessed);
 
     WizCategoryViewTimeSearchItem* pCreatedToday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since Today"), "DT_CREATED > %1", DateInterval_Today);
-    WizCategoryViewTimeSearchItem* pCreatedYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since Yestoday"), "DT_CREATED > %1", DateInterval_Yestoday);
-    WizCategoryViewTimeSearchItem* pCreatedDayBeforeYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since the day before yestoday"), "DT_CREATED > %1", DateInterval_TheDayBeforeYestoday);
+    WizCategoryViewTimeSearchItem* pCreatedYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since Yesterday"), "DT_CREATED > %1", DateInterval_Yesterday);
+    WizCategoryViewTimeSearchItem* pCreatedDayBeforeYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Created since the day before yesterday"), "DT_CREATED > %1", DateInterval_TheDayBeforeYesterday);
     WizCategoryViewTimeSearchItem* pCreatedOneWeek = new WizCategoryViewTimeSearchItem(m_app, tr("Created since one week"), "DT_CREATED > %1", DateInterval_LastWeek);
     WizCategoryViewTimeSearchItem* pCreatedOneMonth = new WizCategoryViewTimeSearchItem(m_app, tr("Created since one month"), "DT_CREATED > %1", DateInterval_LastMonth);
     pSearchByDTCreated->addChild(pCreatedToday);
-    pSearchByDTCreated->addChild(pCreatedYestoday);
-    pSearchByDTCreated->addChild(pCreatedDayBeforeYestoday);
+    pSearchByDTCreated->addChild(pCreatedYesterday);
+    pSearchByDTCreated->addChild(pCreatedDayBeforeYesterday);
     pSearchByDTCreated->addChild(pCreatedOneWeek);
     pSearchByDTCreated->addChild(pCreatedOneMonth);
 
     WizCategoryViewTimeSearchItem* pModifiedToday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since Today"), "DT_MODIFIED > %1", DateInterval_Today);
-    WizCategoryViewTimeSearchItem* pModifiedYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since Yestoday"), "DT_MODIFIED > %1", DateInterval_Yestoday);
-    WizCategoryViewTimeSearchItem* pModifiedDayBeforeYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since the day before yestoday"), "DT_MODIFIED > %1", DateInterval_TheDayBeforeYestoday);
+    WizCategoryViewTimeSearchItem* pModifiedYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since Yesterday"), "DT_MODIFIED > %1", DateInterval_Yesterday);
+    WizCategoryViewTimeSearchItem* pModifiedDayBeforeYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since the day before yesterday"), "DT_MODIFIED > %1", DateInterval_TheDayBeforeYesterday);
     WizCategoryViewTimeSearchItem* pModifiedOneWeek = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since one week"), "DT_MODIFIED > %1", DateInterval_LastWeek);
     WizCategoryViewTimeSearchItem* pModifiedOneMonth = new WizCategoryViewTimeSearchItem(m_app, tr("Modified since one month"), "DT_MODIFIED > %1", DateInterval_LastMonth);
     pSearchByDTModified->addChild(pModifiedToday);
-    pSearchByDTModified->addChild(pModifiedYestoday);
-    pSearchByDTModified->addChild(pModifiedDayBeforeYestoday);
+    pSearchByDTModified->addChild(pModifiedYesterday);
+    pSearchByDTModified->addChild(pModifiedDayBeforeYesterday);
     pSearchByDTModified->addChild(pModifiedOneWeek);
     pSearchByDTModified->addChild(pModifiedOneMonth);
 
     WizCategoryViewTimeSearchItem* pAccessedToday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since Today"), "DT_ACCESSED > %1", DateInterval_Today);
-    WizCategoryViewTimeSearchItem* pAccessedYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since Yestoday"), "DT_ACCESSED > %1", DateInterval_Yestoday);
-    WizCategoryViewTimeSearchItem* pAccessedDayBeforeYestoday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since the day before yestoday"), "DT_ACCESSED > %1", DateInterval_TheDayBeforeYestoday);
+    WizCategoryViewTimeSearchItem* pAccessedYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since Yesterday"), "DT_ACCESSED > %1", DateInterval_Yesterday);
+    WizCategoryViewTimeSearchItem* pAccessedDayBeforeYesterday = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since the day before yesterday"), "DT_ACCESSED > %1", DateInterval_TheDayBeforeYesterday);
     WizCategoryViewTimeSearchItem* pAccessedOneWeek = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since one week"), "DT_ACCESSED > %1", DateInterval_LastWeek);
     WizCategoryViewTimeSearchItem* pAccessedOneMonth = new WizCategoryViewTimeSearchItem(m_app, tr("Accessed since one month"), "DT_ACCESSED > %1", DateInterval_LastMonth);
     pSearchByDTAccessed->addChild(pAccessedToday);
-    pSearchByDTAccessed->addChild(pAccessedYestoday);
-    pSearchByDTAccessed->addChild(pAccessedDayBeforeYestoday);
+    pSearchByDTAccessed->addChild(pAccessedYesterday);
+    pSearchByDTAccessed->addChild(pAccessedDayBeforeYesterday);
     pSearchByDTAccessed->addChild(pAccessedOneWeek);
     pSearchByDTAccessed->addChild(pAccessedOneMonth);
 
@@ -5605,7 +5598,6 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionNewItem)->setEnabled(false);
         findAction(ActionRenameItem)->setEnabled(false);
         findAction(ActionDeleteItem)->setEnabled(false);
-        findAction(ActionRecovery)->setEnabled(false);
 
         findAction(ActionCopyItem)->setEnabled(false);
         findAction(ActionMoveItem)->setEnabled(false);
@@ -5616,7 +5608,6 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionNewItem)->setEnabled(true);
         findAction(ActionRenameItem)->setEnabled(true);
         findAction(ActionDeleteItem)->setEnabled(true);
-        findAction(ActionRecovery)->setEnabled(true);
 
         findAction(ActionCopyItem)->setEnabled(true);
         findAction(ActionMoveItem)->setEnabled(true);

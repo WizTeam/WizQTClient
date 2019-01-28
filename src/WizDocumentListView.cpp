@@ -443,7 +443,11 @@ void WizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataAr
 
 void WizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
-    WizDatabase& db = m_dbMgr.db();
+    if (arrayDocument.empty()) {
+        return;
+    }
+    WizDatabase& db = m_dbMgr.db(arrayDocument[0].strKbGUID);
+    //
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
@@ -456,7 +460,11 @@ void WizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray
 void WizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
                                                         const QString& targetFolder, bool keepDocTime, bool keepTag)
 {
-    WizDatabase& db = m_dbMgr.db();
+    if (arrayDocument.empty()) {
+        return;
+    }
+    WizDatabase& db = m_dbMgr.db(arrayDocument[0].strKbGUID);
+    //
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
@@ -470,7 +478,11 @@ void WizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataAr
 void WizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
                                                       const WIZTAGDATA& targetTag, bool keepDocTime)
 {
-    WizDatabase& db = m_dbMgr.db();
+    if (arrayDocument.empty()) {
+        return;
+    }
+    WizDatabase& db = m_dbMgr.db(arrayDocument[0].strKbGUID);
+    //
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
@@ -1781,7 +1793,10 @@ void WizDocumentListView::on_action_moveDocument()
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizDocumentListView::on_action_moveDocument_confirmed(int result)
@@ -1845,7 +1860,10 @@ void WizDocumentListView::on_action_copyDocument()
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_copyDocument_confirmed(int)));
-    selector->exec();
+    //
+    QTimer::singleShot(0, [=]() {
+        selector->exec();
+    });
 }
 
 void WizDocumentListView::on_action_copyDocument_confirmed(int result)
@@ -2323,6 +2341,10 @@ void WizDocumentListView::paintEvent(QPaintEvent *e)
     //
     QPixmap pixmap = isSearchResult() ? m_emptySearch : m_emptyFolder;
     QSize imageSize = pixmap.size();
+#ifdef Q_OS_MAC
+    imageSize.setWidth(int(imageSize.width() / pixmap.devicePixelRatio()));
+    imageSize.setHeight(int(imageSize.height() / pixmap.devicePixelRatio()));
+#endif
     QRect rc = rect();
     //
     QString text = isSearchResult()
