@@ -30,6 +30,7 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     , ui(new Ui::WizPreferenceWindow)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
+    , m_biniting(true)
 {
     //
 #ifndef Q_OS_MAC
@@ -210,7 +211,21 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
         ui->spinBox_top->setStyleSheet(darkStyleSheet);
         //
     }
+    //
+    ui->comboLineHeight->addItem("1");
+    ui->comboLineHeight->addItem("1.2");
+    ui->comboLineHeight->addItem("1.5");
+    ui->comboLineHeight->addItem("1.7");
+    ui->comboLineHeight->addItem("2.0");
+    ui->comboLineHeight->setCurrentText(m_app.userSettings().editorLineHeight());
 
+    ui->comboParaSpacing->addItem("5");
+    ui->comboParaSpacing->addItem("8");
+    ui->comboParaSpacing->addItem("12");
+    ui->comboParaSpacing->addItem("15");
+    ui->comboParaSpacing->setCurrentText(m_app.userSettings().editorParaSpacing());
+    //
+    ui->tabWidget->setCurrentIndex(0);
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
     if (isDarkMode()) {
@@ -227,6 +242,14 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
         ui->checkBoxTrayIcon->setVisible(false);
     }
 #endif
+    //
+    m_biniting = false;
+}
+
+void WizPreferenceWindow::showEvent(QShowEvent*)
+{
+    QSize size = ui->pushButtonClearBackground->size();
+    ui->btnResetLineHeight->setFixedSize(size);
 }
 
 void WizPreferenceWindow::showPrintMarginPage()
@@ -491,7 +514,10 @@ void WizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
 void WizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
 {
     QColorDialog dlg;
-    dlg.setCurrentColor(m_app.userSettings().editorBackgroundColor());
+    QString color = m_app.userSettings().editorBackgroundColor();
+    if (!color.isEmpty()) {
+        dlg.setCurrentColor(color);
+    }
     if (dlg.exec() == QDialog::Accepted)
     {
         QString strColor = dlg.currentColor().name();
@@ -562,3 +588,52 @@ void WizPreferenceWindow::on_enableSpellCheck(bool checked)
     userSettings().setEnableSpellCheck(checked);
     Q_EMIT settingsChanged(wizoptionsSpellCheck);
 }
+
+
+void WizPreferenceWindow::updateEditorLineHeight(const QString& strLineHeight, bool save)
+{
+    if (save) {
+        m_app.userSettings().setEditorLineHeight(strLineHeight);
+    }
+    //
+    Q_EMIT settingsChanged(wizoptionsFont);
+}
+
+void WizPreferenceWindow::on_comboLineHeight_currentIndexChanged(int index)
+{
+    if (m_biniting)
+        return;
+    //
+    QString LineHeight = ui->comboLineHeight->itemText(index);
+    updateEditorLineHeight(LineHeight, true);
+}
+void WizPreferenceWindow::on_btnResetLineHeight_clicked()
+{
+    ui->comboLineHeight->setCurrentText("1.7");
+    updateEditorLineHeight("1.7", true);
+}
+
+
+void WizPreferenceWindow::updateEditorParaSpacing(const QString& spacing, bool save)
+{
+    if (save) {
+        m_app.userSettings().setEditorParaSpacing(spacing);
+    }
+    //
+    Q_EMIT settingsChanged(wizoptionsFont);
+}
+void WizPreferenceWindow::on_comboParaSpacing_currentIndexChanged(int index)
+{
+    if (m_biniting)
+        return;
+    //
+    QString LineHeight = ui->comboParaSpacing->itemText(index);
+    updateEditorParaSpacing(LineHeight, true);
+}
+void WizPreferenceWindow::on_btnResetParaSpacingt_clicked()
+{
+    ui->comboParaSpacing->setCurrentText("8");
+    updateEditorParaSpacing("8", true);
+}
+
+

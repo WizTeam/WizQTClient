@@ -4,4 +4,8 @@ html, .wiz-editor-body {
   /*default-font-family*/
   /*default-font-size*/
   /*default-background-color*/
+  /*default-line-height*/
 } 
+p, div {
+  /*default-para-spacing*/
+}

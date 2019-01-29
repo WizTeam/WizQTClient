@@ -677,10 +677,12 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
     //
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
-
+    QString lineHeight = m_app.userSettings().editorLineHeight();
+    QString paraSpacing = m_app.userSettings().editorParaSpacing();
+    QString backgroundColor = m_app.userSettings().editorBackgroundColor();
+    //
     strCss.replace("/*default-font-family*/", QString("font-family:'%1';").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
-    QString backgroundColor = m_app.userSettings().editorBackgroundColor();
     if (backgroundColor.isEmpty())
     {
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
@@ -692,6 +694,9 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
     //
 
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
+    strCss.replace("/*default-line-height*/", QString("line-height:%1;").arg(lineHeight));
+    strCss.replace("/*default-para-spacing*/", QString("margin-top:%1px !important;margin-bottom:%1px !important").arg(paraSpacing));
+
     //
     const QString customCssId("wiz_custom_css");
 

@@ -2410,7 +2410,7 @@ Reason: %3</source>
         <translation>日</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="799"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="804"/>
         <source>Saving comments...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2713,7 +2713,7 @@ Password hint: %1</source>
         <location filename="../src/WizCategoryView.cpp" line="2455"/>
         <location filename="../src/WizCategoryView.cpp" line="3048"/>
         <location filename="../src/WizCategoryView.cpp" line="3989"/>
-        <location filename="../src/WizCategoryView.cpp" line="5687"/>
+        <location filename="../src/WizCategoryView.cpp" line="5685"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
     </message>
@@ -3064,7 +3064,7 @@ Password hint: %1</source>
         <translation type="unfinished">一月內</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="6199"/>
+        <location filename="../src/WizCategoryView.cpp" line="6197"/>
         <source>Moving folder...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3543,7 +3543,7 @@ Go to create a note</source>
     <message>
         <location filename="../src/WizDocumentWebView.cpp" line="479"/>
         <location filename="../src/WizDocumentWebView.cpp" line="484"/>
-        <location filename="../src/WizDocumentWebView.cpp" line="772"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="777"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
     </message>
@@ -3558,48 +3558,48 @@ Go to create a note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="772"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="777"/>
         <source>Do not support insert comment into markdown note.</source>
         <translation type="unfinished">贊不支持插入評論到Markdown筆記中。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1209"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1214"/>
         <source>Failed to save note.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1210"/>
-        <location filename="../src/WizDocumentWebView.cpp" line="1262"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1215"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1267"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1262"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1267"/>
         <source>Can&apos;t copy style files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1916"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1921"/>
         <source>Image File</source>
         <translation type="unfinished">圖片檔案</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1916"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1921"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation type="unfinished">圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2058"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2086"/>
         <source>PDF Files (*.pdf)</source>
         <translation type="unfinished">PDF 檔案 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2093"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2125"/>
         <source>Html Files (*.html)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2137"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2169"/>
         <source>Markdown Files (*.md)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3607,12 +3607,12 @@ Go to create a note</source>
 <context>
     <name>WizDocumentWebViewLoaderThread</name>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2509"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2541"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2509"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2541"/>
         <source>Can&apos;t view note: (Can&apos;t unzip note data)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4410,10 +4410,10 @@ Go to create a note</source>
         <location filename="../src/WizMainWindow.cpp" line="1245"/>
         <location filename="../src/WizMainWindow.cpp" line="1265"/>
         <location filename="../src/WizMainWindow.cpp" line="2351"/>
-        <location filename="../src/WizMainWindow.cpp" line="2471"/>
-        <location filename="../src/WizMainWindow.cpp" line="2474"/>
-        <location filename="../src/WizMainWindow.cpp" line="2477"/>
-        <location filename="../src/WizMainWindow.cpp" line="3970"/>
+        <location filename="../src/WizMainWindow.cpp" line="2475"/>
+        <location filename="../src/WizMainWindow.cpp" line="2478"/>
+        <location filename="../src/WizMainWindow.cpp" line="2481"/>
+        <location filename="../src/WizMainWindow.cpp" line="3974"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
     </message>
@@ -4489,7 +4489,7 @@ Go to create a note</source>
     </message>
     <message>
         <location filename="../src/WizMainWindow.cpp" line="1814"/>
-        <location filename="../src/WizMainWindow.cpp" line="4052"/>
+        <location filename="../src/WizMainWindow.cpp" line="4056"/>
         <source>New Note</source>
         <translation type="unfinished">新增筆記</translation>
     </message>
@@ -4520,52 +4520,52 @@ Go to create a note</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="2913"/>
+        <location filename="../src/WizMainWindow.cpp" line="2917"/>
         <source>Mark all as readed</source>
         <translation type="unfinished">標記為已讀</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="2913"/>
+        <location filename="../src/WizMainWindow.cpp" line="2917"/>
         <source>Mark all documents as readed.</source>
         <translation type="unfinished">將所有未讀筆記標記為已讀</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3274"/>
+        <location filename="../src/WizMainWindow.cpp" line="3278"/>
         <source>Searching...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3970"/>
+        <location filename="../src/WizMainWindow.cpp" line="3974"/>
         <source>Can&apos;t find the specified attachment, may be it has been deleted.</source>
         <translation type="unfinished">找不到指定附件，該附件可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4049"/>
+        <location filename="../src/WizMainWindow.cpp" line="4053"/>
         <source>Show/Hide MainWindow</source>
         <translation type="unfinished">顯示/隱藏主視窗</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4056"/>
+        <location filename="../src/WizMainWindow.cpp" line="4060"/>
         <source>Hide TrayIcon</source>
         <translation type="unfinished">隱藏系統匣圖示</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4060"/>
+        <location filename="../src/WizMainWindow.cpp" line="4064"/>
         <source>Logout</source>
         <translation type="unfinished">登出</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4062"/>
+        <location filename="../src/WizMainWindow.cpp" line="4066"/>
         <source>Exit</source>
         <translation type="unfinished">退出</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4430"/>
+        <location filename="../src/WizMainWindow.cpp" line="4434"/>
         <source>Downloading attachment file  %1 ...</source>
         <translation type="unfinished">下載附件 %1 ...</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4431"/>
+        <location filename="../src/WizMainWindow.cpp" line="4435"/>
         <source>Downloading</source>
         <translation type="unfinished">正在下載</translation>
     </message>
@@ -5111,118 +5111,139 @@ Asian characters: %5</source>
         <translation type="unfinished">預設字型</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="472"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="473"/>
         <source>Select</source>
         <translation type="unfinished">選擇</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="487"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="486"/>
         <source>Background color</source>
         <translation type="unfinished">編輯器背景色</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="515"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="514"/>
         <source>Clear</source>
         <translation type="unfinished">清除</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="539"/>
-        <source>Print</source>
-        <translation type="unfinished">列印</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="545"/>
-        <source>Page margins</source>
-        <translation type="unfinished">頁面邊界</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="551"/>
-        <source>Unit:</source>
-        <translation type="unfinished">單位：</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="565"/>
-        <source>Millimeter</source>
-        <translation type="unfinished">毫米</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="570"/>
-        <source>Point</source>
-        <translation type="unfinished">點</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="575"/>
-        <source>Inch</source>
-        <translation type="unfinished">英吋</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="580"/>
-        <source>Pica</source>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="524"/>
+        <source>Spacing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="585"/>
-        <source>Didot</source>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="539"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="546"/>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="556"/>
+        <source>Para spacing:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="566"/>
+        <source>Line height:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/WizPreferenceDialog.ui" line="590"/>
+        <source>Print</source>
+        <translation type="unfinished">列印</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="596"/>
+        <source>Page margins</source>
+        <translation type="unfinished">頁面邊界</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="602"/>
+        <source>Unit:</source>
+        <translation type="unfinished">單位：</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="616"/>
+        <source>Millimeter</source>
+        <translation type="unfinished">毫米</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="621"/>
+        <source>Point</source>
+        <translation type="unfinished">點</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="626"/>
+        <source>Inch</source>
+        <translation type="unfinished">英吋</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="631"/>
+        <source>Pica</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="636"/>
+        <source>Didot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="641"/>
         <source>Cicero</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="598"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="649"/>
         <source>Top:</source>
         <translation type="unfinished">上：</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="621"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="672"/>
         <source>Bottom:</source>
         <translation type="unfinished">下：</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="644"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="695"/>
         <source>Left:</source>
         <translation type="unfinished">左：</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="661"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="712"/>
         <source>Right:</source>
         <translation type="unfinished">右：</translation>
     </message>
     <message>
-        <location filename="../src/ui/WizPreferenceDialog.ui" line="719"/>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="770"/>
         <source>Close</source>
         <translation type="unfinished">關閉</translation>
     </message>
     <message>
-        <location filename="../src/WizPreferenceDialog.cpp" line="43"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="44"/>
         <source>Preference</source>
         <translation type="unfinished">偏好設定</translation>
     </message>
     <message>
-        <location filename="../src/WizPreferenceDialog.cpp" line="184"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="185"/>
         <source>Proxy settings</source>
         <translation type="unfinished">代理設定</translation>
     </message>
     <message>
-        <location filename="../src/WizPreferenceDialog.cpp" line="427"/>
-        <location filename="../src/WizPreferenceDialog.cpp" line="487"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="450"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="510"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
     </message>
     <message>
-        <location filename="../src/WizPreferenceDialog.cpp" line="427"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="450"/>
         <source>Language will be changed after restart WizNote.</source>
         <translation type="unfinished">語言將會在重新啟動為知筆記後生效。</translation>
     </message>
     <message>
-        <location filename="../src/WizPreferenceDialog.cpp" line="487"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="510"/>
         <source>Application style will be changed after restart WizNote.</source>
         <translation type="unfinished">視窗樣式將會在重新啟動為知筆記後生效。</translation>
     </message>
     <message>
-        <location filename="../src/WizPreferenceDialog.cpp" line="517"/>
+        <location filename="../src/WizPreferenceDialog.cpp" line="543"/>
         <source>Click to select color</source>
         <translation type="unfinished">點擊選擇顏色</translation>
     </message>
