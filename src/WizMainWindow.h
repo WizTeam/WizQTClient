@@ -315,6 +315,7 @@ public Q_SLOTS:
 
     // menu view
     void on_actionViewToggleCategory_triggered();
+    void on_actionViewShowSubFolderDocuments_triggered();
     void on_actionViewToggleFullscreen_triggered();
     void on_actionViewMinimize_triggered();
     void on_actionZoom_triggered();

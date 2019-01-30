@@ -801,6 +801,16 @@ void WizUserSettings::setSyncGroupMethod(int days)
     set("SyncGroupMethod", QString::number(days));
 }
 
+bool WizUserSettings::showSubFolderDocuments()
+{
+    bool b = get("CategoryShowSubFolderDocuments").toInt() ? true : false;
+    return b;
+}
+void WizUserSettings::setShowSubFolderDocuments(bool b)
+{
+    set("CategoryShowSubFolderDocuments", QString::number(b ? 1 : 0));
+}
+
 void WizUserSettings::appendRecentSearch(const QString& search)
 {
     if (search.isEmpty())

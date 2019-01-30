@@ -246,12 +246,6 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     m_biniting = false;
 }
 
-void WizPreferenceWindow::showEvent(QShowEvent*)
-{
-    QSize size = ui->pushButtonClearBackground->size();
-    ui->btnResetLineHeight->setFixedSize(size);
-}
-
 void WizPreferenceWindow::showPrintMarginPage()
 {
     ui->tabWidget->setCurrentWidget(ui->tabPrint);
@@ -630,7 +624,7 @@ void WizPreferenceWindow::on_comboParaSpacing_currentIndexChanged(int index)
     QString LineHeight = ui->comboParaSpacing->itemText(index);
     updateEditorParaSpacing(LineHeight, true);
 }
-void WizPreferenceWindow::on_btnResetParaSpacingt_clicked()
+void WizPreferenceWindow::on_btnResetParaSpacing_clicked()
 {
     ui->comboParaSpacing->setCurrentText("8");
     updateEditorParaSpacing("8", true);

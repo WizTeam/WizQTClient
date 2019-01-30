@@ -1002,6 +1002,7 @@ void WizMainWindow::initMenuBar()
     m_actions->actionFromName(WIZCATEGORY_OPTION_TAGS)->setCheckable(true);
     m_actions->actionFromName(WIZCATEGORY_OPTION_BIZGROUPS)->setCheckable(true);
     m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setCheckable(true);
+    m_actions->actionFromName(WIZACTION_GLOBAL_SHOW_SUB_FOLDER_DOCUMENTS)->setCheckable(true);
 
     bool checked = m_category->isSectionVisible(Section_MessageCenter);
     m_actions->actionFromName(WIZCATEGORY_OPTION_MESSAGECENTER)->setChecked(checked);
@@ -1018,7 +1019,8 @@ void WizMainWindow::initMenuBar()
     m_actions->actionFromName(WIZCATEGORY_OPTION_BIZGROUPS)->setChecked(checked);
     checked = m_category->isSectionVisible(Section_PersonalGroups);
     m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setChecked(checked);
-
+    checked = userSettings().showSubFolderDocuments();
+    m_actions->actionFromName(WIZACTION_GLOBAL_SHOW_SUB_FOLDER_DOCUMENTS)->setChecked(checked);
     //
     m_viewTypeActions = new QActionGroup(m_menuBar);
     QAction* action = m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW);
@@ -2685,6 +2687,16 @@ void WizMainWindow::on_actionViewToggleCategory_triggered()
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
 
+void WizMainWindow::on_actionViewShowSubFolderDocuments_triggered()
+{
+    bool show = !userSettings().showSubFolderDocuments();
+    userSettings().setShowSubFolderDocuments(show);
+    on_category_itemSelectionChanged();
+    //
+    actions()->actionFromName(WIZACTION_GLOBAL_SHOW_SUB_FOLDER_DOCUMENTS)->setChecked(show);
+    //
+}
+
 void WizMainWindow::on_actionViewToggleFullscreen_triggered()
 {
     WizGetAnalyzer().logAction("MenuBarFullscreen");
@@ -3392,7 +3404,7 @@ void WizMainWindow::on_actionGoForward_triggered()
 
 void WizMainWindow::on_category_itemSelectionChanged()
 {
-    WizCategoryBaseView* category = qobject_cast<WizCategoryBaseView *>(sender());
+    WizCategoryBaseView* category = m_category;
     if (!category)
         return;
     quitSearchStatus();

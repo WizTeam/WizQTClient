@@ -910,7 +910,7 @@ void WizCategoryViewFolderItem::setLocation(const QString& strLocation)
 
 void WizCategoryViewFolderItem::getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    db.getDocumentsByLocation(m_strName, arrayDocument);
+    db.getDocumentsByLocation(m_strName, arrayDocument, m_app.userSettings().showSubFolderDocuments());
 }
 
 bool WizCategoryViewFolderItem::accept(WizDatabase& db, const WIZDOCUMENTDATA& data)

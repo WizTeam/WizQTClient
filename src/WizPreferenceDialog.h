@@ -72,10 +72,7 @@ private slots:
     void on_btnResetLineHeight_clicked();
 
     void on_comboParaSpacing_currentIndexChanged(int index);
-    void on_btnResetParaSpacingt_clicked();
-
-protected:
-    void showEvent(QShowEvent* event) override;
+    void on_btnResetParaSpacing_clicked();
 
 private:
     Ui::WizPreferenceWindow *ui;
