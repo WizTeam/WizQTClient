@@ -6,6 +6,6 @@ html, .wiz-editor-body {
   /*default-background-color*/
   /*default-line-height*/
 } 
-p, div {
+.wiz-editor-body div, .wiz-editor-body p, .wiz-editor-body ul, .wiz-editor-body ol, .wiz-editor-body dl, .wiz-editor-body li {
   /*default-para-spacing*/
 }
