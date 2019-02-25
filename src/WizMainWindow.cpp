@@ -1087,8 +1087,7 @@ void WizMainWindow::on_editor_statusChanged(const QString& currentStyle)
 void WizMainWindow::createNoteByTemplate(const TemplateData& tmplData)
 {
     QFileInfo info(tmplData.strFileName);
-    if (info.exists())
-    {
+    if (info.exists() || tmplData.type == BuildInTemplate) {
         createNoteByTemplateCore(tmplData);
     }
     else
@@ -1131,6 +1130,7 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     //
     WIZDOCUMENTDATA data;
     data.strKbGUID = kbGUID;
+    data.strType = "svgpainter";
     //
     data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
     //  Journal {date}({week})

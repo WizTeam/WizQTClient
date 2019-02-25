@@ -209,50 +209,7 @@ bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
     if (WizServerTemplate != tmplData.type || tmplData.isFree)
         return true;
 
-    //开放给所有用户使用
     return true;
-    //
-    //不再限制用户使用模版
-    /*
-    WizAccountManager account(dbMgr);
-    if (account.isVip())
-        return true;
-
-    QString record = Utils::WizPathResolve::wizTemplatePurchaseRecordFile();
-    if(!QFile::exists(record))
-        return false;
-
-    QFile file(record);
-    if (!file.open(QFile::ReadOnly))
-        return false;
-
-    QTextStream stream(&file);
-    QString jsonData = stream.readAll();
-    if (jsonData.isEmpty())
-        return false;
-
-    Json::Value d;
-    Json::Reader reader;
-    if (!reader.parse(jsonData.toUtf8().constData(), d))
-        return;
-
-    if (!d.isMember("result"))
-        return false;
-
-    const Json::Value& templates = d["result"];
-    for(Json::ArrayIndex i = 0; i < templates.Size(); i++)
-    {
-        const Json::Value& templateObj = templates[i];
-
-        if (!templateObj.isMember("templateId"))
-            continue;
-
-        if (templateObj["templateId"].asInt() == tmplData.id)
-            return true;
-    }
-
-    return false;
-    */
 }
 
 void WizDocTemplateDialog::createPurchaseDialog()
@@ -530,6 +487,13 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
     }
 }
 
+TemplateData::TemplateData()
+    : type(BuildInTemplate)
+    , id(0)
+    , isFree(true)
+{
+
+}
 
 QVariant TemplateData::toQVariant() const
 {
@@ -544,6 +508,7 @@ QVariant TemplateData::toQVariant() const
     varMap.insert("isFree", isFree);
     varMap.insert("thumb", strThumbUrl);
     varMap.insert("demo", strDemoUrl);
+    varMap.insert("buildInName", buildInName);
 
     QVariant var(varMap);
     return var;
@@ -564,6 +529,7 @@ void TemplateData::fromQVariant(const QVariant& var)
     isFree = varMap.value("isFree").toBool();
     strThumbUrl = varMap.value("thumb").toString();
     strDemoUrl = varMap.value("demo").toString();
+    buildInName = varMap.value("buildInName").toString();
 }
 
 //获取模板列表，用于主窗口的新建笔记按钮快速创建笔记
@@ -587,6 +553,16 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     tmplMarkdown.isFree = true;
     tmplList.append(tmplMarkdown);
     //
+    // 内置的markdown模板
+    TemplateData tmplHandwriting;
+    tmplHandwriting.type = BuildInTemplate;
+    tmplHandwriting.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/handwriting.ziw";;
+    tmplHandwriting.strName = QObject::tr("Handwriting Note");
+    tmplHandwriting.strTitle = QObject::tr("Handwriting Note");
+    tmplHandwriting.buildInName = "Handwriting";
+    tmplHandwriting.isFree = true;
+    tmplList.append(tmplHandwriting);
+
     // sep
     TemplateData tmplSep;
     tmplSep.type = CustomTemplate;

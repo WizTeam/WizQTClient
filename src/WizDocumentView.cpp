@@ -439,7 +439,12 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
         db.modifyDocumentReadCount(docData);
         docData.tAccessed = WizGetCurrentTime();
         db.modifyDocumentDateAccessed(docData);
-
+        //
+        if (forceEdit) {
+            if (data.strType == "svgpainter") {
+                m_web->OnClickedSvg("");
+            }
+        }
     });
 }
 

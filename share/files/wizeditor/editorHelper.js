@@ -94,6 +94,12 @@ function WizOnKeyDown(event) {
           console.error(err);
         }
       }
+    } else if (event.charCode === 99 && event.metaKey) {
+        try {
+            WizQtEditor.doCopy();
+        } catch (err) {
+            console.error(err);
+        }
     }
   } catch (e) {
     console.error(e);

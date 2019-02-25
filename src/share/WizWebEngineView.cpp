@@ -374,6 +374,8 @@ static QWebEngineView* getActiveWeb()
 
 bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev)
 {
+    qDebug() << ev->key() << ", " << ev->text();
+    //
     if (ev->modifiers() && ev->key()) {
         if (QWebEngineView* web = getActiveWeb()) {
             if (ev->matches(QKeySequence::Copy))

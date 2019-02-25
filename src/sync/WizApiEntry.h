@@ -29,6 +29,7 @@ public:
     static QString editStatusUrl();
     static QString shareServer();
     static QString shareNoteUrl();
+    static QString svgEditorUrl();
 
     //
     static QString makeUpUrlFromCommand(const QString& strCommand);

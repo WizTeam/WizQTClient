@@ -77,6 +77,7 @@ private:
     CWizToolButton* m_btnCheckList;
     CWizToolButton* m_btnInsertLink;
     CWizToolButton* m_btnInsertImage;
+    CWizToolButton* m_btnInsertPainter;
     CWizToolButton* m_btnInsertDate;
     CWizToolButton* m_btnSearchReplace;
     CWizToolButton* m_btnMobileImage;
@@ -163,6 +164,7 @@ protected Q_SLOTS:
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
     void on_btnInsertImage_clicked();
+    void on_btnInsertPainter_clicked();
     void on_btnInsertLink_clicked();
     void on_btnInsertDate_clicked();
     void on_btnMobileImage_clicked();

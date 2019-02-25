@@ -3743,7 +3743,9 @@ bool WizDatabase::createDocumentByTemplate(const QString& templateZiwFile, const
     {
         newDoc.strTitle = strTitle;
     }
-    newDoc.strType = "TemplateNote";
+    if (newDoc.strType.isEmpty()) {
+        newDoc.strType = "TemplateNote";
+    }
 
     return createDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
 }

@@ -59,6 +59,8 @@
 #include "WizDocumentTransitionView.h"
 #include "WizDocumentView.h"
 #include "WizSearchReplaceWidget.h"
+#include "WizSvgEditorDialog.h"
+
 
 #include "html/WizHtmlReader.h"
 #include "WizPlugins.h"
@@ -1948,6 +1950,11 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
     analyzer.logAction("insertImage");
 }
 
+void WizDocumentWebView::editorCommandExecuteInsertPainter()
+{
+    OnClickedSvg("");
+}
+
 
 void WizDocumentWebView::editorCommandExecuteInsertDate()
 {
@@ -2383,6 +2390,37 @@ void WizDocumentWebView::OnSelectionChange(const QString& currentStyle)
     Q_EMIT statusChanged(currentStyle);
 }
 
+void WizDocumentWebView::OnClickedSvg(const QString& data)
+{
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+        //
+        QString url = ::WizApiEntry::standardCommandUrl("svg_editor");
+        WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, [this] (QString data) {
+            //
+            this->updateSvg(data);
+            //
+        }, WizMainWindow::instance());
+        //
+        dialog->exec();
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+            //
+            dialog->deleteLater();
+            //
+        });
+        //
+    });
+}
+
+void WizDocumentWebView::updateSvg(QString data)
+{
+    //
+    data = data.replace("\\", "\\\\");
+    QString js = QString("WizEditor.replaceSvg(`%1`)").arg(data);
+    page()->runJavaScript(js);
+    //
+}
+
 
 void WizDocumentWebView::saveCurrentNote()
 {
@@ -2400,6 +2438,11 @@ void WizDocumentWebView::onReturn()
         tryResetTitle();
         //
     });
+}
+
+void WizDocumentWebView::doCopy()
+{
+    page()->triggerAction(QWebEnginePage::Copy, false);
 }
 
 void WizDocumentWebView::doPaste()

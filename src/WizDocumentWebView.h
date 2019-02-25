@@ -178,6 +178,7 @@ public:
     void editorFocus();
     void enableEditor(bool enalbe);
     QString noteResourcesPath();
+    void updateSvg(QString data);
     //
     void editorResetSpellCheck();
 
@@ -232,9 +233,11 @@ public:
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();
     Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
+    Q_INVOKABLE void OnClickedSvg(const QString& data);
     Q_INVOKABLE void saveCurrentNote();
     Q_INVOKABLE void onReturn();
     Q_INVOKABLE void doPaste();
+    Q_INVOKABLE void doCopy();
 
     Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)
@@ -369,6 +372,7 @@ public Q_SLOTS:
     void editorCommandExecuteInsertHorizontal();
     void editorCommandExecuteInsertCheckList();
     void editorCommandExecuteInsertImage();
+    void editorCommandExecuteInsertPainter();
     void editorCommandExecuteInsertCode();
     void editorCommandExecuteMobileImage(bool bReceiveImage);
     void editorCommandExecuteScreenShot();
