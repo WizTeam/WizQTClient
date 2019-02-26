@@ -34972,13 +34972,18 @@ function setClientType(type, env) {
       if (cmd === CONST.CLIENT_EVENT.WizReaderClickImg) {
         env.win.external.OnClickedImage(options.src, JSON.stringify(options.imgList));
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
-        console.log(JSON.stringify(options));
+        // console.log(JSON.stringify(options));
         env.win.external.OnClickedSvg(JSON.stringify(options));
       }
     };
   } else if (type.indexOf('ios') > -1) {
     env.client.type.isIOS = true;
     env.client.sendCmdToWizClient = function (cmd, options) {
+      if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
+        env.win.webkit.messageHandlers.onClickSvg.postMessage(JSON.stringify(options));
+        return;
+      }
+
       var url = void 0;
       if (cmd === CONST.CLIENT_EVENT.WizReaderClickImg) {
         delete options.imgList;
@@ -35014,7 +35019,7 @@ function setClientType(type, env) {
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickImg) {
         env.win.WizNote.onEditorClickImage(options.src);
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
-        env.win.WizNote.OnClickSvg(JSON.stringify(options));
+        env.win.WizNote.onClickSvg(JSON.stringify(options));
       }
     };
   } else if (type.indexOf('mac') > -1) {
@@ -35027,8 +35032,8 @@ function setClientType(type, env) {
       if (cmd === CONST.CLIENT_EVENT.WizReaderClickImg) {
         env.win.WizExplorerApp.onClickedImage(options.src, JSON.stringify(options.imgList));
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
-        console.log(JSON.stringify(options));
-        env.win.WizQtEditor.OnClickedSvg(JSON.stringify(options));
+        // console.log(JSON.stringify(options));
+        env.win.WizQtEditor.onClickedSvg(JSON.stringify(options));
       }
     };
   }

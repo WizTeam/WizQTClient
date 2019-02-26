@@ -75,7 +75,7 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
 
 function WizOnSelectionChange(style) {
   try {
-    WizQtEditor.OnSelectionChange(JSON.stringify(style));
+    WizQtEditor.onSelectionChange(JSON.stringify(style));
   } catch (e) {
 
   }

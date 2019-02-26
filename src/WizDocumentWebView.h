@@ -232,8 +232,8 @@ public:
     Q_INVOKABLE bool canRenderMarkdown();
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();
-    Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
-    Q_INVOKABLE void OnClickedSvg(const QString& data);
+    Q_INVOKABLE void onSelectionChange(const QString& currentStyle);
+    Q_INVOKABLE void onClickedSvg(const QString& data);
     Q_INVOKABLE void saveCurrentNote();
     Q_INVOKABLE void onReturn();
     Q_INVOKABLE void doPaste();

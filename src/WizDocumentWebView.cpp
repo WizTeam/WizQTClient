@@ -1952,7 +1952,7 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
 
 void WizDocumentWebView::editorCommandExecuteInsertPainter()
 {
-    OnClickedSvg("");
+    onClickedSvg("");
 }
 
 
@@ -2385,12 +2385,12 @@ QString WizDocumentWebView::getLocalLanguage()
     return "en";
 }
 
-void WizDocumentWebView::OnSelectionChange(const QString& currentStyle)
+void WizDocumentWebView::onSelectionChange(const QString& currentStyle)
 {
     Q_EMIT statusChanged(currentStyle);
 }
 
-void WizDocumentWebView::OnClickedSvg(const QString& data)
+void WizDocumentWebView::onClickedSvg(const QString& data)
 {
     ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
         //
@@ -2402,12 +2402,8 @@ void WizDocumentWebView::OnClickedSvg(const QString& data)
         }, WizMainWindow::instance());
         //
         dialog->exec();
-        //
-        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-            //
-            dialog->deleteLater();
-            //
-        });
+        //qt bug? crash while delete dialog
+        dialog->web()->load(QUrl("about:blank"));
         //
     });
 }

@@ -442,7 +442,7 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
         //
         if (forceEdit) {
             if (data.strType == "svgpainter") {
-                m_web->OnClickedSvg("");
+                m_web->onClickedSvg("");
             }
         }
     });

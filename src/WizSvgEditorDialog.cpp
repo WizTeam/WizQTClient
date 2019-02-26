@@ -19,9 +19,7 @@ void WizSvgEditorDialog::onLoaded(bool ok)
     //
     data = data.replace("\\", "\\\\");
     //
-    QString script = QString("wizSvgPainter.editor.on({\n\
-                             pagesData: `%1`\n\
-                           })").arg(data);
+    QString script = QString("wizSvgPainter.importPages(`%1`)").arg(data);
     web()->page()->runJavaScript(script);
 }
 
