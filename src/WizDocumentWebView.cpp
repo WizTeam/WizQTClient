@@ -136,6 +136,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     , m_bInSeperateWindow(false)
     , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
+    , m_currentSvgEditorDialog(nullptr)
 {
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage({{"WizExplorerApp", m_app.object()}, {"WizQtEditor", this}}, this);
     setPage(page);
@@ -172,7 +173,6 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
     //
     //
-
     connect(this, SIGNAL(loadFinishedEx(bool)), SLOT(onEditorLoadFinished(bool)));
     //
     //
@@ -1383,7 +1383,27 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::m
         WizHTMLAppendTextInHead(strTag, strHtml);
     }
 }
+void WizDocumentWebView::addDefaultScriptsToDocumentHtml(QString htmlFileName)
+{
+    QString strHtml;
+    bool ret = WizLoadUnicodeTextFromFile(htmlFileName, strHtml);
+    if (!ret) {
+        // hide client and show error
+        return;
+    }
+    //
+    m_currentNoteHtml = strHtml;
+    emit currentHtmlChanged();
+    //
+    std::map<QString, QString> files;
+    getAllEditorScriptAndStypeFileName(files);
+    insertScriptAndStyleCore(strHtml, files);
+    //
+    replaceDefaultCss(strHtml);
+    //
+    ::WizSaveUnicodeTextToUtf8File(htmlFileName, strHtml, true);
 
+}
 void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
 {
     QString strGUID = view()->note().strGUID;
@@ -1399,8 +1419,7 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
         return;
     }
     //
-    m_currentNoteHtml = strHtml;
-    emit currentHtmlChanged();
+    addDefaultScriptsToDocumentHtml(strFileName);
 
     WizEditorMode oldMode = m_currentEditorMode;
     m_currentEditorMode = editorMode;
@@ -1414,14 +1433,6 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
         //
         view()->titleBar()->setEditorMode(m_currentEditorMode);
     }
-    //
-    std::map<QString, QString> files;
-    getAllEditorScriptAndStypeFileName(files);
-    insertScriptAndStyleCore(strHtml, files);
-    //
-    replaceDefaultCss(strHtml);
-    //
-    ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
     //
     if (isDarkMode()) {
         page()->setBackgroundColor(QColor("#272727"));
@@ -1952,7 +1963,8 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
 
 void WizDocumentWebView::editorCommandExecuteInsertPainter()
 {
-    onClickedSvg("");
+    QString js = QString("WizEditor.createSvg()");
+    page()->runJavaScript(js);
 }
 
 
@@ -2392,20 +2404,37 @@ void WizDocumentWebView::onSelectionChange(const QString& currentStyle)
 
 void WizDocumentWebView::onClickedSvg(const QString& data)
 {
-    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+    const WIZDOCUMENTDATA note = view()->note();
+    //
+    trySaveDocument(note, true, [=] (const QVariant) {
         //
-        QString url = ::WizApiEntry::standardCommandUrl("svg_editor");
-        WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, [this] (QString data) {
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
             //
-            this->updateSvg(data);
+            auto saveSvgCallback = [=] (QString html) {
+                //
+                m_docSaverThread->save(note, html, m_strNoteHtmlFileName, 0);
+                //
+            };
             //
-        }, WizMainWindow::instance());
-        //
-        dialog->exec();
-        //qt bug? crash while delete dialog
-        dialog->web()->load(QUrl("about:blank"));
-        //
+            auto reloadCallback = [=] () {
+                //
+                addDefaultScriptsToDocumentHtml(m_strNoteHtmlFileName);
+                load(QUrl::fromLocalFile(m_strNoteHtmlFileName));
+            };
+            //
+
+            QString url = ::WizApiEntry::standardCommandUrl("svg_editor");
+            QString resourcePath = noteResourcesPath();
+            //WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, manualSaveSvgCallback, postMessageToNoteEditorCallback, resourcePath, WizMainWindow::instance());
+            WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, saveSvgCallback, reloadCallback, m_strNoteHtmlFileName, resourcePath, WizMainWindow::instance());
+            m_currentSvgEditorDialog = dialog;
+            //
+            dialog->exec();
+            //qt bug? crash while delete dialog
+            dialog->web()->load(QUrl("about:blank"));
+        });
     });
+
 }
 
 void WizDocumentWebView::updateSvg(QString data)

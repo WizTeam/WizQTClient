@@ -24,6 +24,7 @@ class WizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 class QNetworkDiskCache;
 class WizSearchReplaceWidget;
+class WizSvgEditorDialog;
 
 struct WIZODUCMENTDATA;
 
@@ -251,6 +252,7 @@ private:
     //
     void saveAsPDFCore(std::function<void()> callback);
     //
+    void addDefaultScriptsToDocumentHtml(QString htmlFileName);
     void loadDocumentInWeb(WizEditorMode editorMode);
     //
     void getAllEditorScriptAndStypeFileName(std::map<QString, QString>& arrayFile);
@@ -306,6 +308,8 @@ private:
     QPointer<WizEditorInsertLinkForm> m_editorInsertLinkForm;
 
     WizSearchReplaceWidget* m_searchReplaceWidget;
+    //
+    WizSvgEditorDialog* m_currentSvgEditorDialog;
 
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback

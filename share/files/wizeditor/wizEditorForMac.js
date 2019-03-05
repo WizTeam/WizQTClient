@@ -26678,28 +26678,26 @@ var EditorUtils = function EditorUtils() {
     while (_this.replace(from, to, matchcase)) {}
   };
 
-  this.replaceSvg = function (dataList) {
-    if (!dataList || dataList.length === 0) {
+  this.replaceSvg = function (data) {
+    if (!data || !data.id) {
       return;
     }
-    for (var i = 0; i < dataList.length; i++) {
-      var data = dataList[i];
-      var dom = env.body.querySelector('#' + data.id);
-      if (dom) {
-        // 在页面内找到 id 对应的 dom
-        if (data.deleted) {
-          // 删除
-          domUtils.remove(dom);
-          continue;
-        }
-        // 替换
-        dom.outerHTML = data.html;
-      } else if (!data.deleted) {
-        // 在页面内没有找到 id 对应的 dom
-        var template = env.doc.createElement('div');
-        template.innerHTML = data.html;
-        env.doc.body.appendChild(template.firstElementChild);
+    var dom = env.body.querySelector('#' + data.id);
+    if (dom) {
+      // 在页面内找到 id 对应的 dom
+      if (data.deleted) {
+        // 删除
+        domUtils.remove(dom);
       }
+      // 替换
+      dom.outerHTML = data.html;
+    } else if (!data.deleted) {
+      // 在页面内没有找到 id 对应的 dom
+      // let container = env.doc.createElement('div');
+      // container.innerHTML = data.html;
+      _this.insertHtml('<div>' + data.html + '</div>', false);
+      //
+      // env.doc.body.appendChild(template.firstElementChild);
     }
   };
 };
@@ -28527,6 +28525,7 @@ module.exports = ImgResize;
  * img 操作基本方法集合
  */
 var CONST = require('../../config/const');
+var utils = require('../../libs/utils');
 
 var ImgUtils = function ImgUtils() {
   var _this = this;
@@ -28534,11 +28533,13 @@ var ImgUtils = function ImgUtils() {
   var core = null;
   var env = null;
   var domUtils = null;
+  var rangeUtils = null;
 
   this.initCore = function (_core) {
     core = _core;
     env = core.env;
     domUtils = core.require.domUtils;
+    rangeUtils = core.require.rangeUtils;
   };
 
   var imgFilter = function imgFilter(img, onlyLocal) {
@@ -28603,6 +28604,76 @@ var ImgUtils = function ImgUtils() {
     var width = newImg.width;
     return { width: width, height: height };
   };
+
+  this.getSvgList = function () {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    var result = {
+      before: [],
+      after: []
+    };
+    var targetIndex = null;
+    var isTargetBefore = false;
+    // let isTargetAfter = false;
+    var targetSvg = null;
+
+    if (options.targetType === 'caret') {
+      var range = rangeUtils.getRange();
+      if (range && !range.collapsed) {
+        // 如果 光标 有选中区域则自动设置到 选中区域的末尾
+        rangeUtils.setRange(range.endContainer, range.endOffset);
+        range = rangeUtils.getRange();
+      }
+      if (range) {
+        var detail = rangeUtils.getRangeDetail(range.startContainer, range.startOffset);
+        targetIndex = domUtils.getIndexList(detail.container).join('.');
+        if (detail.offset === 0) {
+          isTargetBefore = true;
+        }
+        // if (detail.isEnd) {
+        //   isTargetAfter = true;
+        // }
+      }
+    } else if (options.targetType === 'svg') {
+      var _targetSvg = env.body.querySelector('#' + options.id);
+      if (_targetSvg) {
+        targetIndex = domUtils.getIndexList(_targetSvg).join('.');
+      }
+    }
+
+    var svgList = env.body.querySelectorAll('img.' + CONST.CLASS.SVG_IMAGE);
+    for (var i = 0; i < svgList.length; i++) {
+      var svg = svgList[i];
+      if (targetSvg && targetSvg === svg) {
+        // 如果 svg 就是 目标，则不进入结果集合
+        continue;
+      }
+      if (!targetIndex) {
+        // 如果当前没有目标位置，则 所有的 svg 都认为在前面的
+        result.before.push(svg.id);
+        continue;
+      }
+
+      var svgIndex = domUtils.getIndexList(svg).join('.');
+      var compare = utils.compareVersion(svgIndex, targetIndex);
+      if (compare < 0) {
+        // 小于当前位置 都放入到 before 内
+        result.before.push(svg.id);
+      } else if (compare > 0) {
+        // 大于当前位置 都放入到 after 内
+        result.after.push(svg.id);
+      } else if (isTargetBefore) {
+        // 等于当前位置 且光标在 before 位置的，放入到 after 内
+        result.after.push(svg.id);
+      } else {
+        // 等于当前位置 且光标在 后面的， 放入到 before 内
+        result.before.push(svg.id);
+      }
+    }
+
+    return result;
+  };
+
   this.makeAttachmentDom = function (guid, imgPath) {
     var result = [],
         main = void 0,
@@ -28674,7 +28745,7 @@ var ImgUtils = function ImgUtils() {
 
 module.exports = ImgUtils;
 
-},{"../../config/const":388}],377:[function(require,module,exports){
+},{"../../config/const":388,"../../libs/utils":400}],377:[function(require,module,exports){
 'use strict';
 
 /**
@@ -28695,8 +28766,10 @@ var SvgClick = function SvgClick() {
   };
 
   var svgCheck = function svgCheck(target) {
-    var svgClassExp = new RegExp('(' + CONST.CLASS.SVG_BASE + ')', 'i');
-    return !!(target && domUtils.isTag(target, 'svg') && svgClassExp.test(target.getAttribute('class')));
+    var svgClassExp = new RegExp('(' + CONST.CLASS.SVG_IMAGE + ')', 'i');
+    // let svg = domUtils.getParentByTagName(target, 'img', true);
+    // return !!(svg && svgClassExp.test(svg.getAttribute('class')));
+    return !!(target && domUtils.isTag(target, 'img') && svgClassExp.test(target.getAttribute('class')));
   };
   var clickSvgForEdit = function clickSvgForEdit(e) {
     var target = e.target;
@@ -28704,19 +28777,11 @@ var SvgClick = function SvgClick() {
       return;
     }
 
-    var svgList = env.body.querySelectorAll('svg.' + CONST.CLASS.SVG_BASE);
+    var fileName = target.src.replace(/^.*[\\\/]([^\\\/]*)$/, '$1');
     var resultData = {
-      index: 0,
-      svgList: []
+      svgId: target.id,
+      fileName: fileName
     };
-    for (var i = 0; i < svgList.length; i++) {
-      var svg = svgList[i];
-      resultData.svgList.push(svg.outerHTML);
-      if (target === svg) {
-        resultData.index = i;
-      }
-    }
-
     env.client.sendCmdToWizClient(CONST.CLIENT_EVENT.WizEditorClickSvg, resultData);
     utils.stopEvent(e);
   };
@@ -34701,7 +34766,7 @@ var CONST = {
     SELECT_PLUGIN_HEADER_TEXT: 'wiz-select-plugin-header-text',
     SELECT_PLUGIN_OPTIONS: 'wiz-select-plugin-options',
     SELECT_PLUGIN_OPTIONS_ITEM: 'wiz-select-plugin-options-item',
-    SVG_BASE: 'wiz-svg-base',
+    SVG_IMAGE: 'wiz-svg-image',
     TEMPLATE_EDITABLE: 'wiz-template-editable',
     TABLE_CONTAINER: 'wiz-table-container',
     TABLE_TOOLS: 'wiz-table-tools',
@@ -34736,12 +34801,13 @@ var CONST = {
   },
   //客户端相关的事件定义
   CLIENT_EVENT: {
-    WizEditorPaste: 'wizEditorPaste',
-    WizEditorClickImg: 'wizEditorClickImg',
+    WizEditorPaste: 'WizEditorPaste',
+    WizEditorClickImg: 'WizEditorClickImg',
     WizEditorClickSvg: 'WizEditorClickSvg',
-    WizReaderClickImg: 'wizReaderClickImg',
-    WizMarkdownRender: 'wizMarkdownRender',
-    WizEditorTrackEvent: 'wizEditorTrackEvent'
+    WizEditorPostMessageToSvgEditor: 'WizEditorPostMessageToSvgEditor',
+    WizEditorTrackEvent: 'WizEditorTrackEvent',
+    WizMarkdownRender: 'WizMarkdownRender',
+    WizReaderClickImg: 'WizReaderClickImg'
   },
   CODE: {
     StorageKey: {
@@ -34974,6 +35040,9 @@ function setClientType(type, env) {
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
         // console.log(JSON.stringify(options));
         env.win.external.OnClickedSvg(JSON.stringify(options));
+      } else if (cmd === CONST.CLIENT_EVENT.WizEditorPostMessageToSvgEditor) {
+        console.log(JSON.stringify(options));
+        env.win.external.postMessageToSvgEditor(JSON.stringify(options));
       }
     };
   } else if (type.indexOf('ios') > -1) {
@@ -34981,6 +35050,10 @@ function setClientType(type, env) {
     env.client.sendCmdToWizClient = function (cmd, options) {
       if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
         env.win.webkit.messageHandlers.onClickSvg.postMessage(JSON.stringify(options));
+        return;
+      } else if (cmd === CONST.CLIENT_EVENT.WizEditorPostMessageToSvgEditor) {
+        // console.log(JSON.stringify(options));
+        env.win.webkit.messageHandlers.postMessageToSvgEditor.postMessage(JSON.stringify(options));
         return;
       }
 
@@ -35020,6 +35093,9 @@ function setClientType(type, env) {
         env.win.WizNote.onEditorClickImage(options.src);
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
         env.win.WizNote.onClickSvg(JSON.stringify(options));
+      } else if (cmd === CONST.CLIENT_EVENT.WizEditorPostMessageToSvgEditor) {
+        // console.log(JSON.stringify(options));
+        env.win.WizNote.postMessageToSvgEditor(JSON.stringify(options));
       }
     };
   } else if (type.indexOf('mac') > -1) {
@@ -35034,6 +35110,9 @@ function setClientType(type, env) {
       } else if (cmd === CONST.CLIENT_EVENT.WizEditorClickSvg) {
         // console.log(JSON.stringify(options));
         env.win.WizQtEditor.onClickedSvg(JSON.stringify(options));
+      } else if (cmd === CONST.CLIENT_EVENT.WizEditorPostMessageToSvgEditor) {
+        // console.log(JSON.stringify(options));
+        env.win.WizQtEditor.postMessageToSvgEditor(JSON.stringify(options));
       }
     };
   }
@@ -35933,6 +36012,30 @@ var WizDocument = function WizDocument(documentOptions, coreCallback) {
         historyUtils.saveSnap(false);
         editorUtils.modifySelectionDom(style, attr);
       },
+      onMessageFromSvgEditor: function onMessageFromSvgEditor(data) {
+        if (typeof data === 'string') {
+          data = JSON.parse(data);
+        }
+        if (data.type === 'save') {
+          // 保存 svg
+          // data = {type, id, deleted, html}
+          historyUtils.saveSnap(false);
+          editorUtils.replaceSvg(data);
+        } else if (data.type === 'querySvgList') {
+          // 查找光标 或 某个 svg 前后 svg 列表
+          // data = {type, targetType, id}
+          var svgList = imgUtils.getSvgList({
+            targetType: data.targetType,
+            id: data.id
+          });
+          env.client.sendCmdToWizClient(CONST.CLIENT_EVENT.WizEditorPostMessageToSvgEditor, {
+            type: 'svgList',
+            before: svgList.before,
+            after: svgList.after,
+            targetId: data.id
+          });
+        }
+      },
       paste: function paste(html, txt) {
         if (env.readonly === false) {
           pasteUtils.pasteFromClient(html, txt);
@@ -35959,13 +36062,6 @@ var WizDocument = function WizDocument(documentOptions, coreCallback) {
       replaceAll: function replaceAll(from, to, matchcase) {
         historyUtils.saveSnap(false);
         editorUtils.replaceAll(from, to, matchcase);
-      },
-      replaceSvg: function replaceSvg(dataList) {
-        if (typeof dataList === 'string') {
-          dataList = JSON.parse(dataList);
-        }
-        historyUtils.saveSnap(false);
-        editorUtils.replaceSvg(dataList);
       },
       /**
        * 恢复已备份光标位置
@@ -36650,6 +36746,7 @@ var wizEditor = {
     wizEditor.insertHtml = wizDocument.editor.insertHtml;
     wizEditor.isModified = wizDocument.editor.isModified;
     wizEditor.modifySelectionDom = wizDocument.editor.modifySelectionDom;
+    wizEditor.onMessageFromSvgEditor = wizDocument.editor.onMessageFromSvgEditor;
     wizEditor.paste = wizDocument.editor.paste;
     wizEditor.pasteB64 = wizDocument.editor.pasteB64;
     wizEditor.redo = function () {
@@ -36666,7 +36763,6 @@ var wizEditor = {
     };
     wizEditor.replace = wizDocument.editor.replace;
     wizEditor.replaceAll = wizDocument.editor.replaceAll;
-    wizEditor.replaceSvg = wizDocument.editor.replaceSvg;
     wizEditor.restoreCaret = wizDocument.editor.caretRestore;
     wizEditor.saveSnap = wizDocument.editor.saveSnap;
     // wizEditor.setWebViewSizeForFixScroll = wizDocument.editor.setWebViewSizeForFixScroll;
