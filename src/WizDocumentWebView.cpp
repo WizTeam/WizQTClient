@@ -2431,7 +2431,9 @@ void WizDocumentWebView::onClickedSvg(const QString& data)
             //
             dialog->exec();
             //qt bug? crash while delete dialog
-            dialog->web()->load(QUrl("about:blank"));
+            QTimer::singleShot(3000, [=] {
+                dialog->web()->load(QUrl("about:blank"));
+            });
         });
     });
 

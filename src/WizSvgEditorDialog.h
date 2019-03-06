@@ -14,10 +14,8 @@ private:
     QString m_data;
     std::function<void(QString)> m_saveCallback;
     std::function<void()> m_reloadCallback;
-    //std::function<void(QString)> m_postMessageToNoteEditorCallback;
     QString m_htmlFilePath;
     QString m_indexFilesPath;
-    bool m_closeAfterSaving;
 private:
 protected:
     virtual void onLoaded(bool ok);

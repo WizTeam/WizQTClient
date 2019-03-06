@@ -17,10 +17,9 @@ WizSvgEditorDialog::WizSvgEditorDialog(QString url, QString data, std::function<
     //, m_postMessageToNoteEditorCallback(postMessageToNoteEditorCallback)
     , m_htmlFilePath(htmlFilePath)
     , m_indexFilesPath(indexFilesPath)
-    , m_closeAfterSaving(false)
 {
 #ifdef QT_DEBUG
-    //m_url = "http://192.168.1.73:8888/static/index.html?saveToEditor=1&clientType=macosx";
+    //m_url = "http://192.168.1.73:8888/static/index.html?clientType=macosx";
 #endif
     setWindowTitle(QObject::tr("Handwriting Note"));
     //
@@ -31,17 +30,7 @@ WizSvgEditorDialog::WizSvgEditorDialog(QString url, QString data, std::function<
 
 void WizSvgEditorDialog::reject()
 {
-    m_closeAfterSaving = true;
-    qDebug() << "---close dialog";
-    web()->page()->runJavaScript("wizSvgPainter.save()", [=] (const QVariant& ret) {
-        qDebug() << "---request save return";
-        if (!ret.toBool()) {
-            //没有修改，不会调用saveData, 因此直接关闭
-            m_reloadCallback();
-            WizWebSettingsDialog::reject();
-        }
-        //
-    });
+    web()->page()->runJavaScript("wizSvgPainter.save({closeDialog: true})");
 }
 
 void WizSvgEditorDialog::onLoaded(bool ok)
@@ -84,19 +73,21 @@ void WizSvgEditorDialog::saveData(QString options, QString svgData, QString html
     if (!reader.parse(options.toUtf8().constData(), o))
         return;
     //
-    bool isManual = o["isManual"].asBool();
-    //bool isBodyHtml = o["isBodyHtml"].asBool();
-    QString fileName = QString::fromUtf8(o["fileName"].asString().c_str());
-    QString oldFileName = QString::fromUtf8(o["oldFileName"].asString().c_str());
-    if (!fileName.isEmpty()) {
-        fileName = m_indexFilesPath + fileName;
-        ::WizSaveUnicodeTextToUtf8File(fileName, svgData, false);
+    if (!svgData.isEmpty()) {
         //
-        if (!oldFileName.isEmpty()) {
-            oldFileName = m_indexFilesPath + oldFileName;
-            QFile::remove(oldFileName);
+        QString fileName = QString::fromUtf8(o["fileName"].asString().c_str());
+        QString oldFileName = QString::fromUtf8(o["oldFileName"].asString().c_str());
+        if (!fileName.isEmpty()) {
+            fileName = m_indexFilesPath + fileName;
+            ::WizSaveUnicodeTextToUtf8File(fileName, svgData, false);
+            //
+            if (!oldFileName.isEmpty()) {
+                oldFileName = m_indexFilesPath + oldFileName;
+                QFile::remove(oldFileName);
+            }
         }
     }
+
     //
     if (!htmlData.isEmpty()) {
         //
@@ -104,39 +95,12 @@ void WizSvgEditorDialog::saveData(QString options, QString svgData, QString html
         m_saveCallback(htmlData);
         //
     }
-//    //
-//    if (isBodyHtml) {
-//        //
-//        //
-//    } else {
-//        if (!htmlData.isEmpty()) {
-//            postMessageToNoteEditor(htmlData);
-//        }
-//    }
     //
-    if (isManual) {
-        //m_manualSaveCallback();
-    }
-    //
-    qDebug() << "---save data done";
-    qDebug() << "-----------------";
-    //
-    if (m_closeAfterSaving) {
+    bool closeDialog = o["closeDialog"].asBool();
+    if (closeDialog) {
         m_reloadCallback();
         WizWebSettingsDialog::reject();
     }
     //
 }
 
-
-//void WizSvgEditorDialog::postMessageToSvgEditor(QString message)
-//{
-//    message = message.replace("\\", "\\\\");
-//    QString js = QString("wizSvgPainter.onMessageFromNoteEditor(`%1`)").arg(message);
-//    web()->page()->runJavaScript(js);
-//}
-
-//void WizSvgEditorDialog::postMessageToNoteEditor(QString message)
-//{
-//    m_postMessageToNoteEditorCallback(message);
-//}
