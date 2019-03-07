@@ -160,11 +160,13 @@ void editHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc
     WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, saveSvgCallback, strHtmlFile, parent);
     //
     dialog->exec();
-    //qt bug? crash while delete dialog
-    QTimer::singleShot(3000, [=] {
-        dialog->web()->load(QUrl("about:blank"));
-    });
 
+#ifdef Q_OS_MAC
+    //QWebEngine bugs on mac, crash on some system.
+    dialog->web()->load(QUrl("about:blank"));
+#else
+    pDlg->deleteLater();
+#endif
 }
 
 void createHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc, QWidget* parent)
@@ -186,10 +188,14 @@ void createHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& d
     WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, "", saveSvgCallback, strHtmlFile, parent);
     //
     dialog->exec();
-    //qt bug? crash while delete dialog
-    QTimer::singleShot(3000, [=] {
-        dialog->web()->load(QUrl("about:blank"));
-    });
+    //
+    //
+#ifdef Q_OS_MAC
+    //QWebEngine bugs on mac, crash on some system.
+    dialog->web()->load(QUrl("about:blank"));
+#else
+    pDlg->deleteLater();
+#endif
 
 }
 

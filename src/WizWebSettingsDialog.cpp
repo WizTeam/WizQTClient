@@ -62,6 +62,10 @@ void WizWebSettingsDialog::init(const WizWebEngineViewInjectObjects& objects, QS
         web->setPage(new WizWebEnginePage(temp, web));
     }
     connect(web, SIGNAL(loadFinishedEx(bool)), SLOT(on_web_loaded(bool)));
+    //
+    QTimer::singleShot(100, [=] {
+        load();
+    });
 }
 
 WizWebEngineView* WizWebSettingsDialog::web()
@@ -72,13 +76,6 @@ WizWebEngineView* WizWebSettingsDialog::web()
 void WizWebSettingsDialog::load()
 {
     web()->load(m_url);
-}
-
-void WizWebSettingsDialog::showEvent(QShowEvent* event)
-{
-    QDialog::showEvent(event);
-    //
-    load();
 }
 
 void WizWebSettingsDialog::on_web_loaded(bool ok)
@@ -147,6 +144,22 @@ void WizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     web()->load(u);
 }
 
+
+void WizWebSettingsWithTokenDialog::onLoaded(bool ok)
+{
+    if (m_loaded) {
+        return;
+    }
+    //
+    m_loaded = true;
+    //
+    if (m_delayShow && ok) {
+        show();
+    }
+}
+
+////
+
 WizWebSettingsWithTokenDialog* WizWebSettingsWithTokenDialog::delayShow(QString title, QString url, QSize sz, QWidget* parent)
 {
     WizWebSettingsWithTokenDialog* dialog = new WizWebSettingsWithTokenDialog(url, sz, parent);
@@ -154,17 +167,5 @@ WizWebSettingsWithTokenDialog* WizWebSettingsWithTokenDialog::delayShow(QString 
     dialog->setWindowTitle(title);
     dialog->m_delayShow = true;
     //
-    dialog->load();
-    //
     return dialog;
 }
-
-void WizWebSettingsWithTokenDialog::onLoaded(bool ok)
-{
-    m_loaded = true;
-    //
-    if (ok) {
-        show();
-    }
-}
-

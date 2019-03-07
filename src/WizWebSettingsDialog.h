@@ -27,7 +27,6 @@ private:
     void init(const WizWebEngineViewInjectObjects& objects, QSize sz, QWidget *parent);
 protected:
     virtual void load();
-    virtual void showEvent(QShowEvent* event);
     virtual void onLoaded(bool ok) {}
 protected:
     QString m_url;
