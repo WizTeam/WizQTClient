@@ -1130,7 +1130,7 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     //
     WIZDOCUMENTDATA data;
     data.strKbGUID = kbGUID;
-    data.strType = "svgpainter";
+    data.strType = tmplData.buildInName;
     //
     data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
     //  Journal {date}({week})

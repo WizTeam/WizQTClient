@@ -441,8 +441,10 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
         db.modifyDocumentDateAccessed(docData);
         //
         if (forceEdit) {
-            if (data.strType == "svgpainter") {
-                m_web->onClickedSvg("");
+            if (data.strType == "handwriting") {
+                QTimer::singleShot(300, [=] {
+                    m_web->editorCommandExecuteInsertPainter();
+                });
             }
         }
     });

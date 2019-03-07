@@ -559,7 +559,7 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     tmplHandwriting.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/handwriting.ziw";;
     tmplHandwriting.strName = QObject::tr("Handwriting Note");
     tmplHandwriting.strTitle = QObject::tr("Handwriting Note");
-    tmplHandwriting.buildInName = "Handwriting";
+    tmplHandwriting.buildInName = "handwriting";
     tmplHandwriting.isFree = true;
     tmplList.append(tmplHandwriting);
 
