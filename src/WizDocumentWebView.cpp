@@ -696,7 +696,7 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
 
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
     strCss.replace("/*default-line-height*/", QString("line-height:%1;").arg(lineHeight));
-    strCss.replace("/*default-para-spacing*/", QString("margin-top:%1px !important;margin-bottom:%1px !important").arg(paraSpacing));
+    strCss.replace("/*default-para-spacing*/", QString("margin-top:%1px; margin-bottom:%1px").arg(paraSpacing));
 
     //
     const QString customCssId("wiz_custom_css");
