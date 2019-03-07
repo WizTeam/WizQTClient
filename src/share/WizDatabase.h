@@ -554,6 +554,16 @@ private:
 };
 
 
+class WizDocumentDataLocker
+{
+    QMutex* m_mutex;
+#ifdef QT_DEBUG
+    QString m_docGuid;
+#endif
+public:
+    WizDocumentDataLocker(QString docGuid);
+    ~WizDocumentDataLocker();
+};
 
 #define WIZNOTE_MIMEFORMAT_TAGS             "wiznote/tags"
 #define WIZNOTE_MIMEFORMAT_DOCUMENTS        "wiznote/documents"

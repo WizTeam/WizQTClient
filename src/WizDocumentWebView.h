@@ -24,7 +24,6 @@ class WizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 class QNetworkDiskCache;
 class WizSearchReplaceWidget;
-class WizSvgEditorDialog;
 
 struct WIZODUCMENTDATA;
 
@@ -308,9 +307,6 @@ private:
     QPointer<WizEditorInsertLinkForm> m_editorInsertLinkForm;
 
     WizSearchReplaceWidget* m_searchReplaceWidget;
-    //
-    WizSvgEditorDialog* m_currentSvgEditorDialog;
-
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 

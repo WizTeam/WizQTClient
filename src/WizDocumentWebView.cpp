@@ -136,7 +136,6 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     , m_bInSeperateWindow(false)
     , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
-    , m_currentSvgEditorDialog(nullptr)
 {
     WizDocumentWebViewPage* page = new WizDocumentWebViewPage({{"WizExplorerApp", m_app.object()}, {"WizQtEditor", this}}, this);
     setPage(page);
@@ -2410,30 +2409,9 @@ void WizDocumentWebView::onClickedSvg(const QString& data)
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
             //
-            auto saveSvgCallback = [=] (QString html) {
-                //
-                m_docSaverThread->save(note, html, m_strNoteHtmlFileName, 0);
-                //
-            };
-            //
-            auto reloadCallback = [=] () {
-                //
-                addDefaultScriptsToDocumentHtml(m_strNoteHtmlFileName);
-                load(QUrl::fromLocalFile(m_strNoteHtmlFileName));
-            };
-            //
-
-            QString url = ::WizApiEntry::standardCommandUrl("svg_editor");
-            QString resourcePath = noteResourcesPath();
-            //WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, manualSaveSvgCallback, postMessageToNoteEditorCallback, resourcePath, WizMainWindow::instance());
-            WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, saveSvgCallback, reloadCallback, m_strNoteHtmlFileName, resourcePath, WizMainWindow::instance());
-            m_currentSvgEditorDialog = dialog;
-            //
-            dialog->exec();
-            //qt bug? crash while delete dialog
-            QTimer::singleShot(3000, [=] {
-                dialog->web()->load(QUrl("about:blank"));
-            });
+            editHandwritingNote(m_dbMgr, note, m_strNoteHtmlFileName, data, WizMainWindow::instance());
+            addDefaultScriptsToDocumentHtml(m_strNoteHtmlFileName);
+            load(QUrl::fromLocalFile(m_strNoteHtmlFileName));
         });
     });
 
@@ -2482,63 +2460,6 @@ void WizDocumentWebView::doPaste()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-class WizDocumentDataMutexes
-{
-    QMutex m_globalLocker;
-    std::map<QString, QMutex*> m_lockers;
-
-    QMutex* getDocumentMutexesCore(QString docGuid)
-    {
-        QMutexLocker locker(&m_globalLocker);
-        auto it = m_lockers.find(docGuid);
-        if (it != m_lockers.end()) {
-            return it->second;
-        }
-        //
-        QMutex* mutex = new QMutex();
-        m_lockers[docGuid] = mutex;
-        return mutex;
-    }
-    //
-public:
-    static QMutex* getDocumentMutexes(QString docGuid) {
-        static WizDocumentDataMutexes g;
-        return g.getDocumentMutexesCore(docGuid);
-    }
-};
-
-class WizDocumentDataLocker
-{
-    QMutex* m_mutex;
-#ifdef QT_DEBUG
-    QString m_docGuid;
-#endif
-public:
-    WizDocumentDataLocker(QString docGuid)
-    {
-#ifdef QT_DEBUG
-        m_docGuid = docGuid;
-        DEBUG_TOLOG1("try access doc: %1", docGuid);
-#endif
-        //
-        m_mutex = WizDocumentDataMutexes::getDocumentMutexes(docGuid);
-        m_mutex->lock();
-        //
-#ifdef QT_DEBUG
-        DEBUG_TOLOG1("begin access doc: %1", docGuid);
-#endif
-    }
-    ~WizDocumentDataLocker()
-    {
-#ifdef QT_DEBUG
-        DEBUG_TOLOG1("end access doc: %1", m_docGuid);
-#endif
-        //
-        m_mutex->unlock();
-    }
-};
 
 WizDocumentWebViewLoaderThread::WizDocumentWebViewLoaderThread(WizDatabaseManager &dbMgr, QObject *parent)
     : QThread(parent)

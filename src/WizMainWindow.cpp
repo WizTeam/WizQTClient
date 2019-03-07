@@ -100,6 +100,7 @@
 #include "share/WizWebEngineView.h"
 #include "widgets/WizExecutingActionDialog.h"
 #include "widgets/WizUserServiceExprDialog.h"
+#include "WizSvgEditorDialog.h"
 
 #include "share/jsoncpp/json/json.h"
 
@@ -1178,6 +1179,13 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     if (!noteManager.createNoteByTemplate(data, currTag, tmplData.strFileName))
         return;
     //
+    bool isHandwriting = false;
+    if (data.strType == "handwriting") {
+        //
+        isHandwriting = true;
+        createHandwritingNote(m_dbMgr, data, this);
+    }
+    //
     setFocusForNewNote(data);
     //
     locateDocument(data);
@@ -1190,7 +1198,8 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     }
     else
     {
-        viewDocument(data, true);
+        bool addToHistory = true;
+        viewDocument(data, addToHistory);
     }
 
     quickSyncKb(kbGUID);
@@ -3917,7 +3926,9 @@ void WizMainWindow::reconnectServer()
 
 void WizMainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
 {
-    m_documentForEditing = doc;
+    if (doc.strType != "handwriting") {
+        m_documentForEditing = doc;
+    }
     m_documents->addAndSelectDocument(doc);
     m_documents->clearFocus();
     m_doc->web()->setFocus(Qt::MouseFocusReason);

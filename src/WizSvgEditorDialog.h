@@ -7,13 +7,11 @@ class WizSvgEditorDialog: public WizWebSettingsDialog
 {
     Q_OBJECT
 public:
-    //WizSvgEditorDialog(QString url, QString data, std::function<void()> manualSaveCallback, std::function<void(QString)> postMessageToNoteEditorCallback, QString htmlFilePath, QWidget* parent = nullptr);
-    WizSvgEditorDialog(QString url, QString data, std::function<void(QString html)> saveCallback, std::function<void()> reloadCallback, QString htmlFilePath, QString indexFilesPath, QWidget* parent = nullptr);
+    WizSvgEditorDialog(QString url, QString data, std::function<void(bool changed, std::function<void(bool)> saved)> saveCallback, QString htmlFilePath, QWidget* parent = nullptr);
     //
 private:
     QString m_data;
-    std::function<void(QString)> m_saveCallback;
-    std::function<void()> m_reloadCallback;
+    std::function<void(bool changed, std::function<void(bool)> saved)> m_saveCallback;
     QString m_htmlFilePath;
     QString m_indexFilesPath;
 private:
@@ -25,6 +23,12 @@ public:
     Q_INVOKABLE void saveData(QString options, QString svgData, QString htmlData);
     //Q_INVOKABLE void postMessageToNoteEditor(QString message);
 };
+
+class WizDatabaseManager;
+struct WIZDOCUMENTDATAEX;
+
+void editHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc, QString strHtmlFile, QString data, QWidget* parent);
+void createHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc, QWidget* parent);
 
 
 #endif // WIZSVGEDITORDIALOG_H

@@ -439,14 +439,6 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
         db.modifyDocumentReadCount(docData);
         docData.tAccessed = WizGetCurrentTime();
         db.modifyDocumentDateAccessed(docData);
-        //
-        if (forceEdit) {
-            if (data.strType == "handwriting") {
-                QTimer::singleShot(300, [=] {
-                    m_web->editorCommandExecuteInsertPainter();
-                });
-            }
-        }
     });
 }
 
