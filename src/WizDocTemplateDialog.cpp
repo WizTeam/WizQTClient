@@ -553,13 +553,13 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     tmplMarkdown.isFree = true;
     tmplList.append(tmplMarkdown);
     //
-    // 内置的markdown模板
+    // 内置的handwriting模板
     TemplateData tmplHandwriting;
     tmplHandwriting.type = BuildInTemplate;
     tmplHandwriting.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/handwriting.ziw";;
     tmplHandwriting.strName = QObject::tr("Handwriting Note");
     tmplHandwriting.strTitle = QObject::tr("Handwriting Note");
-    tmplHandwriting.buildInName = "handwriting";
+    tmplHandwriting.buildInName = "svgpainter";
     tmplHandwriting.isFree = true;
     tmplList.append(tmplHandwriting);
 

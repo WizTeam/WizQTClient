@@ -1180,7 +1180,7 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
         return;
     //
     bool isHandwriting = false;
-    if (data.strType == "handwriting") {
+    if (data.strType == "svgpainter") {
         //
         isHandwriting = true;
         createHandwritingNote(m_dbMgr, data, this);
@@ -3926,7 +3926,7 @@ void WizMainWindow::reconnectServer()
 
 void WizMainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
 {
-    if (doc.strType != "handwriting") {
+    if (doc.strType != "svgpainter") {
         m_documentForEditing = doc;
     }
     m_documents->addAndSelectDocument(doc);

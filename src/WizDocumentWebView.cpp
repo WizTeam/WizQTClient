@@ -1962,6 +1962,7 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
 
 void WizDocumentWebView::editorCommandExecuteInsertPainter()
 {
+    view()->changeType("svgpainter");
     QString js = QString("WizEditor.createSvg()");
     page()->runJavaScript(js);
 }
