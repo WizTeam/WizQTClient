@@ -165,7 +165,7 @@ void editHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc
     //QWebEngine bugs on mac, crash on some system.
     dialog->web()->load(QUrl("about:blank"));
 #else
-    pDlg->deleteLater();
+    dialog->deleteLater();
 #endif
 }
 
@@ -194,7 +194,7 @@ void createHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& d
     //QWebEngine bugs on mac, crash on some system.
     dialog->web()->load(QUrl("about:blank"));
 #else
-    pDlg->deleteLater();
+    dialog->deleteLater();
 #endif
 
 }
