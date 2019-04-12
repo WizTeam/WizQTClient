@@ -16,6 +16,7 @@
 
 WizSvgEditorDialog::WizSvgEditorDialog(QString url, QString data, std::function<void(bool changed, std::function<void(bool)> saved)> saveCallback, QString htmlFilePath, QWidget* parent)
     : WizWebSettingsDialog({{"WizQtObject", this}}, url, QSize(), parent)
+    , m_error(false)
     , m_data(data)
     , m_saveCallback(saveCallback)
     , m_htmlFilePath(htmlFilePath)
@@ -37,12 +38,24 @@ WizSvgEditorDialog::WizSvgEditorDialog(QString url, QString data, std::function<
 
 void WizSvgEditorDialog::reject()
 {
-    web()->page()->runJavaScript("wizSvgPainter.save({closeDialog: true})");
+    if (m_error) {
+        WizWebSettingsDialog::reject();
+        return;
+    }
+    //
+    web()->page()->runJavaScript("wizSvgPainter.save({closeDialog: true})", [=](const QVariant& ret) {
+        //
+        if (!ret.isValid()) {
+            WizWebSettingsDialog::reject();
+        }
+
+    });
 }
 
 void WizSvgEditorDialog::onLoaded(bool ok)
 {
     if (!ok) {
+        m_error = true;
         return;
     }
     //

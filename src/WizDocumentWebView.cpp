@@ -2460,6 +2460,12 @@ void WizDocumentWebView::doPaste()
     });
 }
 
+void WizDocumentWebView::afterCopied()
+{
+    WizWebEnginePage::processCopiedData();
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 WizDocumentWebViewLoaderThread::WizDocumentWebViewLoaderThread(WizDatabaseManager &dbMgr, QObject *parent)

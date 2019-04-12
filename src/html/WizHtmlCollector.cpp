@@ -293,7 +293,7 @@ bool WizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName)
 
 
 
-enum WIZIMAGEFORMAT {wizImageUnknown, wizImageBmp, wizImageJpg, wizImageGif, wizImagePng};
+enum WIZIMAGEFORMAT {wizImageUnknown, wizImageBmp, wizImageJpg, wizImageGif, wizImagePng, wizImageSvg};
 
 inline WIZIMAGEFORMAT WizGetImageFormatFromMarkBuffer(const unsigned char* pBuffer, int nBufferLen)
 {
@@ -308,6 +308,8 @@ inline WIZIMAGEFORMAT WizGetImageFormatFromMarkBuffer(const unsigned char* pBuff
         return wizImageJpg;
     else if (szBuffer[0] == 'G' && szBuffer[1] == 'I' && szBuffer[2] == 'F')
         return wizImageGif;
+    else if (szBuffer[0] == '<' && szBuffer[1] == 's' && szBuffer[2] == 'v' && szBuffer[3] == 'g')
+        return wizImageSvg;
     else if (szBuffer[0] == 0x89 && szBuffer[1] == 'P' && szBuffer[2] == 'N' && szBuffer[3] == 'G')
         return wizImagePng;
     else
@@ -351,6 +353,9 @@ bool WizHtmlCollector::downloadImage(const QString& strUrl, QString& strFileName
         break;
     case wizImagePng:
         ext = ".png";
+        break;
+    case wizImageSvg:
+        ext = ".svg";
         break;
     default:
         break;

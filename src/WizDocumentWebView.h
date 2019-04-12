@@ -238,6 +238,8 @@ public:
     Q_INVOKABLE void onReturn();
     Q_INVOKABLE void doPaste();
     Q_INVOKABLE void doCopy();
+    Q_INVOKABLE void afterCopied();
+
 
     Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)

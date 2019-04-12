@@ -45,6 +45,7 @@ public:
     explicit WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent = 0);
     //
     void stopCurrentNavigation() { m_continueNavigate = false; }
+    static void processCopiedData();
 protected:
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
     virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
