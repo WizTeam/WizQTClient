@@ -1595,9 +1595,9 @@ void WizDocumentWebView::editorCommandExecutePastePlainText()
         return;
     QString text = data->text();
     //
-    QString html = WizText2Html(text);
-
-    editorCommandExecuteInsertHtml(html, false);
+    QString base64Text = WizStringToBase64(text);
+    QString js = QString("WizEditor.pasteB64('', '%1')").arg(base64Text);
+    page()->runJavaScript(js);
 }
 
 void WizDocumentWebView::editorCommandExecuteIndent()
