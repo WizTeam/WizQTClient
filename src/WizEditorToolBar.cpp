@@ -1528,6 +1528,11 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     bool canCreateCode = QString::fromStdString(d["canCreateCode"].asString()) == "1";
     bool canCreateTodo = QString::fromStdString(d["canCreateTodo"].asString()) == "1";
     int formatPainterStatus = QString::fromStdString(d["formatPainterStatus"].asString()).toInt();
+    //
+    bool canFormatPainter = QString::fromStdString(d["canFormatPainter"].asString()) == "1";
+    bool canInsertHorizontalRule = QString::fromStdString(d["canInsertHorizontalRule"].asString()) == "1";
+    bool canInsertImage = QString::fromStdString(d["canInsertImage"].asString()) == "1";
+    bool canSetLink = QString::fromStdString(d["canSetLink"].asString()) == "1";
 
     //
     bool blockFormatSetted = false;
@@ -1585,6 +1590,11 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
     m_btnMobileImage->setEnabled(true);
+    //
+    m_btnFormatPainter->setEnabled(canFormatPainter);
+    m_btnHorizontal->setEnabled(canInsertHorizontalRule);
+    m_btnInsertImage->setEnabled(canInsertImage);
+    m_btnInsertLink->setEnabled(canSetLink);
 }
 
 
