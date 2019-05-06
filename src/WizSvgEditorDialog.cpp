@@ -26,13 +26,14 @@ WizSvgEditorDialog::WizSvgEditorDialog(QString url, QString data, std::function<
     m_indexFilesPath = resourcePath;
 
 #ifdef QT_DEBUG
-    //m_url = "http://192.168.1.73:8888/static/index.html?clientType=macosx";
+    //m_url = "http://192.168.1.73:8888/index.html?clientType=linux";
 #endif
     setWindowTitle(QObject::tr("Handwriting Note"));
     //
     QString type = data.isEmpty() ? "createNote" : "";
     QString a = + "type=" + type;
     m_url = m_url + "&a=" + QUrl::toPercentEncoding(a);
+    qDebug() << m_url;
 }
 
 void WizSvgEditorDialog::reject()
