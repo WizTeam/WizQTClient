@@ -204,6 +204,8 @@ WizCategoryBaseView::WizCategoryBaseView(WizExplorerApp& app, QWidget* parent)
 
 WizCategoryBaseView::~WizCategoryBaseView()
 {
+    disconnect();
+    //
     if (!m_dragHoveredTimer) {
         m_dragHoveredTimer->stop();
         delete m_dragHoveredTimer;

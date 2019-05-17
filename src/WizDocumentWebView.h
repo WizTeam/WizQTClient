@@ -129,10 +129,12 @@ class WizDocumentWebViewPage: public WizWebEnginePage
     Q_OBJECT
 
 public:
-    explicit WizDocumentWebViewPage(const WizWebEngineViewInjectObjects& objects, WizDocumentWebView* parent);
+    explicit WizDocumentWebViewPage(QWebEngineProfile* profile, QWidget* parent);
     virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
     virtual void triggerAction(WebAction action, bool checked = false);
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
+    //
+    void setDocumentWebView(WizDocumentWebView* view) { m_engineView = view; }
 
 Q_SIGNALS:
     void actionTriggered(WebAction act);

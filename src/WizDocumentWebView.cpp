@@ -73,12 +73,10 @@ enum WizLinkType {
     WizLink_Attachment
 };
 
-WizDocumentWebViewPage::WizDocumentWebViewPage(const std::vector<WizWebEngineViewInjectObject>& objects, WizDocumentWebView* parent)
-    : WizWebEnginePage(objects, parent)
-    , m_engineView(parent)
+WizDocumentWebViewPage::WizDocumentWebViewPage(QWebEngineProfile* profile, QWidget* parent)
+    : WizWebEnginePage(profile, parent)
+    , m_engineView(nullptr)
 {
-    Q_ASSERT(m_engineView);
-    //
     action(QWebEnginePage::Undo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Redo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Copy)->setShortcut(QKeySequence());
@@ -137,15 +135,19 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
 {
-    WizDocumentWebViewPage* page = new WizDocumentWebViewPage({{"WizExplorerApp", m_app.object()}, {"WizQtEditor", this}}, this);
-    setPage(page);
+    //
+    WizWebEngineViewInjectObjects objects = {{"WizExplorerApp", app.object()}, {"WizQtEditor", this}};
+    initWebEngineView<WizDocumentWebView, WizDocumentWebViewPage>(this, objects);
+
+    WizDocumentWebViewPage* p = (WizDocumentWebViewPage *)page();
+    p->setDocumentWebView(this);
     if (isDarkMode()) {
-        page->setBackgroundColor(QColor("#272727"));
+        p->setBackgroundColor(QColor("#272727"));
     }
 
-    connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
-    connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
-    connect(page, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(onOpenLinkInNewWindow(QUrl)));
+    connect(p, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
+    connect(p, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
+    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(onOpenLinkInNewWindow(QUrl)));
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -176,7 +178,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     //
     //
     if (m_app.userSettings().isEnableSpellCheck()) {
-        QWebEngineProfile *profile = page->profile();
+        QWebEngineProfile *profile = p->profile();
         profile->setSpellCheckEnabled(true);
         profile->setSpellCheckLanguages({"en-US"});
     }

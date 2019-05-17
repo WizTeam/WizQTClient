@@ -5,6 +5,7 @@
 #include "WebSocketTransport.h"
 #include <QWebEngineView>
 #include <QWebEnginePage>
+#include <QWebEngineProfile>
 #include <QDialog>
 
 class QWebChannel;
@@ -42,8 +43,10 @@ class WizWebEnginePage: public QWebEnginePage
 {
     Q_OBJECT
 public:
-    explicit WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent = 0);
+    explicit WizWebEnginePage(QWebEngineProfile* profile, QObject* parent = nullptr);
+    virtual ~WizWebEnginePage();
     //
+    virtual void init(const WizWebEngineViewInjectObjects& objects);
     void stopCurrentNavigation() { m_continueNavigate = false; }
     static void processCopiedData();
 protected:
@@ -59,6 +62,7 @@ private:
 };
 
 
+QWebEngineProfile* createWebEngineProfile(const WizWebEngineViewInjectObjects& objects, QObject* parent);
 
 class WizWebEngineView : public QWebEngineView
 {
@@ -66,7 +70,6 @@ class WizWebEngineView : public QWebEngineView
 
 public:
     WizWebEngineView(QWidget* parent);
-    WizWebEngineView(const WizWebEngineViewInjectObjects& objects, QWidget* parent);
     virtual ~WizWebEngineView();
 public:
     Q_INVOKABLE QVariant ExecuteScript(QString script);
@@ -83,6 +86,36 @@ Q_SIGNALS:
     void loadFinishedEx(bool);
 protected:
     void wheelEvent(QWheelEvent *event);
+    //
+protected:
+    virtual void init(const WizWebEngineViewInjectObjects& objects);
+public:
+
+
+    //bugs fixed:
+    //https://phabricator.kde.org/D19559?id=53357
+    //
+    template <class TWebEngineView = WizWebEngineView, class TWebEnginePage = WizWebEnginePage>
+    static inline TWebEngineView* create(const WizWebEngineViewInjectObjects& objects, QWidget* parent)
+    {
+        TWebEngineView* webView = new TWebEngineView(parent);
+        initWebEngineView<TWebEngineView, TWebEnginePage>(webView, objects);
+        return webView;
+    }
+    //
+
+    template <class TWebEngineView = WizWebEngineView, class TWebEnginePage = WizWebEnginePage>
+    static inline void initWebEngineView(TWebEngineView* webView, const WizWebEngineViewInjectObjects& objects)
+    {
+        QWebEngineProfile* profile = createWebEngineProfile(objects, nullptr);
+        TWebEnginePage* page = new TWebEnginePage(profile, webView);
+        profile->setParent(page);
+        webView->setPage(page);
+        if (auto view =  dynamic_cast<WizWebEngineView*>(webView)) {
+            view->init(objects);
+        }
+    }
+
 };
 
 bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev);
@@ -94,5 +127,6 @@ public:
 protected:
     virtual void keyPressEvent(QKeyEvent* ev);
 };
+
 
 #endif // MAINWINDOW_H

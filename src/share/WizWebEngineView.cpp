@@ -123,9 +123,16 @@ void WizWebEngineAsyncMethodResultObject::setResult(const QVariant& result)
     emit resultAcquired(m_result);
 }
 
-WizWebEnginePage::WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent)
-    : QWebEnginePage(createWebEngineProfile(objects, parent), parent)
+WizWebEnginePage::WizWebEnginePage(QWebEngineProfile* profile, QObject* parent)
+    : QWebEnginePage(profile, parent)
     , m_continueNavigate(true)
+{
+}
+WizWebEnginePage::~WizWebEnginePage() {
+    disconnect();
+}
+
+void WizWebEnginePage::init(const WizWebEngineViewInjectObjects& objects)
 {
     if (!objects.empty()) {
 
@@ -205,26 +212,22 @@ void WizWebEnginePage::processCopiedData()
 WizWebEngineView::WizWebEngineView(QWidget* parent)
     : QWebEngineView(parent)
 {
-    std::vector<WizWebEngineViewInjectObject> objects;
-    WizWebEnginePage* p = new WizWebEnginePage(objects, this);
-    setPage(p);
-    //
-    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
-    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
 }
 
-WizWebEngineView::WizWebEngineView(const WizWebEngineViewInjectObjects& objects, QWidget* parent)
-    : QWebEngineView(parent)
+void WizWebEngineView::init(const WizWebEngineViewInjectObjects& objects)
 {
-    WizWebEnginePage* p = new WizWebEnginePage(objects, this);
-    setPage(p);
-    //
-    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
+    connect(page(), SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
+    //
+    if (WizWebEnginePage* p = dynamic_cast<WizWebEnginePage *>(page())) {
+        p->init(objects);
+    }
 }
+
 
 WizWebEngineView::~WizWebEngineView()
 {
+    disconnect();
 }
 
 QVariant WizWebEngineView::ExecuteScript(QString script)

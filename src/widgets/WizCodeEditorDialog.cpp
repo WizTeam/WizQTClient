@@ -31,8 +31,10 @@ WizCodeEditorDialog::WizCodeEditorDialog(WizExplorerApp& app, WizDocumentWebView
     WizWebEngineViewContainerDialog(parent)
   , m_app(app)
   , m_external(external)
-  , m_codeBrowser(new WizWebEngineView({{"codeEditor", this}, {"external", external}}, this))
+  , m_codeBrowser(new WizWebEngineView(this))
 {
+    WizWebEngineView::initWebEngineView(m_codeBrowser, {{"codeEditor", this}, {"external", external}});
+    //
     setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);
     //

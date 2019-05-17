@@ -59,7 +59,8 @@ void WizWebSettingsDialog::init(const WizWebEngineViewInjectObjects& objects, QS
     if (mainWindow) {
         WizWebEngineViewInjectObjects temp = objects;
         temp.push_back({"WizExplorerApp", mainWindow->object()});
-        web->setPage(new WizWebEnginePage(temp, web));
+        //
+        WizWebEngineView::initWebEngineView(web, temp);
     }
     connect(web, SIGNAL(loadFinishedEx(bool)), SLOT(on_web_loaded(bool)));
     //
