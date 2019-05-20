@@ -916,6 +916,7 @@ void WizMainWindow::on_upgradeThread_finished()
 
 WizMainWindow::~WizMainWindow()
 {
+    disconnect();
     delete m_history;
 }
 
@@ -1794,8 +1795,6 @@ void WizMainWindow::initMenuList()
 void WizMainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
-    m_toolBar->showInWindow(this);
-    //
     //reset mac toolbar icons
     QString skin = userSettings().skin();
     QSize size = QSize(32, 32);
@@ -1841,7 +1840,9 @@ void WizMainWindow::initToolBar()
     if (m_searchWidget) {
         m_searchWidget->setUserSettings(m_settings);
     }
-
+    //
+    m_toolBar->showInWindow(this);
+    //
 #else
     layoutTitleBar();
     //

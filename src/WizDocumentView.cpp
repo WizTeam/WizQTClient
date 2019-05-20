@@ -402,10 +402,6 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
             m_tab->setCurrentWidget(m_transitionView);
             downloadNoteFromServer(data);
             //
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
-
             return;
         }
 
@@ -433,19 +429,11 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
                 m_tab->setCurrentWidget(m_passwordView);
                 m_passwordView->setCipherEditorFocus();
                 //
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
-
                 return;
             }
         }
         //
         m_tab->setCurrentWidget(m_docView);
-
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
 
         loadNote(data);
         WIZDOCUMENTDATA docData = data;
@@ -483,9 +471,6 @@ void WizDocumentView::reviewCurrentNote()
             m_passwordView->setHint(db.getCertPasswordHint());
             m_tab->setCurrentWidget(m_passwordView);
             m_passwordView->setCipherEditorFocus();
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
 
             return;
         }
@@ -493,9 +478,6 @@ void WizDocumentView::reviewCurrentNote()
 
     if (m_tab->currentWidget() != m_docView) {
         m_tab->setCurrentWidget(m_docView);
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
     }
 }
 
@@ -594,10 +576,6 @@ void WizDocumentView::resetTitle(const QString& strTitle)
 void WizDocumentView::promptMessage(const QString &strMsg)
 {
     m_tab->setCurrentWidget(m_msgWidget);
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
-
     m_msgLabel->setText(strMsg);
 }
 
@@ -801,9 +779,6 @@ void WizDocumentView::onCloseNoteRequested(WizDocumentView *view)
     Q_UNUSED(view)
 
     m_tab->setCurrentWidget(m_blankView);
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
 }
 
 void WizDocumentView::onCipherCheckRequest()
@@ -823,9 +798,6 @@ void WizDocumentView::onCipherCheckRequest()
     m_passwordView->cipherCorrect();
 
     m_tab->setCurrentWidget(m_docView);
-#ifdef USECOCOATOOLBAR
-            WizMainWindow::instance()->updateMacToolPositions();
-#endif
     loadNote(noteData);
 }
 
