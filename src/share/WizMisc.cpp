@@ -2366,12 +2366,7 @@ void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, Q
     pDlg->setWindowTitle(windowTitle);
     pDlg->exec();
     //
-#ifdef Q_OS_MAC
-    //QWebEngine bugs on mac, crash on some system.
-    //pDlg->web()->load(QUrl("about:blank"));
-#else
     pDlg->deleteLater();
-#endif
 }
 
 void WizShowWebDialogWithTokenDelayed(const QString& windowTitle, const QString& url, QWidget* parent, const QSize& sz, bool dialogResizable)

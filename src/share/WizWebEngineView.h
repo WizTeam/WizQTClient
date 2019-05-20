@@ -109,7 +109,9 @@ public:
     {
         QWebEngineProfile* profile = createWebEngineProfile(objects, nullptr);
         TWebEnginePage* page = new TWebEnginePage(profile, webView);
-        profile->setParent(page);
+        if (profile) {
+            profile->setParent(page);
+        }
         webView->setPage(page);
         if (auto view =  dynamic_cast<WizWebEngineView*>(webView)) {
             view->init(objects);
