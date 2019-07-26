@@ -4201,8 +4201,10 @@ bool WizDatabase::verifyCertPassword(QString password)
     if (WizAESDecryptBase64StringToString(password, encrypted_d, d)
             && d.length() > 0)
     {
-        WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
-        return true;
+        if (atoi(d.left(6).toUtf8()) != 0) {
+            WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
+            return true;
+        }
     }
     //
     if (!refreshCertFromServer())
@@ -4214,8 +4216,10 @@ bool WizDatabase::verifyCertPassword(QString password)
             && d.length() > 0)
     {
         loadUserCert();
-        WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
-        return true;
+        if (atoi(d.left(6).toUtf8()) != 0) {
+            WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
+            return true;
+        }
     }
     //
     return false;

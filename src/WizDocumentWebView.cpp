@@ -1202,6 +1202,7 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
                 {
                     succeeded = true;
                     m_currentNoteHtml = html;
+                    ::WizSaveUnicodeTextToUtf8File(m_strNoteHtmlFileName, m_currentNoteHtml);
                     emit currentHtmlChanged();
                     //
                     //qDebug() << m_currentNoteHtml;
