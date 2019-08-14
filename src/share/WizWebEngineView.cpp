@@ -185,6 +185,7 @@ void WizWebEnginePage::processCopiedData()
     //避免这个错误
     //
     //
+#ifdef Q_OS_MAC
     QTimer::singleShot(500, [=]{
         //
         QClipboard* clipboard = QApplication::clipboard();
@@ -206,6 +207,7 @@ void WizWebEnginePage::processCopiedData()
         //
         clipboard->setMimeData(newData);
     });
+#endif
 }
 
 
