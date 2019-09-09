@@ -1282,7 +1282,7 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 
 
 #ifdef QT_DEBUG
-//#define DEBUG_EDITOR
+#define DEBUG_EDITOR
 #endif
 
 void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)

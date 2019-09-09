@@ -161,13 +161,14 @@ void WizUserInfoWidget::on_action_accountSettings_triggered()
 
 void WizUserInfoWidget::on_action_upgradeVip_triggered()
 {
+    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
 #ifndef BUILD4APPSTORE
     QString strToken = WizToken::token();
     QString extInfo = WizCommonApiEntry::appstoreParam(false);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("vip", strToken, extInfo);
-    QDesktopServices::openUrl(strUrl);
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window);
+    //QDesktopServices::openUrl(strUrl);
 #else
-    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
     WizIAPDialog* dlg = window->iapDialog();
     dlg->loadIAPPage();
     dlg->exec();

@@ -1468,7 +1468,7 @@ void WizMainWindow::showVipUpgradePage()
             QString strToken = WizToken::token();
             QString strUrl = WizApiEntry::standardCommandUrl("vip", strToken);
             WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                QDesktopServices::openUrl(QUrl(strUrl));
+                WizShowWebDialogWithToken(tr("Account settings"), strUrl, this);
             });
         });
 #else

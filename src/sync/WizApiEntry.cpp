@@ -75,7 +75,9 @@ QMutex WizCommonApiEntry::m_mutex(QMutex::Recursive);
 QString _requestUrl(const QString& strUrl)
 {
     QNetworkAccessManager net;
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+    QNetworkRequest req(strUrl);
+    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    QNetworkReply* reply = net.get(req);
 
     WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
