@@ -1112,7 +1112,9 @@ void WizDocumentWebView::onOpenLinkInNewWindow(QUrl url)
         }
 
         qDebug() << "Open url " << strUrl;
+#if QT_VERSION != QT_VERSION_CHECK(5,12,3)
         QDesktopServices::openUrl(strUrl);
+#endif
         return;
     }
 }

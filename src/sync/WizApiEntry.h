@@ -59,10 +59,10 @@ private:
     static QMap<QString, QString> m_cacheMap;
 };
 
-class WizApiEntry
+class WizOfficialApiEntry
 {
 public:
-    WizApiEntry();
+    WizOfficialApiEntry();
 
     static QString analyzerUploadUrl();
     static QString crashReportUrl();

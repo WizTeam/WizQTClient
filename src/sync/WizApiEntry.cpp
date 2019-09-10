@@ -368,7 +368,7 @@ QString WizCommonApiEntry::requestUrl(const QString& strCommand)
     return strUrl;
 }
 
-QString WizApiEntry::appendSrc(QString url)
+QString WizOfficialApiEntry::appendSrc(QString url)
 {
     QUrl u(url);
     QString host = u.host();
@@ -392,7 +392,7 @@ QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
     //
-    strUrl = WizApiEntry::appendSrc(strUrl);
+    strUrl = WizOfficialApiEntry::appendSrc(strUrl);
     return strUrl;
 }
 
@@ -460,39 +460,39 @@ QString WizCommonApiEntry::getUrlByCommand(const QString& strCommand)
     return strUrl;
 }
 
-QString WizApiEntry::analyzerUploadUrl()
+QString WizOfficialApiEntry::analyzerUploadUrl()
 {
     QString analyzerUrl = requestUrl("analyzer");
     return analyzerUrl;
 }
 
-QString WizApiEntry::crashReportUrl()
+QString WizOfficialApiEntry::crashReportUrl()
 {
     QString strUrl = requestUrl("crash_http");
     return strUrl;
 }
 
-QString WizApiEntry::standardCommandUrl(const QString& strCommand)
+QString WizOfficialApiEntry::standardCommandUrl(const QString& strCommand)
 {
     QString strUrl = urlFromCommand(strCommand);
     return strUrl;
 }
 
-QString WizApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken)
+QString WizOfficialApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
     QString strUrl = urlFromCommand(strCommand);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString WizApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
+QString WizOfficialApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
 {
     QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
     QString strUrl = urlFromCommand(strCommand);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString WizApiEntry::requestUrl(const QString& strCommand)
+QString WizOfficialApiEntry::requestUrl(const QString& strCommand)
 {
     QString strRequestUrl= urlFromCommand(strCommand);
     QString strUrl = _requestUrl(strRequestUrl);
@@ -504,7 +504,7 @@ QString WizApiEntry::requestUrl(const QString& strCommand)
     return strUrl;
 }
 
-QString WizApiEntry::urlFromCommand(const QString& strCommand)
+QString WizOfficialApiEntry::urlFromCommand(const QString& strCommand)
 {
     qsrand((uint)QTime::currentTime().msec());
     QString strUrl = QString(WIZNOTE_API_ENTRY)

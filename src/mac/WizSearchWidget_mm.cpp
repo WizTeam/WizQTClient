@@ -439,7 +439,7 @@ void WizSuggestCompletionon::autoSuggest()
 
 void WizSuggestCompletionon::on_advanced_buttonClicked()
 {
-    QString strUrl = WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizOfficialApiEntry::standardCommandUrl("link");
     strUrl += "&site=www";
     strUrl += "&name=advanced_search.html";
 

@@ -74,7 +74,7 @@ void WizUserServiceExprDialog::setUserInfo(bool free, bool isBizUser, WIZGROUPDA
 
 void WizUserServiceExprDialog::helpClicked()
 {
-    QString url = WizApiEntry::standardCommandUrl("link");
+    QString url = WizOfficialApiEntry::standardCommandUrl("link");
     url += "&site=blog&name=sync_service.html";
     QDesktopServices::openUrl(QUrl(url));
 }

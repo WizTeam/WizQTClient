@@ -43,7 +43,7 @@ QString appendNormalParams(const QString& strUrl, const QString& token)
         url += "&token=" + token;
     }
     //
-    url = WizApiEntry::appendSrc(url);
+    url = WizOfficialApiEntry::appendSrc(url);
     //
     return url;
 }

@@ -1323,7 +1323,7 @@ void WizLoginDialog::serverListMenuClicked(QAction* action)
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
-            QString strUrl = WizApiEntry::standardCommandUrl("link");
+            QString strUrl = WizOfficialApiEntry::standardCommandUrl("link");
             strUrl += "&name=wiz-box-search-help.html";
             QDesktopServices::openUrl(strUrl);
         }

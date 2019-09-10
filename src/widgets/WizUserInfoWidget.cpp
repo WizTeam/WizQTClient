@@ -71,12 +71,12 @@ WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
-    if (!oemSettings.isHideMyShare())
-    {
-        QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
-        connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
-        m_menuMain->addAction(actionMyShare);
-    }
+//    if (!oemSettings.isHideMyShare())
+//    {
+//        QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
+//        connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
+//        m_menuMain->addAction(actionMyShare);
+//    }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionLogout);
     //

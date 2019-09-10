@@ -169,7 +169,7 @@ void editHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc
         //
     };
     //
-    QString url = ::WizApiEntry::standardCommandUrl("svg_editor");
+    QString url = ::WizCommonApiEntry::makeUpUrlFromCommand("svg_editor");
     WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, data, saveSvgCallback, strHtmlFile, parent);
     //
     dialog->exec();
@@ -192,7 +192,7 @@ void createHandwritingNote(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& d
         //
     };
     //
-    QString url = ::WizApiEntry::standardCommandUrl("svg_editor");
+    QString url = ::WizCommonApiEntry::makeUpUrlFromCommand("svg_editor");
     WizSvgEditorDialog* dialog = new WizSvgEditorDialog(url, "", saveSvgCallback, strHtmlFile, parent);
     //
     dialog->exec();
