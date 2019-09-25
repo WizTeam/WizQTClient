@@ -242,6 +242,8 @@ public:
     Q_INVOKABLE void doCopy();
     Q_INVOKABLE void afterCopied();
 
+    Q_INVOKABLE void onMarkerUndoStatusChanged(QString data);
+    Q_INVOKABLE void onMarkerInitiated(QString data);
 
     Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)
@@ -376,16 +378,23 @@ public Q_SLOTS:
     void editorCommandExecuteInsertHorizontal();
     void editorCommandExecuteInsertCheckList();
     void editorCommandExecuteInsertImage();
+    void editorCommandExecuteStartMarkup();
+    void editorCommandExecuteStopMarkup();
     void editorCommandExecuteInsertPainter();
     void editorCommandExecuteInsertCode();
     void editorCommandExecuteMobileImage(bool bReceiveImage);
     void editorCommandExecuteScreenShot();
     void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
     void on_editorCommandExecuteScreenShot_finished();
+    //
+    void editorExecJs(QString js);
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
     void statusChanged(const QString& currentStyle);
+    void markerUndoStatusChanged(const QString& data);
+    void markerInitiated(const QString& data);
+    //
     void selectAllKeyPressed();
     // signals used request reset info toolbar and editor toolbar
     void focusIn();

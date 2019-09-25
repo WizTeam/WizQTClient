@@ -59,6 +59,8 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
       editor: {
         callback: {
           onKeyDown: WizOnKeyDown,
+          markerUndo: WizOnUndoStatusChanged,
+          markerInitiated: WizOnMarkerInitiated,
         }
       }
     }
@@ -107,6 +109,15 @@ function WizOnKeyDown(event) {
     return true;
   }
 }
+
+function WizOnUndoStatusChanged(data) {
+  WizQtEditor.onMarkerUndoStatusChanged(data);
+}
+
+function WizOnMarkerInitiated(data) {
+  WizQtEditor.onMarkerInitiated(data);
+}
+
 
 
 function WizAddCssForCode(cssFile) {

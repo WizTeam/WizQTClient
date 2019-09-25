@@ -1,13 +1,3 @@
-img {
-  filter: brightness(50%);
-  -webkit-filter: brightness(50%);
-}
-
-svg, iframe {
-  filter: brightness(70%);
-  -webkit-filter: brightness(70%);
-}
-
 iframe#wiz-content-iframe-viewer {
   filter: none;
   -webkit-filter: none;
@@ -143,4 +133,8 @@ div.CodeMirror-selected {
 
 .wiz-content-outer {
   border-color: transparent !important;
+}
+
+.wiz-editor-body #wiz-painter-root svg *[stroke="#333333"] {
+    stroke: #a6a6a6;
 }

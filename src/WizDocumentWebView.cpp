@@ -1284,7 +1284,7 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 
 
 #ifdef QT_DEBUG
-#define DEBUG_EDITOR
+//#define DEBUG_EDITOR
 #endif
 
 void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)
@@ -1965,6 +1965,23 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
     analyzer.logAction("insertImage");
 }
 
+void WizDocumentWebView::editorCommandExecuteStartMarkup()
+{
+    QString js = QString("WizEditor.marker.start();");
+    page()->runJavaScript(js);
+}
+
+void WizDocumentWebView::editorCommandExecuteStopMarkup()
+{
+    QString js = QString("WizEditor.marker.quit();");
+    page()->runJavaScript(js);
+}
+
+void WizDocumentWebView::editorExecJs(QString js)
+{
+    page()->runJavaScript(js);
+}
+
 void WizDocumentWebView::editorCommandExecuteInsertPainter()
 {
     view()->changeType("svgpainter");
@@ -2469,6 +2486,18 @@ void WizDocumentWebView::afterCopied()
 {
     WizWebEnginePage::processCopiedData();
 }
+
+
+void WizDocumentWebView::onMarkerUndoStatusChanged(QString data)
+{
+    emit markerUndoStatusChanged(data);
+
+}
+void WizDocumentWebView::onMarkerInitiated(QString data)
+{
+    emit markerInitiated(data);
+}
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
