@@ -3049,6 +3049,7 @@ bool WizURLDownloadToData(const QString& url, QByteArray& data)
     do
     {
         QNetworkRequest request(newUrl);
+        request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
         //
         reply = netCtrl.get(request);
         WizAutoTimeOutEventLoop loop(reply);

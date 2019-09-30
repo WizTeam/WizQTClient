@@ -1842,7 +1842,9 @@ QString WizOEMDownloader::_downloadOEMSettings()
     QNetworkAccessManager net;
     WizCommonApiEntry::setEnterpriseServerIP(m_server);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("oem");
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+    QNetworkRequest req(strUrl);
+    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    QNetworkReply* reply = net.get(req);
     qDebug() << "get oem from server : " << strUrl;
 
     QEventLoop loop;
