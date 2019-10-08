@@ -698,9 +698,9 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     //
 #ifdef Q_OS_MAC
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
 #else
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
                                                  "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
