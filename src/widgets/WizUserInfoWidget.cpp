@@ -65,7 +65,7 @@ WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     if (!oemSettings.isHideBuyVip())
     {
         WizAccountManager manager(m_app.databaseManager());
-        QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renewal Vip...") : tr("Upgrade VIP..."), m_menuMain);
+        QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renew Vip...") : tr("Upgrade VIP..."), m_menuMain);
         connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
         m_menuMain->addAction(actionUpgradeVIP);
     }

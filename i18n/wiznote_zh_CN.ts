@@ -479,17 +479,17 @@
     <message>
         <location filename="../src/main.cpp" line="71"/>
         <location filename="../src/main.cpp" line="72"/>
-        <location filename="../src/main.cpp" line="150"/>
+        <location filename="../src/main.cpp" line="155"/>
         <source>WizNote</source>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="151"/>
+        <location filename="../src/main.cpp" line="156"/>
         <source>cn.wiz.wiznoteformac</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="343"/>
+        <location filename="../src/main.cpp" line="348"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -4429,14 +4429,14 @@ Asian characters: %5</source>
 <context>
     <name>WizOEMDownloader</name>
     <message>
-        <location filename="../src/WizLoginDialog.cpp" line="1855"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1857"/>
         <source>Can not find server %1</source>
         <translation>找不到服务器 %1</translation>
     </message>
     <message>
-        <location filename="../src/WizLoginDialog.cpp" line="1917"/>
-        <location filename="../src/WizLoginDialog.cpp" line="1926"/>
-        <location filename="../src/WizLoginDialog.cpp" line="1950"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1919"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1928"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1952"/>
         <source>Licence not found : %1</source>
         <translation>无法获取Licence : %1</translation>
     </message>
@@ -5495,14 +5495,14 @@ w: %3  h: %4</translation>
         <translation>打开网页版...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/WizUserInfoWidget.cpp" line="68"/>
-        <source>Renewal Vip...</source>
-        <translation>续费VIP...</translation>
-    </message>
-    <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="58"/>
         <source>Logout...</source>
         <translation>退出登录...</translation>
+    </message>
+    <message>
+        <location filename="../src/widgets/WizUserInfoWidget.cpp" line="68"/>
+        <source>Renew Vip...</source>
+        <translation>续费VIP...</translation>
     </message>
     <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="150"/>

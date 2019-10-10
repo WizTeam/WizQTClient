@@ -124,6 +124,11 @@ int mainCore(int argc, char *argv[])
 #else
     QApplication a(argc, argv);
     //
+    qDebug() << QApplication::font();
+    //QFont font = QApplication::font();
+    //font.setFamily("Helvetica Neue");
+    //QApplication::setFont(font);
+    //
 #ifdef BUILD4APPSTORE
     QDir dir(QApplication::applicationDirPath());
     dir.cdUp();

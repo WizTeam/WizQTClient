@@ -879,17 +879,17 @@ Reason: %3</source>
     <message>
         <location filename="../src/main.cpp" line="71"/>
         <location filename="../src/main.cpp" line="72"/>
-        <location filename="../src/main.cpp" line="150"/>
+        <location filename="../src/main.cpp" line="155"/>
         <source>WizNote</source>
         <translation>為知筆記</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="151"/>
+        <location filename="../src/main.cpp" line="156"/>
         <source>cn.wiz.wiznoteformac</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="343"/>
+        <location filename="../src/main.cpp" line="348"/>
         <source>Can not open database</source>
         <translation>無法開啟資料庫</translation>
     </message>
@@ -4857,14 +4857,14 @@ Asian characters: %5</source>
 <context>
     <name>WizOEMDownloader</name>
     <message>
-        <location filename="../src/WizLoginDialog.cpp" line="1855"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1857"/>
         <source>Can not find server %1</source>
         <translation type="unfinished">找不到伺服器 %1</translation>
     </message>
     <message>
-        <location filename="../src/WizLoginDialog.cpp" line="1917"/>
-        <location filename="../src/WizLoginDialog.cpp" line="1926"/>
-        <location filename="../src/WizLoginDialog.cpp" line="1950"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1919"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1928"/>
+        <location filename="../src/WizLoginDialog.cpp" line="1952"/>
         <source>Licence not found : %1</source>
         <translation type="unfinished">無法取得 Licence : %1</translation>
     </message>
@@ -5923,13 +5923,13 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="68"/>
-        <source>Renewal Vip...</source>
-        <translation type="unfinished">續費VIP...</translation>
+        <source>Upgrade VIP...</source>
+        <translation type="unfinished">升級 VIP...</translation>
     </message>
     <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="68"/>
-        <source>Upgrade VIP...</source>
-        <translation type="unfinished">升級 VIP...</translation>
+        <source>Renew Vip...</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/widgets/WizUserInfoWidget.cpp" line="150"/>
