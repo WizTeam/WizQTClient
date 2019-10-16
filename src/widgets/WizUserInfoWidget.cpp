@@ -62,7 +62,7 @@ WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
     WizOEMSettings oemSettings(m_db.getAccountPath());
-    if (!oemSettings.isHideBuyVip())
+    if (!oemSettings.isHideBuyVip() && app.userSettings().serverType() != EnterpriseServer)
     {
         WizAccountManager manager(m_app.databaseManager());
         QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renew Vip...") : tr("Upgrade VIP..."), m_menuMain);
