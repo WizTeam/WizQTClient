@@ -62,16 +62,6 @@ WizConsoleDialog::~WizConsoleDialog()
 {
 }
 
-void WizConsoleDialog::showEvent(QShowEvent *event)
-{
-    QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
-    vScroll->setValue(vScroll->maximum());
-
-    move(parentWidget()->geometry().center() - rect().center());
-
-    QDialog::showEvent(event);
-}
-
 void WizConsoleDialog::insertLog(const QString& text)
 {
     QTextCursor cursor = m_ui->editConsole->textCursor();

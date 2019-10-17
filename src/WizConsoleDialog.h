@@ -18,9 +18,6 @@ public:
     WizConsoleDialog(WizExplorerApp& app, QWidget* parent = 0);
     ~WizConsoleDialog();
 
-protected:
-    virtual void showEvent(QShowEvent *event);
-
 private:
     WizExplorerApp& m_app;
     Ui::WizConsoleDialog* m_ui;
