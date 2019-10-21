@@ -2563,7 +2563,7 @@ Password hint: %1</source>
     </message>
     <message>
         <location filename="../src/widgets/WizAboutDialog.cpp" line="64"/>
-        <source>&lt;span style=&quot;font-size:10px&quot;&gt;Copyright 2011-2018 Beijing Wozhi Technology Co., Ltd. All rights reserved.&lt;/span&gt;</source>
+        <source>&lt;span style=&quot;font-size:10px&quot;&gt;Copyright 2011-2019 Beijing Wozhi Technology Co., Ltd. All rights reserved.&lt;/span&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3188,17 +3188,17 @@ Password hint: %1</source>
         <translation type="unfinished">複製到剪貼簿</translation>
     </message>
     <message>
-        <location filename="../src/WizConsoleDialog.cpp" line="128"/>
+        <location filename="../src/WizConsoleDialog.cpp" line="118"/>
         <source>Save log</source>
         <translation type="unfinished">儲存日誌</translation>
     </message>
     <message>
-        <location filename="../src/WizConsoleDialog.cpp" line="133"/>
+        <location filename="../src/WizConsoleDialog.cpp" line="123"/>
         <source>Failed to save</source>
         <translation type="unfinished">儲存失敗</translation>
     </message>
     <message>
-        <location filename="../src/WizConsoleDialog.cpp" line="133"/>
+        <location filename="../src/WizConsoleDialog.cpp" line="123"/>
         <source>you should select a file name which does not exists</source>
         <translation type="unfinished">您應該使用一個不重複的名稱進行儲存</translation>
     </message>

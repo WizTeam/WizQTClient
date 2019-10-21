@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-    <string>2.7.8</string>
+    <string>2.7.9</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>CFBundleName</key>
@@ -33,7 +33,7 @@
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>&amp;copy;2011-2018 Wozhi Technology Co. Ltd. Corporation.</string>
+    <string>&amp;copy;2011-2019 Wozhi Technology Co. Ltd. Corporation.</string>
 	<key>ForAppStore</key>
 	<true/>
 	<key>NSHighResolutionCapable</key>

@@ -2123,8 +2123,8 @@ Password hint: %1</source>
     </message>
     <message>
         <location filename="../src/widgets/WizAboutDialog.cpp" line="64"/>
-        <source>&lt;span style=&quot;font-size:10px&quot;&gt;Copyright 2011-2018 Beijing Wozhi Technology Co., Ltd. All rights reserved.&lt;/span&gt;</source>
-        <translation>&lt;span style=&quot;font-size:10px&quot;&gt;版权所有 2011-2018 北京我知科技有限公司. 保留所有权利.&lt;/span&gt;</translation>
+        <source>&lt;span style=&quot;font-size:10px&quot;&gt;Copyright 2011-2019 Beijing Wozhi Technology Co., Ltd. All rights reserved.&lt;/span&gt;</source>
+        <translation>&lt;span style=&quot;font-size:10px&quot;&gt;版权所有 2011-2019 北京我知科技有限公司. 保留所有权利.&lt;/span&gt; {10p?} {2011-2019 ?}</translation>
     </message>
     <message>
         <location filename="../src/widgets/WizAboutDialog.cpp" line="80"/>
@@ -2754,17 +2754,17 @@ Password hint: %1</source>
         <translation>清除</translation>
     </message>
     <message>
-        <location filename="../src/WizConsoleDialog.cpp" line="128"/>
+        <location filename="../src/WizConsoleDialog.cpp" line="118"/>
         <source>Save log</source>
         <translation>保存日志</translation>
     </message>
     <message>
-        <location filename="../src/WizConsoleDialog.cpp" line="133"/>
+        <location filename="../src/WizConsoleDialog.cpp" line="123"/>
         <source>Failed to save</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="../src/WizConsoleDialog.cpp" line="133"/>
+        <location filename="../src/WizConsoleDialog.cpp" line="123"/>
         <source>you should select a file name which does not exists</source>
         <translation>您需要选择一个不存在的文件</translation>
     </message>
