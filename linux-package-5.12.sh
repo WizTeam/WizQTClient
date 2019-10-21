@@ -1,4 +1,8 @@
 # compile
+
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+
+
 mkdir ../WizQTClient-Release-Linux
 rm -rf ../WizQTClient-Release-Linux/*
 
