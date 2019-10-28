@@ -138,13 +138,13 @@ WizCategoryBaseView::WizCategoryBaseView(WizExplorerApp& app, QWidget* parent)
 
     // style
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
-//    QColor colorBg = Utils::StyleHelper::treeViewBackground();
-//    QPalette pal = palette();
-//    colorBg.setAlpha(200);
-//    pal.setBrush(QPalette::Base, colorBg);
-//    setPalette(pal);
-//    setStyleSheet("background-color: transparent;");
-//    setAutoFillBackground(true);   
+    QColor colorBg = Utils::WizStyleHelper::treeViewBackground();
+    QPalette pal = palette();
+    colorBg.setAlpha(200);
+    pal.setBrush(QPalette::Base, colorBg);
+    setPalette(pal);
+    setStyleSheet("background-color: transparent;");
+    setAutoFillBackground(true);
 
     // signals from database
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),
