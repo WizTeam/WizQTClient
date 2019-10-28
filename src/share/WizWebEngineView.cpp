@@ -219,7 +219,7 @@ WizWebEngineView::WizWebEngineView(QWidget* parent)
 void WizWebEngineView::init(const WizWebEngineViewInjectObjects& objects)
 {
     connect(page(), SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
-    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
+    connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
     //
     if (WizWebEnginePage* p = dynamic_cast<WizWebEnginePage *>(page())) {
         p->init(objects);
