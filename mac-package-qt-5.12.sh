@@ -40,6 +40,10 @@ APPLCERT="Developer ID Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92
 
 codesign --verbose=2 --deep --sign "$APPLCERT"  WizNote.app
 
+#codesign --options=runtime --verbose=2 --deep --sign "$APPLCERT"  WizNote.app
+#ditto -ck --rsrc --sequesterRsrc "WizNote.app" "WizNote.zip"
+#node ../WizQTClient/notarization.js $1
+
 cd ../WizQTClient
 
 setFile -a V ${package_home}/wiznote-disk-cover.jpg
