@@ -40,6 +40,7 @@
 #include "WizWebSettingsDialog.h"
 #include "WizFileImporter.h"
 #include "WizOEMSettings.h"
+#include "share/jsoncpp/json/json.h"
 
 
 #define CATEGORY_GENERAL    QObject::tr("General")
@@ -309,7 +310,7 @@ void WizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         if (m_dragItem != nullptr)
         {
 //            blockSignals(true);
-            setCurrentItem(m_dragItem);
+            //setCurrentItem(m_dragItem);
 //            blockSignals(false);
             m_dragItem = nullptr;
         }
@@ -452,7 +453,7 @@ void WizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 QAbstractItemView::DropIndicatorPosition WizCategoryBaseView::position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const
 {
     QAbstractItemView::DropIndicatorPosition r = QAbstractItemView::OnViewport;
-    const int margin = 2;
+    const int margin = 4;
     if (pos.y() - rect.top() < margin) {
         r = QAbstractItemView::AboveItem;
     } else if (rect.bottom() - pos.y() < margin) {
@@ -541,6 +542,7 @@ bool WizCategoryBaseView::dropOn(QDropEvent *event, int *dropRow, int *dropCol, 
     *dropIndex = index;
     *dropRow = row;
     *dropCol = col;
+    //
     if (!droppingOnItself(event, index))
         return true;
     //
@@ -550,7 +552,7 @@ bool WizCategoryBaseView::dropOn(QDropEvent *event, int *dropRow, int *dropCol, 
 
 
 
-void WizCategoryBaseView::dropEventCore(QDropEvent *event)
+QTreeWidgetItem* WizCategoryBaseView::dropEventCore(QDropEvent *event)
 {
     if (event->source() == this && (event->dropAction() == Qt::MoveAction ||
                                     dragDropMode() == QAbstractItemView::InternalMove)) {
@@ -566,50 +568,70 @@ void WizCategoryBaseView::dropEventCore(QDropEvent *event)
                 indexes.append(idx);
 
             if (indexes.contains(topIndex))
-                return;
+                return nullptr;
 
             // When removing items the drop location could shift
             QPersistentModelIndex dropRow = model()->index(row, col, topIndex);
 
+            QTreeWidgetItem* oldParent = nullptr;
             // Remove the items
             QList<QTreeWidgetItem *> taken;
             for (const auto &index : indexes) {
-                QTreeWidgetItem *parent = itemFromIndex(index);
-                if (!parent || !parent->parent()) {
-                    taken.append(takeTopLevelItem(index.row()));
-                } else {
-                    taken.append(parent->parent()->takeChild(index.row()));
+                QTreeWidgetItem *item = itemFromIndex(index);
+                if (item && item->parent()) {
+                    QTreeWidgetItem *itemTaken = item->parent()->child(index.row());
+                    if (WizCategoryViewItemBase* base = dynamic_cast<WizCategoryViewItemBase*>(itemTaken)) {
+                        base->setWillBeDeleted(true);
+                    }
+                    oldParent = itemTaken->parent();
+                    qDebug() << item->text(0) << "==" << itemTaken->text(0);
+                    QTreeWidgetItem* copied = itemTaken->clone();
+                    copied->addChildren(itemTaken->takeChildren());
+                    taken.append(copied);
                 }
             }
 
+
+            QTreeWidgetItem* result = nullptr;
             // insert them back in at their new positions
             for (int i = 0; i < indexes.count(); ++i) {
                 // Either at a specific point or appended
+                QTreeWidgetItem *itemInsert = taken.takeFirst();
+                result = itemInsert;
+                qDebug() << itemInsert->text(0);
+                //
                 if (row == -1) {
+                    //
+                    //直接移动作为子目录，不需要排序
                     if (topIndex.isValid()) {
+                        //
                         QTreeWidgetItem *parent = itemFromIndex(topIndex);
-                        parent->insertChild(parent->childCount(), taken.takeFirst());
-                    } else {
-                        insertTopLevelItem(topLevelItemCount(), taken.takeFirst());
+                        if (parent == oldParent) {
+                            return nullptr;
+                        }
+                        //
+                        qDebug() << parent->text(0);
+                        parent->insertChild(parent->childCount(), itemInsert);
                     }
                 } else {
+                    //
+                    //移动并且排序
                     int r = dropRow.row() >= 0 ? dropRow.row() : row;
                     if (topIndex.isValid()) {
                         QTreeWidgetItem *parent = itemFromIndex(topIndex);
-                        parent->insertChild(qMin(r, parent->childCount()), taken.takeFirst());
-                    } else {
-                        insertTopLevelItem(qMin(r, topLevelItemCount()), taken.takeFirst());
+                        qDebug() << parent->text(0);
+                        parent->insertChild(qMin(r, parent->childCount()), itemInsert);
                     }
                 }
             }
-
+            //
             event->accept();
-            // Don't want QAbstractItemView to delete it because it was "moved" we already did it
-            event->setDropAction(Qt::CopyAction);
+            return result;
         }
     }
 
     QTreeView::dropEvent(event);
+    return nullptr;
 }
 
 void WizCategoryBaseView::dropEvent(QDropEvent * event)
@@ -679,6 +701,10 @@ void WizCategoryBaseView::dropEvent(QDropEvent * event)
         {
             qDebug() << "null item";
         }
+        else
+        {
+            qDebug() << "hover item: " << hoverItem->text(0);
+        }
 
         if (pItem->type() == Category_ShortcutRootItem || pItem->type() == Category_TagItem)
         {
@@ -688,10 +714,10 @@ void WizCategoryBaseView::dropEvent(QDropEvent * event)
         }
         else
         {
-            dropEventCore(event);
-            if (m_dragItem && event->isAccepted())
+            QTreeWidgetItem* newItem = dropEventCore(event);
+            if (newItem && event->isAccepted())
             {
-                on_itemPosition_changed(m_dragItem);
+                on_itemPosition_changed(dynamic_cast<WizCategoryViewItemBase*>(newItem));
             }
         }
         viewport()->repaint();
@@ -4013,40 +4039,43 @@ void WizCategoryView::updateGroupFolderPosition(WizDatabase& db, WizCategoryView
         WIZTAGDATA tag = pGroup->tag();
 
         QTreeWidgetItem* sameNameBrother = findSameNameBrother(pItem->parent(), pItem, pItem->text(0));
+        if (sameNameBrother) {
 
-        WizDatabase& db = m_dbMgr.db(tag.strKbGUID);
-        bool combineFolder = false;
-        if (sameNameBrother != nullptr)
-        {
-            if (WizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(tag.strName)) == QMessageBox::Yes)
-            {
-                // move documents to brother folder  and move child folders to brother folder
-                WizCategoryViewGroupItem* targetItem = dynamic_cast<WizCategoryViewGroupItem*>(sameNameBrother);
-                combineGroupFolder(pGroup, targetItem);
+            WizCategoryViewGroupItem* brotherTagItem = dynamic_cast<WizCategoryViewGroupItem*>(sameNameBrother);
+            if (brotherTagItem && brotherTagItem->tag().strGUID != tag.strGUID) {
 
-                setCurrentItem(targetItem);
-                if (m_dragItem == pItem)
+                WizDatabase& db = m_dbMgr.db(tag.strKbGUID);
+                bool combineFolder = false;
+                if (WizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(tag.strName)) == QMessageBox::Yes)
                 {
-                    m_dragItem = nullptr;
-                }
-                combineFolder = true;
-            }
-        }
+                    // move documents to brother folder  and move child folders to brother folder
+                    WizCategoryViewGroupItem* targetItem = dynamic_cast<WizCategoryViewGroupItem*>(sameNameBrother);
+                    combineGroupFolder(pGroup, targetItem);
 
-        if (sameNameBrother == nullptr || !combineFolder)
-        {
-            QString useableName = getUseableItemName(pGroup->parent(), pGroup);
-            tag.strName = useableName;
-            tag.strParentGUID = "";
-            if (pItem->parent()->type() == Category_GroupItem)
-            {
-                WizCategoryViewGroupItem* parentItem = dynamic_cast<WizCategoryViewGroupItem*>(pGroup->parent());
-                Q_ASSERT(parentItem);
-                tag.strParentGUID = parentItem->tag().strGUID;
+                    setCurrentItem(targetItem);
+                    if (m_dragItem == pItem)
+                    {
+                        m_dragItem = nullptr;
+                    }
+                    combineFolder = true;
+                }
+
+                if (!combineFolder)
+                {
+                    QString useableName = getUseableItemName(pGroup->parent(), pGroup);
+                    tag.strName = useableName;
+                    tag.strParentGUID = "";
+                    if (pItem->parent()->type() == Category_GroupItem)
+                    {
+                        WizCategoryViewGroupItem* parentItem = dynamic_cast<WizCategoryViewGroupItem*>(pGroup->parent());
+                        Q_ASSERT(parentItem);
+                        tag.strParentGUID = parentItem->tag().strGUID;
+                    }
+                    tag.nVersion = -1;
+                    db.updateTag(tag);
+                    pGroup->reload(db);
+                }
             }
-            tag.nVersion = -1;
-            db.updateTag(tag);
-            pGroup->reload(db);
         }
     }
     //
@@ -4238,6 +4267,11 @@ void WizCategoryView::savePersonalTagsPosition(WizDatabase& db, WizCategoryViewT
     }
 }
 
+/*
+ *
+ *父子结构也可能变化了，需要更新父子结构
+ *
+ */
 void WizCategoryView::saveGroupTagsPosition(const QString& strKbGUID)
 {
     WizCategoryViewGroupRootItem* rootItem =
@@ -4267,6 +4301,22 @@ void WizCategoryView::saveGroupTagsPosition(WizDatabase& db, WizCategoryViewGrou
 
     WIZTAGDATA tag = pItem->tag();
     db.modifyTagPosition(tag);
+    //
+    QTreeWidgetItem* parent = pItem->parent();
+    if (WizCategoryViewGroupItem* parentTag = dynamic_cast<WizCategoryViewGroupItem*>(parent)) {
+        //
+        if (pItem->tag().strParentGUID != parentTag->tag().strGUID) {
+            tag.strParentGUID = parentTag->tag().strGUID;
+            db.modifyTag(tag);
+        }
+
+    } else if (WizCategoryViewGroupRootItem* group = dynamic_cast<WizCategoryViewGroupRootItem*>(parent)) {
+        //
+        if (!pItem->tag().strParentGUID.isEmpty()) {
+            tag.strParentGUID = "";
+            db.modifyTag(tag);
+        }
+    }
 
     for (int i = 0; i < pItem->childCount(); i++)
     {
@@ -4286,38 +4336,36 @@ QString WizCategoryView::getAllFoldersPosition()
     if (!pItem)
         return QString();
 
-    QString str = "{";
+    Json::Value jValue;
+
     int nStartPos = 1;
     for (int i = 0; i < pItem->childCount(); i++)
     {
         WizCategoryViewFolderItem* childItem = dynamic_cast<WizCategoryViewFolderItem* >(pItem->child(i));
         Q_ASSERT(childItem);
-        str += getAllFoldersPosition(childItem, nStartPos);
-
-        if (i < pItem->childCount() - 1)
-            str += ",\n";
+        getAllFoldersPosition(childItem, nStartPos, jValue);
     }
-    str += "}";
-    return str;
+    return QString::fromStdString(jValue.toStyledString());
 }
 
-QString WizCategoryView::getAllFoldersPosition(WizCategoryViewFolderItem* pItem, int& nStartPos)
+void WizCategoryView::getAllFoldersPosition(WizCategoryViewFolderItem* pItem, int& nStartPos, Json::Value& jValue)
 {
     if (!pItem)
-        return QString();
+        return;
+    //
+    if (pItem->willBeDeleted()) {
+        return;
+    }
 
-    QString str ="\"" + pItem->location() + "\": " + QString::number(nStartPos);
+    jValue[pItem->location().toStdString()] = nStartPos;
     nStartPos ++;
 
     for (int i = 0; i < pItem->childCount(); i++)
     {
         WizCategoryViewFolderItem* childItem = dynamic_cast<WizCategoryViewFolderItem* >(pItem->child(i));
         Q_ASSERT(childItem);
-        str += ", \n";
-        str += getAllFoldersPosition(childItem, nStartPos);
+        getAllFoldersPosition(childItem, nStartPos, jValue);
     }
-
-    return str;
 }
 
 void WizCategoryView::initFolders()
@@ -5671,6 +5719,10 @@ void WizCategoryView::on_groupDocuments_unreadCount_modified(const QString& strK
 
 void WizCategoryView::on_itemPosition_changed(WizCategoryViewItemBase* pItem)
 {
+    if (!pItem) {
+        return;
+    }
+    //
     QTreeWidgetItem* parentItem = pItem->parent();
     if (!parentItem)
     {
@@ -6226,6 +6278,10 @@ void WizCategoryView::resetFolderLocation(WizCategoryViewFolderItem* item, const
 
 void WizCategoryView::moveFolder(QString oldLocation, QString newLocation)
 {
+    if (oldLocation == newLocation) {
+        return;
+    }
+    //
     ::WizExecutingActionDialog::executeAction(tr("Moving folder..."), WIZ_THREAD_DEFAULT, [=]{
         //
         //wait for sync
@@ -6243,7 +6299,7 @@ void WizCategoryView::moveFolder(QString oldLocation, QString newLocation)
     WizCategoryViewFolderItem* newItem = findFolder(newLocation, true, true);
     if (newItem)
     {
-        setCurrentItem(newItem);
+        //setCurrentItem(newItem);
     }
     //
     WizMainWindow::instance()->quickSyncKb("");

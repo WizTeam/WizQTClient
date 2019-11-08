@@ -59,6 +59,7 @@ WizCategoryViewItemBase::WizCategoryViewItemBase(WizExplorerApp& app,
     , m_strName(strName)
     , m_strKbGUID(strKbGUID)
     , m_extraButtonIconPressed(false)
+    , m_bWillBeDeleted(false)
 {
 }
 
@@ -382,9 +383,11 @@ void WizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionV
 
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
 WizCategoryViewMessageItem::WizCategoryViewMessageItem(WizExplorerApp& app,
-                                                                 const QString& strName, int nFilterType)
+                                                                 const QString& strName, int nFilterType,
+                                                       int unread, QSize unreadSize)
     : WizCategoryViewItemBase(app, strName, "", Category_MessageItem)
-    , m_nUnread(0)    
+    , m_nUnread(unread)
+    , m_szUnreadSize(unreadSize)
 {
     QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_messages", QSize(), ICON_OPTIONS);
     setIcon(0, icon);
@@ -1244,7 +1247,7 @@ bool WizCategoryViewGroupsRootItem::accept(WizDatabase& db, const WIZDOCUMENTDAT
                 return true;
         }
     }
-
+    //
     return false;
 }
 
@@ -1579,7 +1582,27 @@ bool WizCategoryViewGroupRootItem::acceptDrop(const WizCategoryViewItemBase* pIt
 //    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
 
     const WizCategoryViewGroupItem* item = dynamic_cast<const WizCategoryViewGroupItem*>(pItem);
-    return item && item->kbGUID() == kbGUID();
+    if (!item) {
+        return false;
+    }
+
+    if (item->kbGUID() != kbGUID()) {
+        return false;
+    }
+    //
+    if (WizCategoryView* view = dynamic_cast<WizCategoryView*>(treeWidget())) {
+        //
+        QPoint pos = QCursor::pos();
+        pos = view->mapFromGlobal(pos);
+        auto index = view->indexFromItem(this);
+        //
+        int dropIndicatorPosition = view->position(pos, view->visualRect(index), index);
+        if (1 == dropIndicatorPosition) { //above
+            qDebug() << pos << view->visualRect(index);
+            return false;
+        }
+    }
+    return true;
 }
 
 bool WizCategoryViewGroupRootItem::acceptDrop(const QString& urls) const
@@ -1869,7 +1892,11 @@ bool WizCategoryViewGroupItem::acceptDrop(const WizCategoryViewItemBase* pItem) 
 {
 //    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
 
-    return pItem->kbGUID() == kbGUID();
+    if (pItem->kbGUID() != kbGUID()) {
+        return false;
+    }
+    //
+    return true;
 }
 
 bool WizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
@@ -1880,6 +1907,7 @@ bool WizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
         return true;
     }
+    //
 
     return false;
 }
@@ -2031,6 +2059,7 @@ WizCategoryViewShortcutItem::WizCategoryViewShortcutItem(WizExplorerApp& app,
     , m_strGuid(strGuid)
     , m_type(type)
     , m_location(location)
+    , m_bEncrypted(bEncrypted)
 {
     QIcon icon;
     switch (type) {

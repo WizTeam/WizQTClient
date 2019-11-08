@@ -96,7 +96,7 @@ QPixmap WizStyleHelper::loadPixmap(const QString& strName)
     }
     QPixmap ret = QPixmap(fileName);
 #ifdef QT_DEBUG
-    qDebug() << ret.devicePixelRatio();
+    //qDebug() << ret.devicePixelRatio();
 #endif
     return ret;
 #else

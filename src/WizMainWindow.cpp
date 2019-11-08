@@ -3517,10 +3517,11 @@ void WizMainWindow::showTrash()
     {
         WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
             QString strToken = WizToken::token();
-            QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+            QString* strUrl = new QString(WizCommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID()));
             WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
                 m_subContainer->setCurrentIndex(1);
-                m_mainWebView->load(strUrl);
+                m_mainWebView->load(*strUrl);
+                delete strUrl;
             });
         });
     }
