@@ -287,6 +287,7 @@ void WizCategoryBaseView::resizeEvent(QResizeEvent* event)
 
 void WizCategoryBaseView::contextMenuEvent(QContextMenuEvent * e)
 {
+    m_selectedItem = nullptr;
     WizCategoryViewItemBase* pItem = dynamic_cast<WizCategoryViewItemBase*>(itemAt(e->pos()));
     if (pItem) {
         pItem->showContextMenu(this, mapToGlobal(e->pos()));
