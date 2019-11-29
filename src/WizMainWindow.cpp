@@ -3413,7 +3413,7 @@ void WizMainWindow::on_actionGoForward_triggered()
     m_doc->setFocus();
 }
 
-void WizMainWindow::on_category_itemSelectionChanged()
+void WizMainWindow::processCategoryItemChanged()
 {
     WizCategoryBaseView* category = m_category;
     if (!category)
@@ -3506,6 +3506,13 @@ void WizMainWindow::on_category_itemSelectionChanged()
     QString kbGuid = m_category->selectedItemKbGUID();
     if (m_searchWidget) {
         m_searchWidget->setCurrentKb(kbGuid);
+    }
+}
+void WizMainWindow::on_category_itemSelectionChanged()
+{
+    processCategoryItemChanged();
+    if (!m_category->selectedItems().isEmpty()) {
+        m_category->clearStoredSelection();
     }
 }
 

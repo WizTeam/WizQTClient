@@ -46,6 +46,7 @@ public:
 
     void saveSelection();
     void restoreSelection();
+    void clearStoredSelection() { m_selectedItem = nullptr; }
 
     WizCategoryViewItemBase* itemAt(const QPoint& p) const;
     WizCategoryViewItemBase* itemFromKbGUID(const QString& strKbGUID) const;

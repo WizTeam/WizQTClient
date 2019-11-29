@@ -275,6 +275,9 @@ public:
     //
     void showTrash();
     void showSharedNotes(); 
+    //
+    void processCategoryItemChanged();
+    //
 signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);

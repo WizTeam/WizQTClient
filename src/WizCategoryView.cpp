@@ -767,7 +767,7 @@ QString WizCategoryBaseView::selectedItemKbGUID()
 QString WizCategoryBaseView::storedSelectedItemKbGuid()
 {
     if (!m_selectedItem)
-        return QString();
+        return selectedItemKbGUID();
     //
     WizCategoryViewItemBase* pItem = dynamic_cast<WizCategoryViewItemBase*>(m_selectedItem);
     if (!pItem)
