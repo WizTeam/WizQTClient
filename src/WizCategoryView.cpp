@@ -4299,6 +4299,8 @@ void WizCategoryView::saveGroupTagsPosition(WizDatabase& db, WizCategoryViewGrou
 {
     if (!pItem)
         return;
+    if (pItem->willBeDeleted())
+        return;
 
     WIZTAGDATA tag = pItem->tag();
     db.modifyTagPosition(tag);

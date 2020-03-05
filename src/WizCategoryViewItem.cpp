@@ -1176,7 +1176,7 @@ void WizCategoryViewTagItem::reload(WizDatabase& db)
 
 void WizCategoryViewTagItem::setTagPosition(int nPos)
 {
-    m_tag.nPostion = nPos;
+    m_tag.nPosition = nPos;
 }
 
 
@@ -1963,10 +1963,10 @@ bool WizCategoryViewGroupItem::operator<(const QTreeWidgetItem& other) const
         const WizCategoryViewGroupItem* pOther = dynamic_cast<const WizCategoryViewGroupItem*>(&other);
         if (pOther)
         {
-            if (m_tag.nPostion == pOther->m_tag.nPostion || m_tag.nPostion == 0 || pOther->m_tag.nPostion == 0)
+            if (m_tag.nPosition == pOther->m_tag.nPosition || m_tag.nPosition == 0 || pOther->m_tag.nPosition == 0)
                 return WizCategoryViewItemBase::operator <(other);
 
-            return m_tag.nPostion < pOther->m_tag.nPostion;
+            return m_tag.nPosition < pOther->m_tag.nPosition;
         }
     }
 
@@ -1982,7 +1982,7 @@ void WizCategoryViewGroupItem::reload(WizDatabase& db)
 
 void WizCategoryViewGroupItem::setTagPosition(int nPos)
 {
-    m_tag.nPostion = nPos;
+    m_tag.nPosition = nPos;
 }
 
 /* ------------------------------ CWizCategoryViewTrashItem ------------------------------ */

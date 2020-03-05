@@ -321,7 +321,7 @@ bool WizIndex::createTag(const CString& strParentTagGUID,
     data.strDescription = strDescription;
 	data.tModified = WizGetCurrentTime();
     data.nVersion = -1;
-    data.nPostion = 0;
+    data.nPosition = 0;
 
 	return createTagEx(data);
 }
@@ -577,8 +577,8 @@ bool WizIndex::deleteTag(const WIZTAGDATA& data, bool bLog, bool bReset /* = tru
 
 bool WizIndex::modifyTagPosition(const WIZTAGDATA& data)
 {
-    CString strSQL = WizFormatString2("update WIZ_TAG set TAG_POS=%1 where TAG_GUID=%2",
-        WizInt64ToStr(data.nPostion),
+    CString strSQL = WizFormatString2("update WIZ_TAG set TAG_POS=%1, WIZ_VERSION=-1 where TAG_GUID=%2",
+        WizInt64ToStr(data.nPosition),
         STR2SQL(data.strGUID));
 
     //

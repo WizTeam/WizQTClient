@@ -740,7 +740,7 @@ bool WizDatabase::onDownloadTagList(const CWizTagDataArray& arrayData)
         WIZTAGDATA dataTemp;
         if (tagFromGuid(data.strGUID, dataTemp))
         {
-            data.nPostion = dataTemp.nPostion;
+            data.nPosition = dataTemp.nPosition;
         }
         arrayTag.push_back(data);
     }
@@ -1746,7 +1746,7 @@ QString WizDatabase::getGroupTagsPos()
          it++)
     {
         WIZTAGDATA tag = *it;
-        strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPostion) + "*");
+        strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPosition) + "*");
     }
     strTagPos.remove(strTagPos.length() - 1, 1);
     return strTagPos;
@@ -1857,9 +1857,9 @@ void WizDatabase::setGroupTagsPos(const QString& tagsPos, qint64 nVersion)
         int nPos = posList.last().toInt();
         //
         WIZTAGDATA tagData = tags[strGUID];
-        if (!tagData.strGUID.isEmpty() && tagData.nPostion != nPos)
+        if (!tagData.strGUID.isEmpty() && tagData.nPosition != nPos)
         {
-            tagData.nPostion = nPos;
+            tagData.nPosition = nPos;
             modifyTagPosition(tagData);
             bPositionChanged = true;
         }

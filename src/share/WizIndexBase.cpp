@@ -343,7 +343,7 @@ bool WizIndexBase::sqlToTagDataArray(const CString& strSQL, CWizTagDataArray& ar
             data.strDescription = query.getStringField(tagTAG_DESCRIPTION);
             data.tModified = query.getTimeField(tagDT_MODIFIED);
             data.nVersion = query.getInt64Field(tagVersion);
-            data.nPostion = query.getInt64Field(tagTAG_POS);
+            data.nPosition = query.getInt64Field(tagTAG_POS);
 
             arrayTag.push_back(data);
             query.nextRow();
@@ -888,7 +888,7 @@ bool WizIndexBase::createTagEx(const WIZTAGDATA& d)
         STR2SQL(data.strDescription).utf16(),
         TIME2SQL(data.tModified).utf16(),
         WizInt64ToStr(data.nVersion).utf16(),
-        WizInt64ToStr(data.nPostion).utf16()
+        WizInt64ToStr(data.nPosition).utf16()
         );
 
 
@@ -925,7 +925,7 @@ bool WizIndexBase::modifyTagEx(const WIZTAGDATA& d)
         STR2SQL(data.strDescription).utf16(),
         TIME2SQL(data.tModified).utf16(),
         WizInt64ToStr(data.nVersion).utf16(),
-        WizInt64ToStr(data.nPostion).utf16(),
+        WizInt64ToStr(data.nPosition).utf16(),
         STR2SQL(data.strGUID).utf16()
         );
 
@@ -1391,7 +1391,7 @@ bool WizIndexBase::getAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
             data.strDescription = query.getStringField(tagTAG_DESCRIPTION);
             data.tModified = query.getTimeField(tagDT_MODIFIED);
             data.nVersion = query.getInt64Field(tagVersion);
-            data.nPostion = query.getInt64Field(tagTAG_POS);
+            data.nPosition = query.getInt64Field(tagTAG_POS);
 
             mapTag.insert(std::make_pair(data.strParentGUID, data));
             query.nextRow();
