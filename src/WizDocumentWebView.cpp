@@ -547,7 +547,7 @@ void WizDocumentWebView::dropEvent(QDropEvent* event)
     }
 }
 
-WizDocumentView* WizDocumentWebView::view()
+WizDocumentView* WizDocumentWebView::view() const
 {
     QWidget* pParent = parentWidget();
     while(pParent) {
@@ -750,7 +750,7 @@ void WizDocumentWebView::enableEditor(bool enalbe)
     }
     else
     {
-        QString code = QString("WizEditor.off({noteType:'%1'});").arg(getNoteType());
+        QString code = QString("WizEditor.off({reader: {type:'%1'}});").arg(getNoteType());
         //
         page()->runJavaScript(code);
         //
@@ -949,6 +949,10 @@ QString WizDocumentWebView::getNoteType()
 {
     const WIZDOCUMENTDATA& doc = view()->note();
     //
+    if (doc.strType == "outline") {
+        return "outline";
+    }
+    //
     QString title = doc.strTitle;
     if (title.endsWith(".md"))
         return "markdown";
@@ -968,6 +972,11 @@ QString WizDocumentWebView::getNoteType()
     return "common";
 }
 
+bool WizDocumentWebView::isOutline() const
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+    return doc.strType == "outline";
+}
 
 QString WizDocumentWebView::getHighlightKeywords()
 {

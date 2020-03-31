@@ -7,10 +7,6 @@
     padding: 0;
 }
 
-.markdown-body > *:first-child {
-    margin-top: 0 !important;
-}
-
 .markdown-body > *:last-child {
     margin-bottom: 0 !important;
 }
@@ -106,8 +102,8 @@
 
 .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
 .markdown-body dl, .markdown-body pre {
-    margin: 10px 0;
-    margin: .83rem 0;
+    margin: 0 0 10px;
+    margin: 0 0 .83rem;
 }
 
 .markdown-body li {

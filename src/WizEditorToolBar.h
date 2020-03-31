@@ -113,7 +113,10 @@ private:
     CWizToolButton* m_btnUndo;
     CWizToolButton* m_btnRedo;
     CWizToolButton* m_btnGoback;
-
+    //
+    //outline tools
+    CWizToolButton* m_btnUndoOutline;
+    CWizToolButton* m_btnRedoOutline;
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     QString m_currentStyle;
 #ifdef Q_OS_WIN

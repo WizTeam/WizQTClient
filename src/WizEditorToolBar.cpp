@@ -1222,6 +1222,7 @@ QString shiftKey()
 
 
 #define TOOLBARTYPE_HIGHLIGHTER "highlighter"
+#define TOOLBARTYPE_OUTLINE     "outline"
 #define TOOLBARTYPE_NORMAL      "normal"
 
 QColor getColorFromSettings(WizExplorerApp& app, QString name, QColor def)
@@ -1741,6 +1742,32 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     layout->addWidget(buttonContainerMarkup5);
     setAvaliableInToolbar(buttonContainerMarkup5, TOOLBARTYPE_HIGHLIGHTER);
     //
+    //
+    //outline tool bar
+    m_btnUndoOutline = new CWizToolButton(this);
+    m_btnUndoOutline->setCheckable(false);
+    m_btnUndoOutline->setIcon(::WizLoadSkinIcon(skin, "actionMarkupUndo", editIconSize, ICON_OPTIONS));
+    m_btnUndoOutline->setPosition(ButtonPosition::Left);
+    connect(m_btnUndoOutline, SIGNAL(clicked()), SLOT(on_btnUndo_clicked()));
+
+    m_btnRedoOutline = new CWizToolButton(this);
+    m_btnRedoOutline->setCheckable(false);
+    m_btnRedoOutline->setIcon(::WizLoadSkinIcon(skin, "actionMarkupRedo", editIconSize, ICON_OPTIONS));
+    m_btnRedoOutline->setPosition(ButtonPosition::Right);
+    connect(m_btnRedoOutline, SIGNAL(clicked()), SLOT(on_btnRedo_clicked()));
+
+    QWidget*  buttonContainerOutline = createMoveAbleWidget(this);
+    QHBoxLayout* outlineLayout = qobject_cast<QHBoxLayout*>(buttonContainerOutline->layout());
+    outlineLayout->addWidget(m_btnUndoOutline);
+    outlineLayout->addWidget(m_btnRedoOutline);
+    layout->addWidget(buttonContainerOutline);
+    setAvaliableInToolbar(buttonContainerOutline, TOOLBARTYPE_OUTLINE);
+    //markupLayout5->addSpacing(16);
+    //markupLayout5->addWidget(m_btnGoback);
+
+    //
+    //
+    //normal tools
     QWidget*  buttonContainer0 = createMoveAbleWidget(this);
     QHBoxLayout* containerLayout = qobject_cast<QHBoxLayout*>(buttonContainer0->layout());
     containerLayout->addWidget(m_comboParagraph);
@@ -1878,10 +1905,15 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     //
     setToolbarType(TOOLBARTYPE_NORMAL);
     //setToolbarType(TOOLBARTYPE_HIGHLIGHTER);
+    //setToolbarType(TOOLBARTYPE_OUTLINE);
 }
 
 void WizEditorToolBar::switchToNormalMode() {
-    setToolbarType(TOOLBARTYPE_NORMAL);
+    if (m_editor->isOutline()) {
+        setToolbarType(TOOLBARTYPE_OUTLINE);
+    } else {
+        setToolbarType(TOOLBARTYPE_NORMAL);
+    }
 }
 
 void WizEditorToolBar::setToolbarType(QString type) {

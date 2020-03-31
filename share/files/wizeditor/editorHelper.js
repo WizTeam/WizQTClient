@@ -62,6 +62,9 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
           markerUndo: WizOnUndoStatusChanged,
           markerInitiated: WizOnMarkerInitiated,
         }
+      },
+      reader: {
+        type: noteType
       }
     }
     //

@@ -563,7 +563,8 @@ bool WizSearcher::onlineSearchOnly(const QString& kbGuid, const QString& keyword
         postData.addQueryItem("kb_guid", kbGuid);
     }
     //
-    QString urlString = WizCommonApiEntry::searchUrl();
+    QString strKS = m_dbMgr.db().getKbServer(kbGuid);
+    QString urlString = strKS + "/ks/note/search/" + kbGuid;
     if (urlString.isEmpty())
         return false;
     //
@@ -632,24 +633,29 @@ bool WizSearcher::onlineSearchOnly(const QString& kbGuid, const QString& keyword
     {
         const Json::Value& elem = result[i];
         //
-        QString docGuid = QString::fromStdString(elem["doc_guid"].asString());
+        QString docGuid = QString::fromStdString(elem["docGuid"].asString());
         //
-        QString title;
-        QString text;
-        if (elem.isMember("title"))
-        {
-            const Json::Value& titleVal = elem["title"];
-            title = JsonValueToText(titleVal);
+        if (elem.isMember("highlight")) {
+            //
+            const Json::Value& highlight = elem["highlight"];
+            //
+            QString title;
+            QString text;
+            if (highlight.isMember("title"))
+            {
+                const Json::Value& titleVal = highlight["title"];
+                title = JsonValueToText(titleVal);
+            }
+            if (highlight.isMember("text"))
+            {
+                const Json::Value& textVal = highlight["text"];
+                text = JsonValueToText(textVal);
+            }
+            //
+            //
+            highlightTitle[docGuid] = title;
+            highlightText[docGuid] = text;
         }
-        if (elem.isMember("text"))
-        {
-            const Json::Value& textVal = elem["text"];
-            text = JsonValueToText(textVal);
-        }
-        //
-        //
-        highlightTitle[docGuid] = title;
-        highlightText[docGuid] = text;
         //
         docs.push_back(docGuid);
         guids.insert(docGuid);

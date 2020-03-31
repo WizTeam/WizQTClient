@@ -15,7 +15,6 @@ public:
     static QString syncUrl();
     static QString asServerUrl();
     static QString messageServerUrl();
-    static QString searchUrl();
     static QString systemAvatarUrl(const QString& avatarName);
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();

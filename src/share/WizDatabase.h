@@ -367,6 +367,8 @@ public:
     bool getBizData(const QString& bizGUID, WIZBIZDATA& biz);
     bool getBizGuid(const QString& strGroupGUID, QString& strBizGUID);
     bool getGroupData(const QString& groupGUID, WIZGROUPDATA& group);
+    QString getKbServer(const QString &kbGuid);
+
     //
     static bool isEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);
     static bool getOwnGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayOwnGroup);

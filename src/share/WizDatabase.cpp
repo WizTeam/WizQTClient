@@ -2177,6 +2177,29 @@ bool WizDatabase::getGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     return !group.strGroupName.isEmpty();
 }
 
+QString WizDatabase::getKbServer(const QString &kbGuid) {
+    //
+    IWizSyncableDatabase* pDatabase = this;
+    if (isGroup()) {
+        pDatabase = getPersonalDatabase();
+    }
+    //
+    WizDatabase* db = dynamic_cast<WizDatabase*>(pDatabase);
+    if (!db) {
+        return QString();
+    }
+    //
+    WIZUSERINFO userInfo;
+    db->getUserInfo(userInfo);
+    if (userInfo.strKbGUID == kbGuid || kbGuid.isEmpty()) {
+        return userInfo.strKbServer;
+    }
+    //
+    WIZGROUPDATA group;
+    db->getGroupData(kbGuid, group);
+    return group.strKbServer;
+}
+
 bool WizDatabase::getOwnGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayOwnGroup)
 {
     for (CWizGroupDataArray::const_iterator it = arrayAllGroup.begin();

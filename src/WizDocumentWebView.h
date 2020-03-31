@@ -151,7 +151,7 @@ public:
     WizDocumentWebView(WizExplorerApp& app, QWidget* parent);
     ~WizDocumentWebView();
     //
-    WizDocumentView* view();
+    WizDocumentView* view() const;
     //
     void clear();
     //
@@ -430,6 +430,8 @@ private:
     QString getHighlightKeywords();
     //
 //    bool shouldAddUserDefaultCSS();
+public:
+    bool isOutline() const;
 };
 
 

@@ -563,6 +563,16 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     tmplHandwriting.isFree = true;
     tmplList.append(tmplHandwriting);
 
+    // 内置的outline模板
+    TemplateData tmplOutlone;
+    tmplOutlone.type = BuildInTemplate;
+    tmplOutlone.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/newnote.ziw";;
+    tmplOutlone.strName = QObject::tr("Outline Note");
+    tmplOutlone.strTitle = QObject::tr("Outline Note");
+    tmplOutlone.buildInName = "outline";
+    tmplOutlone.isFree = true;
+    tmplList.append(tmplOutlone);
+
     // sep
     TemplateData tmplSep;
     tmplSep.type = CustomTemplate;

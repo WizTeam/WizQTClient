@@ -205,16 +205,6 @@ QString WizCommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
     return strUrl;
 }
 
-QString WizCommonApiEntry::searchUrl()
-{
-    QString strUrl = asServerUrl();
-    if (strUrl.isEmpty())
-        return QString();
-
-    strUrl.append("/a/kb/search");
-
-    return strUrl;
-}
 
 
 QString WizCommonApiEntry::avatarUploadUrl()
