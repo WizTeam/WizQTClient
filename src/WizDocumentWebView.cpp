@@ -175,6 +175,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     //
     //
     connect(this, SIGNAL(loadFinishedEx(bool)), SLOT(onEditorLoadFinished(bool)));
+    connect(view()->titleBar(), SIGNAL(onViewMindMap(bool)), SLOT(onViewMindMap(bool)));
     //
     //
     if (m_app.userSettings().isEnableSpellCheck()) {
@@ -1989,6 +1990,18 @@ void WizDocumentWebView::editorCommandExecuteStopMarkup()
 void WizDocumentWebView::editorExecJs(QString js)
 {
     page()->runJavaScript(js);
+}
+
+void WizDocumentWebView::onViewMindMap(bool on)
+{
+    if (on) {
+        QString title = view()->note().strTitle;
+        QString js = QString("WizEditor.outline.showMinder(`%1`);").arg(title.replace("`", "\\`"));
+        editorExecJs(js);
+    } else {
+        QString js = "WizEditor.outline.hideMinder();";
+        editorExecJs(js);
+    }
 }
 
 void WizDocumentWebView::editorCommandExecuteInsertPainter()
