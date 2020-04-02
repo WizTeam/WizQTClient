@@ -3700,7 +3700,7 @@ void WizEditorToolBar::on_btnNotesOutline_clicked()
 void WizEditorToolBar::on_btnCompleteOutline_clicked()
 {
     if (m_editor) {
-        m_editor->editorExecJs(QString("WizEditor.outline.setComplete();"));
+        m_editor->editorExecJs(QString("WizEditor.outline.setCompleted();"));
     }
 }
 
