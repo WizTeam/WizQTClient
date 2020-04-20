@@ -147,7 +147,7 @@ WizKMSyncThread::~WizKMSyncThread()
 
 void WizKMSyncThread::run()
 {
-    QThread::sleep(1000 * 10);
+    QThread::sleep(10);
     //
     while (!m_pEvents->isStop())
     {

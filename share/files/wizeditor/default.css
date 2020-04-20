@@ -8,3 +8,6 @@ html, .wiz-editor-body {
 body.wiz-editor-body div, body.wiz-editor-body p, body.wiz-editor-body ul, body.wiz-editor-body ol, body.wiz-editor-body dl, body.wiz-editor-body li {
   /*default-para-spacing*/
 }
+body, .wiz-editor-body {
+  padding-top: 8px;
+}
