@@ -2189,9 +2189,9 @@ QString WizDatabase::getKbServer(const QString &kbGuid) {
         return QString();
     }
     //
-    WIZUSERINFO userInfo;
-    db->getUserInfo(userInfo);
-    if (userInfo.strKbGUID == kbGuid || kbGuid.isEmpty()) {
+    if (db->kbGUID() == kbGuid || kbGuid.isEmpty()) {
+        WIZUSERINFO userInfo;
+        db->getUserInfo(userInfo);
         return userInfo.strKbServer;
     }
     //
