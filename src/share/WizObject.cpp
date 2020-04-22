@@ -334,7 +334,7 @@ bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
     value["parentTagGuid"] = strParentGUID.toStdString();
     value["name"] = strName.toStdString();
     value["modified"] = tModified.toTime_t() * (Json::UInt64)1000;
-    value["pos"] = nPosition;
+    value["pos"] = (int)nPosition;
     //
     return true;
 }
