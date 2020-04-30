@@ -1,9 +1,9 @@
-﻿#ifndef WIZDEF_H
+#ifndef WIZDEF_H
 #define WIZDEF_H
 
 #include <QtGlobal>
 
-#define WIZ_CLIENT_VERSION  "2.7.1"
+#define WIZ_CLIENT_VERSION  "2.8.5"
 #define WIZNOTE_FTS_VERSION "5"
 #define WIZNOTE_THUMB_VERSION "3"
 #define WIZ_NEW_FEATURE_GUIDE_VERSION "4"

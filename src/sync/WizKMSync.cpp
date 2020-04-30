@@ -147,6 +147,8 @@ WizKMSyncThread::~WizKMSyncThread()
 
 void WizKMSyncThread::run()
 {
+    QThread::sleep(10);
+    //
     while (!m_pEvents->isStop())
     {
         m_mutex.lock();

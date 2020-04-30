@@ -123,9 +123,16 @@ void WizWebEngineAsyncMethodResultObject::setResult(const QVariant& result)
     emit resultAcquired(m_result);
 }
 
-WizWebEnginePage::WizWebEnginePage(const WizWebEngineViewInjectObjects& objects, QObject* parent)
-    : QWebEnginePage(createWebEngineProfile(objects, parent), parent)
+WizWebEnginePage::WizWebEnginePage(QWebEngineProfile* profile, QObject* parent)
+    : QWebEnginePage(profile, parent)
     , m_continueNavigate(true)
+{
+}
+WizWebEnginePage::~WizWebEnginePage() {
+    disconnect();
+}
+
+void WizWebEnginePage::init(const WizWebEngineViewInjectObjects& objects)
 {
     if (!objects.empty()) {
 
@@ -166,59 +173,63 @@ void WizWebEnginePage::triggerAction(WizWebEnginePage::WebAction action, bool ch
     {
 #ifdef Q_OS_MAC
         //fix
-        //从webengine复制的文字，粘贴到mac的备忘录的时候，中文会乱码。
-        //webengine复制到剪贴板的纯文字有bug，编码有问题。因此延迟等到webengine处理完成后再重新粘贴纯文本
-        //避免这个错误
-        //
-        //
-        QTimer::singleShot(500, [=]{
-            //
-            QClipboard* clipboard = QApplication::clipboard();
-            const QMimeData *mimeData = clipboard->mimeData();
-            QMimeData* newData = new QMimeData();
-            for (auto format : mimeData->formats()) {
-                //
-                if (format == "text/html") {
-                    //
-                    QByteArray htmlData = mimeData->data(format);
-                    QString html = QString::fromUtf8(htmlData);
-                    html = "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\">" + html;
-                    newData->setHtml(html);
-                    //
-                } else {
-                    newData->setData(format, mimeData->data(format));
-                }
-            }
-            //
-            clipboard->setMimeData(newData);
-        });
+        processCopiedData();
 #endif
     }
 }
 
+void WizWebEnginePage::processCopiedData()
+{
+    //从webengine复制的文字，粘贴到mac的备忘录的时候，中文会乱码。
+    //webengine复制到剪贴板的纯文字有bug，编码有问题。因此延迟等到webengine处理完成后再重新粘贴纯文本
+    //避免这个错误
+    //
+    //
+#ifdef Q_OS_MAC
+    QTimer::singleShot(500, [=]{
+        //
+        QClipboard* clipboard = QApplication::clipboard();
+        const QMimeData *mimeData = clipboard->mimeData();
+        QMimeData* newData = new QMimeData();
+        for (auto format : mimeData->formats()) {
+            //
+            if (format == "text/html") {
+                //
+                QByteArray htmlData = mimeData->data(format);
+                QString html = QString::fromUtf8(htmlData);
+                html = "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\">" + html;
+                newData->setHtml(html);
+                //
+            } else {
+                newData->setData(format, mimeData->data(format));
+            }
+        }
+        //
+        clipboard->setMimeData(newData);
+    });
+#endif
+}
+
+
 WizWebEngineView::WizWebEngineView(QWidget* parent)
     : QWebEngineView(parent)
 {
-    std::vector<WizWebEngineViewInjectObject> objects;
-    WizWebEnginePage* p = new WizWebEnginePage(objects, this);
-    setPage(p);
-    //
-    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
-    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
 }
 
-WizWebEngineView::WizWebEngineView(const WizWebEngineViewInjectObjects& objects, QWidget* parent)
-    : QWebEngineView(parent)
+void WizWebEngineView::init(const WizWebEngineViewInjectObjects& objects)
 {
-    WizWebEnginePage* p = new WizWebEnginePage(objects, this);
-    setPage(p);
+    connect(page(), SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
+    connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
     //
-    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
-    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
+    if (WizWebEnginePage* p = dynamic_cast<WizWebEnginePage *>(page())) {
+        p->init(objects);
+    }
 }
+
 
 WizWebEngineView::~WizWebEngineView()
 {
+    disconnect();
 }
 
 QVariant WizWebEngineView::ExecuteScript(QString script)
@@ -374,6 +385,8 @@ static QWebEngineView* getActiveWeb()
 
 bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev)
 {
+    qDebug() << ev->key() << ", " << ev->text();
+    //
     if (ev->modifiers() && ev->key()) {
         if (QWebEngineView* web = getActiveWeb()) {
             if (ev->matches(QKeySequence::Copy))

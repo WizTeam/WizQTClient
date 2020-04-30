@@ -15,7 +15,8 @@ WizFramelessWebDialog::WizFramelessWebDialog(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_DeleteOnClose);
 
-    m_web = new WizWebEngineView({{"customObject", this}}, this);
+    m_web = new WizWebEngineView(this);
+    WizWebEngineView::initWebEngineView(m_web, {{"customObject", this}});
     //
     m_frame = m_web->page();
     connect(m_web, SIGNAL(loadFinishedEx(bool)), SLOT(onPageLoadFinished(bool)));

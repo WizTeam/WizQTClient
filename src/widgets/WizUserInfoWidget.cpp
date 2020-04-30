@@ -62,21 +62,21 @@ WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
     WizOEMSettings oemSettings(m_db.getAccountPath());
-    if (!oemSettings.isHideBuyVip())
+    if (!oemSettings.isHideBuyVip() && app.userSettings().serverType() != EnterpriseServer)
     {
         WizAccountManager manager(m_app.databaseManager());
-        QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renewal Vip...") : tr("Upgrade VIP..."), m_menuMain);
+        QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renew Vip...") : tr("Upgrade VIP..."), m_menuMain);
         connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
         m_menuMain->addAction(actionUpgradeVIP);
     }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
-    if (!oemSettings.isHideMyShare())
-    {
-        QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
-        connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
-        m_menuMain->addAction(actionMyShare);
-    }
+//    if (!oemSettings.isHideMyShare())
+//    {
+//        QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
+//        connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
+//        m_menuMain->addAction(actionMyShare);
+//    }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionLogout);
     //
@@ -161,13 +161,14 @@ void WizUserInfoWidget::on_action_accountSettings_triggered()
 
 void WizUserInfoWidget::on_action_upgradeVip_triggered()
 {
+    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
 #ifndef BUILD4APPSTORE
     QString strToken = WizToken::token();
     QString extInfo = WizCommonApiEntry::appstoreParam(false);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("vip", strToken, extInfo);
-    QDesktopServices::openUrl(strUrl);
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window);
+    //QDesktopServices::openUrl(strUrl);
 #else
-    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
     WizIAPDialog* dlg = window->iapDialog();
     dlg->loadIAPPage();
     dlg->exec();

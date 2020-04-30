@@ -367,6 +367,8 @@ public:
     bool getBizData(const QString& bizGUID, WIZBIZDATA& biz);
     bool getBizGuid(const QString& strGroupGUID, QString& strBizGUID);
     bool getGroupData(const QString& groupGUID, WIZGROUPDATA& group);
+    QString getKbServer(const QString &kbGuid);
+
     //
     static bool isEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);
     static bool getOwnGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayOwnGroup);
@@ -554,6 +556,16 @@ private:
 };
 
 
+class WizDocumentDataLocker
+{
+    QMutex* m_mutex;
+#ifdef QT_DEBUG
+    QString m_docGuid;
+#endif
+public:
+    WizDocumentDataLocker(QString docGuid);
+    ~WizDocumentDataLocker();
+};
 
 #define WIZNOTE_MIMEFORMAT_TAGS             "wiznote/tags"
 #define WIZNOTE_MIMEFORMAT_DOCUMENTS        "wiznote/documents"

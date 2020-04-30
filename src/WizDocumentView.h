@@ -101,6 +101,7 @@ public:
     void reloadNote();
     void setEditorFocus();
     bool noteLoaded() const { return m_noteLoaded; }
+    void changeType(QString type) { m_note.strType = type; }
 
     void initStat(const WIZDOCUMENTDATA& data, bool forceEdit);
     void viewNote(const WIZDOCUMENTDATAEX& data, bool forceEdit);

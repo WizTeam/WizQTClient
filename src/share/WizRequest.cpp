@@ -39,6 +39,7 @@ bool WizRequest::execJsonRequest(const QString& url, QString method, const QByte
     QNetworkAccessManager net;
     QNetworkRequest request;
     request.setUrl(url);
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     //
     QNetworkReply* reply = NULL;
     if (method == "POST")

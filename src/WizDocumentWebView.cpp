@@ -59,6 +59,8 @@
 #include "WizDocumentTransitionView.h"
 #include "WizDocumentView.h"
 #include "WizSearchReplaceWidget.h"
+#include "WizSvgEditorDialog.h"
+
 
 #include "html/WizHtmlReader.h"
 #include "WizPlugins.h"
@@ -71,12 +73,10 @@ enum WizLinkType {
     WizLink_Attachment
 };
 
-WizDocumentWebViewPage::WizDocumentWebViewPage(const std::vector<WizWebEngineViewInjectObject>& objects, WizDocumentWebView* parent)
-    : WizWebEnginePage(objects, parent)
-    , m_engineView(parent)
+WizDocumentWebViewPage::WizDocumentWebViewPage(QWebEngineProfile* profile, QWidget* parent)
+    : WizWebEnginePage(profile, parent)
+    , m_engineView(nullptr)
 {
-    Q_ASSERT(m_engineView);
-    //
     action(QWebEnginePage::Undo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Redo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Copy)->setShortcut(QKeySequence());
@@ -135,15 +135,19 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
 {
-    WizDocumentWebViewPage* page = new WizDocumentWebViewPage({{"WizExplorerApp", m_app.object()}, {"WizQtEditor", this}}, this);
-    setPage(page);
+    //
+    WizWebEngineViewInjectObjects objects = {{"WizExplorerApp", app.object()}, {"WizQtEditor", this}};
+    initWebEngineView<WizDocumentWebView, WizDocumentWebViewPage>(this, objects);
+
+    WizDocumentWebViewPage* p = (WizDocumentWebViewPage *)page();
+    p->setDocumentWebView(this);
     if (isDarkMode()) {
-        page->setBackgroundColor(QColor("#272727"));
+        p->setBackgroundColor(QColor("#272727"));
     }
 
-    connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
-    connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
-    connect(page, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(onOpenLinkInNewWindow(QUrl)));
+    connect(p, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
+    connect(p, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
+    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(onOpenLinkInNewWindow(QUrl)));
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -170,12 +174,12 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
     //
     //
-
     connect(this, SIGNAL(loadFinishedEx(bool)), SLOT(onEditorLoadFinished(bool)));
+    connect(view()->titleBar(), SIGNAL(onViewMindMap(bool)), SLOT(onViewMindMap(bool)));
     //
     //
     if (m_app.userSettings().isEnableSpellCheck()) {
-        QWebEngineProfile *profile = page->profile();
+        QWebEngineProfile *profile = p->profile();
         profile->setSpellCheckEnabled(true);
         profile->setSpellCheckLanguages({"en-US"});
     }
@@ -544,7 +548,7 @@ void WizDocumentWebView::dropEvent(QDropEvent* event)
     }
 }
 
-WizDocumentView* WizDocumentWebView::view()
+WizDocumentView* WizDocumentWebView::view() const
 {
     QWidget* pParent = parentWidget();
     while(pParent) {
@@ -677,10 +681,12 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
     //
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
-
+    QString lineHeight = m_app.userSettings().editorLineHeight();
+    QString paraSpacing = m_app.userSettings().editorParaSpacing();
+    QString backgroundColor = m_app.userSettings().editorBackgroundColor();
+    //
     strCss.replace("/*default-font-family*/", QString("font-family:'%1';").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
-    QString backgroundColor = m_app.userSettings().editorBackgroundColor();
     if (backgroundColor.isEmpty())
     {
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
@@ -692,6 +698,9 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
     //
 
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
+    strCss.replace("/*default-line-height*/", QString("line-height:%1;").arg(lineHeight));
+    strCss.replace("/*default-para-spacing*/", QString("margin-top:%1px; margin-bottom:%1px").arg(paraSpacing));
+
     //
     const QString customCssId("wiz_custom_css");
 
@@ -742,7 +751,7 @@ void WizDocumentWebView::enableEditor(bool enalbe)
     }
     else
     {
-        QString code = QString("WizEditor.off({noteType:'%1'});").arg(getNoteType());
+        QString code = QString("WizEditor.off({reader: {type:'%1'}});").arg(getNoteType());
         //
         page()->runJavaScript(code);
         //
@@ -941,6 +950,10 @@ QString WizDocumentWebView::getNoteType()
 {
     const WIZDOCUMENTDATA& doc = view()->note();
     //
+    if (doc.strType == "outline") {
+        return "outline";
+    }
+    //
     QString title = doc.strTitle;
     if (title.endsWith(".md"))
         return "markdown";
@@ -960,6 +973,11 @@ QString WizDocumentWebView::getNoteType()
     return "common";
 }
 
+bool WizDocumentWebView::isOutline() const
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+    return doc.strType == "outline";
+}
 
 QString WizDocumentWebView::getHighlightKeywords()
 {
@@ -1104,7 +1122,9 @@ void WizDocumentWebView::onOpenLinkInNewWindow(QUrl url)
         }
 
         qDebug() << "Open url " << strUrl;
+#if QT_VERSION != QT_VERSION_CHECK(5,12,3)
         QDesktopServices::openUrl(strUrl);
+#endif
         return;
     }
 }
@@ -1194,6 +1214,7 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
                 {
                     succeeded = true;
                     m_currentNoteHtml = html;
+                    ::WizSaveUnicodeTextToUtf8File(m_strNoteHtmlFileName, m_currentNoteHtml);
                     emit currentHtmlChanged();
                     //
                     //qDebug() << m_currentNoteHtml;
@@ -1376,7 +1397,27 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const std::m
         WizHTMLAppendTextInHead(strTag, strHtml);
     }
 }
+void WizDocumentWebView::addDefaultScriptsToDocumentHtml(QString htmlFileName)
+{
+    QString strHtml;
+    bool ret = WizLoadUnicodeTextFromFile(htmlFileName, strHtml);
+    if (!ret) {
+        // hide client and show error
+        return;
+    }
+    //
+    m_currentNoteHtml = strHtml;
+    emit currentHtmlChanged();
+    //
+    std::map<QString, QString> files;
+    getAllEditorScriptAndStypeFileName(files);
+    insertScriptAndStyleCore(strHtml, files);
+    //
+    replaceDefaultCss(strHtml);
+    //
+    ::WizSaveUnicodeTextToUtf8File(htmlFileName, strHtml, true);
 
+}
 void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
 {
     QString strGUID = view()->note().strGUID;
@@ -1392,8 +1433,7 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
         return;
     }
     //
-    m_currentNoteHtml = strHtml;
-    emit currentHtmlChanged();
+    addDefaultScriptsToDocumentHtml(strFileName);
 
     WizEditorMode oldMode = m_currentEditorMode;
     m_currentEditorMode = editorMode;
@@ -1407,14 +1447,6 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
         //
         view()->titleBar()->setEditorMode(m_currentEditorMode);
     }
-    //
-    std::map<QString, QString> files;
-    getAllEditorScriptAndStypeFileName(files);
-    insertScriptAndStyleCore(strHtml, files);
-    //
-    replaceDefaultCss(strHtml);
-    //
-    ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
     //
     if (isDarkMode()) {
         page()->setBackgroundColor(QColor("#272727"));
@@ -1578,9 +1610,9 @@ void WizDocumentWebView::editorCommandExecutePastePlainText()
         return;
     QString text = data->text();
     //
-    QString html = WizText2Html(text);
-
-    editorCommandExecuteInsertHtml(html, false);
+    QString base64Text = WizStringToBase64(text);
+    QString js = QString("WizEditor.pasteB64('', '%1')").arg(base64Text);
+    page()->runJavaScript(js);
 }
 
 void WizDocumentWebView::editorCommandExecuteIndent()
@@ -1941,6 +1973,42 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
 
     WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
     analyzer.logAction("insertImage");
+}
+
+void WizDocumentWebView::editorCommandExecuteStartMarkup()
+{
+    QString js = QString("WizEditor.marker.start();");
+    page()->runJavaScript(js);
+}
+
+void WizDocumentWebView::editorCommandExecuteStopMarkup()
+{
+    QString js = QString("WizEditor.marker.quit();");
+    page()->runJavaScript(js);
+}
+
+void WizDocumentWebView::editorExecJs(QString js)
+{
+    page()->runJavaScript(js);
+}
+
+void WizDocumentWebView::onViewMindMap(bool on)
+{
+    if (on) {
+        QString title = view()->note().strTitle;
+        QString js = QString("WizEditor.outline.showMinder(`%1`);").arg(title.replace("`", "\\`"));
+        editorExecJs(js);
+    } else {
+        QString js = "WizEditor.outline.hideMinder();";
+        editorExecJs(js);
+    }
+}
+
+void WizDocumentWebView::editorCommandExecuteInsertPainter()
+{
+    view()->changeType("svgpainter");
+    QString js = QString("WizEditor.createSvg()");
+    page()->runJavaScript(js);
 }
 
 
@@ -2373,9 +2441,34 @@ QString WizDocumentWebView::getLocalLanguage()
     return "en";
 }
 
-void WizDocumentWebView::OnSelectionChange(const QString& currentStyle)
+void WizDocumentWebView::onSelectionChange(const QString& currentStyle)
 {
     Q_EMIT statusChanged(currentStyle);
+}
+
+void WizDocumentWebView::onClickedSvg(const QString& data)
+{
+    const WIZDOCUMENTDATA note = view()->note();
+    //
+    trySaveDocument(note, true, [=] (const QVariant) {
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+            //
+            editHandwritingNote(m_dbMgr, note, m_strNoteHtmlFileName, data, WizMainWindow::instance());
+            addDefaultScriptsToDocumentHtml(m_strNoteHtmlFileName);
+            load(QUrl::fromLocalFile(m_strNoteHtmlFileName));
+        });
+    });
+
+}
+
+void WizDocumentWebView::updateSvg(QString data)
+{
+    //
+    data = data.replace("\\", "\\\\");
+    QString js = QString("WizEditor.replaceSvg(`%1`)").arg(data);
+    page()->runJavaScript(js);
+    //
 }
 
 
@@ -2397,6 +2490,11 @@ void WizDocumentWebView::onReturn()
     });
 }
 
+void WizDocumentWebView::doCopy()
+{
+    page()->triggerAction(QWebEnginePage::Copy, false);
+}
+
 void WizDocumentWebView::doPaste()
 {
     WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
@@ -2406,64 +2504,25 @@ void WizDocumentWebView::doPaste()
     });
 }
 
+void WizDocumentWebView::afterCopied()
+{
+    WizWebEnginePage::processCopiedData();
+}
+
+
+void WizDocumentWebView::onMarkerUndoStatusChanged(QString data)
+{
+    emit markerUndoStatusChanged(data);
+
+}
+void WizDocumentWebView::onMarkerInitiated(QString data)
+{
+    emit markerInitiated(data);
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-class WizDocumentDataMutexes
-{
-    QMutex m_globalLocker;
-    std::map<QString, QMutex*> m_lockers;
-
-    QMutex* getDocumentMutexesCore(QString docGuid)
-    {
-        QMutexLocker locker(&m_globalLocker);
-        auto it = m_lockers.find(docGuid);
-        if (it != m_lockers.end()) {
-            return it->second;
-        }
-        //
-        QMutex* mutex = new QMutex();
-        m_lockers[docGuid] = mutex;
-        return mutex;
-    }
-    //
-public:
-    static QMutex* getDocumentMutexes(QString docGuid) {
-        static WizDocumentDataMutexes g;
-        return g.getDocumentMutexesCore(docGuid);
-    }
-};
-
-class WizDocumentDataLocker
-{
-    QMutex* m_mutex;
-#ifdef QT_DEBUG
-    QString m_docGuid;
-#endif
-public:
-    WizDocumentDataLocker(QString docGuid)
-    {
-#ifdef QT_DEBUG
-        m_docGuid = docGuid;
-        DEBUG_TOLOG1("try access doc: %1", docGuid);
-#endif
-        //
-        m_mutex = WizDocumentDataMutexes::getDocumentMutexes(docGuid);
-        m_mutex->lock();
-        //
-#ifdef QT_DEBUG
-        DEBUG_TOLOG1("begin access doc: %1", docGuid);
-#endif
-    }
-    ~WizDocumentDataLocker()
-    {
-#ifdef QT_DEBUG
-        DEBUG_TOLOG1("end access doc: %1", m_docGuid);
-#endif
-        //
-        m_mutex->unlock();
-    }
-};
 
 WizDocumentWebViewLoaderThread::WizDocumentWebViewLoaderThread(WizDatabaseManager &dbMgr, QObject *parent)
     : QThread(parent)

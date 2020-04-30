@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-    <string>2.7.1</string>
+    <string>2.8.5</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>CFBundleName</key>
@@ -33,11 +33,11 @@
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-    <string>&amp;copy;2011-2018 Wozhi Technology Co. Ltd. Corporation.</string>
+    <string>&amp;copy;2011-2019 Wozhi Technology Co. Ltd. Corporation.</string>
 	<key>ForAppStore</key>
 	<true/>
-    <key>NSHighResolutionCapable</key>
-    <true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
 	<key>CFBundleLocalizations</key>
@@ -59,9 +59,9 @@
 			</array>
 		</dict>
 	</array>
-    <key>NSRequiresAquaSystemAppearance</key>
-    <false/>
-    <key>NSServices</key>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<false/>
+	<key>NSServices</key>
 	<array>
 		<dict>
 			<key>NSMenuItem</key>

@@ -45,6 +45,7 @@ public:
     void setBackgroundImage(QString fileName, QPoint pt, QColor darkColor = Qt::transparent);
     void setLeftIcon(QString fileName);
     void setRightIcon(QString fileName);
+    void setRightIcon(const QIcon& icon);
     void setPlaceholderText(const QString& strText);
     void setAutoClearRightIcon(bool bAutoClean);
     //

@@ -129,10 +129,12 @@ class WizDocumentWebViewPage: public WizWebEnginePage
     Q_OBJECT
 
 public:
-    explicit WizDocumentWebViewPage(const WizWebEngineViewInjectObjects& objects, WizDocumentWebView* parent);
+    explicit WizDocumentWebViewPage(QWebEngineProfile* profile, QWidget* parent);
     virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
     virtual void triggerAction(WebAction action, bool checked = false);
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
+    //
+    void setDocumentWebView(WizDocumentWebView* view) { m_engineView = view; }
 
 Q_SIGNALS:
     void actionTriggered(WebAction act);
@@ -149,7 +151,7 @@ public:
     WizDocumentWebView(WizExplorerApp& app, QWidget* parent);
     ~WizDocumentWebView();
     //
-    WizDocumentView* view();
+    WizDocumentView* view() const;
     //
     void clear();
     //
@@ -178,6 +180,7 @@ public:
     void editorFocus();
     void enableEditor(bool enalbe);
     QString noteResourcesPath();
+    void updateSvg(QString data);
     //
     void editorResetSpellCheck();
 
@@ -231,10 +234,16 @@ public:
     Q_INVOKABLE bool canRenderMarkdown();
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();
-    Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
+    Q_INVOKABLE void onSelectionChange(const QString& currentStyle);
+    Q_INVOKABLE void onClickedSvg(const QString& data);
     Q_INVOKABLE void saveCurrentNote();
     Q_INVOKABLE void onReturn();
     Q_INVOKABLE void doPaste();
+    Q_INVOKABLE void doCopy();
+    Q_INVOKABLE void afterCopied();
+
+    Q_INVOKABLE void onMarkerUndoStatusChanged(QString data);
+    Q_INVOKABLE void onMarkerInitiated(QString data);
 
     Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)
@@ -248,6 +257,7 @@ private:
     //
     void saveAsPDFCore(std::function<void()> callback);
     //
+    void addDefaultScriptsToDocumentHtml(QString htmlFileName);
     void loadDocumentInWeb(WizEditorMode editorMode);
     //
     void getAllEditorScriptAndStypeFileName(std::map<QString, QString>& arrayFile);
@@ -303,7 +313,6 @@ private:
     QPointer<WizEditorInsertLinkForm> m_editorInsertLinkForm;
 
     WizSearchReplaceWidget* m_searchReplaceWidget;
-
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
@@ -369,15 +378,24 @@ public Q_SLOTS:
     void editorCommandExecuteInsertHorizontal();
     void editorCommandExecuteInsertCheckList();
     void editorCommandExecuteInsertImage();
+    void editorCommandExecuteStartMarkup();
+    void editorCommandExecuteStopMarkup();
+    void editorCommandExecuteInsertPainter();
     void editorCommandExecuteInsertCode();
     void editorCommandExecuteMobileImage(bool bReceiveImage);
     void editorCommandExecuteScreenShot();
     void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
     void on_editorCommandExecuteScreenShot_finished();
+    //
+    void editorExecJs(QString js);
+    void onViewMindMap(bool on);
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
     void statusChanged(const QString& currentStyle);
+    void markerUndoStatusChanged(const QString& data);
+    void markerInitiated(const QString& data);
+    //
     void selectAllKeyPressed();
     // signals used request reset info toolbar and editor toolbar
     void focusIn();
@@ -413,6 +431,8 @@ private:
     QString getHighlightKeywords();
     //
 //    bool shouldAddUserDefaultCSS();
+public:
+    bool isOutline() const;
 };
 
 

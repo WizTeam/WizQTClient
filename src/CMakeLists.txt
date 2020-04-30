@@ -183,6 +183,7 @@ set(wiznote_SOURCES
     WizMobileFileReceiver.cpp
     WizWebEngineInjectObject.cpp
     WizCombineNotesDialog.cpp
+    WizSvgEditorDialog.cpp
 
     WizOEMSettings.cpp    
     mac/WizSearchWidget_mm.cpp
@@ -360,6 +361,7 @@ set(wiznote_HEADERS
     WizInitBizCertDialog.h
     share/WizDocumentStyle.h
     WizCombineNotesDialog.h
+    WizSvgEditorDialog.h
 
     WizPlugins.h
 )

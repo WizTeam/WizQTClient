@@ -67,6 +67,7 @@ public Q_SLOTS:
     void onAttachButtonClicked();
     void onHistoryButtonClicked();
     void onInfoButtonClicked();
+    void onViewMindMapClicked();
 
     void onEmailActionClicked();
     void onShareActionClicked();
@@ -99,6 +100,7 @@ signals:
     void notifyBar_link_clicked(const QString& link);
     void loadComment_request(const QString& url);
     void viewNoteInSeparateWindow_request();
+    void onViewMindMap(bool on);
 private:
     void showInfoBar();
     void showEditorBar();
@@ -115,6 +117,7 @@ private:
     WizEditorToolBar* m_editorBar;
 
     WizRoundCellButton* m_editBtn;
+    WizCellButton* m_mindmapBtn;
     WizCellButton* m_separateBtn;
     WizCellButton* m_tagBtn;    
 //    CellButton* m_emailBtn;

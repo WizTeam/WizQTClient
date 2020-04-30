@@ -222,8 +222,8 @@ void WizEmailShareDialog::updateContactList()
 void WizEmailShareDialog::sendEmails()
 {
     ui->labelInfo->setText(tr("Sending..."));
-
-    QString strKS = WizToken::userInfo().strKbServer;
+    //
+    QString strKS = m_app.databaseManager().db().getKbServer(m_note.strKbGUID);
     QString strExInfo = getExInfo();
     QString strUrl = WizCommonApiEntry::mailShareUrl(strKS, strExInfo);
     qDebug() << "share url : " << strUrl;

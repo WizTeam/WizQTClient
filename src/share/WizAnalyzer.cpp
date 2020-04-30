@@ -205,7 +205,7 @@ void WizAnalyzer::postBlocked(IWizSyncableDatabase* db)
 {
     QByteArray buffer = constructUploadData(db);
 
-    CString strURL = WizApiEntry::analyzerUploadUrl();
+    CString strURL = WizOfficialApiEntry::analyzerUploadUrl();
 
     if (0 != ::WizStrStrI_Pos(strURL, "http://")
         && 0 != ::WizStrStrI_Pos(strURL, "https://"))

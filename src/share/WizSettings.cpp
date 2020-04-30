@@ -570,6 +570,40 @@ void WizUserSettings::setEditorBackgroundColor(const QString& strColor)
     set("EditorBackgroundColor", strColor);
 }
 
+QString WizUserSettings::editorLineHeight()
+{
+    QString strLineHeight = get("EditorLineHeight");
+    //
+    if (strLineHeight.isEmpty()) {
+        return "1.7";
+    }
+    //
+    return strLineHeight;
+}
+
+void WizUserSettings::setEditorLineHeight(const QString& strLineHeight)
+{
+    set("EditorLineHeight", strLineHeight);
+}
+
+
+QString WizUserSettings::editorParaSpacing()
+{
+    QString strLineHeight = get("EditorParaSpacing");
+    //
+    if (strLineHeight.isEmpty()) {
+        return "8";
+    }
+    //
+    return strLineHeight;
+}
+
+void WizUserSettings::setEditorParaSpacing(const QString& spacing)
+{
+    set("EditorParaSpacing", spacing);
+}
+
+
 bool WizUserSettings::isManualSortingEnabled()
 {
     QString strManualSortingEnable = get("ManualSortingEnable");
@@ -765,6 +799,16 @@ int WizUserSettings::syncGroupMethod() const
 void WizUserSettings::setSyncGroupMethod(int days)
 {
     set("SyncGroupMethod", QString::number(days));
+}
+
+bool WizUserSettings::showSubFolderDocuments()
+{
+    bool b = get("CategoryShowSubFolderDocuments").toInt() ? true : false;
+    return b;
+}
+void WizUserSettings::setShowSubFolderDocuments(bool b)
+{
+    set("CategoryShowSubFolderDocuments", QString::number(b ? 1 : 0));
 }
 
 void WizUserSettings::appendRecentSearch(const QString& search)

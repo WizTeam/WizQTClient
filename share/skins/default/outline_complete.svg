@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图形" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1024 1024" style="enable-background:new 0 0 1024 1024;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#848484;}
+</style>
+<g>
+	<g>
+		<path class="st0" d="M512,75.6C271,75.6,75.6,271,75.6,512S271,948.4,512,948.4S948.4,753,948.4,512S753,75.6,512,75.6z
+			 M512,881.3C308,881.3,142.7,716,142.7,512S308,142.7,512,142.7S881.3,308,881.3,512S716,881.3,512,881.3z M752.1,351
+			c-13.2-13.2-35.1-13.2-48.3,0L449,605.8L330.4,487.1c-4.4-4.4-13.2-8.8-22-8.8c-8.8,0-17.6,4.4-22,8.8
+			c-13.2,13.2-13.2,35.1,0,48.3L427,676c13.2,13.2,35.1,13.2,48.3,0l281.2-281.2c4.4-8.8,8.8-17.6,4.4-22
+			C760.9,364.1,756.5,355.4,752.1,351z"/>
+	</g>
+</g>
+</svg>

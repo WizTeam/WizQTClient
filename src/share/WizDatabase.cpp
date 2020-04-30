@@ -740,7 +740,7 @@ bool WizDatabase::onDownloadTagList(const CWizTagDataArray& arrayData)
         WIZTAGDATA dataTemp;
         if (tagFromGuid(data.strGUID, dataTemp))
         {
-            data.nPostion = dataTemp.nPostion;
+            data.nPosition = dataTemp.nPosition;
         }
         arrayTag.push_back(data);
     }
@@ -1746,7 +1746,7 @@ QString WizDatabase::getGroupTagsPos()
          it++)
     {
         WIZTAGDATA tag = *it;
-        strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPostion) + "*");
+        strTagPos.append(tag.strGUID + ":" + QString::number(tag.nPosition) + "*");
     }
     strTagPos.remove(strTagPos.length() - 1, 1);
     return strTagPos;
@@ -1857,9 +1857,9 @@ void WizDatabase::setGroupTagsPos(const QString& tagsPos, qint64 nVersion)
         int nPos = posList.last().toInt();
         //
         WIZTAGDATA tagData = tags[strGUID];
-        if (!tagData.strGUID.isEmpty() && tagData.nPostion != nPos)
+        if (!tagData.strGUID.isEmpty() && tagData.nPosition != nPos)
         {
-            tagData.nPostion = nPos;
+            tagData.nPosition = nPos;
             modifyTagPosition(tagData);
             bPositionChanged = true;
         }
@@ -2175,6 +2175,29 @@ bool WizDatabase::getGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     }
 
     return !group.strGroupName.isEmpty();
+}
+
+QString WizDatabase::getKbServer(const QString &kbGuid) {
+    //
+    IWizSyncableDatabase* pDatabase = this;
+    if (isGroup()) {
+        pDatabase = getPersonalDatabase();
+    }
+    //
+    WizDatabase* db = dynamic_cast<WizDatabase*>(pDatabase);
+    if (!db) {
+        return QString();
+    }
+    //
+    if (db->kbGUID() == kbGuid || kbGuid.isEmpty()) {
+        WIZUSERINFO userInfo;
+        db->getUserInfo(userInfo);
+        return userInfo.strKbServer;
+    }
+    //
+    WIZGROUPDATA group;
+    db->getGroupData(kbGuid, group);
+    return group.strKbServer;
 }
 
 bool WizDatabase::getOwnGroups(const CWizGroupDataArray& arrayAllGroup, CWizGroupDataArray& arrayOwnGroup)
@@ -3743,7 +3766,9 @@ bool WizDatabase::createDocumentByTemplate(const QString& templateZiwFile, const
     {
         newDoc.strTitle = strTitle;
     }
-    newDoc.strType = "TemplateNote";
+    if (newDoc.strType.isEmpty()) {
+        newDoc.strType = "TemplateNote";
+    }
 
     return createDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
 }
@@ -4199,8 +4224,10 @@ bool WizDatabase::verifyCertPassword(QString password)
     if (WizAESDecryptBase64StringToString(password, encrypted_d, d)
             && d.length() > 0)
     {
-        WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
-        return true;
+        if (atoi(d.left(6).toUtf8()) != 0) {
+            WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
+            return true;
+        }
     }
     //
     if (!refreshCertFromServer())
@@ -4212,8 +4239,10 @@ bool WizDatabase::verifyCertPassword(QString password)
             && d.length() > 0)
     {
         loadUserCert();
-        WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
-        return true;
+        if (atoi(d.left(6).toUtf8()) != 0) {
+            WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
+            return true;
+        }
     }
     //
     return false;
@@ -4522,3 +4551,54 @@ QObject* WizDatabase::GetDeletedItemsFolder()
 //    CWizDocument* pDoc = new CWizDocument(*this, data);
 //    return pDoc;
 //}
+
+
+
+
+class WizDocumentDataMutexes
+{
+    QMutex m_globalLocker;
+    std::map<QString, QMutex*> m_lockers;
+
+    QMutex* getDocumentMutexesCore(QString docGuid)
+    {
+        QMutexLocker locker(&m_globalLocker);
+        auto it = m_lockers.find(docGuid);
+        if (it != m_lockers.end()) {
+            return it->second;
+        }
+        //
+        QMutex* mutex = new QMutex();
+        m_lockers[docGuid] = mutex;
+        return mutex;
+    }
+    //
+public:
+    static QMutex* getDocumentMutexes(QString docGuid) {
+        static WizDocumentDataMutexes g;
+        return g.getDocumentMutexesCore(docGuid);
+    }
+};
+
+WizDocumentDataLocker::WizDocumentDataLocker(QString docGuid)
+{
+#ifdef QT_DEBUG
+    m_docGuid = docGuid;
+    DEBUG_TOLOG1("try access doc: %1", docGuid);
+#endif
+    //
+    m_mutex = WizDocumentDataMutexes::getDocumentMutexes(docGuid);
+    m_mutex->lock();
+    //
+#ifdef QT_DEBUG
+    DEBUG_TOLOG1("begin access doc: %1", docGuid);
+#endif
+}
+WizDocumentDataLocker::~WizDocumentDataLocker()
+{
+#ifdef QT_DEBUG
+    DEBUG_TOLOG1("end access doc: %1", m_docGuid);
+#endif
+    //
+    m_mutex->unlock();
+}

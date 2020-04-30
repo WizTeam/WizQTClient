@@ -272,6 +272,7 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
 
 WizDocumentListView::~WizDocumentListView()
 {
+    disconnect();
 }
 
 void WizDocumentListView::resizeEvent(QResizeEvent* event)

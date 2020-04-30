@@ -57,7 +57,7 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_userSettings(app.userSettings())
-    , m_commentWidget(new WizLocalProgressWebView(app.mainWindow()))
+    , m_commentWidget(new WizLocalProgressWebView({{"WizExplorerApp", m_app.object()}}, app.mainWindow()))
     , m_title(new WizTitleBar(app, this))
     , m_passwordView(new WizUserCipherForm(app, this))
     , m_defaultViewMode(app.userSettings().noteViewMode())
@@ -108,7 +108,6 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     m_tab->setBackgroundRole(QPalette::HighlightedText);
 
     m_comments = m_commentWidget->web();
-    m_comments->setPage(new WizWebEnginePage({{"WizExplorerApp", m_app.object()}}, this));
     //m_comments->history()->setMaximumItemCount(0);
     m_comments->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     //m_comments->page()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
@@ -220,6 +219,9 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
 
 WizDocumentView::~WizDocumentView()
 {
+    m_comments->disconnect();
+    disconnect();
+    //
     if (m_editStatusChecker)
         delete m_editStatusChecker;
 }
@@ -399,7 +401,7 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
 
             m_tab->setCurrentWidget(m_transitionView);
             downloadNoteFromServer(data);
-
+            //
             return;
         }
 
@@ -426,7 +428,7 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
                 m_passwordView->setHint(db.getCertPasswordHint());
                 m_tab->setCurrentWidget(m_passwordView);
                 m_passwordView->setCipherEditorFocus();
-
+                //
                 return;
             }
         }
@@ -439,7 +441,6 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
         db.modifyDocumentReadCount(docData);
         docData.tAccessed = WizGetCurrentTime();
         db.modifyDocumentDateAccessed(docData);
-
     });
 }
 
@@ -575,7 +576,6 @@ void WizDocumentView::resetTitle(const QString& strTitle)
 void WizDocumentView::promptMessage(const QString &strMsg)
 {
     m_tab->setCurrentWidget(m_msgWidget);
-
     m_msgLabel->setText(strMsg);
 }
 

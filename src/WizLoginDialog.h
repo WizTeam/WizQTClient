@@ -195,6 +195,7 @@ private slots:
     void onLogInCheckEnd();
     void onSignUpCheckStart();
     void onSignUpCheckEnd();
+    void searchWizBoxServer();
 
     void resetUserList();    
 
@@ -209,7 +210,6 @@ private:
     QAction* findActionInMenu(const QString& strActData);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
-    void searchWizBoxServer();
     void initAnimationWaitingDialog(const QString& text);
     int showAnimationWaitingDialog(const QString& text);
     void closeAnimationWaitingDialog();

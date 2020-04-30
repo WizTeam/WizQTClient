@@ -153,6 +153,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     connect(m_lineEditPassword, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(m_lineEditUserName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->wgt_usercontainer, SIGNAL(rightIconClicked()), SLOT(showUserListMenu()));
+    connect(ui->wgt_serveroptioncontainer, SIGNAL(rightIconClicked()), SLOT(searchWizBoxServer()));
     connect(ui->btn_selectServer, SIGNAL(clicked()), SLOT(showServerListMenu()));
     connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(onUserNameEdited(QString)));
     //
@@ -186,11 +187,11 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     QAction* actionWizServer = m_menuServers->addAction(tr("Sign in to WizNote Server"));
     actionWizServer->setData(WIZ_SERVERACTION_CONNECT_WIZSERVER);
     actionWizServer->setCheckable(true);
-    QAction* actionWizBoxServer = m_menuServers->addAction(tr("Sign in to Enterprise Private Server (WizBox)"));
+    QAction* actionWizBoxServer = m_menuServers->addAction(tr("Sign in to Private Server/WizBox"));
     actionWizBoxServer->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
     actionWizBoxServer->setCheckable(true);
-    m_menuServers->addAction(tr("Find WizBox..."))->setData(WIZ_SERVERACTION_SEARCH_SERVER);
-    m_menuServers->addAction(tr("About WizBox..."))->setData(WIZ_SERVERACTION_HELP);
+    //m_menuServers->addAction(tr("Find WizBox..."))->setData(WIZ_SERVERACTION_SEARCH_SERVER);
+    m_menuServers->addAction(tr("About private deployment ..."))->setData(WIZ_SERVERACTION_HELP);
     m_menuServers->setDefaultAction(actionWizServer);
 
     //
@@ -652,6 +653,9 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
 
     ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
     ui->wgt_serveroptioncontainer->setLeftIcon(strIconServer);
+    //QString strIconSearch = WizGetSkinResourceFileName(strThemeName, "empty_search" + (isHighPix ? "@2x" : QString()));
+    //ui->wgt_serveroptioncontainer->setRightIcon(strIconSearch);
+    ui->wgt_serveroptioncontainer->setRightIcon(WizLoadSkinIcon(strThemeName, "empty_search"));
     m_lineEditServer->setPlaceholderText(tr("Please search or input your server IP"));
 
     ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8), WizColorLineEditorBackground);
@@ -698,9 +702,9 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     //
 #ifdef Q_OS_MAC
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
 #else
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
                                                  "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
@@ -1300,7 +1304,7 @@ void WizLoginDialog::serverListMenuClicked(QAction* action)
         {
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
-            searchWizBoxServer();
+            //searchWizBoxServer();
             action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_SEARCH_SERVER)
@@ -1323,8 +1327,8 @@ void WizLoginDialog::serverListMenuClicked(QAction* action)
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
-            QString strUrl = WizApiEntry::standardCommandUrl("link");
-            strUrl += "&name=wiz-box-search-help.html";
+            QString strUrl = WizOfficialApiEntry::standardCommandUrl("link");
+            strUrl += "&name=docker";
             QDesktopServices::openUrl(strUrl);
         }
 
@@ -1842,7 +1846,9 @@ QString WizOEMDownloader::_downloadOEMSettings()
     QNetworkAccessManager net;
     WizCommonApiEntry::setEnterpriseServerIP(m_server);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("oem");
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+    QNetworkRequest req(strUrl);
+    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    QNetworkReply* reply = net.get(req);
     qDebug() << "get oem from server : " << strUrl;
 
     QEventLoop loop;

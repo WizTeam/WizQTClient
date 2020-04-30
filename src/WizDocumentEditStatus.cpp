@@ -445,7 +445,9 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
     if (!server.document_getInfo(strGUID, docOnServer))
         return false;
 
-    if ((docOnServer.strGUID == doc.strGUID) && (docOnServer.nVersion > doc.nVersion))
+    if ((docOnServer.strGUID == doc.strGUID)
+            && (docOnServer.nVersion > doc.nVersion)
+            && doc.nVersion > 0) //刚刚上传成功，
     {
         qDebug() << "[Status]New version of note detected , note : " << docOnServer.strTitle << "  local version : " << doc.nVersion << " server version : " << docOnServer.nVersion;
         return true;

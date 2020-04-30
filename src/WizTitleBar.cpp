@@ -99,6 +99,13 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock", iconSize, ICON_OPTIONS), tr("Save & Read"), tr("Save and switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));    
 
+    m_mindmapBtn = new WizCellButton(WizCellButton::ImageOnly, this);
+    m_mindmapBtn->setCheckable(true);
+    m_mindmapBtn->setChecked(false);
+    m_mindmapBtn->setFixedHeight(nTitleHeight);
+    m_mindmapBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "outline_mindmap", iconSize, ICON_OPTIONS), tr("View mindmap"));
+    connect(m_mindmapBtn, SIGNAL(clicked()), SLOT(onViewMindMapClicked()));
+
     m_separateBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_separateBtn->setFixedHeight(nTitleHeight);
     QString separateShortcut = ::WizGetShortcut("EditNoteSeparate", "Alt+2");
@@ -172,6 +179,7 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     layoutInfo2->setSpacing(0);
     layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
+    layoutInfo2->addWidget(m_mindmapBtn);
     layoutInfo2->addSpacing(::WizSmartScaleUI(7));
     layoutInfo2->addWidget(m_separateBtn);
     layoutInfo2->addWidget(m_tagBtn);
@@ -426,8 +434,10 @@ void WizTitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode,
     if (!isGroup)
     {
         m_tagBar->setDocument(data);
-
     }
+    //
+    m_mindmapBtn->setVisible(data.strType == "outline");
+    m_mindmapBtn->setChecked(false);
 }
 
 void WizTitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
@@ -445,9 +455,11 @@ void WizTitleBar::setEditorMode(WizEditorMode editorMode)
     if (editorMode == modeReader)
     {
         showInfoBar();
+        m_editorBar->switchToNormalMode();
     }
     else
     {
+        m_editorBar->switchToNormalMode();
         showEditorBar();
     }
 }
@@ -579,6 +591,14 @@ void WizTitleBar::onTagButtonClicked()
     setTagBarVisible(!m_tagBar->isVisible());
 
     WizGetAnalyzer().logAction("showTags");
+}
+
+void WizTitleBar::onViewMindMapClicked()
+{
+    bool on = m_mindmapBtn->isChecked();
+    //m_mindmapBtn->setChecked(on);
+    emit onViewMindMap(on);
+    m_mindmapBtn->setState(on ? WizCellButton::Checked : WizCellButton::Normal);
 }
 
 QAction* actionFromMenu(QMenu* menu, const QString& text)

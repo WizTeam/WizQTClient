@@ -173,6 +173,13 @@ public:
     //NOTE:  editor background color string could be empty!!!   if it's empty, editor in seperate window could be grey
     QString editorBackgroundColor();
     void setEditorBackgroundColor(const QString& strColor);
+    //
+
+    QString editorLineHeight();
+    void setEditorLineHeight(const QString& strLineHeight);
+    //
+    QString editorParaSpacing();
+    void setEditorParaSpacing(const QString& strSpacing);
 
     bool isManualSortingEnabled();
     void setManualSortingEnable(bool bEnable);
@@ -211,6 +218,9 @@ public:
     //
     void setLastAttachmentPath(const QString& path);
     QString lastAttachmentPath() const;
+    //
+    bool showSubFolderDocuments();
+    void setShowSubFolderDocuments(bool b);
 };
 
 #endif // WIZSETTINGS_H

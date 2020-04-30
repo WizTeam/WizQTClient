@@ -14,33 +14,59 @@
 #include <QWebEngineView>
 #include "share/WizWebEngineView.h"
 
+WizWebSettingsDialog::WizWebSettingsDialog(const WizWebEngineViewInjectObjects& objects, QString url, QSize sz, QWidget *parent )
+    : WizWebEngineViewContainerDialog(parent)
+    , m_url(url)
+{
+    init(objects, sz, parent);
+}
+
 
 WizWebSettingsDialog::WizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
     : WizWebEngineViewContainerDialog(parent)
     , m_url(url)
 {
+    init(WizWebEngineViewInjectObjects(), sz, parent);
+}
+//
+void WizWebSettingsDialog::init(const WizWebEngineViewInjectObjects& objects, QSize sz, QWidget *parent)
+{
     setContentsMargins(0, 0, 0, 0);
-    setFixedSize(sz);
+    if (!sz.isEmpty()) {
+        setFixedSize(sz);
+    } else {
+        setWindowFlags(Qt::Window);
+        setWindowState(windowState() | Qt::WindowMaximized);
+        setGeometry(parent->geometry());
+    }
 
     QPalette pal = palette();
     pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
     setPalette(pal);
 
-    m_progressWebView = new WizLocalProgressWebView(this);
+    m_progressWebView = new WizLocalProgressWebView(objects, this);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setSizeConstraint(QLayout::SetMaximumSize);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-    layout->addWidget(m_progressWebView);
+    layout->addWidget(m_progressWebView);   
     setLayout(layout);
 
     WizWebEngineView* web = m_progressWebView->web();
     //
     WizMainWindow* mainWindow = WizGlobal::mainWindow();
     if (mainWindow) {
-        web->setPage(new WizWebEnginePage({{"WizExplorerApp", mainWindow->object()}}, web));
+        WizWebEngineViewInjectObjects temp = objects;
+        temp.push_back({"WizExplorerApp", mainWindow->object()});
+        //
+        WizWebEngineView::initWebEngineView(web, temp);
     }
     connect(web, SIGNAL(loadFinishedEx(bool)), SLOT(on_web_loaded(bool)));
+    //
+    QTimer::singleShot(100, [=] {
+        load();
+    });
 }
 
 WizWebEngineView* WizWebSettingsDialog::web()
@@ -51,13 +77,6 @@ WizWebEngineView* WizWebSettingsDialog::web()
 void WizWebSettingsDialog::load()
 {
     web()->load(m_url);
-}
-
-void WizWebSettingsDialog::showEvent(QShowEvent* event)
-{
-    QDialog::showEvent(event);
-    //
-    load();
 }
 
 void WizWebSettingsDialog::on_web_loaded(bool ok)
@@ -126,6 +145,22 @@ void WizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     web()->load(u);
 }
 
+
+void WizWebSettingsWithTokenDialog::onLoaded(bool ok)
+{
+    if (m_loaded) {
+        return;
+    }
+    //
+    m_loaded = true;
+    //
+    if (m_delayShow && ok) {
+        show();
+    }
+}
+
+////
+
 WizWebSettingsWithTokenDialog* WizWebSettingsWithTokenDialog::delayShow(QString title, QString url, QSize sz, QWidget* parent)
 {
     WizWebSettingsWithTokenDialog* dialog = new WizWebSettingsWithTokenDialog(url, sz, parent);
@@ -133,17 +168,5 @@ WizWebSettingsWithTokenDialog* WizWebSettingsWithTokenDialog::delayShow(QString 
     dialog->setWindowTitle(title);
     dialog->m_delayShow = true;
     //
-    dialog->load();
-    //
     return dialog;
 }
-
-void WizWebSettingsWithTokenDialog::onLoaded(bool ok)
-{
-    m_loaded = true;
-    //
-    if (ok) {
-        show();
-    }
-}
-

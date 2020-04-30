@@ -68,6 +68,12 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_comboLineHeight_currentIndexChanged(int index);
+    void on_btnResetLineHeight_clicked();
+
+    void on_comboParaSpacing_currentIndexChanged(int index);
+    void on_btnResetParaSpacing_clicked();
+
 private:
     Ui::WizPreferenceWindow *ui;
     WizExplorerApp& m_app;
@@ -76,9 +82,12 @@ private:
     QStringList m_locales;
     QStringList m_skins;
     QPointer<QFontDialog> m_fontDialog;
+    bool m_biniting;
 
     void setSyncGroupTimeLine(int nDays);
     void updateEditorBackgroundColor(const QString& strColorName, bool save);
+    void updateEditorLineHeight(const QString& strLineHeight, bool save);
+    void updateEditorParaSpacing(const QString& spacing, bool save);
 };
 
 

@@ -15,6 +15,10 @@ class WizProgressDialog;
 class WizObjectDownloaderHost;
 class WizFolderSelector;
 
+namespace Json {
+    class Value;
+}
+
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
 #define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
 #define CATEGORY_MESSAGES_MODIFY            QObject::tr("Note modified")
@@ -42,6 +46,7 @@ public:
 
     void saveSelection();
     void restoreSelection();
+    void clearStoredSelection() { m_selectedItem = nullptr; }
 
     WizCategoryViewItemBase* itemAt(const QPoint& p) const;
     WizCategoryViewItemBase* itemFromKbGUID(const QString& strKbGUID) const;
@@ -73,7 +78,7 @@ protected:
     virtual void dropEvent(QDropEvent* event);
     //
     bool dropOn(QDropEvent *event, int *dropRow, int *dropCol, QModelIndex *dropIndex);
-    void dropEventCore(QDropEvent *event);
+    QTreeWidgetItem* dropEventCore(QDropEvent *event);
     bool droppingOnItself(QDropEvent *event, const QModelIndex &index);
     QAbstractItemView::DropIndicatorPosition position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const;
 
@@ -93,6 +98,8 @@ protected:
     WizExplorerApp& m_app;
     WizDatabaseManager& m_dbMgr;
     QTreeWidgetItem* m_selectedItem;
+    //
+    friend class WizCategoryViewGroupRootItem;
 
 
 protected Q_SLOTS:
@@ -257,7 +264,7 @@ public:
     void saveGroupTagsPosition(WizDatabase& db, WizCategoryViewGroupItem* pItem);
 
     QString getAllFoldersPosition();
-    QString getAllFoldersPosition(WizCategoryViewFolderItem* pItem, int& nStartPos);
+    void getAllFoldersPosition(WizCategoryViewFolderItem* pItem, int& nStartPos, Json::Value& jValue);
 
     // tags
     WizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);

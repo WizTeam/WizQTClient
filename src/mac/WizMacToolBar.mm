@@ -50,6 +50,60 @@
 
 #import <AppKit/AppKit.h>
 
+
+class QOpenGLContext;
+class QScreen;
+class QWindow;
+class QPlatformWindow;
+class QBackingStore;
+
+class QPlatformNativeInterface_Fake : public QObject
+{
+    virtual const QMetaObject *metaObject() const;
+    virtual void *qt_metacast(const char *);
+    virtual int qt_metacall(QMetaObject::Call, int, void **);
+private:
+    struct QPrivateSignal {};
+public:
+    virtual void *nativeResourceForIntegration(const QByteArray &resource);
+    virtual void *nativeResourceForContext(const QByteArray &resource, QOpenGLContext *context);
+    virtual void *nativeResourceForScreen(const QByteArray &resource, QScreen *screen);
+    virtual void *nativeResourceForWindow(const QByteArray &resource, QWindow *window);
+    virtual void *nativeResourceForBackingStore(const QByteArray &resource, QBackingStore *backingStore);
+#ifndef QT_NO_CURSOR
+    virtual void *nativeResourceForCursor(const QByteArray &resource, const QCursor &cursor);
+#endif
+    typedef void * (*NativeResourceForIntegrationFunction)();
+    typedef void * (*NativeResourceForContextFunction)(QOpenGLContext *context);
+    typedef void * (*NativeResourceForScreenFunction)(QScreen *screen);
+    typedef void * (*NativeResourceForWindowFunction)(QWindow *window);
+    typedef void * (*NativeResourceForBackingStoreFunction)(QBackingStore *backingStore);
+    virtual NativeResourceForIntegrationFunction nativeResourceFunctionForIntegration(const QByteArray &resource);
+    virtual NativeResourceForContextFunction nativeResourceFunctionForContext(const QByteArray &resource);
+    virtual NativeResourceForScreenFunction nativeResourceFunctionForScreen(const QByteArray &resource);
+    virtual NativeResourceForWindowFunction nativeResourceFunctionForWindow(const QByteArray &resource);
+    virtual NativeResourceForBackingStoreFunction nativeResourceFunctionForBackingStore(const QByteArray &resource);
+    virtual QFunctionPointer platformFunction(const QByteArray &function) const;
+    virtual QVariantMap windowProperties(QPlatformWindow *window) const;
+    virtual QVariant windowProperty(QPlatformWindow *window, const QString &name) const;
+    virtual QVariant windowProperty(QPlatformWindow *window, const QString &name, const QVariant &defaultValue) const;
+    virtual void setWindowProperty(QPlatformWindow *window, const QString &name, const QVariant &value);
+Q_SIGNALS:
+    void windowPropertyChanged(QPlatformWindow *window, const QString &propertyName);
+};
+
+inline QPlatformNativeInterface_Fake::NativeResourceForIntegrationFunction resolvePlatformFunction_Fake(const QByteArray &functionName)
+{
+    QPlatformNativeInterface_Fake *nativeInterface = (QPlatformNativeInterface_Fake *)QGuiApplication::platformNativeInterface();
+    QPlatformNativeInterface_Fake::NativeResourceForIntegrationFunction function =
+        nativeInterface->nativeResourceFunctionForIntegration(functionName);
+    if (Q_UNLIKELY(!function))
+         qWarning("Qt could not resolve function %s from "
+                  "QGuiApplication::platformNativeInterface()->nativeResourceFunctionForIntegration()",
+                  functionName.constData());
+    return function;
+}
+
 class CWizMacToolBarPrivate
 {
 public:
@@ -110,7 +164,14 @@ void WizMacToolBar::setSizeMode(SizeMode sizeMode)
 void WizMacToolBar::showInWindow(QWidget *window)
 {
     d->m_targetWindow = window;
-    QTimer::singleShot(100, this, SLOT(showInTargetWindow()));
+    //
+    QPlatformNativeInterface_Fake::NativeResourceForIntegrationFunction function = resolvePlatformFunction_Fake("setNSToolbar");
+    if (function) {
+        typedef void (*SetNSToolbarFunction)(QWindow *window, void *nsToolbar);
+        reinterpret_cast<SetNSToolbarFunction>(function)(window->windowHandle(), d->toolbar);
+    } else {
+        QTimer::singleShot(100, this, SLOT(showInTargetWindow()));
+    }
 }
 
 void WizMacToolBar::setToolBarVisible(bool bVisible)

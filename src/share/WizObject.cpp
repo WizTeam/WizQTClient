@@ -281,7 +281,7 @@ QString WIZOBJECTDATA::objectTypeToTypeString(WizObjectType eType)
 
 WIZTAGDATA::WIZTAGDATA()
     : nVersion(-1)
-    , nPostion(0)
+    , nPosition(0)
 {
 }
 
@@ -294,7 +294,7 @@ WIZTAGDATA::WIZTAGDATA(const WIZTAGDATA& data)
     strDescription = data.strDescription;
     tModified = data.tModified;
     nVersion = data.nVersion;
-    nPostion = data.nPostion;
+    nPosition = data.nPosition;
 }
 
 BOOL WIZTAGDATA::equalForSync(const WIZTAGDATA& data) const
@@ -315,6 +315,7 @@ bool WIZTAGDATA::fromJson(const Json::Value& value)
         strName = QString::fromStdString(value["name"].asString());
         tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
         nVersion = value["version"].asInt64();
+        nPosition = value["pos"].asInt64();
 
     } catch (Json::Exception& e) {
         TOLOG(e.what());
@@ -333,6 +334,7 @@ bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
     value["parentTagGuid"] = strParentGUID.toStdString();
     value["name"] = strName.toStdString();
     value["modified"] = tModified.toTime_t() * (Json::UInt64)1000;
+    value["pos"] = (int)nPosition;
     //
     return true;
 }

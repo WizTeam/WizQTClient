@@ -331,7 +331,7 @@ WizPluginPopupWidget::WizPluginPopupWidget(WizExplorerApp& app, WizPluginData* d
         {"WizPluginData", m_data},
         {"WizExplorerApp", app.object()}
     };
-    m_web = new WizWebEngineView(objects, this);
+    m_web = WizWebEngineView::create(objects, this);
     //
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
