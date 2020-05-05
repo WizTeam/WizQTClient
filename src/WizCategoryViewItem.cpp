@@ -11,7 +11,7 @@
 #include "utils/WizStyleHelper.h"
 #include "utils/WizNotify.h"
 #include "utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 
 #include "WizCategoryView.h"
 #include "WizMainWindow.h"

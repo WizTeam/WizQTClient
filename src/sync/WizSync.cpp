@@ -12,7 +12,7 @@
 #include "share/WizAnalyzer.h"
 #include "share/WizEventLoop.h"
 
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")

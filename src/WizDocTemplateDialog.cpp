@@ -13,7 +13,7 @@
 
 #include "share/jsoncpp/json/json.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "share/WizMisc.h"
 #include "share/WizZip.h"
 #include "share/WizSettings.h"

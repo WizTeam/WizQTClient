@@ -9,8 +9,8 @@
 
 #include "WizDatabaseManager.h"
 #include "share/WizQtHelper.h"
+#include "WizObject.h"
 
-struct WIZDOCUMENTDATAEX;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 
 

@@ -11,7 +11,7 @@
 #include "share/WizRequest.h"
 #include "share/WizThreads.h"
 
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"

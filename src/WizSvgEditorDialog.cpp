@@ -5,7 +5,7 @@
 #include "share/WizThreads.h"
 #include "share/WizMisc.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "share/jsoncpp/json/json.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"

@@ -10,7 +10,7 @@
 #include <QTextStream>
 #include <iostream>
 #include <fstream>
-#include "WizMisc.h"
+#include "WizMisc_utils.h"
 #include "WizPathResolve.h"
 
 #define LOG_LINES_MAX 30000

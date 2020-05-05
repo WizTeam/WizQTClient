@@ -13,7 +13,7 @@
 #include "WizDef.h"
 #include "WizMisc.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "sync/WizApiEntry.h"
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"

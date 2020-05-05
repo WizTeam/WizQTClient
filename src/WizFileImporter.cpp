@@ -6,7 +6,7 @@
 #include <QDebug>
 
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "html/WizHtmlCollector.h"
 #include "share/WizMisc.h"
 #include "share/WizRtfReader.h"

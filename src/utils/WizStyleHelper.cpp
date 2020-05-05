@@ -13,7 +13,7 @@
 
 #include "WizPathResolve.h"
 #include "../share/WizMisc.h"
-#include "../utils/WizMisc.h"
+#include "../utils/WizMisc_utils.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
 #include "../share/WizUIBase.h"

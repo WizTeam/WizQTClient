@@ -21,7 +21,7 @@
 #endif
 
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 
 
 WizFileIconProvider::WizFileIconProvider()

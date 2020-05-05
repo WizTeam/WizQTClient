@@ -5,7 +5,7 @@
 
 #include "WizMisc.h"
 #include "../utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 
 
 namespace wizmd5

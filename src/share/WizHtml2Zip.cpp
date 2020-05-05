@@ -6,7 +6,7 @@
 
 #include "WizMisc.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include <QDir>
 
 

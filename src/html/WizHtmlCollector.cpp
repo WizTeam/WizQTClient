@@ -9,7 +9,7 @@
 
 #include "../share/WizHtml2Zip.h"
 #include "../share/WizObjectDataDownloader.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 
 bool WizHtmlFileMap::lookup(const QString& strUrl, QString& strFileName)

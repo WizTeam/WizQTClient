@@ -17,7 +17,7 @@
 #include "share/jsoncpp/json/json.h"
 
 #include "utils/WizStyleHelper.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizPinyin.h"
 #include "sync/WizAvatarHost.h"
 #include "sync/WizAsyncApi.h"

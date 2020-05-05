@@ -31,7 +31,7 @@
 #include "WizDef.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizStyleHelper.h"
 
 #include "share/WizMisc.h"

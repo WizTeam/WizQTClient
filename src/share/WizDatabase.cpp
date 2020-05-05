@@ -22,7 +22,7 @@
 #include "share/jsoncpp/json/json.h"
 
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 #include "sync/WizAvatarHost.h"
 #include "WizObjectDataDownloader.h"

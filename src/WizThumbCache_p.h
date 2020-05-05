@@ -3,10 +3,8 @@
 
 #include <QObject>
 #include <QMap>
+#include "share/WizObject.h"
 
-
-struct WIZABSTRACT;
-struct WIZDOCUMENTDATA;
 
 class WizThumbCache;
 

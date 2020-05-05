@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "WizKMCore.h"
 #include "utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "WizMisc.h"
 
 

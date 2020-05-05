@@ -20,7 +20,7 @@
 #include "share/WizMessageBox.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "WizNoteStyle.h"
 #include "WizButton.h"
 #include "WizMainWindow.h"

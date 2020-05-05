@@ -1,7 +1,7 @@
 ﻿#include "WizShareLinkDialog.h"
 #include "sync/WizToken.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "share/WizSettings.h"
 #include <QVBoxLayout>
 #include <QWebEngineView>
