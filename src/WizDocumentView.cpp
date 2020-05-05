@@ -79,13 +79,6 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     //
     m_tab = new QStackedWidget(this);
     //
-    if (isDarkMode()) {
-        setAutoFillBackground(true);
-        setStyleSheet("background-color:#272727;");
-        m_tab->setAutoFillBackground(true);
-        m_tab->setStyleSheet("background-color:#272727;");
-    }
-
     m_passwordView->setGeometry(this->geometry());
     connect(m_passwordView, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
     //
@@ -119,6 +112,7 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     m_commentWidget->hide();
 
     QWidget* wgtEditor = new QWidget(m_docView);
+    m_wgtEditor = wgtEditor;
     //
     //使用一个widget包含webview，否则夜间模式下新建编辑，界面容易出现晃动
     QWidget* webContainer = new QWidget(wgtEditor);
@@ -215,6 +209,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     connect(checkThread, SIGNAL(finished()), m_editStatusChecker, SLOT(clearTimers()));
     m_editStatusChecker->moveToThread(checkThread);
     checkThread->start();
+    //
+    applyTheme();
 }
 
 WizDocumentView::~WizDocumentView()
@@ -224,6 +220,39 @@ WizDocumentView::~WizDocumentView()
     //
     if (m_editStatusChecker)
         delete m_editStatusChecker;
+}
+
+void WizDocumentView::applyTheme() {
+    //
+    m_title->applyTheme();
+    m_web->editorResetFont();
+    //
+    if (isDarkMode()) {
+        //
+        setAutoFillBackground(true);
+        setStyleSheet("background-color:#272727;");
+        //
+        m_tab->setAutoFillBackground(true);
+        m_tab->setStyleSheet("background-color:#272727;");
+        //
+        m_wgtEditor->setAutoFillBackground(true);
+        m_wgtEditor->setStyleSheet("background-color:#272727");
+        //
+        titleBar()->setStyleSheet(QString("QWidget{background-color:#272727;} QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"));
+        titleBar()->setAutoFillBackground(true);
+    } else {
+        setAutoFillBackground(true);
+        setStyleSheet("background-color:#f5f5f5;");
+        //
+        m_tab->setAutoFillBackground(true);
+        m_tab->setStyleSheet("background-color:#f5f5f5;");
+        //
+        m_wgtEditor->setAutoFillBackground(true);
+        m_wgtEditor->setStyleSheet("background-color:white");
+        //
+        titleBar()->setStyleSheet(QString("QWidget{background-color:#ffffff;} QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"));
+        titleBar()->setAutoFillBackground(true);
+    }
 }
 
 QSize WizDocumentView::sizeHint() const

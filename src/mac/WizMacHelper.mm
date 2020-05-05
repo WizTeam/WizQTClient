@@ -31,11 +31,7 @@
 #include <qmacfunctions.h>
 #endif
 
-
-
 #define WizShareSettingsName    @"KCS8N3QJ92.cn.wiz.extension"
-
-
 
 
 @interface DBSCustomView: NSView
@@ -826,11 +822,12 @@ int getSystemPatchVersion()
     return bugfix;
 }
 
-bool isDarkMode()
+//
+bool detectDarkMode(bool force)
 {
     static bool first = true;
     static bool ret = false;
-    if (first) {
+    if (first || force) {
         first = false;
         //
         int major = getSystemMajorVersion();
@@ -857,6 +854,16 @@ bool isDarkMode()
         }
     }
     return ret;
+}
+//
+void resetDarkMode()
+{
+    detectDarkMode(true);
+}
+
+bool isDarkMode()
+{
+    return detectDarkMode(false);
 }
 
 bool isMojaveOrHigher()
@@ -1023,3 +1030,31 @@ QList<WizWindowInfo> WizGetActiveWindows()
 
     return windowTitles;
 }
+
+@interface WizThemeHelper : NSObject
+- (void) themeChanged: (NSNotification *) notification;
+@end
+
+@implementation WizThemeHelper
+- (id) init {
+    [super init];
+    [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(themeChanged:) name:@"AppleInterfaceThemeChangedNotification" object: nil];
+}
+
+-(void)themeChanged:(NSNotification *) notification {
+
+    resetDarkMode();
+    //
+    WizMainWindow *window = WizMainWindow::instance();
+    if (window) {
+        window->onThemeChanged();
+    }
+    //
+}
+@end
+
+
+void wizMacThemeInit() {
+    static WizThemeHelper* helper = [WizThemeHelper new];
+}
+

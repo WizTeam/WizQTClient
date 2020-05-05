@@ -188,6 +188,11 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 WizDocumentWebView::~WizDocumentWebView()
 {
 }
+
+void WizDocumentWebView::applyTheme()
+{
+
+}
 void WizDocumentWebView::waitForDone()
 {
     if (m_docLoadThread) {

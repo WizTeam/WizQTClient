@@ -152,13 +152,14 @@ WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     m_layout = new QHBoxLayout(this);
     m_edit = new QLineEdit(this);
     m_edit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    if (isDarkMode()) {
-        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#999999; "
-                              "selection-background-color: #cccccc;}"));
-    } else {
-        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
-                              "selection-background-color: #8ECAF1;}"));
-    }
+    m_edit->setStyleSheet(QString("QLineEdit{ border:none;}"));
+//    if (isDarkMode()) {
+//        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#999999; "
+//                              "selection-background-color: #cccccc;}"));
+//    } else {
+//        m_edit->setStyleSheet(QString("QLineEdit{ border:none; color:#2F2F2F; "
+//                              "selection-background-color: #8ECAF1;}"));
+//    }
     m_leftIcon = new QLabel(this);
     m_rightIcon = new QLabel(this);
     //

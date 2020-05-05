@@ -66,7 +66,7 @@ public:
     bool isCursorEntered() const { return m_cursorEntered; }
 
     QPoint hitPoint() const { return m_hitPos; }
-
+    //
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
@@ -238,6 +238,8 @@ public:
     bool setSectionVisible(CategorySection section, bool visible);
     bool isSectionVisible(CategorySection section) const;
     void loadSectionStatus();
+
+    void applyTheme();
 
 public:
     WizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);

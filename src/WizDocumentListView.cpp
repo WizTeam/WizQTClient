@@ -116,10 +116,8 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     // setup style
     QString strSkinName = m_app.userSettings().skin();
     setStyle(::WizGetStyle(strSkinName));
-
-    QPalette pal = palette();
-    pal.setColor(QPalette::Base, Utils::WizStyleHelper::listViewBackground());
-    setPalette(pal);
+    //
+    applyTheme();
 
     setCursor(QCursor(Qt::ArrowCursor));
     //
@@ -275,6 +273,12 @@ WizDocumentListView::~WizDocumentListView()
     disconnect();
 }
 
+void WizDocumentListView::applyTheme()
+{
+    QPalette pal = palette();
+    pal.setColor(QPalette::Base, Utils::WizStyleHelper::listViewBackground());
+    setPalette(pal);
+}
 void WizDocumentListView::resizeEvent(QResizeEvent* event)
 {
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
@@ -2326,12 +2330,25 @@ void WizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QSt
 
 void WizDocumentListView::paintEvent(QPaintEvent *e)
 {
-    QListView::paintEvent(e);
-    if (model() && model()->rowCount(rootIndex()) > 0)
-       return;
+    if (model() && model()->rowCount(rootIndex()) > 0) {
+        //
+        QPainter p(viewport());
+        //
+        QRect rc = rect();
+        p.fillRect(rc, Utils::WizStyleHelper::listViewBackground());
+        //
+        QListView::paintEvent(e);
+        //
+        return;
+    }
+    //
     // The view is empty.
-
+    QListView::paintEvent(e);
+    //
     QPainter p(viewport());
+    //
+    QRect rc = rect();
+    p.fillRect(rc, Utils::WizStyleHelper::listViewBackground());
     //
     if (m_emptyFolder.isNull()) {
         m_emptyFolder = QPixmap(Utils::WizStyleHelper::loadPixmap("empty_folder"));
@@ -2346,7 +2363,6 @@ void WizDocumentListView::paintEvent(QPaintEvent *e)
     imageSize.setWidth(int(imageSize.width() / pixmap.devicePixelRatio()));
     imageSize.setHeight(int(imageSize.height() / pixmap.devicePixelRatio()));
 #endif
-    QRect rc = rect();
     //
     QString text = isSearchResult()
             ? tr("No search results...\nTry to change another keyword or advanced searching")

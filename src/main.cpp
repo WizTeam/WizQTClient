@@ -167,6 +167,7 @@ int mainCore(int argc, char *argv[])
 #ifdef Q_OS_MAC
     wizMacInitUncaughtExceptionHandler();
     wizMacRegisterSystemService();
+    wizMacThemeInit();
 
     // init sys local for crash report
     QString sysLocal = QLocale::system().name();

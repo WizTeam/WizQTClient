@@ -33,6 +33,15 @@ WizTitleEdit::WizTitleEdit(QWidget *parent)
     setFont(f);
 }
 
+void WizTitleEdit::applyTheme()
+{
+    if (isDarkMode()) {
+        setStyleSheet("color:#a6a6a6;background-color:#272727");
+    } else {
+        setStyleSheet("color:#535353;");
+    }
+}
+
 QSize WizTitleEdit::sizeHint() const
 {
     return QSize(fontMetrics().width(text()), fontMetrics().height() + 10);
@@ -229,11 +238,7 @@ void WizTitleEdit::setText(const QString& text)
 {
     QLineEdit::setText(text);
     setCursorPosition(0);
-    if (isDarkMode()) {
-        setStyleSheet("color:#a6a6a6;background-color:#272727");
-    } else {
-        setStyleSheet("color:#535353;");
-    }
+    applyTheme();
 }
 
 void WizTitleEdit::onTitleReturnPressed()

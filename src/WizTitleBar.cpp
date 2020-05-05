@@ -216,6 +216,11 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
             SLOT(on_commentCountAcquired(QString,int)));
 }
 
+void WizTitleBar::applyTheme()
+{
+    m_editTitle->applyTheme();
+}
+
 void WizTitleBar::initPlugins(QLayout* layout)
 {
     int nTitleHeight = Utils::WizStyleHelper::titleEditorHeight();

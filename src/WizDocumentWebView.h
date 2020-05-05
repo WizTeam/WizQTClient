@@ -151,6 +151,8 @@ public:
     WizDocumentWebView(WizExplorerApp& app, QWidget* parent);
     ~WizDocumentWebView();
     //
+    void applyTheme();
+    //
     WizDocumentView* view() const;
     //
     void clear();

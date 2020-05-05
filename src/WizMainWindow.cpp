@@ -236,7 +236,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
             m_doc, SLOT(on_document_data_changed(QString,WizDocumentView*)));
 
     connect(m_doc->titleBar(), SIGNAL(viewNoteInSeparateWindow_request()), SLOT(viewCurrentNoteInSeparateWindow()));
-
+    //
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &WizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
         WizAvatarHost::deleteAvatar(oldId);
@@ -296,6 +296,50 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
         syncMessageTimer->setInterval(3 * 1000 * 60);
         syncMessageTimer->start(3 * 1000 * 60);
     }
+    //
+    applyTheme();
+}
+
+void WizMainWindow::applyTheme()
+{
+    m_category->applyTheme();
+    m_documents->applyTheme();
+    m_doc->applyTheme();
+    //
+    QPalette pal = m_noteListWidget->palette();
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#272727"));
+        pal.setColor(QPalette::Base, QColor("#272727"));
+
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    }
+    m_noteListWidget->setPalette(pal);
+    //
+    if (isDarkMode()) {
+        m_noteButtonsContainer->setStyleSheet("background-color:#333333");
+    } else {
+        m_noteButtonsContainer->setStyleSheet("background-color:#f5f5f5");
+    }
+    //
+    if (isDarkMode()) {
+        m_notelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
+    } else {
+        m_notelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    }
+    //
+    //message list
+    pal = m_msgListWidget->palette();
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#272727"));
+        pal.setColor(QPalette::Base, QColor("#272727"));
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    }
+    m_msgListWidget->setPalette(pal);
+    m_msgListWidget->setAutoFillBackground(true);
 }
 
 bool WizMainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -1926,8 +1970,6 @@ void WizMainWindow::initClient()
     m_clienWgt = new QWidget(this);
     setCentralWidget(m_clienWgt);
 
-    m_doc->setStyleSheet("{background-color:#f6f6f6");
-
 #else
     setCentralWidget(rootWidget());
     //
@@ -2018,10 +2060,6 @@ void WizMainWindow::initClient()
     m_doc->commentWidget()->setMinimumWidth(isHighPix ? 170 : 195);
     m_doc->web()->setMinimumWidth(576);
 
-    m_doc->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
-                                 "QToolButton {border:0px; padding:0px; border-radius:0px;}"));
-    m_doc->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"));
-
     m_msgListWidget->hide();
     //
     connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
@@ -2059,6 +2097,7 @@ QWidget* WizMainWindow::createNoteListView()
     if (isDarkMode()) {
         noteButtonsContainer->setStyleSheet("background-color:#333333");
     }
+    m_noteButtonsContainer = noteButtonsContainer;
 
     WizViewTypePopupButton* viewBtn = new WizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
@@ -2103,6 +2142,7 @@ QWidget* WizMainWindow::createNoteListView()
     } else {
         line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
+    m_notelistHeaderSep = line2;
 
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
@@ -2125,16 +2165,6 @@ QWidget*WizMainWindow::createMessageListView()
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     m_msgListWidget->setLayout(layoutList);
-    QPalette pal = m_msgListWidget->palette();
-    if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#272727"));
-        pal.setColor(QPalette::Base, QColor("#272727"));
-    } else {
-        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
-        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
-    }
-    m_msgListWidget->setPalette(pal);
-    m_msgListWidget->setAutoFillBackground(true);
 
     m_msgListTitleBar = new WizMessageListTitleBar(*this, this);
     connect(m_msgListTitleBar, SIGNAL(messageSelector_senderSelected(QString)),
@@ -4513,5 +4543,9 @@ void WizMainWindow::setNeedResetGroups()
 }
 
 
-
+void WizMainWindow::onThemeChanged()
+{
+    applyTheme();
+    emit themeChanged();
+}
 

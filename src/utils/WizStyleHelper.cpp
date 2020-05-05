@@ -521,7 +521,8 @@ int WizStyleHelper::listViewItemHeight(int nType)
 
 QColor WizStyleHelper::listViewBackground()
 {    
-    return QColor(getValue("Documents/Background", "#ffffff").toString());
+    QString text = getValue("Documents/Background", "#ffffff").toString();
+    return QColor(text);
 }
 
 int WizStyleHelper::listViewItemHorizontalPadding()
@@ -1102,7 +1103,21 @@ int WizStyleHelper::editComboFontSize()
 
 QVariant WizStyleHelper::getValue(const QString& key, const QVariant& defaultValue)
 {
-    if (!m_settings) {
+    static bool oldIsDarkMode = isDarkMode();
+    //
+    bool resetSettings = false;
+    if (oldIsDarkMode != isDarkMode()) {
+        oldIsDarkMode = isDarkMode();
+        resetSettings = true;
+    }
+    //
+    if (!m_settings || resetSettings) {
+        //
+        if (m_settings) {
+            delete m_settings;
+            m_settings = nullptr;
+        }
+        //
         QString fileName = WizPathResolve::themePath(themeName()) + "skin.ini";
         if (isDarkMode()) {
             QString darkFileName = WizPathResolve::themePath(themeName()) + "skin_dark.ini";
