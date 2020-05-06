@@ -41,6 +41,8 @@ void WizProgressDialog::setProgress(int nMax, int nCurrent)
 
 void WizProgressDialog::setProgress(QString strObjGUID, int nMax, int nCurrent)
 {
+    Q_UNUSED(strObjGUID);
+    //
     ui->progressBar->setMaximum(nMax);
     ui->progressBar->setValue(nCurrent);
     update();

@@ -85,7 +85,7 @@ void WizUpgradeChecker::_check(const QString& strUrl)
         QDate dateUpgrade(y, m, d);
 
         QFileInfo fi(::WizGetAppFileName());
-        QDate dateLocal = fi.created().date();
+        QDate dateLocal = fi.birthTime().date();
 
         if (dateUpgrade > dateLocal) {
             TOLOG(QObject::tr("INFO: Upgrade is avaliable, version time: %1").arg(dateUpgrade.toString()));

@@ -15,10 +15,10 @@ WizFolderSelector::WizFolderSelector(const QString& strTitle, WizExplorerApp& ap
                                        unsigned int nPermission, QWidget *parent)
     : QDialog(parent)
     , m_app(app)
-    , m_nMinPermission(nPermission)
     , m_bAcceptRoot(true)
     , m_bKeepTime(true)
     , m_bKeepTags(true)
+    , m_nMinPermission(nPermission)
 {
     setWindowTitle(strTitle);
     setFixedSize(400, 420);
@@ -78,13 +78,13 @@ bool WizFolderSelector::isSelectGroupFolder()
             return false;
 
         int nPermission = m_app.databaseManager().db(baseItem->kbGUID()).permission();
-        if (nPermission > m_nMinPermission)
+        if (nPermission > (int)m_nMinPermission)
         {
-            if (nPermission >= WIZ_USERGROUP_READER)
+            if (nPermission >= (int)WIZ_USERGROUP_READER)
             {
                 WizMessageBox::warning(this, tr("Info"), tr("You have no permission to create note in this group!"));
             }
-            else if (nPermission >= WIZ_USERGROUP_EDITOR)
+            else if (nPermission >= (int)WIZ_USERGROUP_EDITOR)
             {
                 WizMessageBox::warning(this, tr("Info"), tr("You have no permission to create folder in this group!"));
             }

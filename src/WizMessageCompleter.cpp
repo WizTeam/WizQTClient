@@ -126,7 +126,7 @@ MessageCompleterModel::MessageCompleterModel(const CWizBizUserDataArray& arrayUs
     }
     if (!m_users.isEmpty())
     {
-        qSort(m_users.begin(), m_users.end(), caseInsensitiveLessThan);
+        std::sort(m_users.begin(), m_users.end(), caseInsensitiveLessThan);
         m_users.insert(0, UserItem());
         m_users[0].strUserId = QString();
         m_users[0].strAlias = tr("all");

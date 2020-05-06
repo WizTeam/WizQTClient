@@ -70,6 +70,7 @@ void WizShareLinkDialog::getToken()
     QString strToken = WizToken::token();
     m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken), [=](const QVariant& vRet){
 
+        Q_UNUSED(vRet);
         emit tokenObtained();
 
     });
@@ -92,6 +93,7 @@ QString WizShareLinkDialog::getTitle()
 
 void WizShareLinkDialog::resizeEx(int nWidth, int nHeight)
 {
+    Q_UNUSED(nWidth);
 //    resize(nWidth, nHeight);
     QRect rec = geometry();
     rec.setHeight(nHeight);
@@ -164,6 +166,7 @@ QString WizShareLinkDialog::formateISO8601String()
 
 void WizShareLinkDialog::notifyEvent(const QString& event, const QVariant& params)
 {
+    Q_UNUSED(params);
     qDebug() << event;
     if (event == "UpgradeToVip") {
         //

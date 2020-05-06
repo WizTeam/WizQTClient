@@ -869,6 +869,7 @@ bool WizAskUserCipherToOperateEncryptedNote(const CWizDocumentDataArray& arrayDo
 
 void WizClearUserCipher(WizDatabase& db, WizUserSettings& settings)
 {
+    Q_UNUSED(db);
     if (!settings.isRememberNotePasswordForSession())
     {
         //TODO:wsj

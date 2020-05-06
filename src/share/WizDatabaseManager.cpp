@@ -14,8 +14,8 @@ WizDatabaseManager* WizDatabaseManager::instance()
 }
 
 WizDatabaseManager::WizDatabaseManager(const QString& strAccountFolderName)
-    : m_strAccountFolderName(strAccountFolderName)
-    , m_mutex(QMutex::Recursive)
+    : m_mutex(QMutex::Recursive)
+    , m_strAccountFolderName(strAccountFolderName)
 {
     Q_ASSERT(!m_instance);
 

@@ -17,12 +17,12 @@ mkdir ../WizQTClient-Release-QT5
 cd ../WizQTClient-Release-QT5
 $QTDIR/bin/qmake ../WizQTClient/WizNote.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler && make -f ./Makefile qmake_all
 cd lib
-cd zlib && make -f ./Makefile && cd ..
-cd quazip && make -f ./Makefile && cd ..
-cd cryptopp && make -f ./Makefile && cd ..
+cd zlib && make -j4 -f ./Makefile && cd ..
+cd quazip && make -j4 -f ./Makefile && cd ..
+cd cryptopp && make -j4 -f ./Makefile && cd ..
 cd ..
 echo $(pwd)
-cd src && make -f ./Makefile && rm -r ../WizNote.app && mv ./WizNote.app ../ && cd ..
+cd src && make -j4 -f ./Makefile && rm -r ../WizNote.app && mv ./WizNote.app ../ && cd ..
 
 MYAPP="WizNote"
 DEST="$MYAPP.app" # Our final App directory

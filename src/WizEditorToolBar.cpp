@@ -1049,6 +1049,8 @@ public:
     void drawTextItem(QPainter *painter, const QStyleOptionViewItem &option,
                       const QModelIndex &index, bool useDefaultFont = false) const
     {
+        Q_UNUSED(useDefaultFont);
+
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
         //
@@ -2000,6 +2002,9 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     //
     bool subscript = QString::fromStdString(d["subscript"].asString()) == "1";
     bool superscript = QString::fromStdString(d["superscript"].asString()) == "1";
+    Q_UNUSED(subscript);
+    Q_UNUSED(superscript);
+    //
     //
     bool bold = QString::fromStdString(d["bold"].asString()) == "1";
     bool italic = QString::fromStdString(d["italic"].asString()) == "1";
@@ -2010,6 +2015,7 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     bool justifycenter = QString::fromStdString(d["justifycenter"].asString()) == "1";
     bool justifyright = QString::fromStdString(d["justifyright"].asString()) == "1";
     bool justifyfull = QString::fromStdString(d["justifyfull"].asString()) == "1";
+    Q_UNUSED(justifyfull);
     //
     bool InsertOrderedList = QString::fromStdString(d["InsertOrderedList"].asString()) == "1";
     bool InsertUnorderedList = QString::fromStdString(d["InsertUnorderedList"].asString()) == "1";
@@ -2300,7 +2306,7 @@ void WizEditorToolBar::on_delegate_markerInitiated(const QString& data)
         //
         QString type = QString::fromStdString(d["curType"].asString());
         Json::Value tools = d["tools"];
-        for (int i = 0; i < tools.size(); i++) {
+        for (int i = 0; i < (int)tools.size(); i++) {
             //
             Json::Value tool = tools[i];
             QString toolType = QString::fromStdString(tool["type"].asString());
@@ -3076,7 +3082,7 @@ void WizEditorToolBar::savePixmap(QPixmap& pix, const QString& strType, bool bUs
 
 void WizEditorToolBar::saveGif(const QByteArray& ba)
 {
-
+    Q_UNUSED(ba);
 }
 
 bool WizEditorToolBar::hasFocus()

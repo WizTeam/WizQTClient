@@ -204,8 +204,8 @@ protected:
     virtual void normalizeCharacters(CString &rCharacters);
     void resetSeekPointer(void) { m_dwBufPos = 0L; }
 
-    const unsigned short readChar(void);
-    const unsigned short ungetChar(void);
+    unsigned short readChar(void);
+    unsigned short ungetChar(void);
     bool getEventNotify(DWORD dwEvent) const ;
     bool isWhiteSpace(int ch) const { return (::wiz_isspace(ch) ? true : false); }
 

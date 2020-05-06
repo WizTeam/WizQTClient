@@ -282,4 +282,5 @@ void WizTitleEdit::onTextEdit(const QString& text)
 
 void WizTitleEdit::onTextChanged(const QString& text)
 {    
+    Q_UNUSED(text);
 }

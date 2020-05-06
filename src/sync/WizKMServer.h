@@ -210,6 +210,10 @@ public:
     template <class TData>
     bool getList(int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
     {
+        Q_UNUSED(nCountPerPage);
+        Q_UNUSED(nVersion);
+        Q_UNUSED(arrayRet);
+
         ATLASSERT(FALSE);
         return FALSE;
     }
@@ -247,6 +251,7 @@ public:
     template <class TData>
     bool postList(std::deque<TData>& arrayData)
     {
+        Q_UNUSED(arrayData);
         ATLASSERT(FALSE);
         return FALSE;
     }
@@ -275,6 +280,10 @@ public:
     template <class TData>
     bool postData(TData& data, bool bWithData, __int64& nServerVersion)
     {
+        Q_UNUSED(data);
+        Q_UNUSED(bWithData);
+        Q_UNUSED(nServerVersion);
+        //
         ATLASSERT(FALSE);
         return FALSE;
     }

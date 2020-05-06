@@ -263,6 +263,7 @@ BOOL WizHtmlGetContentByHiddenTag(const CString& strHtmlText, CString& strConten
     static const QString lpszEnd = WizGetHtmlContentHiddenTagEnd();
     static const int nBeginLen = (int)lpszBegin.length();
     static const int nEndLen = (int)lpszEnd.length();
+    Q_UNUSED(nEndLen);
     //
     int nBegin = strHtmlText.find(lpszBegin);
     if (-1 == nBegin)
@@ -372,7 +373,7 @@ BOOL WizCombineHtmlText(CString& strTextTo, QString lpszTextFrom)
 
 BOOL WizHTMLIsCommentedOutCode(UINT nPos, CString strHTML)
 {
-    if (-1 == nPos)
+    if (-1 == (int)nPos)
         return FALSE;
     //
     CString strSubText = strHTML.right(strHTML.length() - nPos);

@@ -1494,6 +1494,9 @@ void WizLoginDialog::onSNSLoginSuccess(const QString& strUrl)
 void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString& serverAddress,
                                        const QString& responseMessage)
 {
+    Q_UNUSED(boardAddress);
+    Q_UNUSED(serverAddress);
+    //
     qDebug() << "response from wizbox : " << responseMessage;
 
     if (responseMessage.isEmpty())
@@ -2057,6 +2060,8 @@ void WizActionWidget::leaveEvent(QEvent* event)
 
 void WizActionWidget::paintEvent(QPaintEvent * event)
 {
+    Q_UNUSED(event);
+    //
     QStyleOption opt;
     opt.init(this);
     QPainter p(this);

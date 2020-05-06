@@ -1545,7 +1545,7 @@ void WizHtmlReader::normalizeCharacters(CString &rCharacters)
 }
 
 
-const unsigned short WizHtmlReader::readChar(void)
+unsigned short WizHtmlReader::readChar(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     if (m_dwBufPos >= m_dwBufLen)
@@ -1553,7 +1553,7 @@ const unsigned short WizHtmlReader::readChar(void)
     return (m_lpszBuffer[m_dwBufPos++]);
 }
 
-const unsigned short WizHtmlReader::ungetChar(void)
+unsigned short WizHtmlReader::ungetChar(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     ATLASSERT(m_dwBufPos);

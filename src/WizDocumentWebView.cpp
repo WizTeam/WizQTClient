@@ -116,6 +116,7 @@ void WizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction,
 void WizDocumentWebViewPage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
 {
     Q_UNUSED(sourceID);
+    Q_UNUSED(level);
 
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
@@ -1023,7 +1024,7 @@ QString WizDocumentWebView::getHighlightKeywords()
     //
     CString ret;
     ::WizStringArrayToText(arr, ret, ",");
-    return ret;
+    return QString(ret);
 }
 
 
@@ -1090,6 +1091,7 @@ bool WizDocumentWebView::isInternalUrl(const QUrl& url)
 
 void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
+    Q_UNUSED(navigationType);
     if (!isMainFrame)
         return;
     //

@@ -315,7 +315,7 @@ public:
     virtual bool deleteAttachmentFromLocal(const QString& strAttachmentGuid);
 
 public:
-    bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
+    virtual bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
     bool loadDatabaseInfo();
     bool setDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool initDatabaseInfo(const WIZDATABASEINFO& dbInfo);

@@ -20,8 +20,8 @@
 namespace Utils {
 
 WizLogger::WizLogger()
-    : m_buffer(new QBuffer())
-    , m_mutex(QMutex::Recursive)
+    : m_mutex(QMutex::Recursive)
+    , m_buffer(new QBuffer())
 {
     connect(m_buffer, SIGNAL(readyRead()), SLOT(onBuffer_readRead()));
 }

@@ -12,7 +12,7 @@ macx {
     QMAKE_INFO_PLIST = ../build/osx/info.plist
     ICON = ../build/common/logo/wiznote.icns
 
-    QMAKE_CXXFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-parameter -Wno-inconsistent-missing-overrid
+    QMAKE_CXXFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-parameter -Wno-inconsistent-missing-override
 }
 
 TARGET = WizNote
@@ -33,6 +33,9 @@ DEFINES += USECOCOATOOLBAR
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+TRANSLATIONS = ../i18n/wiznote_zh_CN.ts  ../i18n/wiznote_zh_TW.ts
+CONFIG+=lrelease embed_translations
 
 SOURCES += \
     mac/WizSearchWidget_mac.mm \
@@ -470,9 +473,8 @@ macx {
 
 message($$WIZNOTE_RESOURCESPATH)
 
-macx {
-    copyResource.commands = $(COPY_DIR) $$PWD/../share/ $$WIZNOTE_RESOURCESPATH
-}
+
+copyResource.commands = $(COPY_DIR) $$PWD/../share/ $$WIZNOTE_RESOURCESPATH
 first.depends = $(first) copyResource
 export(first.depends)
 export(copyResource.commands)

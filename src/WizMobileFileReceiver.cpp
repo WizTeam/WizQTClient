@@ -391,6 +391,8 @@ QAbstractSocket::SocketState WizMobileTcpContainer::tcpState()
 
 void WizMobileTcpContainer::connectToHost(const QString& address, quint16 port)
 {
+    Q_UNUSED(port);
+    //
     m_strHost = address;
     if (!isRunning())
     {

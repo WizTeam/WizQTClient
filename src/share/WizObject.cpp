@@ -113,7 +113,7 @@ bool WIZKBVALUEVERSIONS::fromJson(const Json::Value& value)
         //
         Json::Value versionsVal = value["versions"];
         //
-        for (int i = 0; i < versionsVal.size(); i++)
+        for (int i = 0; i < (int)versionsVal.size(); i++)
         {
             Json::Value version = versionsVal[i];
             //
@@ -329,6 +329,7 @@ bool WIZTAGDATA::fromJson(const Json::Value& value)
 
 bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
 {
+    Q_UNUSED(kbGuid);
     //value["kbGuid"] = kbGuid.toStdString();
     value["tagGuid"] = strGUID.toStdString();
     value["parentTagGuid"] = strParentGUID.toStdString();
@@ -458,6 +459,8 @@ bool WIZDELETEDGUIDDATA::fromJson(const Json::Value& value)
 
 bool WIZDELETEDGUIDDATA::toJson(QString kbGuid, Json::Value& value) const
 {
+    Q_UNUSED(kbGuid);
+
     value["deletedGuid"] = strGUID.toStdString();
     value["type"] = WIZOBJECTDATA::objectTypeToTypeString(eType).toStdString();
     value["created"] = tDeleted.toTime_t() * (Json::UInt64)1000;

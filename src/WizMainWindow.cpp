@@ -1119,7 +1119,7 @@ void WizMainWindow::initDockMenu()
 {
 #ifdef Q_OS_MAC
     m_dockMenu = new QMenu(this);
-    qt_mac_set_dock_menu(m_dockMenu);
+    m_dockMenu->setAsDockMenu();
 
     connect(m_dockMenu, SIGNAL(aboutToShow()),
             SLOT(resetDockMenu()));
@@ -1128,6 +1128,7 @@ void WizMainWindow::initDockMenu()
 
 void WizMainWindow::on_editor_statusChanged(const QString& currentStyle)
 {
+    Q_UNUSED(currentStyle);
 }
 
 void WizMainWindow::createNoteByTemplate(const TemplateData& tmplData)
@@ -1442,7 +1443,7 @@ void WizMainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
         newActions.append(action);
     }
 
-    qSort(newActions.begin(), newActions.end(), caseInsensitiveLessThan);
+    std::sort(newActions.begin(), newActions.end(), caseInsensitiveLessThan);
     for (QAction* action : newActions)
     {
         connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
@@ -1537,6 +1538,8 @@ void WizMainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
     }
     m_templateIAPDialog->showTemplateInfo(tmpl.id, tmpl.strName, tmpl.strThumbUrl);
     m_templateIAPDialog->open();
+#else
+    Q_UNUSED(tmpl);
 #endif
 }
 
@@ -1703,7 +1706,7 @@ void WizMainWindow::onClickedImage(const QString& src, const QString& list)
         CWizStdStringArray files;
         if (d.isArray())
         {
-            for (int i = 0; i < d.size(); i++)
+            for (int i = 0; i < (int)d.size(); i++)
             {
                 QString file = QString::fromStdString(d[i].asString());
                 files.push_back(file);
@@ -3346,6 +3349,9 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
 
 void WizMainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart, bool bEnd)
 {
+    Q_UNUSED(strKeywords);
+    Q_UNUSED(bEnd);
+    //
     if (bStart) {
         m_documents->setLeadInfoState(DocumentLeadInfo_SearchResult);
         m_documents->setDocuments(arrayDocument);
@@ -3386,6 +3392,8 @@ void WizMainWindow::on_menuButtonClicked()
 
 void WizMainWindow::on_client_splitterMoved(int pos, int index)
 {
+    Q_UNUSED(pos);
+    Q_UNUSED(index);
 #ifndef Q_OS_MAC
     adjustToolBarLayout();
 #endif
@@ -3652,8 +3660,10 @@ void WizMainWindow::on_options_restartForSettings()
 
 void WizMainWindow::resetPermission(const QString& strKbGUID, const QString& strOwner)
 {
+    Q_UNUSED(strOwner);
+
     int nPerm = m_dbMgr.db(strKbGUID).permission();
-    bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
+    //bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
 
     // Admin, Super, do anything
     if (nPerm == WIZ_USERGROUP_ADMIN || nPerm == WIZ_USERGROUP_SUPER)
@@ -3901,6 +3911,7 @@ QObject* WizMainWindow::CreateWizObject(const QString& strObjectID)
 
 void WizMainWindow::SetSavingDocument(bool saving)
 {
+    Q_UNUSED(saving);
 }
 
 void WizMainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)

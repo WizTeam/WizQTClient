@@ -157,11 +157,11 @@ void WizTagListWidget::setDocuments(const CWizDocumentDataArray& arrayDocument)
         CWizTagListWidgetItem* pItem = dynamic_cast<CWizTagListWidgetItem*>(m_list->item(i));
 
         int n  = listGUIDs.count(pItem->tag().strGUID);
-        if (n  && n < arrayDocument.size()) {
+        if (n  && n < (int)arrayDocument.size()) {
             m_list->takeItem(i);
             m_list->insertItem(0, pItem);
             pItem->setCheckState(Qt::PartiallyChecked);
-        } else if (n == arrayDocument.size()) {
+        } else if (n == (int)arrayDocument.size()) {
             m_list->takeItem(i);
             m_list->insertItem(0, pItem);
             pItem->setCheckState(Qt::Checked);

@@ -277,6 +277,7 @@ QPixmap WizUserInfoWidget::getCircleAvatar(int width, int height)
 
 QPixmap WizUserInfoWidget::getAvatar(int width, int height)
 {
+    Q_UNUSED(height);
     return getCircleAvatar(width, width);
 }
 

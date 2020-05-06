@@ -448,6 +448,7 @@ void WizSuggestCompletionon::on_advanced_buttonClicked()
 
 void WizSuggestCompletionon::resetContainerSize(int width, int height)
 {
+    Q_UNUSED(width);
     m_popupWgt->setFixedSize(m_editor->sizeHint().width(), height);
     QRect rect(0, 0, m_editor->sizeHint().width(), height); //= geometry();    
     QRegion region = Utils::WizStyleHelper::borderRadiusRegion(rect);

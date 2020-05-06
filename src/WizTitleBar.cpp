@@ -429,6 +429,7 @@ void WizTitleBar::onEditorChanged()
 
 void WizTitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked)
 {
+    Q_UNUSED(locked);
     updateInfo(data);
     setEditorMode(editorMode);
     //
@@ -737,6 +738,7 @@ bool isNetworkAccessible()
 void WizTitleBar::onCommentsButtonClicked()
 {
     QWebEngineView* comments = noteView()->commentView();
+    Q_UNUSED(comments);
 
     WizDocumentView* view = noteView();
     if (!view)

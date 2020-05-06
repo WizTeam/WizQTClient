@@ -495,7 +495,7 @@ QString JsonValueToText(const Json::Value& value)
         //
         CString text;
         ::WizStringArrayToText(arr, text, " ");
-        return text;
+        return QString(text);
     }
     else if (value.isString())
     {

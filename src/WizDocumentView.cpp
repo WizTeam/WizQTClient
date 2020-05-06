@@ -273,6 +273,8 @@ void WizDocumentView::waitForDone()
     //
     bool done = false;
     m_web->trySaveDocument(m_note, false, [=, &done](const QVariant& ret){
+        //
+        Q_UNUSED(ret);
 
         m_web->waitForDone();
         //
@@ -339,6 +341,9 @@ void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUME
 
 void WizDocumentView::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool bOk)
 {
+    Q_UNUSED(view);
+    Q_UNUSED(doc);
+    Q_UNUSED(bOk);
 }
 
 bool WizDocumentView::reload()
@@ -408,6 +413,8 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
     WIZDOCUMENTDATAEX dataTemp = wizDoc;
     //
     m_web->trySaveDocument(m_note, false, [=](const QVariant& ret){
+        //
+        Q_UNUSED(ret);
         //
         WIZDOCUMENTDATAEX data = dataTemp;
 
@@ -1021,7 +1028,8 @@ void WizDocumentView::on_commentWidget_statusChanged()
         int maxWidth = maximumWidth();
         if (!WizIsHighPixel())
         {
-            if (qApp->desktop()->availableGeometry().width() < 1440)
+            QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+            if (screen && screen->size().width() < 1440)
             {
                 maxWidth = 916;
             }

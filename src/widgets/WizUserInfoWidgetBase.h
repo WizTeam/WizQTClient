@@ -18,7 +18,7 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *event);
     //
-    virtual QPixmap getAvatar(int width, int height) { return QPixmap(); }
+    virtual QPixmap getAvatar(int width, int height) { Q_UNUSED(width); Q_UNUSED(height); return QPixmap(); }
     virtual QIcon getArrow() { return QIcon(); }
     virtual QIcon getVipIcon() { return QIcon(); }
     //

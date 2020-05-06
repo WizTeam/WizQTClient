@@ -51,7 +51,11 @@ public:
     virtual void setLeadInfoState(int state);
 
     // drawing
-    virtual void draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const {}
+    virtual void draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const {
+        Q_UNUSED(p);
+        Q_UNUSED(vopt);
+        Q_UNUSED(nViewType);
+    }
 
 protected:
     int m_nSortingType;      // upercase : -  decrease : +

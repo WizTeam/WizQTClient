@@ -594,6 +594,7 @@ void WizCategoryViewMessageItem::mousePressed(const QPoint& pos)
 
 void WizCategoryViewMessageItem::mouseReleased(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     m_extraButtonIconPressed = false;
 }
 
@@ -1350,6 +1351,7 @@ void WizCategoryViewBizGroupRootItem::mousePressed(const QPoint& pos)
 
 void WizCategoryViewBizGroupRootItem::mouseReleased(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     m_extraButtonIconPressed = false;
 }
 
@@ -1462,16 +1464,16 @@ bool WizCategoryViewBizGroupRootItem::hitTestUnread()
 
 bool WizCategoryViewBizGroupRootItem::isOwner()
 {
-    return m_biz.bizUserRole == WIZ_BIZROLE_OWNER;
+    return m_biz.bizUserRole == (int)WIZ_BIZROLE_OWNER;
 }
 bool WizCategoryViewBizGroupRootItem::isAdmin()
 {
-    return m_biz.bizUserRole == WIZ_BIZROLE_ADMIN;
+    return m_biz.bizUserRole == (int)WIZ_BIZROLE_ADMIN;
 }
 
 bool WizCategoryViewBizGroupRootItem::isHr()
 {
-    return m_biz.bizUserRole <= WIZ_BIZROLE_HR;
+    return m_biz.bizUserRole <= (int)WIZ_BIZROLE_HR;
 }
 
 WizCategoryViewOwnGroupRootItem::WizCategoryViewOwnGroupRootItem(WizExplorerApp& app)
@@ -1571,7 +1573,7 @@ bool WizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) const
     Q_UNUSED(data);
 
     WizDatabase& db = WizDatabaseManager::instance()->db(kbGUID());
-    if (WIZ_USERGROUP_AUTHOR >= db.permission())
+    if ((int)WIZ_USERGROUP_AUTHOR >= db.permission())
         return true;
 
     return false;
@@ -1610,7 +1612,7 @@ bool WizCategoryViewGroupRootItem::acceptDrop(const QString& urls) const
     Q_UNUSED(urls);
     WizDatabase& db = m_app.databaseManager().db(kbGUID());
 
-    return WIZ_USERGROUP_AUTHOR >= db.permission();
+    return (int)WIZ_USERGROUP_AUTHOR >= db.permission();
 }
 
 void WizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
@@ -1675,6 +1677,7 @@ void WizCategoryViewGroupRootItem::reload(WizDatabase& db)
 
 void WizCategoryViewGroupRootItem::mousePressed(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     QRect rcBorder = treeWidget()->visualItemRect(this);
     QRect rcIcon = getExtraButtonRect(rcBorder, true);
     if (rcIcon.contains(pos))
@@ -1685,6 +1688,7 @@ void WizCategoryViewGroupRootItem::mousePressed(const QPoint& pos)
 
 void WizCategoryViewGroupRootItem::mouseReleased(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     m_extraButtonIconPressed = false;
 }
 
@@ -1904,7 +1908,7 @@ bool WizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     Q_UNUSED(data);
 
     WizDatabase& db = WizDatabaseManager::instance()->db(kbGUID());
-    if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
+    if ((int)WIZ_USERGROUP_AUTHOR >= db.permission()) {
         return true;
     }
     //
@@ -1917,7 +1921,7 @@ bool WizCategoryViewGroupItem::acceptDrop(const QString& urls) const
     Q_UNUSED(urls);
     WizDatabase& db = m_app.databaseManager().db(kbGUID());
 
-    return WIZ_USERGROUP_AUTHOR >= db.permission();
+    return (int)WIZ_USERGROUP_AUTHOR >= db.permission();
 }
 
 void WizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
@@ -1998,6 +2002,7 @@ WizCategoryViewTrashItem::WizCategoryViewTrashItem(WizExplorerApp& app,
 
 void WizCategoryViewTrashItem::showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos)
 {
+    Q_UNUSED(pos);
     if (WizCategoryView* view = dynamic_cast<WizCategoryView *>(pCtrl)) {
         //no menu
         //view->showTrashContextMenu(pos);
@@ -2030,11 +2035,14 @@ bool WizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
 
 bool WizCategoryViewTrashItem::acceptDrop(const WizCategoryViewItemBase* pItem) const
 {
+    Q_UNUSED(pItem);
     return false;
 }
 
 void WizCategoryViewTrashItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
 {
+    Q_UNUSED(forceCopy);
+    //
     CWizDocumentDataArray arrayOp;
     for (WIZDOCUMENTDATA doc : arrayDocument)
     {

@@ -20,7 +20,7 @@
 #include "share/WizAnalyzer.h"
 
 const int TAGITEM_MARGIN = 16;
-const int TAGITEM_HEIGHT  = 16;
+//const int TAGITEM_HEIGHT  = 16;
 const int TAGITEM_DELETEICONSIZE = 14;
 
 
@@ -453,6 +453,7 @@ void WizTagBar::on_documentTagModified(const WIZDOCUMENTDATA& document)
 
 void WizTagBar::on_lineEditTextChanged(const QString& text)
 {
+    Q_UNUSED(text);
 //    if (text.isEmpty())
 //    {
 //        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#6c6c6c;}");

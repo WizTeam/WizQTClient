@@ -12,8 +12,8 @@
 
 WizNotifyBar::WizNotifyBar(QWidget *parent)
     : QWidget(parent)
-    , m_type(NoNotify)
     , m_childWgt(new QWidget(this))
+    , m_type(NoNotify)
 {
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);    // On most platforms, the margin is 11 pixels in all directions.

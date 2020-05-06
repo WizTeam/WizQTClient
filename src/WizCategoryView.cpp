@@ -401,7 +401,7 @@ void WizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
             }
         }
 
-        if (nAccept == m_dragDocArray.size()) {
+        if (nAccept == (int)m_dragDocArray.size()) {
             event->acceptProposedAction();
         }
         else
@@ -3027,6 +3027,7 @@ void WizCategoryView::on_itemSelectionChanged()
 
 void WizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
 {
+    Q_UNUSED(column);
     //ignore item changed signal that caused by drag-drop
     if (m_dragItem)
         return;
@@ -3066,6 +3067,7 @@ void WizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
 
 void WizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
 {
+    Q_UNUSED(column);
     if (WizCategoryViewLinkItem* pLink = dynamic_cast<WizCategoryViewLinkItem*>(item))
     {
         if (LINK_COMMAND_ID_CREATE_GROUP == pLink->commandId())
@@ -4750,7 +4752,7 @@ void WizCategoryView::initGroup(WizDatabase& db, bool& itemCreeated)
     WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
         // only show trash if permission is enough
         WizDatabase& newDb = m_dbMgr.db(strKbGUID);
-        if (newDb.permission() > WIZ_USERGROUP_SUPER)
+        if (newDb.permission() > (int)WIZ_USERGROUP_SUPER)
         {
             pTrashItem->setHidden(true);
         }
@@ -5673,7 +5675,7 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
     int nPerm = m_dbMgr.db(strKbGUID).permission();
 
     // only Admin and Super user see trash folder and operate with tag (group folder)
-    if (nPerm > WIZ_USERGROUP_SUPER) {
+    if (nPerm > (int)WIZ_USERGROUP_SUPER) {
         WizCategoryViewTrashItem* pItem =  findTrash(strKbGUID);
         if (pItem) pItem->setHidden(true);
 
@@ -5696,13 +5698,13 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
     }
 
     // permission greater than author can create new document
-    if (nPerm >= WIZ_USERGROUP_READER) {
+    if (nPerm >= (int)WIZ_USERGROUP_READER) {
         findAction(ActionNewDocument)->setEnabled(false);
     } else {
         findAction(ActionNewDocument)->setEnabled(true);
     }
 
-    if (nPerm >= WIZ_USERGROUP_READER) {
+    if (nPerm >= (int)WIZ_USERGROUP_READER) {
         findAction(ActionImportFile)->setEnabled(false);
     } else {
         findAction(ActionImportFile)->setEnabled(true);
@@ -5711,6 +5713,7 @@ void WizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
 
 void WizCategoryView::on_group_bizChanged(const QString& strKbGUID)
 {
+    Q_UNUSED(strKbGUID);
     //TODO:
 }
 
@@ -6022,6 +6025,7 @@ bool WizCategoryView::movePersonalFolder(const QString& sourceFolder, WizFolderS
 
 void WizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder)
 {
+    Q_UNUSED(combineFolder);
     QString name = WizDatabase::getLocationName(sourceFolder);
     QString newLocation = targetParentFolder + name + "/";
     //
@@ -6168,6 +6172,10 @@ void WizCategoryView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& ar
 void WizCategoryView::dropItemAsBrother(WizCategoryViewItemBase* targetItem,
                                          WizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
 {
+    Q_UNUSED(targetItem);
+    Q_UNUSED(dragedItem);
+    Q_UNUSED(dropAtTop);
+    Q_UNUSED(deleteDragSource);
 //    if (targetItem->type() == Category_FolderItem)
 //    {
 //        CWizCategoryViewFolderItem* folderItem = dynamic_cast<CWizCategoryViewFolderItem*>(targetItem);

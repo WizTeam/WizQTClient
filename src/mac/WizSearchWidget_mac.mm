@@ -11,6 +11,8 @@
 #include "WizMacHelper_mm.h"
 #include "WizMacToolBar.h"
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 // WizSearchField
 
 @interface WizSearchField: NSSearchField <NSTextFieldDelegate>
@@ -188,7 +190,7 @@
      m_pSearchWidget->on_search_textChanging();
 }
 
-- (void) changePlaceHolderString:(NSString*)text;
+- (void) changePlaceHolderString:(NSString*)text
 {
     [self setPlaceholderString:text];
     NSString* currentSearchStringValue = self.stringValue;

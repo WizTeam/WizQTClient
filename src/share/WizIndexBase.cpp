@@ -25,7 +25,7 @@ WizIndexBase::~WizIndexBase(void)
     close();
 }
 
-bool WizIndexBase::open(const CString& strFileName)
+bool WizIndexBase::open(const QString& strFileName, const QString&)
 {
     m_strFileName = strFileName;
     //m_strDatabasePath = WizExtractFilePath(strFileName);

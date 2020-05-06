@@ -130,6 +130,7 @@ private:
     template <class TData>
     bool onDownloadList(const std::deque<TData>& arrayData)
     {
+        Q_UNUSED(arrayData);
         ATLASSERT(FALSE);
         return FALSE;
     }

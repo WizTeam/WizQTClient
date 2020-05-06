@@ -27,7 +27,7 @@ private:
     void init(const WizWebEngineViewInjectObjects& objects, QSize sz, QWidget *parent);
 protected:
     virtual void load();
-    virtual void onLoaded(bool ok) {}
+    virtual void onLoaded(bool) {}
 protected:
     QString m_url;
     WizLocalProgressWebView* m_progressWebView;

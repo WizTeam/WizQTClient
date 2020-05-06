@@ -1869,6 +1869,8 @@ void WizScaleIconToSize(QIcon& icon, QSize size)
 
 QIcon WizLoadPngSkinIcon(const QString& fileName, const QSize& iconSize, const WizIconOptions& options)
 {
+    Q_UNUSED(iconSize);
+    //
     QIcon icon;
     if (isDarkMode()) {
         //

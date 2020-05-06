@@ -413,6 +413,9 @@ bool WizKMSync::downloadValue(const QString& strKey)
 template <class TData>
 bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<TData>& arrayData)
 {
+    Q_UNUSED(pDatabase);
+    Q_UNUSED(arrayData);
+    //
     ATLASSERT(FALSE);
     return FALSE;
 }
@@ -464,6 +467,7 @@ bool onUploadObject(IWizSyncableDatabase* pDatabase, const TData& data, const QS
 template <class TData>
 bool onUploadObject(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTPARAMDATA& data, const QString& strObjectType)
 {
+    Q_UNUSED(strObjectType);
     return pDatabase->onUploadParam(data.strDocumentGuid, data.strName);
 }
 
@@ -557,6 +561,8 @@ QByteArray WizCompressAttachmentFile(const QByteArray& stream, QString& strTempF
 template <class TData>
 bool CanEditData(IWizSyncableDatabase* pDatabase, const TData& data)
 {
+    Q_UNUSED(pDatabase);
+    Q_UNUSED(data);
     ATLASSERT(FALSE);
     return FALSE;
 }
@@ -646,6 +652,9 @@ void SaveServerError(const WIZKBINFO& kbInfo, const WizKMDatabaseServer& server,
 
 bool UploadDocumentCore(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress, bool forceUploadData)
 {
+    Q_UNUSED(kbInfo);
+    Q_UNUSED(progress);
+
     QString strDisplayName;
 
     strDisplayName = local.strTitle;
@@ -803,6 +812,9 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
 
 bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
+    Q_UNUSED(kbInfo);
+    Q_UNUSED(progress);
+
     QString strDisplayName;
 
     strDisplayName = local.strName;
@@ -924,8 +936,22 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
 
 
 template <class TData>
-bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, TData>& mapDataOnServer, TData& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index,
+                  std::map<QString, TData>& mapDataOnServer, TData& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, WizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
+    Q_UNUSED(kbInfo);
+    Q_UNUSED(size);
+    Q_UNUSED(start);
+    Q_UNUSED(total);
+    Q_UNUSED(index);
+    Q_UNUSED(server);
+    Q_UNUSED(strObjectType);
+    Q_UNUSED(progress);
+    Q_UNUSED(pDatabase);
+    Q_UNUSED(mapDataOnServer);
+    Q_UNUSED(local);
+    Q_UNUSED(pEvents);
+
     ATLASSERT(false);
 }
 
@@ -1393,6 +1419,8 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server,
 
 bool WizUploadMessages(IWizKMSyncEvents* pEvents, WizKMAccountsServer& server, IWizSyncableDatabase* pDatabase)
 {
+    Q_UNUSED(pEvents);
+    //
     CWizMessageDataArray arrayMessage;
     pDatabase->getModifiedMessageList(arrayMessage);
 
@@ -1514,7 +1542,7 @@ public:
             if (it.key() != m_currentUserGUID)
             {
                 QFileInfo info(strFileName);
-                if (info.created().daysTo(QDateTime::currentDateTime()) < 7)
+                if (info.birthTime().daysTo(QDateTime::currentDateTime()) < 7)
                 {
                     continue;
                 }
@@ -1562,6 +1590,8 @@ QString downloadFromUrl(const QString& strUrl)
 void syncGroupUsers(WizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
                     IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool background)
 {
+    Q_UNUSED(background);
+
     pEvents->onStatus(QObject::tr("Sync group users"));
 
     for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();

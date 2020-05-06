@@ -44,7 +44,7 @@ public:
 #endif
     //
     virtual QString userId() { return QString(); }
-    virtual QPixmap getAvatar(int width, int height) { return QPixmap(); }
+    virtual QPixmap getAvatar(int width, int height) { Q_UNUSED(width); Q_UNUSED(height); return QPixmap(); }
     virtual QIcon getVipIcon() { return QIcon(); }
     virtual QIcon getArrow() { return QIcon(); }
     virtual int textWidth() const;

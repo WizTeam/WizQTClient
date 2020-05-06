@@ -4,8 +4,8 @@
 
 
 WizCodeExternal::WizCodeExternal(WizCodeEditorDialog* editor, QObject* parent)
-    : m_editor(editor)
-    , QObject(parent)
+    : QObject(parent)
+    , m_editor(editor)
 {
 }
 

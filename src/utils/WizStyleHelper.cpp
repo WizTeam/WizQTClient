@@ -380,7 +380,8 @@ QColor WizStyleHelper::treeViewItemMessageText()
 }
 
 QColor WizStyleHelper::treeViewItemText(bool bSelected, bool bSecondLevel)
-{    
+{
+    Q_UNUSED(bSecondLevel);
     if (bSelected) {
         return QColor(getValue("Category/TextSelected", "#ffffff").toString());
     } else {
@@ -562,26 +563,36 @@ QColor WizStyleHelper::listViewItemBackground(int stat)
 
 QColor WizStyleHelper::listViewItemType(bool bSelected, bool bFocused)
 {
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Type", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Title", "#464646").toString());
 }
 
 QColor WizStyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
 }
 
 QColor WizStyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
 {
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Location", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
-{    
+{
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
 }
 

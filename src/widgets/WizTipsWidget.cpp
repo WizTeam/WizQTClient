@@ -13,15 +13,15 @@ QSet<QString> WizTipsWidget::m_tipsList = QSet<QString>();
 
 WizTipsWidget::WizTipsWidget(const QString& id, QWidget *parent)
     : WizPopupWidget(parent)
-    , m_hintSize(318, 82)
-    , m_showFunction(emptyFunction)
-    , m_hideFunction(emptyFunction)
-    , m_closeFunction(emptyFunction)
-    , m_id(id)
-    , m_autoAdjustPosition(false)
     , m_targetWidget(nullptr)
     , m_xOff(0)
     , m_yOff(0)
+    , m_hintSize(318, 82)
+    , m_id(id)
+    , m_autoAdjustPosition(false)
+    , m_showFunction(emptyFunction)
+    , m_hideFunction(emptyFunction)
+    , m_closeFunction(emptyFunction)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & ~Qt::Popup;

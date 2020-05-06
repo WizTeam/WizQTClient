@@ -56,7 +56,7 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
 
 }
 
-QSize WizUserCipherForm::sizeHint()
+QSize WizUserCipherForm::sizeHint() const
 {
     return QSize(WizSmartScaleUI(350), WizSmartScaleUI(120));
 }

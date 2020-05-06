@@ -47,5 +47,5 @@ QString WizCommonUI::clipboardToImage(int hwnd, const QString& strOptions)
     if (!image.save(strFileName))
         return CString();
     //
-    return strFileName;
+    return QString(strFileName);
 }

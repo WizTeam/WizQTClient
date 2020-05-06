@@ -2,6 +2,7 @@ QT -= gui
 
 TEMPLATE = lib
 CONFIG += staticlib
+CONFIG += warn_off
 
 CONFIG += c++11
 

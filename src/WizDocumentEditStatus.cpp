@@ -270,7 +270,7 @@ WizDocumentStatusChecker::WizDocumentStatusChecker(QObject* parent)
     //, m_loopCheckTimer(0)
     , m_stop(false)
 {
-
+    Q_UNUSED(parent);
 }
 
 WizDocumentStatusChecker::~WizDocumentStatusChecker()
@@ -292,6 +292,9 @@ void WizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const Q
 
 void WizDocumentStatusChecker::stopCheckStatus(const QString& strKbGUID, const QString& strGUID)
 {
+    Q_UNUSED(strKbGUID);
+    Q_UNUSED(strGUID);
+    //
     m_timeOutTimer->stop();
 //    m_loopCheckTimer->stop();
     m_stop = true;

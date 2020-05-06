@@ -33,6 +33,7 @@
 
 #define WizShareSettingsName    @"KCS8N3QJ92.cn.wiz.extension"
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 @interface DBSCustomView: NSView
 
@@ -328,6 +329,9 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
                  userData:(NSString *)userData
                     error:(NSString **)error
 {
+    Q_UNUSED(userData);
+    Q_UNUSED(error);
+    //
     for (NSString *type in [pboard types])
     {
         //NSLog(@"types %@", type);
@@ -410,6 +414,8 @@ QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath)
 
 void wizHIDictionaryWindowShow(const QString& strText, QRect rcText)
 {
+    Q_UNUSED(strText);
+    Q_UNUSED(rcText);
 //    CFStringRef cfString = (CFStringRef)WizToNSString(strText);
 //    [HIDictionaryWindowShow dictionary:NULL textString:cfString selectionRange:];
 }
@@ -509,6 +515,9 @@ bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, con
 
         virtual void startTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
         {
+            Q_UNUSED(bAbort);
+            Q_UNUSED(dwAppData);
+            //
             QString tagName = pTag->getTagName();
             tagName = tagName.toUpper();
             //
@@ -644,8 +653,11 @@ void wizMacSetClipboardText(const QString& strText)
 
 void wizMacGetClipboardHtml(const QString& html, QString& url)
 {
+    Q_UNUSED(html);
+    Q_UNUSED(url);
+    //
     NSArray* arr = [[NSPasteboard generalPasteboard] types];
-    for (int i = 0; i < arr.count; i++)
+    for (int i = 0; i < (int)arr.count; i++)
     {
         NSString* type = arr[i];
         NSLog(@"%@", type);
@@ -664,8 +676,9 @@ void wizMacGetClipboardHtml(const QString& html, QString& url)
             NSArray *subItems = [NSArray arrayWithArray:[webArchive objectForKey:@"WebSubresources"]];
             NSPredicate *iPredicate = [NSPredicate predicateWithFormat:@"WebResourceMIMEType like 'image*'"];
             NSArray *imagesArray = [subItems filteredArrayUsingPredicate:iPredicate];
-            for (int i=0; i<[imagesArray count]; i++) {
+            for (int i=0; i < (int)[imagesArray count]; i++) {
                 NSDictionary *sItem = [NSDictionary dictionaryWithDictionary:[imagesArray objectAtIndex:i]];
+                Q_UNUSED(sItem);
                 //NSImage *sImage = [NSImage imageWithData:[sItem valueForKey:@"WebResourceData"]];
                 // handle images
             }
@@ -1039,10 +1052,12 @@ QList<WizWindowInfo> WizGetActiveWindows()
 - (id) init {
     [super init];
     [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(themeChanged:) name:@"AppleInterfaceThemeChangedNotification" object: nil];
+    return self;
 }
 
 -(void)themeChanged:(NSNotification *) notification {
 
+    Q_UNUSED(notification);
     resetDarkMode();
     //
     WizMainWindow *window = WizMainWindow::instance();
@@ -1056,5 +1071,6 @@ QList<WizWindowInfo> WizGetActiveWindows()
 
 void wizMacThemeInit() {
     static WizThemeHelper* helper = [WizThemeHelper new];
+    Q_UNUSED(helper);
 }
 
