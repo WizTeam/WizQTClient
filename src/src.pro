@@ -1,6 +1,5 @@
 QT       += core gui
 
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webengine webenginewidgets svg xml websockets
 
 macx {
@@ -12,6 +11,8 @@ macx {
 
     QMAKE_INFO_PLIST = ../build/osx/info.plist
     ICON = ../build/common/logo/wiznote.icns
+
+    QMAKE_CXXFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-parameter -Wno-inconsistent-missing-overrid
 }
 
 TARGET = WizNote
@@ -457,3 +458,35 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/cryptopp/release/cryptopp.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/cryptopp/debug/cryptopp.lib
 else:unix: PRE_TARGETDEPS += $$OUT_PWD/../lib/cryptopp/libcryptopp.a
+
+
+
+# copy resources
+# https://dragly.org/2013/11/05/copying-data-files-to-the-build-directory-when-working-with-qmake/
+WIZNOTE_RESOURCESPATH = $$OUT_PWD/share
+macx {
+    WIZNOTE_RESOURCESPATH = $$OUT_PWD/$${TARGET}.app/Contents/Resources
+}
+
+message($$WIZNOTE_RESOURCESPATH)
+
+macx {
+    copyResource.commands = $(COPY_DIR) $$PWD/../share/ $$WIZNOTE_RESOURCESPATH
+}
+first.depends = $(first) copyResource
+export(first.depends)
+export(copyResource.commands)
+
+# copy mac translations
+macx {
+    copyServiceMenu.commands = $(COPY_DIR) $$PWD/../build/osx/localize/ $$WIZNOTE_RESOURCESPATH
+    first.depends = $(first) copyResource copyServiceMenu
+    export(first.depends)
+    export(copyServiceMenu.commands)
+
+    QMAKE_EXTRA_TARGETS += first copyServiceMenu copyResource
+} else {
+    QMAKE_EXTRA_TARGETS += first copyResource
+}
+
+
