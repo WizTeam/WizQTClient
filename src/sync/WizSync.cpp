@@ -1002,7 +1002,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
         //
         if (_document)	//
         {
-            pEvents->onUploadDocument(local.strGUID, FALSE);
+            pEvents->onUploadDocument(local.displayName(), FALSE);
         }
         //
         BOOL bUploaded = TRUE;
@@ -1047,7 +1047,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
         //
         if (_document && bUploaded)	//
         {
-            pEvents->onUploadDocument(local.strGUID, TRUE);
+            pEvents->onUploadDocument(local.displayName(), TRUE);
             pDatabase->onObjectUploaded(local.strGUID, "document");
         }
     }

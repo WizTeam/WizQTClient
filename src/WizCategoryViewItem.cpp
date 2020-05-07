@@ -63,6 +63,28 @@ WizCategoryViewItemBase::WizCategoryViewItemBase(WizExplorerApp& app,
 {
 }
 
+void WizCategoryViewItemBase::setIconName(QString name)
+{
+    m_iconName = name;
+    resetIcon(false);
+}
+void WizCategoryViewItemBase::resetIcon(bool withChildren)
+{
+    if (!m_iconName.isEmpty()) {
+        QIcon icon = WizLoadSkinIcon(m_app.userSettings().skin(), m_iconName, QSize(), ICON_OPTIONS);
+        setIcon(0, icon);
+    }
+    //
+    if (withChildren) {
+        for (int i = 0; i < childCount(); i++) {
+            if (WizCategoryViewItemBase* childItem = dynamic_cast<WizCategoryViewItemBase*>(child(i))) {
+                childItem->resetIcon(withChildren);
+            }
+        }
+    }
+    //
+}
+
 void WizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     bool bSelected = vopt->state.testFlag(QStyle::State_Selected);
@@ -389,8 +411,7 @@ WizCategoryViewMessageItem::WizCategoryViewMessageItem(WizExplorerApp& app,
     , m_nUnread(unread)
     , m_szUnreadSize(unreadSize)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_messages", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_messages");
     setText(0, strName);
 
     m_nFilter = nFilterType;
@@ -603,8 +624,7 @@ WizCategoryViewShortcutRootItem::WizCategoryViewShortcutRootItem(WizExplorerApp&
                                                                    const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_ShortcutRootItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_shortcut", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_shortcut");
     setText(0, strName);
 }
 
@@ -814,8 +834,7 @@ WizCategoryViewSearchRootItem::WizCategoryViewSearchRootItem(WizExplorerApp& app
                                                                const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_QuickSearchRootItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_search", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_search");
     setText(0, strName);
 }
 
@@ -839,8 +858,7 @@ WizCategoryViewAllFoldersItem::WizCategoryViewAllFoldersItem(WizExplorerApp& app
                                                                const QString& strKbGUID)
     : WizCategoryViewItemBase(app, strName, strKbGUID, Category_AllFoldersItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folders", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_folders");
     setText(0, strName);
 }
 
@@ -887,13 +905,11 @@ WizCategoryViewFolderItem::WizCategoryViewFolderItem(WizExplorerApp& app,
                                                        const QString& strKbGUID)
     : WizCategoryViewItemBase(app, strLocation, strKbGUID, Category_FolderItem)
 {
-    QIcon icon;
     if (::WizIsPredefinedLocation(strLocation) && strLocation == "/My Journals/") {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder_diary", QSize(), ICON_OPTIONS);
+        setIconName("category_folder_diary");
     } else {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder", QSize(), ICON_OPTIONS);
+        setIconName("category_folder");
     }
-    setIcon(0, icon);
     setText(0, WizDatabase::getLocationDisplayName(strLocation));
 }
 
@@ -1040,8 +1056,7 @@ WizCategoryViewAllTagsItem::WizCategoryViewAllTagsItem(WizExplorerApp& app,
                                                          const QString& strKbGUID)
     : WizCategoryViewItemBase(app, strName, strKbGUID, Category_AllTagsItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_tags", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_tags");
     setText(0, strName);
 }
 
@@ -1089,8 +1104,7 @@ WizCategoryViewTagItem::WizCategoryViewTagItem(WizExplorerApp& app,
     : WizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_TagItem)
     , m_tag(tag)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_tagItem", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_tagItem");
     setText(0, WizDatabase::tagNameToDisplayName(tag.strName));
 }
 
@@ -1186,8 +1200,7 @@ WizCategoryViewStyleRootItem::WizCategoryViewStyleRootItem(WizExplorerApp& app,
                                                              const QString& strName)
     : WizCategoryViewItemBase(app, strName)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "style", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("style");
     setText(0, strName);
 }
 
@@ -1201,8 +1214,7 @@ QString WizCategoryViewStyleRootItem::getSectionName()
 WizCategoryViewGroupsRootItem::WizCategoryViewGroupsRootItem(WizExplorerApp& app, const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_GroupsRootItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_group", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_group");
     setText(0, strName);
 }
 
@@ -1270,8 +1282,7 @@ WizCategoryViewBizGroupRootItem::WizCategoryViewBizGroupRootItem(WizExplorerApp&
     , m_biz(biz)
     , m_unReadCount(0)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_biz", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_biz");
 }
 
 void WizCategoryViewBizGroupRootItem::showContextMenu(WizCategoryBaseView *pCtrl, QPoint pos)
@@ -1514,16 +1525,14 @@ WizCategoryViewGroupRootItem::WizCategoryViewGroupRootItem(WizExplorerApp& app,
     , m_group(group)
     , m_nUnread(0)
 {
-    QIcon icon;
     if (group.bEncryptData)
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_group_enc", QSize(), ICON_OPTIONS);
+        setIconName("category_group_enc");
     }
     else
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_group", QSize(), ICON_OPTIONS);
+        setIconName("category_group");
     }
-    setIcon(0, icon);
     setText(0, m_strName);
 }
 
@@ -1828,8 +1837,7 @@ WizCategoryViewGroupNoTagItem::WizCategoryViewGroupNoTagItem(WizExplorerApp& app
                                                                const QString& strKbGUID)
     : WizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID, Category_GroupNoTagItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_unclassified", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_unclassified");
     setText(0, PREDEFINED_UNCLASSIFIED);
 }
 
@@ -1863,8 +1871,7 @@ WizCategoryViewGroupItem::WizCategoryViewGroupItem(WizExplorerApp& app,
     : WizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_GroupItem)
     , m_tag(tag)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_folder");
     setText(0, WizDatabase::tagNameToDisplayName(tag.strName));
 }
 
@@ -1995,8 +2002,7 @@ WizCategoryViewTrashItem::WizCategoryViewTrashItem(WizExplorerApp& app,
                                                      const QString& strKbGUID)
     : WizCategoryViewFolderItem(app, "/Deleted Items/", strKbGUID)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_trash", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_trash");
     setText(0, PREDEFINED_TRASH);
 }
 
@@ -2069,35 +2075,33 @@ WizCategoryViewShortcutItem::WizCategoryViewShortcutItem(WizExplorerApp& app,
     , m_location(location)
     , m_bEncrypted(bEncrypted)
 {
-    QIcon icon;
     switch (type) {
     case Document:
     {
         if (bEncrypted)
         {
-            icon = WizLoadSkinIcon(app.userSettings().skin(), "document_badge_encrypted", QSize(), ICON_OPTIONS);
+            setIconName("document_badge_encrypted");
         }
         else
         {
-            icon = WizLoadSkinIcon(app.userSettings().skin(), "document_badge", QSize(), ICON_OPTIONS);
+            setIconName("document_badge");
         }
     }
         break;
     case PersonalFolder:
     case GroupTag:
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder", QSize(), ICON_OPTIONS);
+        setIconName("category_folder");
     }
         break;
     case PersonalTag:
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_tag", QSize(), ICON_OPTIONS);
+        setIconName("category_tag");
     }
         break;
     }
 
     //
-    setIcon(0, icon);
     setText(0, strName);
 }
 
@@ -2344,8 +2348,7 @@ void WizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewIt
 WizCategoryViewMySharesItem::WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_MySharesItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_share", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_share");
     setText(0, strName);
 }
 

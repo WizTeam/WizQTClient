@@ -48,6 +48,8 @@ class WizCategoryViewItemBase : public QTreeWidgetItem
 {
 public:
     WizCategoryViewItemBase(WizExplorerApp& app, const QString& strName = "", const QString& strKbGUID = "", int type = Type);
+    virtual void setIconName(QString name);
+    virtual void resetIcon(bool withChildren);
     virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos) = 0;
     virtual void getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(WizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
@@ -105,6 +107,7 @@ protected:
     QString m_countString;
     bool m_extraButtonIconPressed;
     bool m_bWillBeDeleted;
+    QString m_iconName;
 };
 
 

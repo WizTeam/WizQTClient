@@ -353,6 +353,7 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
 
     WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
     bool fromJson(const Json::Value& value);
+    QString displayName() const { return strTitle; }
 
     // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
@@ -388,6 +389,8 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     //
     friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
     BOOL equalForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
+    //
+    QString displayName() const { return strName; }
 
     static QString versionName() { return "attachment_version"; }
     static QString objectName() { return "attachment"; }

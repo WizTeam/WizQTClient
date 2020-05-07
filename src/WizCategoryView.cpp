@@ -1325,7 +1325,11 @@ WizCategoryView::~WizCategoryView()
 
 void WizCategoryView::applyTheme()
 {
-
+   for (int i = 0; i< topLevelItemCount(); i++) {
+       if (WizCategoryViewItemBase* item = dynamic_cast<WizCategoryViewItemBase *>(topLevelItem(i))) {
+           item->resetIcon(true);
+       }
+   }
 }
 
 void WizCategoryView::initMenus()
