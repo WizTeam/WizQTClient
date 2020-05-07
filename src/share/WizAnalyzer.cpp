@@ -55,7 +55,11 @@ CString WizAnalyzer::getInstallDays()
     if (days == 0)
     {
         QFileInfo info(QApplication::applicationFilePath());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
         days = info.birthTime().daysTo(QDateTime::currentDateTime());
+#else
+        days = info.created().daysTo(QDateTime::currentDateTime());
+#endif
         ::WizIniWriteInt(m_strRecordFileNameNoDelete, "Common", "useDays", days);
     }
     //

@@ -1542,7 +1542,11 @@ public:
             if (it.key() != m_currentUserGUID)
             {
                 QFileInfo info(strFileName);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
                 if (info.birthTime().daysTo(QDateTime::currentDateTime()) < 7)
+#else
+                if (info.created().daysTo(QDateTime::currentDateTime()) < 7)
+#endif
                 {
                     continue;
                 }

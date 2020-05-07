@@ -59,7 +59,11 @@ bool WizDocumentListViewDocumentItem::isAvatarNeedUpdate(const QString& strFileN
 
     QFileInfo info(strFileName);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
     QDateTime tCreated = info.birthTime();
+#else
+    QDateTime tCreated = info.created();
+#endif
     QDateTime tNow = QDateTime::currentDateTime();
     if (tCreated.daysTo(tNow) >= 1) { // download avatar before yesterday
         return true;
