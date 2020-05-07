@@ -66,7 +66,8 @@ WizCategoryViewItemBase::WizCategoryViewItemBase(WizExplorerApp& app,
 void WizCategoryViewItemBase::setIconName(QString name)
 {
     m_iconName = name;
-    resetIcon(false);
+    QIcon icon = WizLoadSkinIcon(m_app.userSettings().skin(), m_iconName, QSize(), ICON_OPTIONS);
+    setIcon(0, icon);
 }
 void WizCategoryViewItemBase::resetIcon(bool withChildren)
 {

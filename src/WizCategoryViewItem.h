@@ -48,7 +48,7 @@ class WizCategoryViewItemBase : public QTreeWidgetItem
 {
 public:
     WizCategoryViewItemBase(WizExplorerApp& app, const QString& strName = "", const QString& strKbGUID = "", int type = Type);
-    virtual void setIconName(QString name);
+    void setIconName(QString name);
     virtual void resetIcon(bool withChildren);
     virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos) = 0;
     virtual void getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;

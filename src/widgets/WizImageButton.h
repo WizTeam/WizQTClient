@@ -31,9 +31,9 @@ signals:
 public slots:
 
 protected slots:
-    void paintEvent(QPaintEvent* event);
-    void mousePressEvent(QMouseEvent*  event);
-    void	mouseReleaseEvent(QMouseEvent* event);
+    void paintEvent(QPaintEvent* event) override;
+    void mousePressEvent(QMouseEvent*  event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
     QPixmap m_normalIcon;

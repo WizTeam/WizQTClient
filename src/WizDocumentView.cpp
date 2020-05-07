@@ -1028,8 +1028,12 @@ void WizDocumentView::on_commentWidget_statusChanged()
         int maxWidth = maximumWidth();
         if (!WizIsHighPixel())
         {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
             QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
             if (screen && screen->size().width() < 1440)
+#else
+            if (qApp->desktop()->availableGeometry().width() < 1440)
+#endif
             {
                 maxWidth = 916;
             }
