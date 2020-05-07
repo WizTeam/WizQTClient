@@ -341,9 +341,6 @@ WizMessageListView::WizMessageListView(WizDatabaseManager& dbMgr, QWidget *paren
 
     QString strSkinName = "default"; // FIXME
     setStyle(::WizGetStyle(strSkinName));
-    QPalette pal = palette();
-    pal.setColor(QPalette::Base, Utils::WizStyleHelper::listViewBackground());
-    setPalette(pal);
 
     setCursor(QCursor(Qt::ArrowCursor));
 
@@ -405,6 +402,15 @@ WizMessageListView::WizMessageListView(WizDatabaseManager& dbMgr, QWidget *paren
             SLOT(on_itemSelectionChanged()));
 
     connect(WizAvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));
+    //
+    applyTheme();
+}
+
+void WizMessageListView::applyTheme()
+{
+    QString style = QString("background-color: %1").arg(Utils::WizStyleHelper::listViewBackground().name());
+    setStyleSheet(style);
+    setAutoFillBackground(true);
 }
 
 void WizMessageListView::resizeEvent(QResizeEvent* event)
@@ -982,14 +988,6 @@ WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* par
     , m_currentSenderGUID(QString())
 {
     setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
-    QPalette pal = palette();
-    if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#333333"));
-    } else {
-        pal.setColor(QPalette::Window, QColor("#F7F7F7"));
-    }
-    setPalette(pal);
-    setAutoFillBackground(true);
 
     QHBoxLayout* hLayout = new QHBoxLayout;
     hLayout->setContentsMargins(0, 0, 0, 0);
@@ -1038,6 +1036,23 @@ WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* par
 
     connect(&m_dbMgr, SIGNAL(messageCreated(WIZMESSAGEDATA)),
             SLOT(on_message_created(WIZMESSAGEDATA)));
+    //
+    applyTheme();
+}
+
+void WizMessageListTitleBar::applyTheme()
+{
+    QPalette pal = palette();
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#333333"));
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F7F7F7"));
+    }
+    setPalette(pal);
+    setAutoFillBackground(true);
+    if (m_msgSenderSelector) {
+        m_msgSenderSelector->applyTheme();
+    }
 }
 
 #define MESSAGELISTTITLEBARTIPSCHECKED      "MessageListTitleBarTipsChecked"
@@ -1281,19 +1296,26 @@ WizMessageSenderSelector::WizMessageSenderSelector(WizDatabaseManager& dbMgr, QW
 
     layout->addWidget(m_userList);
     //
-    setStyleSheet(QString(".QWidget{padding:0px; background-color:#FFFFFF;} \
-                  QListWidget{border:0px;padding:0xp;background-color:#FFFFFF;}"));
-    m_userList->verticalScrollBar()->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
-    QPalette pl = palette();
-    pl.setColor(QPalette::Window, QColor(Qt::white));
-    setPalette(pl);
-
     connect(m_userList, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_selectorItem_clicked(QListWidgetItem*)));
 
     WizListItemStyle<WizSenderSelectorItem>* listStyle = new WizListItemStyle<WizSenderSelectorItem>();
     m_userList->setStyle(listStyle);
 
     connect(m_userList, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_selectorItem_clicked(QListWidgetItem*)));
+    //
+    applyTheme();
+}
+
+void WizMessageSenderSelector::applyTheme()
+{
+    if (isDarkMode()) {
+        setStyleSheet(QString(".QWidget{padding:0px; background-color:#272727;} \
+                      QListWidget{border:0px;padding:0xp;background-color:#272727;}"));
+    } else {
+        setStyleSheet(QString(".QWidget{padding:0px; background-color:#FFFFFF;} \
+                      QListWidget{border:0px;padding:0xp;background-color:#FFFFFF;}"));
+    }
+    m_userList->verticalScrollBar()->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
 }
 
 QSize WizMessageSenderSelector::sizeHint() const

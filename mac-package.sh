@@ -12,8 +12,16 @@ package_output_path="$HOME"
 
 QTDIR="/Users/weishijun/Qt5.12.8/5.12.8/clang_64"
 
+# prepare language files
+$QTDIR/bin/lrelease ./i18n/wiznote_zh_CN.ts ./share/locales/wiznote_zh_CN.qm
+$QTDIR/bin/lrelease ./i18n/wiznote_zh_TW.ts ./share/locales/wiznote_zh_TW.qm
+rm ./share/locales/wiznote_zh_CN.qm
+rm ./share/locales/wiznote_zh_TW.qm
+mv ./i18n/wiznote_zh_CN.qm ./share/locales/wiznote_zh_CN.qm
+mv ./i18n/wiznote_zh_TW.qm ./share/locales/wiznote_zh_TW.qm
+
 mkdir ../WizQTClient-Release-QT5
-#rm -rf ../WizQTClient-Release-QT5/* && \
+rm -rf ../WizQTClient-Release-QT5/*
 cd ../WizQTClient-Release-QT5
 $QTDIR/bin/qmake ../WizQTClient/WizNote.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler && make -f ./Makefile qmake_all
 cd lib

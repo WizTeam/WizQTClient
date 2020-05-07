@@ -34,8 +34,7 @@ DEFINES += USECOCOATOOLBAR
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-TRANSLATIONS = ../i18n/wiznote_zh_CN.ts  ../i18n/wiznote_zh_TW.ts
-CONFIG+=lrelease embed_translations
+RESOURCES  += ../resources/wiznote.qrc
 
 SOURCES += \
     mac/WizSearchWidget_mac.mm \

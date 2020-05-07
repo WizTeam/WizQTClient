@@ -304,7 +304,9 @@ void WizMainWindow::applyTheme()
 {
     m_category->applyTheme();
     m_documents->applyTheme();
+    m_msgList->applyTheme();
     m_doc->applyTheme();
+    m_msgListTitleBar->applyTheme();
     //
     QPalette pal = m_noteListWidget->palette();
     if (isDarkMode()) {
@@ -325,8 +327,10 @@ void WizMainWindow::applyTheme()
     //
     if (isDarkMode()) {
         m_notelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
+        m_messagelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
     } else {
         m_notelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+        m_messagelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
     //
     //message list
@@ -2188,6 +2192,7 @@ QWidget*WizMainWindow::createMessageListView()
     } else {
         line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
+    m_messagelistHeaderSep = line2;
 
     layoutList->addLayout(titleBarLayout);
     layoutList->addWidget(line2);

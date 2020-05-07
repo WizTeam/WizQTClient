@@ -187,6 +187,7 @@ private:
     QWidget* m_noteListWidget;
     QWidget* m_noteButtonsContainer;
     QWidget* m_notelistHeaderSep;
+    QWidget* m_messagelistHeaderSep;
     QWidget* m_msgListWidget;
     WizMessageListTitleBar* m_msgListTitleBar;
 

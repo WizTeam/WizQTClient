@@ -288,13 +288,16 @@ QString WizStyleHelper::wizCommonStyleSheet()
 
 QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 {
+    const QString bgColor = isDarkMode() ? "#272727" : "#ffffff";
+    const QString handColor = isDarkMode() ? "#88686868" : "#DADADA";
+    //
     return QString("QScrollBar {\
-            background: #FFFFFF;\
+            background: %8;\
             width: %1px; \
         }\
         QScrollBar::handle:vertical {\
             width: %2px; \
-            background:#DADADA; \
+            background:%9; \
             border-radius:%3px;\
             min-height:%4px; \
             margin-top:%5px; \
@@ -318,6 +321,8 @@ QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
         .arg(WizSmartScaleUI(marginTop))
         .arg(WizSmartScaleUI(3))
         .arg(WizSmartScaleUI(3))
+        .arg(bgColor)
+        .arg(handColor)
         ;
 }
 
