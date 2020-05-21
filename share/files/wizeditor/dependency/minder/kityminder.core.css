@@ -15,9 +15,9 @@
     margin: 0;
 }
 
-.km-view image {
+/* .km-view image {
     cursor: zoom-in;
-}
+} */
 
 .km-image-viewer {
     position: fixed;

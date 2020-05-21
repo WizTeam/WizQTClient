@@ -698,14 +698,17 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
     }
     //
+    QString textColor = "#000000";
     if (isDarkMode()) {
         backgroundColor = "#272727";
+        textColor = "#a6a6a6";
     }
     //
 
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
     strCss.replace("/*default-line-height*/", QString("line-height:%1;").arg(lineHeight));
     strCss.replace("/*default-para-spacing*/", QString("margin-top:%1px; margin-bottom:%1px").arg(paraSpacing));
+    strCss.replace("/*default-text-color*/", QString("color: %1;").arg(textColor));
 
     //
     const QString customCssId("wiz_custom_css");
@@ -1030,14 +1033,6 @@ QString WizDocumentWebView::getHighlightKeywords()
 
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
-    WizDocumentWebView* self = this;
-    if (isDarkMode()) {
-        //
-        QTimer::singleShot(1000, [=] {
-            self->setVisible(true);
-        });
-    }
-    //
     if (!ok)
         return;
     //
@@ -1301,7 +1296,7 @@ void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 
 
 #ifdef QT_DEBUG
-//#define DEBUG_EDITOR
+#define DEBUG_EDITOR
 #endif
 
 void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QString>& files)
@@ -1310,7 +1305,7 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
 #ifdef DEBUG_EDITOR
-    QString strEditorJS = "http://192.168.1.73:8080/libs/wizDocument/wizEditorForMac.js";
+    QString strEditorJS = "http://192.168.1.73:8080/dist/libs/wizEditorForMac.js";
 #else
     QString strEditorJS = "file:///" +  strHtmlEditorPath + "wizEditorForMac.js";
 #endif
@@ -1457,7 +1452,6 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     //
     if (isDarkMode()) {
         page()->setBackgroundColor(QColor("#272727"));
-        setVisible(false);
     }
     //
     m_strNoteHtmlFileName = strFileName;

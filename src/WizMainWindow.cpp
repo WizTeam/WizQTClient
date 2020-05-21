@@ -429,6 +429,7 @@ void WizMainWindow::on_application_aboutToQuit()
 void WizMainWindow::cleanOnQuit()
 {
     m_quiting = true;
+    qInstallMessageHandler(nullptr);
     //
     WizObjectDownloaderHost::instance()->waitForDone();
     WizKMSyncThread::setQuickThread(NULL);
