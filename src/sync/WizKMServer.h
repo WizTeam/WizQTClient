@@ -1,6 +1,7 @@
 ﻿#ifndef WIZKMXMLRPC_H
 #define WIZKMXMLRPC_H
 
+#include <QUrl>
 #include "share/WizMessageBox.h"
 #include "share/WizRequest.h"
 #include "share/WizObject.h"

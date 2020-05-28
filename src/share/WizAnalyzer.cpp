@@ -67,6 +67,7 @@ CString WizAnalyzer::getInstallDays()
 }
 void WizAnalyzer::increaseCounter(const CString& strSection, const CString& strKey)
 {
+    return;
     int count = ::WizIniReadIntDef(m_strRecordFileName, strSection, strKey, 0);
 	count++;
     ::WizIniWriteInt(m_strRecordFileName, strSection, strKey, count);
@@ -74,6 +75,7 @@ void WizAnalyzer::increaseCounter(const CString& strSection, const CString& strK
 
 void WizAnalyzer::addDuration(const CString& strFunctionName, int seconds)
 {
+    return;
     int count = ::WizIniReadIntDef(m_strRecordFileName, "Durations", strFunctionName, 0);
 	count += seconds;
     ::WizIniWriteInt(m_strRecordFileName, "Durations", strFunctionName, count);
@@ -81,6 +83,7 @@ void WizAnalyzer::addDuration(const CString& strFunctionName, int seconds)
 
 void WizAnalyzer::logTimes()
 {
+    return;
 	WizOleDateTime t = ::WizGetCurrentTime();
 	//
 	int hour = t.getHour();
@@ -99,6 +102,7 @@ void WizAnalyzer::logTimes()
 //
 void WizAnalyzer::logUseDays()
 {
+    return;
 	WizOleDateTime t = ::WizGetCurrentTime();
 	//
 	if (m_tLastLog.getYear() == t.getYear()
@@ -132,6 +136,7 @@ CString WizAnalyzer::getFirstAction(int index)
 }
 void WizAnalyzer::logFirstAction(const CString& strActionName)
 {
+    return;
     if (!strActionName || !*strActionName)
 		return;
 	//
@@ -158,6 +163,7 @@ void WizAnalyzer::logFirstAction(const CString& strActionName)
 
 void WizAnalyzer::logAction(const CString& strAction)
 {
+    return;
     QMutexLocker locker(&m_csLog);
 	//
 	logUseDays();
@@ -169,6 +175,7 @@ void WizAnalyzer::logAction(const CString& strAction)
 
 void WizAnalyzer::logDurations(const CString& strAction, int seconds)
 {
+    return;
     QMutexLocker locker(&m_csLog);
     //
 	logUseDays();
@@ -179,6 +186,8 @@ void WizAnalyzer::logDurations(const CString& strAction, int seconds)
 //
 void WizAnalyzer::post(IWizSyncableDatabase* db)
 {
+    // disabled
+    return;
     //
     class CPostRunnable
     {

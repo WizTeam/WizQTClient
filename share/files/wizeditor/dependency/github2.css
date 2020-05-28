@@ -1,6 +1,6 @@
 .markdown-body {
     margin: 0 auto;
-    padding: 20px 36px;
+    padding: 20px 48px;
 }
 
 .markdown-body.mobile {
@@ -100,15 +100,15 @@
     /*margin: 1em 0;*/
 /*}*/
 
-.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
+/* .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
 .markdown-body dl, .markdown-body pre {
     margin: 0 0 10px;
     margin: 0 0 .83rem;
-}
+} */
 
-.markdown-body li {
+/* .markdown-body li {
     margin: 5px 0;
-}
+} */
 
 .markdown-body li.wiz-md-todo-list-item {
     list-style: none;
@@ -162,10 +162,10 @@
     padding-left: 8px;
 }
 
-.markdown-body ul, .markdown-body ol {
+/* .markdown-body ul, .markdown-body ol {
     padding-left: 34px;
     padding-left: 2.13rem;
-}
+} */
 .markdown-body td ul, .markdown-body td ol {
     padding-left: 16px;
     padding-left: 1rem;
@@ -559,6 +559,7 @@ only screen and (min-device-pixel-ratio: 3) {
     }
 }
 
+
 /*评论页面修正*/
 .comment-list-item .markdown-body {
     padding: 0;
@@ -568,4 +569,11 @@ only screen and (min-device-pixel-ratio: 3) {
 .markdown-body .wiz-code-container,
 .markdown-body .wiz-table-body {
     padding: 0;
+}
+
+/* 修正 br 高度*/
+br {
+    display: block;
+    margin: 0 0 8px;
+    content: " ";
 }

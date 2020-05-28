@@ -1,9 +1,11 @@
 TEMPLATE = subdirs
 
+CONFIG += ordered
+
 SUBDIRS += \
-    src \
-    lib/quazip \
     lib/zlib \
-    lib/cryptopp
+    lib/quazip \
+    lib/cryptopp \
+    src
 
-
+quazip.depends = zlib

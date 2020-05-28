@@ -14,6 +14,7 @@
 #include <QPixmapCache>
 #include <QDateTime>
 #include <QPainter>
+#include <QPainterPath>
 
 #include "WizApiEntry.h"
 #include "../utils/WizPathResolve.h"
