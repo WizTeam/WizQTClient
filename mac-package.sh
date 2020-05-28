@@ -10,7 +10,9 @@ echo "build version : " $REV
 package_home="./macos-package"
 package_output_path="$HOME"
 
-QTDIR="/Users/weishijun/Qt5.12.8/5.12.8/clang_64"
+
+# 注意，需要切换xcode为10
+QTDIR="/Users/weishijun/Qt/5.14.2/clang_64"
 
 # prepare language files
 $QTDIR/bin/lrelease ./i18n/wiznote_zh_CN.ts ./share/locales/wiznote_zh_CN.qm
