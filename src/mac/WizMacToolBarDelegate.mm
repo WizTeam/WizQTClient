@@ -387,6 +387,7 @@ NSMutableArray *itemIdentifiers(const QList<WizMacToolBarItem *> *items, bool cu
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
+    Q_UNUSED(aNotification);
 //    NSWindow* window1 = [[NSApp windows] objectAtIndex:0];
 //    NSWindow* window2 = [[NSApp windows] objectAtIndex:1];
 //    NSWindow* window3 = [NSApp mainWindow];
@@ -400,7 +401,8 @@ NSMutableArray *itemIdentifiers(const QList<WizMacToolBarItem *> *items, bool cu
 - (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
 //- (BOOL) textShouldEndEditing:(NSText *) textObject;
 {
-    //Q_UNUSED(control);
+    Q_UNUSED(control);
+    Q_UNUSED(fieldEditor);
     //
     if (!m_toolbar)
         return YES;

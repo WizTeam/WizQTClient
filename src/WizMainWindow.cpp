@@ -4563,6 +4563,8 @@ void WizMainWindow::setNeedResetGroups()
 void WizMainWindow::onThemeChanged()
 {
     applyTheme();
+    m_searchWidget->applyTheme();
+    //
     emit themeChanged();
 }
 

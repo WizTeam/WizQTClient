@@ -69,6 +69,9 @@
 
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView doCommandBySelector:(SEL)commandSelector
 {    
+    Q_UNUSED(control);
+    Q_UNUSED(textView);
+
     if (commandSelector == @selector(insertNewline:))
     {
         [self enterKeyPressed];
@@ -226,6 +229,7 @@
 }
 - (void)textDidChange:(NSNotification *)aNotification
 {        
+    Q_UNUSED(aNotification);
     //
     QString text = WizToQString([self stringValue]);
     m_pSearchWidget->on_search_textChanged(text);
@@ -267,6 +271,11 @@ void WizSearchView::clear()
     }
 
     [pSearchField setStringValue:@""];
+}
+
+void WizSearchView::applyTheme()
+{
+    m_completer->applyTheme();
 }
 
 void WizSearchView::clearFocus()

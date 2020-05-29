@@ -136,8 +136,6 @@ int mainCore(int argc, char *argv[])
     QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 #endif
     //
-    QtWebEngine::initialize();
-
 #ifdef BUILD4APPSTORE
     WizIAPHelper helper;
     helper.validteReceiptOnLauch();

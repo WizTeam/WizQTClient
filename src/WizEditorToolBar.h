@@ -21,6 +21,7 @@ class CWizToolComboBoxFont;
 class WizExplorerApp;
 class WizTipsWidget;
 class CWizToolLineWidthComboBox;
+class QWidgetAction;
 
 
 class WizDblclickableToolButton : public QToolButton
@@ -52,6 +53,7 @@ public:
 
     void adjustButtonPosition();
     void switchToNormalMode();
+    void applyTheme();
     //
     WizTipsWidget* showCoachingTips();
 
@@ -93,6 +95,7 @@ private:
     QAction* m_actionJustifyLeft;
     QAction* m_actionJustifyCenter;
     QAction* m_actionJustifyRight;
+    QWidgetAction* m_tableAction;
 
     QString m_strImageSrc;
 

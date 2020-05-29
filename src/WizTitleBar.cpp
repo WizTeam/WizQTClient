@@ -219,6 +219,7 @@ WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
 void WizTitleBar::applyTheme()
 {
     m_editTitle->applyTheme();
+    m_editorBar->applyTheme();
 }
 
 void WizTitleBar::initPlugins(QLayout* layout)

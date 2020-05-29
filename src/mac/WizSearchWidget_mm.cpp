@@ -110,40 +110,44 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_treeWgt->setItemDelegate(suggestionDelegate);
 
 
-    QPushButton* advancedSearchButton = new QPushButton(m_popupWgt);
-    advancedSearchButton->setFocusPolicy(Qt::NoFocus);
-    advancedSearchButton->setFocusProxy(m_popupWgt);
-    advancedSearchButton->setText(tr("Advanced Search"));
+    m_advancedSearchButton = new QPushButton(m_popupWgt);
+    m_advancedSearchButton->setFocusPolicy(Qt::NoFocus);
+    m_advancedSearchButton->setFocusProxy(m_popupWgt);
+    m_advancedSearchButton->setText(tr("Advanced Search"));
     if (isDarkMode()) {
-        advancedSearchButton->setStyleSheet("QPushButton { background-color:#666666; border-width: 1px; \
+        m_advancedSearchButton->setStyleSheet("QPushButton { background-color:#666666; border-width: 1px; \
                               padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
                               border-radius: 2px; border-bottom-color:#E0E0E0; }");
     } else {
-        advancedSearchButton->setStyleSheet("QPushButton { background-color:#FFFFFF; border-width: 1px; \
+        m_advancedSearchButton->setStyleSheet("QPushButton { background-color:#FFFFFF; border-width: 1px; \
                               padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
                               border-radius: 2px; border-bottom-color:#E0E0E0; }");
     }
 
-    connect(advancedSearchButton, SIGNAL(clicked(bool)), this, SLOT(on_advanced_buttonClicked()));
+    connect(m_advancedSearchButton, SIGNAL(clicked(bool)), this, SLOT(on_advanced_buttonClicked()));
 
-    QWidget* buttonContainer = new QWidget(m_popupWgt);
-    buttonContainer->setFixedHeight(40);
+    m_buttonContainer = new QWidget(m_popupWgt);
+    m_buttonContainer->setFixedHeight(40);
     if (isDarkMode()) {
-        buttonContainer->setStyleSheet("background-color:#666666; border-top:1px solid #666666;");
+        m_buttonContainer->setStyleSheet("background-color:#666666; border-top:1px solid #666666;");
     } else {
 
     }
-    QHBoxLayout* buttonLayout = new QHBoxLayout(buttonContainer);
+    QHBoxLayout* buttonLayout = new QHBoxLayout(m_buttonContainer);
     buttonLayout->setContentsMargins(8, 8, 8, 8);
     buttonLayout->setSpacing(0);
-    buttonContainer->setLayout(buttonLayout);
+    m_buttonContainer->setLayout(buttonLayout);
     buttonLayout->addStretch(0);
-    buttonLayout->addWidget(advancedSearchButton);
+    buttonLayout->addWidget(m_advancedSearchButton);
 
 
     m_infoWgt = new QWidget(m_popupWgt);
     m_infoWgt->setFixedHeight(135);
-    m_infoWgt->setStyleSheet("background-color:#FFFFFF;");
+    if (isDarkMode()) {
+        m_infoWgt->setStyleSheet("background-color:#666666;");
+    } else {
+        m_infoWgt->setStyleSheet("background-color:#FFFFFF;");
+    }
     QVBoxLayout* infoLayout = new QVBoxLayout(m_infoWgt);
     QLabel* label = new QLabel(m_infoWgt);
     label->setText(tr("Suggestion will be showed here"));
@@ -156,7 +160,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_popupWgt->setLayout(layout);
     layout->addWidget(m_treeWgt);
     layout->addWidget(m_infoWgt);
-    layout->addWidget(buttonContainer);
+    layout->addWidget(m_buttonContainer);
 
     m_infoWgt->setVisible(false);
 
@@ -182,6 +186,45 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
 WizSuggestCompletionon::~WizSuggestCompletionon()
 {
     delete m_popupWgt;
+}
+
+void WizSuggestCompletionon::applyTheme()
+{
+    if (isDarkMode()) {
+        m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; color: #c6c6c6; background-color:#666666;}  "
+                                 "QTreeView::item{background-color:#666666; color:#c6c6c6}  "
+                                 "QTreeView::branch { color:#c6c6c6; border-left:20px solid #666666;  margin-left:20px; }");
+        m_treeWgt->header()->setStyleSheet("QHeaderView:section{ background-color:#666666; height:20px; "
+                                           "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
+    } else {
+        m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; }  "
+                                 "QTreeView::branch { color:#AAAAAA; border-left:20px solid #FFFFFF;  margin-left:20px; }");
+        m_treeWgt->header()->setStyleSheet("QHeaderView:section{ background-color:#FFFFFF; height:20px; "
+                                           "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
+    }
+
+    if (isDarkMode()) {
+        m_advancedSearchButton->setStyleSheet("QPushButton { background-color:#666666; border-width: 1px; \
+                              padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
+                              border-radius: 2px; border-bottom-color:#E0E0E0; }");
+    } else {
+        m_advancedSearchButton->setStyleSheet("QPushButton { background-color:#FFFFFF; border-width: 1px; \
+                              padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
+                              border-radius: 2px; border-bottom-color:#E0E0E0; }");
+    }
+
+    if (isDarkMode()) {
+        m_buttonContainer->setStyleSheet("background-color:#666666; border-top:1px solid #666666;");
+    } else {
+        m_buttonContainer->setStyleSheet("background-color:transparent; border-top:1px solid #666666;");
+    }
+
+    if (isDarkMode()) {
+        m_infoWgt->setStyleSheet("background-color:#666666;");
+    } else {
+        m_infoWgt->setStyleSheet("background-color:#FFFFFF;");
+    }
+
 }
 
 void WizSuggestCompletionon::setUserSettings(WizUserSettings* settings)
@@ -256,6 +299,7 @@ void WizSuggestCompletionon::showCompletion(const QStringList &choices, bool isR
         m_treeWgt->setVisible(false);
         m_infoWgt->setVisible(true);
         m_popupWgt->setFixedHeight(170);
+        m_popupWgt->setFixedWidth(width);
     }
     else
     {
