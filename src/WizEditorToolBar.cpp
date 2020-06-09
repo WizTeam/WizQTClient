@@ -1790,8 +1790,17 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     m_btnNotesOutline = new CWizToolButton(this);
     m_btnNotesOutline->setCheckable(false);
     m_btnNotesOutline->setIcon(::WizLoadSkinIcon(skin, "outline_notes", editIconSize, ICON_OPTIONS));
-    m_btnNotesOutline->setPosition(ButtonPosition::NoPosition);
+    m_btnNotesOutline->setPosition(ButtonPosition::Left);
     connect(m_btnNotesOutline, SIGNAL(clicked()), SLOT(on_btnNotesOutline_clicked()));
+
+    m_btnInsertImagesOutline = new CWizToolButton(this);
+    m_btnInsertImagesOutline->setCheckable(false);
+    m_btnInsertImagesOutline->setHorizontalPadding(8);
+    m_btnInsertImagesOutline->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage", editIconSize, ICON_OPTIONS));
+    m_btnInsertImagesOutline->setToolTip(tr("Insert Image %1%2I").arg(shiftKey()).arg(commandKey()));
+    m_btnInsertImagesOutline->setPosition(ButtonPosition::Right);
+    connect(m_btnInsertImagesOutline, SIGNAL(clicked()), SLOT(on_btnInsertImage_clicked()));
+
 
     m_btnCompleteOutline = new CWizToolButton(this);
     m_btnCompleteOutline->setCheckable(false);
@@ -1809,6 +1818,7 @@ WizEditorToolBar::WizEditorToolBar(WizExplorerApp& app, QWidget *parent)
     outlineLayout->addWidget(m_btnIndentOutline);
     outlineLayout->addSpacing(16);
     outlineLayout->addWidget(m_btnNotesOutline);
+    outlineLayout->addWidget(m_btnInsertImagesOutline);
     outlineLayout->addSpacing(16);
     outlineLayout->addWidget(m_btnCompleteOutline);
 
@@ -2189,6 +2199,7 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     m_btnFormatPainter->setEnabled(canFormatPainter);
     m_btnHorizontal->setEnabled(canInsertHorizontalRule);
     m_btnInsertImage->setEnabled(canInsertImage);
+    m_btnInsertImagesOutline->setEnabled(canInsertImage);
     m_btnInsertLink->setEnabled(canSetLink);
 }
 
@@ -3512,9 +3523,10 @@ void WizEditorToolBar::on_btnCheckList_clicked()
 void WizEditorToolBar::on_btnInsertImage_clicked()
 {
     WizAnalyzer::getAnalyzer().logAction("editorToolBarImage");
-    if (m_editor) {
-        m_editor->editorCommandExecuteInsertImage();
-    }
+    if (!m_editor)
+        return;
+
+    m_editor->editorCommandExecuteInsertImage();
 }
 
 void WizEditorToolBar::on_btnStartMarkup_clicked()

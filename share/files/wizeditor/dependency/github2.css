@@ -1,6 +1,6 @@
 .markdown-body {
     margin: 0 auto;
-    padding: 20px 48px;
+    /* padding: 20px 48px; */
 }
 
 .markdown-body.mobile {
@@ -534,7 +534,7 @@
 
 @media screen and (max-width: 660px) {
     .markdown-body {
-        padding: 20px 18px;
+        padding: 20px 16px;
     }
 }
 
@@ -545,12 +545,12 @@ only screen and (max-device-width: 1024px),
 only screen and (-webkit-min-device-pixel-ratio: 3),
 only screen and (-o-min-device-pixel-ratio: 3),
 only screen and (min-device-pixel-ratio: 3) {
-    .markdown-body {
+    /* .markdown-body {
         padding: 12px 15px;
     }
     .markdown-body ul, .markdown-body ol {
         padding-left: 40px;
-    }
+    } */
 
     .markdown-body blockquote {
         border-left: 4px solid #c8d4e8;

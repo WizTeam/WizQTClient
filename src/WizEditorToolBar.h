@@ -123,6 +123,7 @@ private:
     CWizToolButton* m_btnOutdentOutline;
     CWizToolButton* m_btnIndentOutline;
     CWizToolButton* m_btnNotesOutline;
+    CWizToolButton* m_btnInsertImagesOutline;
     CWizToolButton* m_btnCompleteOutline;
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     QString m_currentStyle;

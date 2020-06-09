@@ -1325,11 +1325,13 @@ WizCategoryView::~WizCategoryView()
 
 void WizCategoryView::applyTheme()
 {
-   for (int i = 0; i< topLevelItemCount(); i++) {
-       if (WizCategoryViewItemBase* item = dynamic_cast<WizCategoryViewItemBase *>(topLevelItem(i))) {
+    disconnect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(on_itemChanged(QTreeWidgetItem*,int)));
+    for (int i = 0; i< topLevelItemCount(); i++) {
+        if (WizCategoryViewItemBase* item = dynamic_cast<WizCategoryViewItemBase *>(topLevelItem(i))) {
            item->resetIcon(true);
-       }
-   }
+        }
+    }
+    connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)), SLOT(on_itemChanged(QTreeWidgetItem*,int)));
 }
 
 void WizCategoryView::initMenus()
@@ -3040,8 +3042,14 @@ void WizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
     if (item->type() == Category_FolderItem)
     {
         WizCategoryViewFolderItem* pFolder = dynamic_cast<WizCategoryViewFolderItem*>(item);
-        if (pFolder == nullptr || pFolder->text(0) == pFolder->name())
+        if (WizIsPredefinedLocation(pFolder->location())) {
             return;
+        }
+        if (pFolder == nullptr
+            || pFolder->text(0) == pFolder->name()
+            || pFolder->text(0) == WizDatabase::getLocationDisplayName(pFolder->location()))
+            return;
+
         qDebug() << "folder changed text " << pFolder->text(0) << "  name : " << pFolder->name();
 
        renameFolder(pFolder, pFolder->text(0));

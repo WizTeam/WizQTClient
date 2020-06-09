@@ -1968,7 +1968,7 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
     //
     CString param;
     WizStringArrayToText(files, param, "*");
-    //
+    //WizEditor.img.insertByPath('./img01.jpg');
     QString script = QString("WizEditor.img.insertByPath('%1');").arg(param);
     page()->runJavaScript(script);
 
