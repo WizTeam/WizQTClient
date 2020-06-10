@@ -2494,7 +2494,20 @@ void WizApplyDarkModeStyles_lineEditor(QObject* parent)
             qDebug() << className << childWidget->geometry();
             //
             if (QWidget* widget = dynamic_cast<QLineEdit*>(child)) {
-                widget->setStyleSheet("color:#a6a6a6;background-color:#333333");
+                widget->setAutoFillBackground(true);
+                QRect rect = widget->geometry();
+
+                int height = WizSmartScaleUI(18);
+                if (rect.height() > height) {
+                    rect.setY(rect.y() + (rect.height() - height) / 2);
+                    rect.setBottom(rect.y() + height);
+                }
+                widget->setGeometry(rect);
+                if (isDarkMode()) {
+                    widget->setStyleSheet("color:#a6a6a6;background-color:#4a4a4a");
+                } else {
+                    widget->setStyleSheet("color:black;background-color:white");
+                }
             }
         }
         //
