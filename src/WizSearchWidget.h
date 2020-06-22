@@ -56,7 +56,7 @@ public:
     //
     void setCurrentKb(const QString& kbGuid) { m_strCurrentKbGuid = kbGuid; }
     QString currentKb() const { return m_strCurrentKbGuid; }
-
+    void applyTheme() {}
 
 public Q_SLOTS:
     void on_search_returnPressed();
