@@ -177,7 +177,7 @@ bool WizFileImporter::importFile(const QString& strFile, const QString& strKbGUI
     else if (containsImage)
     {
         //为了提取和file路径相关联的图片，在创建之后更新笔记内容
-        db.updateDocumentData(doc, strHtml, strFile, 0);
+        db.updateDocumentData(doc, strHtml, strFile, 0, "");
     }
 
     return true;

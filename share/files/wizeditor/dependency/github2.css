@@ -532,13 +532,6 @@
 /*}*/
 
 
-@media screen and (max-width: 660px) {
-    .markdown-body {
-        padding: 20px 16px;
-    }
-}
-
-
 @media only screen and (-webkit-max-device-width: 1024px),
 only screen and (-o-max-device-width: 1024px),
 only screen and (max-device-width: 1024px),
@@ -572,7 +565,7 @@ only screen and (min-device-pixel-ratio: 3) {
 }
 
 /* 修正 br 高度*/
-br {
+p > br {
     display: block;
     margin: 0 0 8px;
     content: " ";

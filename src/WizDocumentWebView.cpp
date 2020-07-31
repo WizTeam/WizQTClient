@@ -40,6 +40,7 @@
 #include "share/WizObjectDataDownloader.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizThreads.h"
+#include "share/jsoncpp/json/json.h"
 #include "sync/WizAvatarHost.h"
 #include "sync/WizToken.h"
 #include "sync/WizApiEntry.h"
@@ -1203,7 +1204,11 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
         //
         QString strFileName = m_mapFile.value(data.strGUID);
         //
-        QString strScript = "WizEditor.getContentHtml()";
+        QString strScript = "(function () {"
+                            "  var html = WizEditor.getContentHtml();"
+                            "  var images = WizEditor.img.getAll(true);"
+                            "  return JSON.stringify({ html, images });"
+                            "})();";
         //
         TOLOG("saving note...");
         page()->runJavaScript(strScript, [=](const QVariant& ret){
@@ -1211,18 +1216,24 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
             bool succeeded = false;
             if (ret.type() == QVariant::String)
             {
-                QString html = ret.toString();
-                if (!html.isEmpty())
+                Json::Reader reader;
+                Json::Value d;
+                if (reader.parse(ret.toString().toUtf8().data(), d))
                 {
-                    succeeded = true;
-                    m_currentNoteHtml = html;
-                    ::WizSaveUnicodeTextToUtf8File(m_strNoteHtmlFileName, m_currentNoteHtml);
-                    emit currentHtmlChanged();
-                    //
-                    //qDebug() << m_currentNoteHtml;
-                    //
-                    m_docSaverThread->save(doc, html, strFileName, 0);
-                    TOLOG("save note done...");
+                    QString html = QString::fromUtf8(d["html"].asString().c_str());
+                    QString images = QString::fromUtf8(d["images"].asString().c_str());
+                    if (!html.isEmpty())
+                    {
+                        succeeded = true;
+                        m_currentNoteHtml = html;
+                        ::WizSaveUnicodeTextToUtf8File(m_strNoteHtmlFileName, m_currentNoteHtml);
+                        emit currentHtmlChanged();
+                        //
+                        //qDebug() << m_currentNoteHtml;
+                        //
+                        m_docSaverThread->save(doc, html, strFileName, 0, images);
+                        TOLOG("save note done...");
+                    }
                 }
             }
             //
@@ -1258,7 +1269,7 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
                 QString strFileName = m_mapFile.value(doc.strGUID);
                 if (!strFileName.isEmpty())
                 {
-                    m_docSaverThread->save(doc, strHtml, strFileName, 0);
+                    m_docSaverThread->save(doc, strHtml, strFileName, 0, "");
                 }
             }
         }
@@ -1946,7 +1957,7 @@ void WizDocumentWebView::editorCommandExecuteInsertCheckList()
 void WizDocumentWebView::editorCommandExecuteInsertImage()
 {
     static QString initPath = QDir::homePath();
-    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg)"));
+    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg *.jpeg)"));
     if (strImgFileList.isEmpty())
         return;
     //
@@ -2657,13 +2668,14 @@ WizDocumentWebViewSaverThread::WizDocumentWebViewSaverThread(WizDatabaseManager 
 }
 
 void WizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
-                                          const QString& strHtmlFile, int nFlags)
+                                          const QString& strHtmlFile, int nFlags, const QString& images)
 {
     SAVEDATA data;
     data.doc = doc;
     data.html = strHtml;
     data.htmlFile = strHtmlFile;
     data.flags = nFlags;
+    data.images = images;
     //
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -2763,7 +2775,7 @@ void WizDocumentWebViewSaverThread::run()
         WizDocumentDataLocker locker(doc.strGUID);
         //
         bool notify = false;    //don't notify
-        bool ok = db.updateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
+        bool ok = db.updateDocumentData(doc, data.html, data.htmlFile, data.flags, data.images, notify);
 
         //
         if (ok)

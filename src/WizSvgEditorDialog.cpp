@@ -151,7 +151,7 @@ void saveSvgCore(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc, QStrin
             bool notify = false;    //don't notify
             WizDatabase& db = dbMgr.db(doc.strKbGUID);
             auto note = doc;
-            ret = db.updateDocumentData(note, html, strHtmlFile, 0, notify);
+            ret = db.updateDocumentData(note, html, strHtmlFile, 0, "", notify);
         }
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {

@@ -130,11 +130,6 @@ void WizDocument::makeSureObjectDataExists()
     }
 }
 
-bool WizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
-{
-    return m_db.updateDocumentData(m_data, strHtml, strURL, nFlags);
-}
-
 void WizDocument::deleteToTrash()
 {
     // move document to trash
@@ -3165,6 +3160,7 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
                                       const QString& strURL,
                                       int nFlags,
+                                     const QString& images,
                                       bool notifyDataModify /*= true*/)
 {
     QString strProcessedHtml(strHtml);
@@ -3181,13 +3177,13 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     //
     CString strZipFileName = getDocumentFileName(data.strGUID);
     if (!data.nProtected) {
-        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName);
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName, images);
         if (!bZip) {
             return false;
         }
     } else {
         CString strTempFile = Utils::WizPathResolve::tempPath() + data.strGUID + "-decrypted";
-        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strTempFile);
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strTempFile, images);
         if (!bZip) {
             return false;
         }
@@ -3675,7 +3671,7 @@ bool WizDatabase::createDocumentAndInit(const CString& strHtml, \
         bRet = createDocument(strTitle, strName, strLocation, strHtmlUrl, data.nProtected, data);
         if (bRet)
         {
-            bRet = updateDocumentData(data, strHtml, strURL, nFlags);
+            bRet = updateDocumentData(data, strHtml, strURL, nFlags, "");
 
             Q_EMIT documentCreated(data);
         }

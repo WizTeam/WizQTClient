@@ -5,7 +5,7 @@
 
 bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
                  const QString& strResourcePath, long flags, \
-                 const QString& strZipFileName);
+                 const QString& strZipFileName, const QString& images);
 
 bool WizHtml2Zip(const QString &strHtml, const CWizStdStringArray& arrayResource, \
                  const QString &strZipFileName);
