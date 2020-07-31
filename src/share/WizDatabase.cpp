@@ -1284,6 +1284,10 @@ bool WizDatabase::isGroupReader()
 
 bool WizDatabase::canEditDocument(const WIZDOCUMENTDATA& data)
 {
+    if (data.strType.startsWith("lite")) {
+        return false;
+    }
+    //
     if (permission() < (int)WIZ_USERGROUP_AUTHOR ||
                 (permission() == WIZ_USERGROUP_AUTHOR && data.strOwner == getUserId())) {
             return true;

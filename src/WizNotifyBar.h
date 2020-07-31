@@ -21,7 +21,8 @@ public:
         Deleted,
         PermissionLack,
         LockForGruop,
-        CustomMessage
+        CustomMessage,
+        NotSupport
     };
 
     explicit WizNotifyBar(QWidget *parent);

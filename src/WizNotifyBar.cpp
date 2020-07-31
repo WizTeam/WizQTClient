@@ -81,6 +81,10 @@ void WizNotifyBar::showPermissionNotify(int type)
         m_labelNotify->setText(QObject::tr("Your permission is not enough to edit this note."));
         showNotify();
         break;
+    case NotSupport:
+        m_labelNotify->setText(QObject::tr("Cannot edit note created by WizNote Lite."));
+        showNotify();
+        break;
     case LockForGruop:
 //        setStyleForEditing();
 //        m_labelNotify->setText(QObject::tr("Checking for the version of note, please wait for a second..."));

@@ -372,7 +372,11 @@ void WizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
             m_bLocked = true;
         }
     } else if (!m_dbMgr.db(data.strKbGUID).canEditDocument(data)) {
-        nLockReason = WizNotifyBar::PermissionLack;
+        if (data.strType.startsWith("lite")) {
+            nLockReason = WizNotifyBar::NotSupport;
+        } else {
+            nLockReason = WizNotifyBar::PermissionLack;
+        }
         m_bLocked = true;
     } else if (WizDatabase::isInDeletedItems(data.strLocation)) {
         nLockReason = WizNotifyBar::Deleted;
