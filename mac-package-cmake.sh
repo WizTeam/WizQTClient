@@ -36,6 +36,7 @@ $QTDIR/bin/macdeployqt $DEST
 #install_name_tool -change @rpath/CrashReporter.framework/Versions/A/CrashReporter \
 # @executable_path/../Frameworks/CrashReporter.framework/Versions/A/CrashReporter WizNote.app/Contents/MacOS/WizNote
 
+echo "code sign"
 APPLCERT="Developer ID Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
 
 codesign --verbose=2 --deep --sign "$APPLCERT"  WizNote.app
