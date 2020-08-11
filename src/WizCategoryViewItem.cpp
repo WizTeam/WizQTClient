@@ -927,6 +927,7 @@ QString WizCategoryViewFolderItem::id() const
 void WizCategoryViewFolderItem::setLocation(const QString& strLocation)
 {
     m_strName = strLocation;
+    setText(0, WizDatabase::getLocationDisplayName(strLocation));
 }
 
 void WizCategoryViewFolderItem::getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument)

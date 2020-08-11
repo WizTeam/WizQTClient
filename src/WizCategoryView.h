@@ -378,7 +378,7 @@ public Q_SLOTS:
 
     void on_action_newItem();
     void on_action_user_newFolder();
-    void on_newFolder_inputText_changed(const QString& text);
+    void on_newFolder_inputText_changed(QString text);
     void on_action_user_newFolder_confirmed(int result);
     void on_action_user_newTag();
     void on_action_user_newTag_confirmed(int result);
@@ -606,6 +606,7 @@ private:
     QString m_strRequestedGroupKbGUID;
 
     QString m_strSelectedId;
+    bool m_renamingFolder;
 
 };
 

@@ -1005,6 +1005,7 @@ bool WizCategoryView::renameFolder(WizCategoryViewFolderItem* item, const QStrin
         return false;
 
     CString validName = strFolderName;
+    validName.trim();
     WizMakeValidFileNameNoPath(validName);
 
     QString strLocation;
@@ -1014,8 +1015,11 @@ bool WizCategoryView::renameFolder(WizCategoryViewFolderItem* item, const QStrin
 
     qDebug() << "rename folder from : " << strOldLocation << "  to : " << strLocation;
 
-    if (strLocation == strOldLocation)
-        return true;
+    if (strLocation == strOldLocation) {
+        m_renamingFolder = false;
+        item->setLocation(strOldLocation);
+        return false;
+    }
 
     CWizStdStringArray arrayLocation;
     m_dbMgr.db().getAllLocationsWithExtra(arrayLocation);
@@ -1023,11 +1027,9 @@ bool WizCategoryView::renameFolder(WizCategoryViewFolderItem* item, const QStrin
     {
         if (WizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(validName)) == QMessageBox::No)
         {
-            validName = getUseableItemName(item->parent(), item);
-            item->setText(0, validName);
-            strLocation = strOldLocation.left(n + 1) + validName + "/";
-            if (strLocation == strOldLocation)
-                return true;
+            m_renamingFolder = false;
+            item->setLocation(strOldLocation);
+            return false;
         }
     }
 
@@ -1304,6 +1306,8 @@ Qt::ItemFlags WizCategoryBaseView::dragItemFlags() const
 /* ------------------------------ CWizCategoryView ------------------------------ */
 WizCategoryView::WizCategoryView(WizExplorerApp& app, QWidget* parent)
     : WizCategoryBaseView(app, parent)
+    , m_renamingFolder(false)
+
 {
     setSelectionMode(QAbstractItemView::SingleSelection);
     setDragEnabled(false);
@@ -2069,10 +2073,12 @@ void WizCategoryView::on_action_user_newFolder()
 
 }
 
-void WizCategoryView::on_newFolder_inputText_changed(const QString& text)
+void WizCategoryView::on_newFolder_inputText_changed(QString text)
 {
     if (WizLineInputDialog* dialog = qobject_cast<WizLineInputDialog*>(sender()))
     {
+        text = text.trimmed();
+        //
         if (!WizIsValidFileNameNoPath(text))
         {
             dialog->setErrorMessage(tr("Invalid folder name"));
@@ -2116,6 +2122,7 @@ void WizCategoryView::on_action_user_newFolder_confirmed(int result)
     if (strFolderName.isEmpty())
         return;
 
+    strFolderName.trim();
     WizMakeValidFileNameNoPath(strFolderName);
 
     QString strLocation;
@@ -2533,6 +2540,8 @@ void WizCategoryView::on_action_renameItem()
                 }
             }
         }
+        //
+        m_renamingFolder = true;
         p->setFlags(p->flags() | Qt::ItemIsEditable);
         editItem(p, 0);
         //
@@ -2565,6 +2574,7 @@ void WizCategoryView::on_action_user_renameFolder_confirmed(int result)
         return;
     }
 
+    strFolderName.trim();
     if (strFolderName.isEmpty()) {
         return;
     }
@@ -3054,6 +3064,10 @@ void WizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
     qDebug() << "item changed : " << item->text(0) << item->type();
     if (item->type() == Category_FolderItem)
     {
+        if (!m_renamingFolder) {
+            return;
+        }
+        //
         WizCategoryViewFolderItem* pFolder = dynamic_cast<WizCategoryViewFolderItem*>(item);
         if (WizIsPredefinedLocation(pFolder->location())) {
             return;
@@ -3066,6 +3080,7 @@ void WizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
         qDebug() << "folder changed text " << pFolder->text(0) << "  name : " << pFolder->name();
 
        renameFolder(pFolder, pFolder->text(0));
+       m_renamingFolder = false;
     }
     else if (item->type() == Category_TagItem)
     {

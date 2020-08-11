@@ -316,6 +316,10 @@ bool WIZTAGDATA::fromJson(const Json::Value& value)
         tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
         nVersion = value["version"].asInt64();
         nPosition = value["pos"].asInt64();
+        //
+        if (strName.isEmpty()) {
+            strName = "Unnamed tag";
+        }
 
     } catch (Json::Exception& e) {
         TOLOG(e.what());
@@ -592,8 +596,12 @@ bool WIZDOCUMENTDATAEX::fromJson(const Json::Value& value)
         strStyleGUID = QString::fromStdString(value["styleGuid"].asString());
         //
         QString tags = QString::fromStdString(value["tags"].asString());
-        QStringList sl = tags.split('*');
-        arrayTagGUID.assign(sl.begin(), sl.end());
+        if (!tags.isEmpty()) {
+            QStringList sl = tags.split('*');
+            if (sl.length() > 0) {
+                arrayTagGUID.assign(sl.begin(), sl.end());
+            }
+        }
         //
         nProtected = value["protected"].asInt();
         nAttachmentCount = value["attachmentCount"].asInt();
