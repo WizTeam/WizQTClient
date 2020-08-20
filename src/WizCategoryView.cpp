@@ -3053,12 +3053,22 @@ void WizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
     else if (item->type() == Category_TagItem)
     {
         WizCategoryViewTagItem* pTag = dynamic_cast<WizCategoryViewTagItem*>(item);
-        if (pTag == nullptr || pTag->text(0).isEmpty() || pTag->text(0) == pTag->tag().strName)
+        CString text = pTag->text(0);
+        text.trim();
+        if (text.isEmpty() || text == pTag->tag().strName) {
+            pTag->reload(m_dbMgr.db());
             return;
+        }
+        //
+        if (findSameNameBrother(pTag->parent(), pTag, text)) {
+            pTag->reload(m_dbMgr.db());
+            return;
+        }
 
-        qDebug() << "tag changed text " << pTag->text(0) << "  name : " << pTag->tag().strName;
+        qDebug() << "tag changed text " << text << "  name : " << pTag->tag().strName;
+        //
         WIZTAGDATA tag = pTag->tag();
-        tag.strName = pTag->text(0);
+        tag.strName = text;
         m_dbMgr.db().modifyTag(tag);
         pTag->reload(m_dbMgr.db());
     }
