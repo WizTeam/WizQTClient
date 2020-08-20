@@ -629,7 +629,11 @@ void WizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode 
     // set data
     int seconds = doc.tCreated.secsTo(QDateTime::currentDateTime());
     m_bNewNote = (seconds >= 0 && seconds <= 1) ? true : false;
-    m_bNewNoteTitleInited = m_bNewNote ? false : true;
+    if (doc.strType.isEmpty()) {
+        m_bNewNoteTitleInited = m_bNewNote ? false : true;
+    } else {
+        m_bNewNoteTitleInited = true;
+    }
     //
     setModified(false);
 

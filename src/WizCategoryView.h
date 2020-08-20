@@ -570,7 +570,7 @@ private:
     void resetFolderLocation(WizCategoryViewFolderItem* item);
     void resetFolderLocation(WizCategoryViewFolderItem* item, const QString& strNewLocation);
     bool renameFolder(WizCategoryViewFolderItem* item, const QString& strFolderName);
-    bool renameGroupFolder(WizCategoryViewGroupItem* pGroup, const QString& strFolderName);
+    bool renameGroupFolder(WizCategoryViewGroupItem* pGroup, CString strFolderName);
     //
     void updateShortcut(int type, const QString& keyValue, const QString& name);
     void removeShortcut(int type, const QString& keyValue);

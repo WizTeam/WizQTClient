@@ -1947,6 +1947,30 @@ bool WizDatabase::isFolderExists(const QString& folder)
     return pos != arrayExtra.end();
 }
 
+bool WizDatabase::isFolderExists(const QString& folder, QString& exists)
+{
+    CWizStdStringArray arrayFolder;
+    getAllLocations(arrayFolder);
+
+    CWizStdStringArray::const_iterator pos = std::find_if(arrayFolder.begin(), arrayFolder.end(),
+                                                WizCompareString(folder));
+
+    if (pos != arrayFolder.end()) {
+        exists = *pos;
+        return true;
+    }
+
+    CWizStdStringArray arrayExtra;
+    getExtraFolder(arrayExtra);
+    pos = std::find_if(arrayExtra.begin(), arrayExtra.end(), WizCompareString(folder));
+
+    if (pos != arrayExtra.end()) {
+        exists = *pos;
+        return true;
+    }
+    return false;
+}
+
 void WizDatabase::setFoldersPosModified()
 {
     setLocalValueVersion("folders_pos", -1);

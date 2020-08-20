@@ -1176,18 +1176,18 @@
         <translation>从笔记列表拖动笔记</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryViewItem.cpp" line="1373"/>
-        <location filename="../src/WizCategoryViewItem.cpp" line="1813"/>
+        <location filename="../src/WizCategoryViewItem.cpp" line="1374"/>
+        <location filename="../src/WizCategoryViewItem.cpp" line="1814"/>
         <source>You have %1 unread notes</source>
         <translation>您有 %1 条未读笔记</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryViewItem.cpp" line="1378"/>
+        <location filename="../src/WizCategoryViewItem.cpp" line="1379"/>
         <source>Your enterprise services has expired</source>
         <translation>您的企业服务已到期</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryViewItem.cpp" line="1818"/>
+        <location filename="../src/WizCategoryViewItem.cpp" line="1819"/>
         <source>Your group is in the abnormal state</source>
         <translation>您的群组处于异常状态</translation>
     </message>
@@ -2035,26 +2035,26 @@
         <translation>日</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="818"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="822"/>
         <source>Saving comments...</source>
         <translation>正在保存备注...</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4267"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4291"/>
         <source>Please enter the password of team cert: %1
 Password hint: %2</source>
         <translation>请输入团队证书密码：%1
 密码提示:%2</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4271"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4295"/>
         <source>Please enter the password of cert:
 Password hint: %1</source>
         <translation>请输入证书密码
 密码提示%1</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4274"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4298"/>
         <source>Cert Password</source>
         <translation>证书密码</translation>
     </message>
@@ -2290,89 +2290,93 @@ Password hint: %1</source>
     <name>WizCategoryView</name>
     <message>
         <location filename="../src/WizCategoryView.cpp" line="2062"/>
-        <location filename="../src/WizCategoryView.cpp" line="2231"/>
-        <location filename="../src/WizCategoryView.cpp" line="2653"/>
+        <location filename="../src/WizCategoryView.cpp" line="2234"/>
+        <location filename="../src/WizCategoryView.cpp" line="2659"/>
         <source>Please input folder name: </source>
         <translation>请输入文件夹名称： </translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2139"/>
+        <location filename="../src/WizCategoryView.cpp" line="2142"/>
         <source>New tag</source>
         <translation>新建标签</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2140"/>
-        <location filename="../src/WizCategoryView.cpp" line="2616"/>
+        <location filename="../src/WizCategoryView.cpp" line="2143"/>
+        <location filename="../src/WizCategoryView.cpp" line="2622"/>
         <source>Please input tag name: </source>
         <translation>请输入标签名称： </translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2230"/>
+        <location filename="../src/WizCategoryView.cpp" line="2233"/>
         <source>New group folder</source>
         <translation>新建群组文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2430"/>
+        <location filename="../src/WizCategoryView.cpp" line="2433"/>
         <source>Copy folder</source>
         <translation>复制文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2615"/>
+        <location filename="../src/WizCategoryView.cpp" line="2621"/>
         <source>Rename tag</source>
         <translation>重命名标签</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2652"/>
+        <location filename="../src/WizCategoryView.cpp" line="2658"/>
         <source>Rename group folder</source>
         <translation>重命名群组文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2716"/>
-        <location filename="../src/WizCategoryView.cpp" line="2756"/>
-        <location filename="../src/WizCategoryView.cpp" line="2796"/>
+        <location filename="../src/WizCategoryView.cpp" line="2722"/>
+        <location filename="../src/WizCategoryView.cpp" line="2762"/>
+        <location filename="../src/WizCategoryView.cpp" line="2802"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2717"/>
-        <location filename="../src/WizCategoryView.cpp" line="2757"/>
-        <location filename="../src/WizCategoryView.cpp" line="2797"/>
+        <location filename="../src/WizCategoryView.cpp" line="2723"/>
+        <location filename="../src/WizCategoryView.cpp" line="2763"/>
+        <location filename="../src/WizCategoryView.cpp" line="2803"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2754"/>
+        <location filename="../src/WizCategoryView.cpp" line="2760"/>
         <source>Delete tag</source>
         <translation>删除标签</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2760"/>
+        <location filename="../src/WizCategoryView.cpp" line="2766"/>
         <source>Do you really want to delete tag: %1 ? (include child tags if any)</source>
         <translation>确定要删除标签 %1 吗？（如果存在子标签也将被删除）</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2794"/>
+        <location filename="../src/WizCategoryView.cpp" line="2800"/>
         <source>Delete group folder</source>
         <translation>删除群组文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="1024"/>
-        <location filename="../src/WizCategoryView.cpp" line="1053"/>
-        <location filename="../src/WizCategoryView.cpp" line="1197"/>
-        <location filename="../src/WizCategoryView.cpp" line="1223"/>
-        <location filename="../src/WizCategoryView.cpp" line="2530"/>
-        <location filename="../src/WizCategoryView.cpp" line="3133"/>
-        <location filename="../src/WizCategoryView.cpp" line="4076"/>
-        <location filename="../src/WizCategoryView.cpp" line="5799"/>
+        <location filename="../src/WizCategoryView.cpp" line="1026"/>
+        <location filename="../src/WizCategoryView.cpp" line="1051"/>
+        <location filename="../src/WizCategoryView.cpp" line="1195"/>
+        <location filename="../src/WizCategoryView.cpp" line="1221"/>
+        <location filename="../src/WizCategoryView.cpp" line="2533"/>
+        <location filename="../src/WizCategoryView.cpp" line="3144"/>
+        <location filename="../src/WizCategoryView.cpp" line="4087"/>
+        <location filename="../src/WizCategoryView.cpp" line="5810"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="1024"/>
-        <location filename="../src/WizCategoryView.cpp" line="1053"/>
-        <location filename="../src/WizCategoryView.cpp" line="1197"/>
-        <location filename="../src/WizCategoryView.cpp" line="1223"/>
-        <location filename="../src/WizCategoryView.cpp" line="4076"/>
+        <location filename="../src/WizCategoryView.cpp" line="1026"/>
+        <source>Folder &apos;%1&apos; already exists.</source>
+        <translation>文件夹 &apos;%1&apos; 已存在。</translation>
+    </message>
+    <message>
+        <location filename="../src/WizCategoryView.cpp" line="1051"/>
+        <location filename="../src/WizCategoryView.cpp" line="1195"/>
+        <location filename="../src/WizCategoryView.cpp" line="1221"/>
+        <location filename="../src/WizCategoryView.cpp" line="4087"/>
         <source>Folder &apos;%1&apos; already exists, combine these folders?</source>
         <translation>文件夹 &apos;%1&apos; 已存在，是否合并？</translation>
     </message>
@@ -2382,216 +2386,216 @@ Password hint: %1</source>
         <translation>添加到快捷方式</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2530"/>
+        <location filename="../src/WizCategoryView.cpp" line="2533"/>
         <source>The default folder can not be renamed.</source>
         <translation>默认目录不支持重命名。</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2720"/>
+        <location filename="../src/WizCategoryView.cpp" line="2726"/>
         <source>Do you really want to delete all notes inside folder: %1 ? (All notes will deleted in local and removed to trash from cloud server)</source>
         <translation>确认删除 %1 下的所有笔记 ? (笔记会在本地删除并存入服务器的回收站中)</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2800"/>
+        <location filename="../src/WizCategoryView.cpp" line="2806"/>
         <source>Do you really want to delete folder: %1? (All notes will deleted in local and removed to trash from cloud server)</source>
         <translation>确认删除文件夹 %1 ? (所有笔记会在本地删除并存入服务器的回收站中)</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3039"/>
+        <location filename="../src/WizCategoryView.cpp" line="3045"/>
         <source>All Notes</source>
         <translation>全部笔记</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3133"/>
+        <location filename="../src/WizCategoryView.cpp" line="3144"/>
         <source>Your enterprise services has expired, could not manage members. Please purchase services or apply for an extension.</source>
         <translation>您的企业服务已到期，将无法进行成员管理。请购买服务或申请延期。</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3256"/>
-        <location filename="../src/WizCategoryView.cpp" line="3265"/>
+        <location filename="../src/WizCategoryView.cpp" line="3267"/>
+        <location filename="../src/WizCategoryView.cpp" line="3276"/>
         <source>View group info</source>
         <translation>群组信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3274"/>
-        <location filename="../src/WizCategoryView.cpp" line="3283"/>
+        <location filename="../src/WizCategoryView.cpp" line="3285"/>
+        <location filename="../src/WizCategoryView.cpp" line="3294"/>
         <source>Manage group</source>
         <translation>管理群组信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3294"/>
+        <location filename="../src/WizCategoryView.cpp" line="3305"/>
         <source>Storage Limit Info</source>
         <translation>容量限制信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3298"/>
+        <location filename="../src/WizCategoryView.cpp" line="3309"/>
         <source>Traffic Limit Info</source>
         <translation>流量限制信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3302"/>
+        <location filename="../src/WizCategoryView.cpp" line="3313"/>
         <source>Note Count Limit Info</source>
         <translation>笔记数目限制信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3302"/>
+        <location filename="../src/WizCategoryView.cpp" line="3313"/>
         <source>Group notes count limit exceeded!</source>
         <translation>群组笔记数目超出限制！</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3376"/>
+        <location filename="../src/WizCategoryView.cpp" line="3387"/>
         <source>View team info</source>
         <translation>团队信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3390"/>
+        <location filename="../src/WizCategoryView.cpp" line="3401"/>
         <source>Manage team</source>
         <translation>管理团队信息</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3703"/>
+        <location filename="../src/WizCategoryView.cpp" line="3714"/>
         <source>loading...</source>
         <translation>正在导入...</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3704"/>
+        <location filename="../src/WizCategoryView.cpp" line="3715"/>
         <source>%1 files to import.</source>
         <translation>导入 %1 文件。</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3726"/>
+        <location filename="../src/WizCategoryView.cpp" line="3737"/>
         <source>Untitled</source>
         <translation>无标题</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4822"/>
+        <location filename="../src/WizCategoryView.cpp" line="4833"/>
         <source>Created since Yesterday</source>
         <translatorcomment>两天内创建</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4823"/>
+        <location filename="../src/WizCategoryView.cpp" line="4834"/>
         <source>Created since the day before yesterday</source>
         <translatorcomment>三天内创建</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4833"/>
+        <location filename="../src/WizCategoryView.cpp" line="4844"/>
         <source>Modified since Yesterday</source>
         <translatorcomment>两天内修改</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4834"/>
+        <location filename="../src/WizCategoryView.cpp" line="4845"/>
         <source>Modified since the day before yesterday</source>
         <translatorcomment>三天内修改</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4844"/>
+        <location filename="../src/WizCategoryView.cpp" line="4855"/>
         <source>Accessed since Yesterday</source>
         <translatorcomment>两天内访问</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4845"/>
+        <location filename="../src/WizCategoryView.cpp" line="4856"/>
         <source>Accessed since the day before yesterday</source>
         <translatorcomment>三天内访问</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3247"/>
+        <location filename="../src/WizCategoryView.cpp" line="3258"/>
         <source>Create Team for Free</source>
         <translation>免费开通团队服务</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2078"/>
+        <location filename="../src/WizCategoryView.cpp" line="2080"/>
         <source>Invalid folder name</source>
         <translation>无效的文件夹名称</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2096"/>
-        <location filename="../src/WizCategoryView.cpp" line="2312"/>
+        <location filename="../src/WizCategoryView.cpp" line="2098"/>
+        <location filename="../src/WizCategoryView.cpp" line="2315"/>
         <source>Folder has already exists</source>
         <translation>文件夹已经存在</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2213"/>
+        <location filename="../src/WizCategoryView.cpp" line="2216"/>
         <source>Tag has already exists</source>
         <translation>标签已经存在</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4720"/>
+        <location filename="../src/WizCategoryView.cpp" line="4731"/>
         <source>Create Team for Free...</source>
         <translation>免费开通团队服务...</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4812"/>
+        <location filename="../src/WizCategoryView.cpp" line="4823"/>
         <source>Search by Date Created</source>
         <translation>通过创建日期</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4813"/>
+        <location filename="../src/WizCategoryView.cpp" line="4824"/>
         <source>Search by Date Modified</source>
         <translation>通过修改日期</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4814"/>
+        <location filename="../src/WizCategoryView.cpp" line="4825"/>
         <source>Search by Date Accessed</source>
         <translation>通过访问日期</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4821"/>
+        <location filename="../src/WizCategoryView.cpp" line="4832"/>
         <source>Created since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4824"/>
+        <location filename="../src/WizCategoryView.cpp" line="4835"/>
         <source>Created since one week</source>
         <translation>一周内</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4825"/>
+        <location filename="../src/WizCategoryView.cpp" line="4836"/>
         <source>Created since one month</source>
         <translation>一月内</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4832"/>
+        <location filename="../src/WizCategoryView.cpp" line="4843"/>
         <source>Modified since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4835"/>
+        <location filename="../src/WizCategoryView.cpp" line="4846"/>
         <source>Modified since one week</source>
         <translation>一周内</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4836"/>
+        <location filename="../src/WizCategoryView.cpp" line="4847"/>
         <source>Modified since one month</source>
         <translation>一月内</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4843"/>
+        <location filename="../src/WizCategoryView.cpp" line="4854"/>
         <source>Accessed since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4846"/>
+        <location filename="../src/WizCategoryView.cpp" line="4857"/>
         <source>Accessed since one week</source>
         <translation>一周内</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="4847"/>
+        <location filename="../src/WizCategoryView.cpp" line="4858"/>
         <source>Accessed since one month</source>
         <translation>一月内</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="6320"/>
+        <location filename="../src/WizCategoryView.cpp" line="6331"/>
         <source>Moving folder...</source>
         <translation>正在移动文件夹...</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3037"/>
+        <location filename="../src/WizCategoryView.cpp" line="3043"/>
         <source>Recent meesages</source>
         <translation>最近消息</translation>
     </message>
@@ -2616,19 +2620,19 @@ Password hint: %1</source>
         <translation>选择文件</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2409"/>
-        <location filename="../src/WizCategoryView.cpp" line="2603"/>
+        <location filename="../src/WizCategoryView.cpp" line="2412"/>
+        <location filename="../src/WizCategoryView.cpp" line="2609"/>
         <source>Moving note %1 ...</source>
         <translation>移动笔记 %1 ...</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2410"/>
-        <location filename="../src/WizCategoryView.cpp" line="2604"/>
+        <location filename="../src/WizCategoryView.cpp" line="2413"/>
+        <location filename="../src/WizCategoryView.cpp" line="2610"/>
         <source>Move notes from %1 to %2</source>
         <translation>从 %1 移动到 %2</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="3041"/>
+        <location filename="../src/WizCategoryView.cpp" line="3047"/>
         <source>No tag notes</source>
         <translation>无标签笔记</translation>
     </message>
@@ -2638,22 +2642,22 @@ Password hint: %1</source>
         <translation>新建文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2341"/>
+        <location filename="../src/WizCategoryView.cpp" line="2344"/>
         <source>Move folder</source>
         <translation>移动文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2550"/>
+        <location filename="../src/WizCategoryView.cpp" line="2555"/>
         <source>Please input new folder name: </source>
         <translation>请输入新的文件夹名： </translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2549"/>
+        <location filename="../src/WizCategoryView.cpp" line="2554"/>
         <source>Rename folder</source>
         <translation>重命名文件夹</translation>
     </message>
     <message>
-        <location filename="../src/WizCategoryView.cpp" line="2714"/>
+        <location filename="../src/WizCategoryView.cpp" line="2720"/>
         <source>Delete Folder</source>
         <translation>删除文件夹</translation>
     </message>
@@ -2849,69 +2853,69 @@ Password hint: %1</source>
 <context>
     <name>WizDatabase</name>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="3615"/>
+        <location filename="../src/share/WizDatabase.cpp" line="3639"/>
         <source>Downloading cert...</source>
         <translation>正在下载证书...</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4117"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4141"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4119"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4143"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4121"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4145"/>
         <source>My Contacts</source>
         <translation>我的联系人</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4123"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4147"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4125"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4149"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4127"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4151"/>
         <source>My Emails</source>
         <translation>我的邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4129"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4153"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4131"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4155"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4135"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4159"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4137"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4161"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4280"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4304"/>
         <source>Invalid password.</source>
         <translation>密码错误。</translation>
     </message>
     <message>
         <location filename="../src/share/WizDatabase.cpp" line="1031"/>
         <location filename="../src/share/WizDatabase.cpp" line="1039"/>
-        <location filename="../src/share/WizDatabase.cpp" line="4532"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4556"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -2922,7 +2926,7 @@ Password hint: %1</source>
         <translation>未发现加密证书，请从Windows客户端创建加密证书。</translation>
     </message>
     <message>
-        <location filename="../src/share/WizDatabase.cpp" line="4532"/>
+        <location filename="../src/share/WizDatabase.cpp" line="4556"/>
         <source>password error!</source>
         <translation>密码错误！</translation>
     </message>
@@ -3134,7 +3138,7 @@ Go to create a note</source>
     <message>
         <location filename="../src/WizDocumentWebView.cpp" line="490"/>
         <location filename="../src/WizDocumentWebView.cpp" line="495"/>
-        <location filename="../src/WizDocumentWebView.cpp" line="791"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="795"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -3149,48 +3153,48 @@ Go to create a note</source>
         <translation>不能添加包文件作为附件！文件名：&apos; %1 &apos;</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="791"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="795"/>
         <source>Do not support insert comment into markdown note.</source>
         <translation>暂不支持插入评论到Markdown笔记中。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1243"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1247"/>
         <source>Failed to save note.</source>
         <translation>保存笔记失败。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1244"/>
-        <location filename="../src/WizDocumentWebView.cpp" line="1296"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1248"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1300"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1296"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1300"/>
         <source>Can&apos;t copy style files</source>
         <translation>不能复制样式文件</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1960"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1964"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1960"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1964"/>
         <source>Images (*.png *.bmp *.gif *.jpg *.jpeg)</source>
         <translation>图片文件 (*.png *.bmp *.gif *.jpg *.jpeg)</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2161"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2165"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2200"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2204"/>
         <source>Html Files (*.html)</source>
         <translation>Html文件(*.html)</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2244"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2248"/>
         <source>Markdown Files (*.md)</source>
         <translation>Markdown文件(*.md)</translation>
     </message>
@@ -3198,12 +3202,12 @@ Go to create a note</source>
 <context>
     <name>WizDocumentWebViewLoaderThread</name>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2607"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2611"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2607"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2611"/>
         <source>Can&apos;t view note: (Can&apos;t unzip note data)</source>
         <translation>无法查看笔记：（不能解压缩笔记数据）</translation>
     </message>

@@ -1021,16 +1021,12 @@ bool WizCategoryView::renameFolder(WizCategoryViewFolderItem* item, const QStrin
         return false;
     }
 
-    CWizStdStringArray arrayLocation;
-    m_dbMgr.db().getAllLocationsWithExtra(arrayLocation);
-    if (std::find(arrayLocation.begin(), arrayLocation.end(), strLocation) != arrayLocation.end())
+    if (m_dbMgr.db().isFolderExists(strLocation))
     {
-        if (WizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(validName)) == QMessageBox::No)
-        {
-            m_renamingFolder = false;
-            item->setLocation(strOldLocation);
-            return false;
-        }
+        WizMessageBox::warning(0, tr("Info"), tr("Folder '%1' already exists.").arg(validName));
+        m_renamingFolder = false;
+        item->setLocation(strOldLocation);
+        return false;
     }
 
     // move all documents to new folder
@@ -1042,9 +1038,10 @@ bool WizCategoryView::renameFolder(WizCategoryViewFolderItem* item, const QStrin
     return true;
 }
 
-bool WizCategoryView::renameGroupFolder(WizCategoryViewGroupItem* pGroup, const QString& strFolderName)
+bool WizCategoryView::renameGroupFolder(WizCategoryViewGroupItem* pGroup, CString strFolderName)
 {
     WIZTAGDATA tag = pGroup->tag();
+    strFolderName.trim();
 
     QTreeWidgetItem* sameNameBrother = findSameNameBrother(pGroup->parent(), pGroup, strFolderName);
 
@@ -1052,43 +1049,9 @@ bool WizCategoryView::renameGroupFolder(WizCategoryViewGroupItem* pGroup, const 
     tag.strName = strFolderName;
     if (sameNameBrother != nullptr)
     {
-        if (WizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(strFolderName)) == QMessageBox::Yes)
-        {
-            // move documents to brother folder  and move child folders to brother folder
-            WIZTAGDATA targetTag;
-            if (sameNameBrother->type() == Category_GroupNoTagItem)
-            {
-                targetTag.strKbGUID = pGroup->kbGUID();
-            }
-            else
-            {
-                WizCategoryViewGroupItem* targetItem = dynamic_cast<WizCategoryViewGroupItem*>(sameNameBrother);
-                targetTag = targetItem->tag();
-            }
-            //
-            CWizDocumentDataArray arrayDocument;
-            if (db.getDocumentsByTag(pGroup->tag(), arrayDocument))
-            {
-                moveDocumentsToGroupFolder(arrayDocument, targetTag);
-            }
-            CWizTagDataArray arrayTag;
-            if (db.getChildTags(pGroup->tag().strGUID, arrayTag))
-            {
-                for (WIZTAGDATA tag : arrayTag)
-                {
-                   tag.strParentGUID = targetTag.strGUID;
-                   db.modifyTag(tag);
-                }
-            }
-            db.deleteTag(pGroup->tag(), true);
-
-            return true;
-        }
-        else
-        {
-            QString useableName = getUseableItemName(pGroup->parent(), pGroup);
-            tag.strName = useableName;
-        }
+        WizMessageBox::warning(0, tr("Info"), tr("Folder '%1' already exists.").arg(strFolderName));
+        pGroup->reload(db);
+        return true;
     }
     db.modifyTag(tag);
     pGroup->reload(db);
@@ -1179,7 +1142,8 @@ QTreeWidgetItem*WizCategoryView::findSameNameBrother(QTreeWidgetItem* parent, QT
     {
         for (int i = 0; i < parent->childCount(); i++)
         {
-            if (parent->child(i) != exceptItem && parent->child(i)->text(0) == name)
+            if (parent->child(i) != exceptItem
+                && parent->child(i)->text(0).compare(name, Qt::CaseInsensitive) == 0)
             {
                 return parent->child(i);
             }
@@ -2212,6 +2176,7 @@ void WizCategoryView::on_newTag_inputText_changed(const QString& text)
         QStringList::const_iterator it;
         for (it = sl.begin(); it != sl.end(); it++) {
             CString strTagName = *it;
+            strTagName.trim();
 
             CWizTagDataArray arrayTag;
             if (m_dbMgr.db().tagByName(strTagName, arrayTag)) {
@@ -2311,6 +2276,7 @@ void WizCategoryView::on_group_newFolder_inputText_changed(const QString& text)
         QStringList::const_iterator it;
         for (it = sl.begin(); it != sl.end(); it++) {
             CString strTagName = *it;
+            strTagName.trim();
 
             CWizTagDataArray arrayTag;
             if (m_dbMgr.db(strKbGUID).tagByName(strTagName, arrayTag)) {
@@ -2511,7 +2477,7 @@ void WizApplyDarkModeStyles_lineEditor(QObject* parent)
                 }
                 widget->setGeometry(rect);
                 if (isDarkMode()) {
-                    widget->setStyleSheet("color:#a6a6a6;background-color:#4a4a4a");
+                    widget->setStyleSheet("color:#eeeeee;background-color:#4a4a4a");
                 } else {
                     widget->setStyleSheet("color:black;background-color:white");
                 }
@@ -2644,6 +2610,7 @@ void WizCategoryView::on_action_user_renameTag_confirmed(int result)
     if (strTagName.isEmpty())
         return;
 
+
     if (WizCategoryViewTagItem* p = currentCategoryItem<WizCategoryViewTagItem>()) {
         WIZTAGDATA tag = p->tag();
         tag.strName = strTagName;
@@ -2671,13 +2638,14 @@ void WizCategoryView::on_action_group_renameFolder()
 void WizCategoryView::on_action_group_renameFolder_confirmed(int result)
 {
     WizLineInputDialog* dialog = qobject_cast<WizLineInputDialog*>(sender());
-    QString strTagName = dialog->input();
+    CString strTagName = dialog->input();
     dialog->deleteLater();
 
     if (result != QDialog::Accepted) {
         return;
     }
 
+    strTagName.trim();
     if (strTagName.isEmpty()) {
         return;
     }

@@ -295,6 +295,7 @@ public:
     void setDownloadAttachmentsAtSync(bool download);
     bool getDownloadAttachmentsAtSync();
     bool isFolderExists(const QString& folder);
+    bool isFolderExists(const QString& folder, QString& exists);
     QString getFolders();
     QString getFoldersPos();
     QString getGroupTagsPos();
