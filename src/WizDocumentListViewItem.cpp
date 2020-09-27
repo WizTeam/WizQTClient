@@ -711,8 +711,7 @@ void WizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOp
     static QPixmap pixmapDownload = download.pixmap(iconSize);
     static QPixmap pixmapUpload = upload.pixmap(iconSize);
     //
-    bool attachModified = false;
-    if (db.isDocumentModified(m_data.doc.strGUID) || attachModified)
+    if (db.isDocumentModified(m_data.doc.strGUID))
     {
         pix = pixmapUpload;
     }
