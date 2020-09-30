@@ -12,6 +12,7 @@ package_output_path="$HOME"
 
 
 # 注意，需要切换xcode为10
+export DEVELOPER_DIR="/Applications/Xcode10.app/Contents/Developer"
 QTDIR="/Users/weishijun/Qt/5.14.2/clang_64"
 
 # prepare language files

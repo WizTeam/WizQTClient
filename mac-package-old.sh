@@ -10,12 +10,13 @@ echo "build version : " $REV
 package_home="./macos-package"
 package_output_path="$HOME"
 
+export DEVELOPER_DIR="/Applications/Xcode10.app/Contents/Developer"
 QTDIR="/Users/weishijun/Qt/5.9.8/clang_64"
 
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DCMAKE_PREFIX_PATH=$QTDIR/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk ../WizQTClient && \
+cmake -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DCMAKE_PREFIX_PATH=$QTDIR/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode10.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk ../WizQTClient && \
 make -j5
 
 
