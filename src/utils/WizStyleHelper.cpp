@@ -5,6 +5,7 @@
 #include <QRect>
 #include <QTransform>
 #include <QPainter>
+#include <QPainterPath>
 #include <QVector>
 #include <QTextLayout>
 #include <QDebug>
