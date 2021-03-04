@@ -13,7 +13,7 @@ package_output_path="$HOME"
 
 # 注意，需要切换xcode为10
 export DEVELOPER_DIR="/Applications/Xcode10.app/Contents/Developer"
-QTDIR="/Users/weishijun/Qt/5.14.2/clang_64"
+QTDIR="/Users/weishijun/Qt5.12.10/5.12.10/clang_64"
 
 # prepare language files
 $QTDIR/bin/lrelease ./i18n/wiznote_zh_CN.ts ./share/locales/wiznote_zh_CN.qm

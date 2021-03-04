@@ -12,7 +12,7 @@ macx {
 
 SOURCES += \
 3way.cpp		cbcmac.cpp		eccrypto.cpp		hmac.cpp		osrng.cpp		rw.cpp			tftables.cpp \
-adhoc.cpp		ccm.cpp			ecp.cpp			hrtimer.cpp		panama.cpp		safer.cpp		tiger.cpp \
+ccm.cpp			ecp.cpp			hrtimer.cpp		panama.cpp		safer.cpp		tiger.cpp \
 adler32.cpp		channels.cpp		elgamal.cpp		ida.cpp			pch.cpp			salsa.cpp		tigertab.cpp \
 algebra.cpp		cmac.cpp		emsa2.cpp		idea.cpp		pkcspad.cpp		seal.cpp		trdlocal.cpp \
 algparam.cpp		cpu.cpp			eprecomp.cpp		integer.cpp		polynomi.cpp		seed.cpp		ttmac.cpp \

@@ -846,6 +846,13 @@ bool detectDarkMode(bool force)
         int major = getSystemMajorVersion();
         int minor = getSystemMinorVersion();
         //return false;
+        if ((major >= 11) || (major == 10 && minor >= 15)) {
+            NSString* appearanceDescription = [NSApplication sharedApplication].effectiveAppearance.debugDescription.lowercaseString;
+            if ([appearanceDescription rangeOfString:@"dark"].location != NSNotFound) {
+                ret = true;
+            }
+            return ret;
+        }
         if ((major >= 11) || (major == 10 && minor >= 14)) {
             //
             NSDictionary *dictApp = [[NSBundle mainBundle] infoDictionary];

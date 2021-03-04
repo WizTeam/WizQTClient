@@ -3,8 +3,8 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webengine webenginewidgets svg xml websockets
 
 macx {
-    QMAKE_MAC_SDK = macosx10.14
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
+    QMAKE_MAC_SDK = macosx10.15
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
 
     QT += macextras
     LIBS += -framework Carbon
@@ -16,8 +16,6 @@ macx {
     ICON = ../build/common/logo/wiznote.icns
 
     QMAKE_CXXFLAGS += -Wno-unused-value -Wno-unused-variable -Wno-unused-parameter -Wno-inconsistent-missing-override
-
-
 }
 
 TARGET = WizNote
