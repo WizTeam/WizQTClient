@@ -10,14 +10,33 @@ echo "build version : " $REV
 package_home="./macos-package"
 package_output_path="$HOME"
 
-QTDIR="/Users/weishijun/Qt5.7.1/5.7/clang_64"
+
+# 注意，需要切换xcode为10
+export DEVELOPER_DIR="/Applications/Xcode10.app/Contents/Developer"
+QTDIR="/Users/weishijun/Qt/5.14.2/clang_64"
+
+# prepare language files
+$QTDIR/bin/lrelease ./i18n/wiznote_zh_CN.ts ./share/locales/wiznote_zh_CN.qm
+$QTDIR/bin/lrelease ./i18n/wiznote_zh_TW.ts ./share/locales/wiznote_zh_TW.qm
+rm ./share/locales/wiznote_zh_CN.qm
+rm ./share/locales/wiznote_zh_TW.qm
+mv ./i18n/wiznote_zh_CN.qm ./share/locales/wiznote_zh_CN.qm
+mv ./i18n/wiznote_zh_TW.qm ./share/locales/wiznote_zh_TW.qm
 
 mkdir ../WizQTClient-Release-QT5
-rm -rf ../WizQTClient-Release-QT5/* && \
-cd ../WizQTClient-Release-QT5 && \
-cmake -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DCMAKE_PREFIX_PATH=$QTDIR/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk ../WizQTClient && \
-make -j5
-
+rm -rf ../WizQTClient-Release-QT5/*
+cd ../WizQTClient-Release-QT5
+$QTDIR/bin/qmake ../WizQTClient/WizNote.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler && make -f ./Makefile qmake_all
+cd lib
+cd zlib && make -j4 -f ./Makefile && cd ..
+cd quazip && make -j4 -f ./Makefile && cd ..
+cd cryptopp && make -j4 -f ./Makefile && cd ..
+cd ..
+echo $(pwd)
+cd src && make -j4 -f ./Makefile 
+rm -r ../WizNote.app 
+mv ./WizNote.app ../
+cd ..
 
 MYAPP="WizNote"
 DEST="$MYAPP.app" # Our final App directory
@@ -39,6 +58,10 @@ $QTDIR/bin/macdeployqt $DEST
 APPLCERT="Developer ID Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
 
 codesign --verbose=2 --deep --sign "$APPLCERT"  WizNote.app
+
+#codesign --options=runtime --verbose=2 --deep --sign "$APPLCERT"  WizNote.app
+#ditto -ck --rsrc --sequesterRsrc "WizNote.app" "WizNote.zip"
+#node ../WizQTClient/notarization.js $1
 
 cd ../WizQTClient
 

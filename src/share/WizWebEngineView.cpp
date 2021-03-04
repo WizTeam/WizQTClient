@@ -33,6 +33,9 @@ class WizInvisibleWebEngineView : public QWebEngineView
 
         bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame)
         {
+            Q_UNUSED(type);
+            Q_UNUSED(isMainFrame);
+
             emit m_ownerPage->openLinkInNewWindow(url);
             //
             parent()->deleteLater();
@@ -147,6 +150,9 @@ void WizWebEnginePage::init(const WizWebEngineViewInjectObjects& objects)
 
 void WizWebEnginePage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
 {
+    Q_UNUSED(level);
+    Q_UNUSED(lineNumber);
+    Q_UNUSED(sourceID);
     qDebug() << message;
 }
 
@@ -162,6 +168,7 @@ bool WizWebEnginePage::acceptNavigationRequest(const QUrl &url, QWebEnginePage::
 }
 QWebEnginePage *WizWebEnginePage::createWindow(WebWindowType type)
 {
+    Q_UNUSED(type);
     return WizInvisibleWebEngineView::create(this);
 }
 

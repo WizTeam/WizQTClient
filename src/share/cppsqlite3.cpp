@@ -35,7 +35,7 @@
 
 // Named constant for passing to CppSQLite3Exception when passing it a string
 // that cannot be deleted.
-static const bool DONT_DELETE_MSG=false;
+//static const bool DONT_DELETE_MSG=false;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Prototypes for SQLite functions not included in SQLite DLL, but copied below

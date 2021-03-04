@@ -11,7 +11,7 @@
 #include "share/WizRequest.h"
 #include "share/WizThreads.h"
 
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
@@ -196,7 +196,7 @@ bool queryJsonList(WizKMApiServerBase& server, QString url, QString method, cons
             return false;
         }
         //
-        for (int i = 0; i < result.size(); i++)
+        for (int i = 0; i < (int)result.size(); i++)
         {
             Json::Value elem = result[i];
             TData data;
@@ -359,6 +359,7 @@ bool WizKMApiServerBase::getValue(const QString& strMethodPrefix, const QString&
 
 bool WizKMApiServerBase::setValue(const QString& strMethodPrefix, const QString& strGuid, const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
+    Q_UNUSED(nRetVersion);
     QString urlPath = "/" + strMethodPrefix + "/kv/value/" + strGuid;
     //
     Json::Value body;
@@ -828,6 +829,7 @@ bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int
 
 bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
 {
+    Q_UNUSED(nStatus);
     QString strUrl = WizCommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?ids=%1").arg(strMessageIDs);
     qDebug() << "set message delete status, strToken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
@@ -956,6 +958,7 @@ bool WizKMDatabaseServer::getCommentCount(const QString& strDocumentGuid, int& c
 
 void WizKMDatabaseServer::onDocumentObjectDownloadProgress(QUrl url, qint64 downloadSize, qint64 totalSize)
 {
+    Q_UNUSED(totalSize);
     QString urlString = url.toString();
     m_objectDownloadedSize[urlString] = downloadSize;
     //
@@ -1190,6 +1193,7 @@ struct WIZRESOURCEDATA
 
 bool uploadResources(WizKMDatabaseServer& server, const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const std::vector<WIZRESOURCEDATA>& files, bool isLast, Json::Value& res)
 {
+    Q_UNUSED(res);
     QString objType = "resource";
     //
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -1559,7 +1563,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
                 std::vector<WIZZIPENTRYDATA> resLess300K;
                 std::vector<WIZZIPENTRYDATA> resLarge;
                 //
-                for (int i = 0; i < resCount; i++)
+                for (int i = 0; i < (int)resCount; i++)
                 {
                     QString resName = QString::fromUtf8(resourcesWaitForUpload[i].asString().c_str());
                     WIZZIPENTRYDATA entry = localResources[resName];
@@ -1724,7 +1728,7 @@ bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arra
     url = appendNormalParams(url, getToken());
     //
     Json::Value guids(Json::arrayValue);
-    for (int i = 0; i < arrayDocumentGUID.size(); i++)
+    for (int i = 0; i < (int)arrayDocumentGUID.size(); i++)
     {
         guids[i] = arrayDocumentGUID[i].toStdString();
     }

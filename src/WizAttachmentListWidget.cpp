@@ -20,7 +20,7 @@
 #include "share/WizMessageBox.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "WizNoteStyle.h"
 #include "WizButton.h"
 #include "WizMainWindow.h"
@@ -313,8 +313,8 @@ void WizAttachmentListView::resetPermission()
         nPerm = WIZ_USERGROUP_READER;
     }
 
-    if (nPerm <= WIZ_USERGROUP_EDITOR
-            || (nPerm == WIZ_USERGROUP_AUTHOR && m_document.strOwner == strUserId)) {
+    if (nPerm <= (int)WIZ_USERGROUP_EDITOR
+            || (nPerm == (int)WIZ_USERGROUP_AUTHOR && m_document.strOwner == strUserId)) {
         findAction(WIZACTION_ATTACHMENT_ADD)->setEnabled(true);
         findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(true);
     } else {
@@ -797,6 +797,7 @@ int WizAttachmentListViewItem::loadProgress() const
 
 void WizAttachmentListViewItem::on_downloadFinished(const WIZOBJECTDATA& data, bool bSucceed)
 {
+    Q_UNUSED(bSucceed);
     if (data.strObjectGUID == m_attachment.strGUID)
     {
         m_loadState = Downloaded;

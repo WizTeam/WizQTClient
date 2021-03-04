@@ -86,15 +86,15 @@ void WizKMSyncEvents::onVipServiceExpr(WIZGROUPDATA group)
     emit promptVipServiceExpr(group);
 }
 
-void WizKMSyncEvents::onUploadDocument(const QString& strDocumentGUID, bool bDone)
+void WizKMSyncEvents::onUploadDocument(const QString& strTitle, bool bDone)
 {
     if (bDone)
     {
-        onStatus(QObject::tr("Upload document: %1 finished").arg(strDocumentGUID));
+        onStatus(QObject::tr("Upload document: %1 finished").arg(strTitle));
     }
     else
     {
-        onStatus(QObject::tr("Upload document: %1 start").arg(strDocumentGUID));
+        onStatus(QObject::tr("Upload document: %1 start").arg(strTitle));
     }
 }
 

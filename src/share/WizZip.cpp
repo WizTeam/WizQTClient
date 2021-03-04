@@ -9,7 +9,7 @@
 #include <QTextStream>
 #include <QDebug>
 
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 
 #include "quazip/quazip.h"

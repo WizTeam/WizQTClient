@@ -12,8 +12,8 @@
 
 WizNotifyBar::WizNotifyBar(QWidget *parent)
     : QWidget(parent)
-    , m_type(NoNotify)
     , m_childWgt(new QWidget(this))
+    , m_type(NoNotify)
 {
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);    // On most platforms, the margin is 11 pixels in all directions.
@@ -79,6 +79,10 @@ void WizNotifyBar::showPermissionNotify(int type)
         break;
     case PermissionLack:
         m_labelNotify->setText(QObject::tr("Your permission is not enough to edit this note."));
+        showNotify();
+        break;
+    case NotSupport:
+        m_labelNotify->setText(QObject::tr("Cannot edit note created by WizNote Lite."));
         showNotify();
         break;
     case LockForGruop:

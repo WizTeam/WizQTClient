@@ -37,6 +37,9 @@ void WizFramelessWebDialog::loadAndShow(const QString& strUrl)
 void WizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1,
                                               QVariant param2, QVariant param3, QVariant param4)
 {
+    Q_UNUSED(param2);
+    Q_UNUSED(param3);
+    Q_UNUSED(param4);
     if (strFunction == "close")
     {
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{

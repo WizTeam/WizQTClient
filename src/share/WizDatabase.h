@@ -44,7 +44,6 @@ public:
     Q_INVOKABLE void Delete();
     Q_INVOKABLE void PermanentlyDelete(void);
     Q_INVOKABLE void moveTo(QObject* pFolder);
-    Q_INVOKABLE bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
     Q_INVOKABLE void deleteToTrash();   // would delete from server
     Q_INVOKABLE void deleteFromTrash();   // delete local file
 
@@ -296,6 +295,7 @@ public:
     void setDownloadAttachmentsAtSync(bool download);
     bool getDownloadAttachmentsAtSync();
     bool isFolderExists(const QString& folder);
+    bool isFolderExists(const QString& folder, QString& exists);
     QString getFolders();
     QString getFoldersPos();
     QString getGroupTagsPos();
@@ -315,7 +315,7 @@ public:
     virtual bool deleteAttachmentFromLocal(const QString& strAttachmentGuid);
 
 public:
-    bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
+    virtual bool open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
     bool loadDatabaseInfo();
     bool setDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool initDatabaseInfo(const WIZDATABASEINFO& dbInfo);
@@ -391,7 +391,7 @@ public:
     bool setDocumentFlags(const QString& strDocumentGuid, const QString& strFlags);
 
     bool updateDocumentData(WIZDOCUMENTDATA& data, const QString& strHtml,
-                            const QString& strURL, int nFlags, bool notifyDataModify = true);
+                            const QString& strURL, int nFlags, const QString& images, bool notifyDataModify = true);
     bool updateDocumentDataWithFolder(WIZDOCUMENTDATA& data, const QString& strFolder,
                                           bool notifyDataModify = true);
     void clearUnusedImages(const QString& strHtml, const QString& strFilePath);

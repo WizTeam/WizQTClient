@@ -50,7 +50,7 @@ public:
     Q_PROPERTY(QString shareLinkFirstTips READ getShareLinkFirstTips WRITE setShareLinkFirstTips)
     Q_PROPERTY(QString localLanguage READ getLocalLanguage)
 
-    Q_PROPERTY(QString formateISO8601StringParam WRITE setFormateISO8601StringParam)
+    Q_PROPERTY(QString formateISO8601StringParam READ formateISO8601String WRITE setFormateISO8601StringParam)
     Q_PROPERTY(QString formateISO8601StringResult READ formateISO8601String NOTIFY formateISO8601StringChanged)
 
 public slots:

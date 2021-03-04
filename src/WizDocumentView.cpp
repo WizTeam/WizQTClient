@@ -79,13 +79,6 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     //
     m_tab = new QStackedWidget(this);
     //
-    if (isDarkMode()) {
-        setAutoFillBackground(true);
-        setStyleSheet("background-color:#272727;");
-        m_tab->setAutoFillBackground(true);
-        m_tab->setStyleSheet("background-color:#272727;");
-    }
-
     m_passwordView->setGeometry(this->geometry());
     connect(m_passwordView, SIGNAL(cipherCheckRequest()), SLOT(onCipherCheckRequest()));
     //
@@ -119,6 +112,7 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     m_commentWidget->hide();
 
     QWidget* wgtEditor = new QWidget(m_docView);
+    m_wgtEditor = wgtEditor;
     //
     //使用一个widget包含webview，否则夜间模式下新建编辑，界面容易出现晃动
     QWidget* webContainer = new QWidget(wgtEditor);
@@ -215,6 +209,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     connect(checkThread, SIGNAL(finished()), m_editStatusChecker, SLOT(clearTimers()));
     m_editStatusChecker->moveToThread(checkThread);
     checkThread->start();
+    //
+    applyTheme();
 }
 
 WizDocumentView::~WizDocumentView()
@@ -224,6 +220,39 @@ WizDocumentView::~WizDocumentView()
     //
     if (m_editStatusChecker)
         delete m_editStatusChecker;
+}
+
+void WizDocumentView::applyTheme() {
+    //
+    m_title->applyTheme();
+    m_web->editorResetFont();
+    //
+    if (isDarkMode()) {
+        //
+        setAutoFillBackground(true);
+        setStyleSheet("background-color:#272727;");
+        //
+        m_tab->setAutoFillBackground(true);
+        m_tab->setStyleSheet("background-color:#272727;");
+        //
+        m_wgtEditor->setAutoFillBackground(true);
+        m_wgtEditor->setStyleSheet("background-color:#272727");
+        //
+        titleBar()->setStyleSheet(QString("QWidget{background-color:#272727;} QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"));
+        titleBar()->setAutoFillBackground(true);
+    } else {
+        setAutoFillBackground(true);
+        setStyleSheet("background-color:#f5f5f5;");
+        //
+        m_tab->setAutoFillBackground(true);
+        m_tab->setStyleSheet("background-color:#f5f5f5;");
+        //
+        m_wgtEditor->setAutoFillBackground(true);
+        m_wgtEditor->setStyleSheet("background-color:white");
+        //
+        titleBar()->setStyleSheet(QString("QWidget{background-color:#ffffff;} QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"));
+        titleBar()->setAutoFillBackground(true);
+    }
 }
 
 QSize WizDocumentView::sizeHint() const
@@ -244,6 +273,8 @@ void WizDocumentView::waitForDone()
     //
     bool done = false;
     m_web->trySaveDocument(m_note, false, [=, &done](const QVariant& ret){
+        //
+        Q_UNUSED(ret);
 
         m_web->waitForDone();
         //
@@ -310,6 +341,9 @@ void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUME
 
 void WizDocumentView::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool bOk)
 {
+    Q_UNUSED(view);
+    Q_UNUSED(doc);
+    Q_UNUSED(bOk);
 }
 
 bool WizDocumentView::reload()
@@ -338,7 +372,11 @@ void WizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
             m_bLocked = true;
         }
     } else if (!m_dbMgr.db(data.strKbGUID).canEditDocument(data)) {
-        nLockReason = WizNotifyBar::PermissionLack;
+        if (data.strType.startsWith("lite")) {
+            nLockReason = WizNotifyBar::NotSupport;
+        } else {
+            nLockReason = WizNotifyBar::PermissionLack;
+        }
         m_bLocked = true;
     } else if (WizDatabase::isInDeletedItems(data.strLocation)) {
         nLockReason = WizNotifyBar::Deleted;
@@ -379,6 +417,8 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
     WIZDOCUMENTDATAEX dataTemp = wizDoc;
     //
     m_web->trySaveDocument(m_note, false, [=](const QVariant& ret){
+        //
+        Q_UNUSED(ret);
         //
         WIZDOCUMENTDATAEX data = dataTemp;
 
@@ -992,7 +1032,12 @@ void WizDocumentView::on_commentWidget_statusChanged()
         int maxWidth = maximumWidth();
         if (!WizIsHighPixel())
         {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+            QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+            if (screen && screen->size().width() < 1440)
+#else
             if (qApp->desktop()->availableGeometry().width() < 1440)
+#endif
             {
                 maxWidth = 916;
             }

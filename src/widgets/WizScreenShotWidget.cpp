@@ -77,6 +77,7 @@ QPixmap WizScreenShotWidget::getFullScreenPixmap()
 
 void WizScreenShotWidget::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
     QColor shadowColor;
     shadowColor= QColor(0, 0, 0, 100);
     painter.begin(this);

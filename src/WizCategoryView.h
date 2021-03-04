@@ -66,7 +66,7 @@ public:
     bool isCursorEntered() const { return m_cursorEntered; }
 
     QPoint hitPoint() const { return m_hitPos; }
-
+    //
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
@@ -239,6 +239,8 @@ public:
     bool isSectionVisible(CategorySection section) const;
     void loadSectionStatus();
 
+    void applyTheme();
+
 public:
     WizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);
 
@@ -376,7 +378,7 @@ public Q_SLOTS:
 
     void on_action_newItem();
     void on_action_user_newFolder();
-    void on_newFolder_inputText_changed(const QString& text);
+    void on_newFolder_inputText_changed(QString text);
     void on_action_user_newFolder_confirmed(int result);
     void on_action_user_newTag();
     void on_action_user_newTag_confirmed(int result);
@@ -568,7 +570,7 @@ private:
     void resetFolderLocation(WizCategoryViewFolderItem* item);
     void resetFolderLocation(WizCategoryViewFolderItem* item, const QString& strNewLocation);
     bool renameFolder(WizCategoryViewFolderItem* item, const QString& strFolderName);
-    bool renameGroupFolder(WizCategoryViewGroupItem* pGroup, const QString& strFolderName);
+    bool renameGroupFolder(WizCategoryViewGroupItem* pGroup, CString strFolderName);
     //
     void updateShortcut(int type, const QString& keyValue, const QString& name);
     void removeShortcut(int type, const QString& keyValue);
@@ -604,6 +606,7 @@ private:
     QString m_strRequestedGroupKbGUID;
 
     QString m_strSelectedId;
+    bool m_renamingFolder;
 
 };
 

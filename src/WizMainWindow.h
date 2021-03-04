@@ -185,6 +185,9 @@ private:
     WizDocumentListView* m_documents;
     WizMessageListView* m_msgList;
     QWidget* m_noteListWidget;
+    QWidget* m_noteButtonsContainer;
+    QWidget* m_notelistHeaderSep;
+    QWidget* m_messagelistHeaderSep;
     QWidget* m_msgListWidget;
     WizMessageListTitleBar* m_msgListTitleBar;
 
@@ -278,9 +281,12 @@ public:
     //
     void processCategoryItemChanged();
     //
+    void applyTheme();
+    //
 signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);
+    void themeChanged();
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -463,7 +469,9 @@ public Q_SLOTS:
     //
     void onAttachmentModified(QString strKbGUID, QString strGUID,QString strFileName,
                               QString strMD5, QDateTime dtLastModified);
-
+    //
+    //
+    void onThemeChanged();
 public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow();

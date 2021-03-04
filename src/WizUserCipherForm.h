@@ -29,7 +29,7 @@ public:
     void cipherCorrect();
 
 protected:
-    virtual QSize sizeHint();
+    virtual QSize sizeHint() const;
     virtual void showEvent(QShowEvent* event);
     
 private:

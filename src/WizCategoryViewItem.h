@@ -48,9 +48,11 @@ class WizCategoryViewItemBase : public QTreeWidgetItem
 {
 public:
     WizCategoryViewItemBase(WizExplorerApp& app, const QString& strName = "", const QString& strKbGUID = "", int type = Type);
+    void setIconName(QString name);
+    virtual void resetIcon(bool withChildren);
     virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos) = 0;
     virtual void getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
-    virtual bool accept(WizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(data); return false; }
+    virtual bool accept(WizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
     virtual bool acceptDrop(const WizCategoryViewItemBase* pItem) const { Q_UNUSED(pItem); return false;}
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
     virtual bool acceptDrop(const QString& urls) const { Q_UNUSED(urls); return false; }
@@ -105,6 +107,7 @@ protected:
     QString m_countString;
     bool m_extraButtonIconPressed;
     bool m_bWillBeDeleted;
+    QString m_iconName;
 };
 
 
@@ -114,7 +117,7 @@ class WizCategoryViewSectionItem : public WizCategoryViewItemBase
 public:
     WizCategoryViewSectionItem(WizExplorerApp& app, const QString& strName, int sortOrder);
     virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
-    virtual void getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument) {  Q_UNUSED(arrayDocument); }
+    virtual void getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument) { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
     virtual int getItemHeight(int nHeight) const;
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
@@ -144,7 +147,7 @@ public:
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
 
     virtual void getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument)
-    {  Q_UNUSED(arrayDocument); }
+    {  Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
 
     virtual bool acceptMousePressedInfo() { return true; }
@@ -204,10 +207,10 @@ class WizCategoryViewShortcutPlaceHoldItem : public WizCategoryViewItemBase
 public:
     WizCategoryViewShortcutPlaceHoldItem(WizExplorerApp& app, const QString& strName);
 
-    virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos) {}
+    virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos) { Q_UNUSED(pCtrl); Q_UNUSED(pos);}
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
     virtual int getItemHeight(int hintHeight) const;
     virtual QTreeWidgetItem *clone() const {return new WizCategoryViewShortcutPlaceHoldItem(m_app,m_strName); }
@@ -232,7 +235,7 @@ public:
     virtual void showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
     virtual bool accept(WizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual QTreeWidgetItem *clone() const {return new WizCategoryViewShortcutItem(m_app, m_strName, m_type, m_strKbGUID, m_strGuid, m_location, m_bEncrypted); }
@@ -257,7 +260,7 @@ public:
 
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 12; }
@@ -274,7 +277,7 @@ public:
 
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
     virtual QString getSQLWhere() { return ""; }
     virtual QString getSelectParam() { return ""; }
@@ -411,7 +414,7 @@ public:
 
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 22; }
     virtual QTreeWidgetItem *clone() const {return new WizCategoryViewStyleRootItem(m_app, m_strName); }
@@ -503,7 +506,7 @@ public:
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
     int commandId() const { return m_commandId; }
 
     virtual void drawItemBody(QPainter* p, const QStyleOptionViewItem* vopt) const;
@@ -633,7 +636,7 @@ public:
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
     virtual void getDocuments(WizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
-    { Q_UNUSED(arrayDocument); }
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 13; }
     virtual bool isWebView() const { return true; }

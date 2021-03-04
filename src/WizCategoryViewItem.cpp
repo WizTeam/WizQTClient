@@ -11,7 +11,7 @@
 #include "utils/WizStyleHelper.h"
 #include "utils/WizNotify.h"
 #include "utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 
 #include "WizCategoryView.h"
 #include "WizMainWindow.h"
@@ -61,6 +61,29 @@ WizCategoryViewItemBase::WizCategoryViewItemBase(WizExplorerApp& app,
     , m_extraButtonIconPressed(false)
     , m_bWillBeDeleted(false)
 {
+}
+
+void WizCategoryViewItemBase::setIconName(QString name)
+{
+    m_iconName = name;
+    QIcon icon = WizLoadSkinIcon(m_app.userSettings().skin(), m_iconName, QSize(), ICON_OPTIONS);
+    setIcon(0, icon);
+}
+void WizCategoryViewItemBase::resetIcon(bool withChildren)
+{
+    if (!m_iconName.isEmpty()) {
+        QIcon icon = WizLoadSkinIcon(m_app.userSettings().skin(), m_iconName, QSize(), ICON_OPTIONS);
+        setIcon(0, icon);
+    }
+    //
+    if (withChildren) {
+        for (int i = 0; i < childCount(); i++) {
+            if (WizCategoryViewItemBase* childItem = dynamic_cast<WizCategoryViewItemBase*>(child(i))) {
+                childItem->resetIcon(withChildren);
+            }
+        }
+    }
+    //
 }
 
 void WizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
@@ -389,8 +412,7 @@ WizCategoryViewMessageItem::WizCategoryViewMessageItem(WizExplorerApp& app,
     , m_nUnread(unread)
     , m_szUnreadSize(unreadSize)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_messages", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_messages");
     setText(0, strName);
 
     m_nFilter = nFilterType;
@@ -594,6 +616,7 @@ void WizCategoryViewMessageItem::mousePressed(const QPoint& pos)
 
 void WizCategoryViewMessageItem::mouseReleased(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     m_extraButtonIconPressed = false;
 }
 
@@ -602,8 +625,7 @@ WizCategoryViewShortcutRootItem::WizCategoryViewShortcutRootItem(WizExplorerApp&
                                                                    const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_ShortcutRootItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_shortcut", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_shortcut");
     setText(0, strName);
 }
 
@@ -813,8 +835,7 @@ WizCategoryViewSearchRootItem::WizCategoryViewSearchRootItem(WizExplorerApp& app
                                                                const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_QuickSearchRootItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_search", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_search");
     setText(0, strName);
 }
 
@@ -838,8 +859,7 @@ WizCategoryViewAllFoldersItem::WizCategoryViewAllFoldersItem(WizExplorerApp& app
                                                                const QString& strKbGUID)
     : WizCategoryViewItemBase(app, strName, strKbGUID, Category_AllFoldersItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folders", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_folders");
     setText(0, strName);
 }
 
@@ -886,13 +906,11 @@ WizCategoryViewFolderItem::WizCategoryViewFolderItem(WizExplorerApp& app,
                                                        const QString& strKbGUID)
     : WizCategoryViewItemBase(app, strLocation, strKbGUID, Category_FolderItem)
 {
-    QIcon icon;
     if (::WizIsPredefinedLocation(strLocation) && strLocation == "/My Journals/") {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder_diary", QSize(), ICON_OPTIONS);
+        setIconName("category_folder_diary");
     } else {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder", QSize(), ICON_OPTIONS);
+        setIconName("category_folder");
     }
-    setIcon(0, icon);
     setText(0, WizDatabase::getLocationDisplayName(strLocation));
 }
 
@@ -909,6 +927,7 @@ QString WizCategoryViewFolderItem::id() const
 void WizCategoryViewFolderItem::setLocation(const QString& strLocation)
 {
     m_strName = strLocation;
+    setText(0, WizDatabase::getLocationDisplayName(strLocation));
 }
 
 void WizCategoryViewFolderItem::getDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument)
@@ -1039,8 +1058,7 @@ WizCategoryViewAllTagsItem::WizCategoryViewAllTagsItem(WizExplorerApp& app,
                                                          const QString& strKbGUID)
     : WizCategoryViewItemBase(app, strName, strKbGUID, Category_AllTagsItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_tags", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_tags");
     setText(0, strName);
 }
 
@@ -1088,8 +1106,7 @@ WizCategoryViewTagItem::WizCategoryViewTagItem(WizExplorerApp& app,
     : WizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_TagItem)
     , m_tag(tag)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_tagItem", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_tagItem");
     setText(0, WizDatabase::tagNameToDisplayName(tag.strName));
 }
 
@@ -1185,8 +1202,7 @@ WizCategoryViewStyleRootItem::WizCategoryViewStyleRootItem(WizExplorerApp& app,
                                                              const QString& strName)
     : WizCategoryViewItemBase(app, strName)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "style", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("style");
     setText(0, strName);
 }
 
@@ -1200,8 +1216,7 @@ QString WizCategoryViewStyleRootItem::getSectionName()
 WizCategoryViewGroupsRootItem::WizCategoryViewGroupsRootItem(WizExplorerApp& app, const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_GroupsRootItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_group", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_group");
     setText(0, strName);
 }
 
@@ -1269,8 +1284,7 @@ WizCategoryViewBizGroupRootItem::WizCategoryViewBizGroupRootItem(WizExplorerApp&
     , m_biz(biz)
     , m_unReadCount(0)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_biz", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_biz");
 }
 
 void WizCategoryViewBizGroupRootItem::showContextMenu(WizCategoryBaseView *pCtrl, QPoint pos)
@@ -1350,6 +1364,7 @@ void WizCategoryViewBizGroupRootItem::mousePressed(const QPoint& pos)
 
 void WizCategoryViewBizGroupRootItem::mouseReleased(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     m_extraButtonIconPressed = false;
 }
 
@@ -1462,16 +1477,16 @@ bool WizCategoryViewBizGroupRootItem::hitTestUnread()
 
 bool WizCategoryViewBizGroupRootItem::isOwner()
 {
-    return m_biz.bizUserRole == WIZ_BIZROLE_OWNER;
+    return m_biz.bizUserRole == (int)WIZ_BIZROLE_OWNER;
 }
 bool WizCategoryViewBizGroupRootItem::isAdmin()
 {
-    return m_biz.bizUserRole == WIZ_BIZROLE_ADMIN;
+    return m_biz.bizUserRole == (int)WIZ_BIZROLE_ADMIN;
 }
 
 bool WizCategoryViewBizGroupRootItem::isHr()
 {
-    return m_biz.bizUserRole <= WIZ_BIZROLE_HR;
+    return m_biz.bizUserRole <= (int)WIZ_BIZROLE_HR;
 }
 
 WizCategoryViewOwnGroupRootItem::WizCategoryViewOwnGroupRootItem(WizExplorerApp& app)
@@ -1512,16 +1527,14 @@ WizCategoryViewGroupRootItem::WizCategoryViewGroupRootItem(WizExplorerApp& app,
     , m_group(group)
     , m_nUnread(0)
 {
-    QIcon icon;
     if (group.bEncryptData)
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_group_enc", QSize(), ICON_OPTIONS);
+        setIconName("category_group_enc");
     }
     else
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_group", QSize(), ICON_OPTIONS);
+        setIconName("category_group");
     }
-    setIcon(0, icon);
     setText(0, m_strName);
 }
 
@@ -1571,7 +1584,7 @@ bool WizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) const
     Q_UNUSED(data);
 
     WizDatabase& db = WizDatabaseManager::instance()->db(kbGUID());
-    if (WIZ_USERGROUP_AUTHOR >= db.permission())
+    if ((int)WIZ_USERGROUP_AUTHOR >= db.permission())
         return true;
 
     return false;
@@ -1610,7 +1623,7 @@ bool WizCategoryViewGroupRootItem::acceptDrop(const QString& urls) const
     Q_UNUSED(urls);
     WizDatabase& db = m_app.databaseManager().db(kbGUID());
 
-    return WIZ_USERGROUP_AUTHOR >= db.permission();
+    return (int)WIZ_USERGROUP_AUTHOR >= db.permission();
 }
 
 void WizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
@@ -1675,6 +1688,7 @@ void WizCategoryViewGroupRootItem::reload(WizDatabase& db)
 
 void WizCategoryViewGroupRootItem::mousePressed(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     QRect rcBorder = treeWidget()->visualItemRect(this);
     QRect rcIcon = getExtraButtonRect(rcBorder, true);
     if (rcIcon.contains(pos))
@@ -1685,6 +1699,7 @@ void WizCategoryViewGroupRootItem::mousePressed(const QPoint& pos)
 
 void WizCategoryViewGroupRootItem::mouseReleased(const QPoint& pos)
 {
+    Q_UNUSED(pos);
     m_extraButtonIconPressed = false;
 }
 
@@ -1824,8 +1839,7 @@ WizCategoryViewGroupNoTagItem::WizCategoryViewGroupNoTagItem(WizExplorerApp& app
                                                                const QString& strKbGUID)
     : WizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID, Category_GroupNoTagItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_unclassified", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_unclassified");
     setText(0, PREDEFINED_UNCLASSIFIED);
 }
 
@@ -1859,8 +1873,7 @@ WizCategoryViewGroupItem::WizCategoryViewGroupItem(WizExplorerApp& app,
     : WizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_GroupItem)
     , m_tag(tag)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_folder");
     setText(0, WizDatabase::tagNameToDisplayName(tag.strName));
 }
 
@@ -1904,7 +1917,7 @@ bool WizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     Q_UNUSED(data);
 
     WizDatabase& db = WizDatabaseManager::instance()->db(kbGUID());
-    if (WIZ_USERGROUP_AUTHOR >= db.permission()) {
+    if ((int)WIZ_USERGROUP_AUTHOR >= db.permission()) {
         return true;
     }
     //
@@ -1917,7 +1930,7 @@ bool WizCategoryViewGroupItem::acceptDrop(const QString& urls) const
     Q_UNUSED(urls);
     WizDatabase& db = m_app.databaseManager().db(kbGUID());
 
-    return WIZ_USERGROUP_AUTHOR >= db.permission();
+    return (int)WIZ_USERGROUP_AUTHOR >= db.permission();
 }
 
 void WizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
@@ -1991,13 +2004,13 @@ WizCategoryViewTrashItem::WizCategoryViewTrashItem(WizExplorerApp& app,
                                                      const QString& strKbGUID)
     : WizCategoryViewFolderItem(app, "/Deleted Items/", strKbGUID)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_trash", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_trash");
     setText(0, PREDEFINED_TRASH);
 }
 
 void WizCategoryViewTrashItem::showContextMenu(WizCategoryBaseView* pCtrl, QPoint pos)
 {
+    Q_UNUSED(pos);
     if (WizCategoryView* view = dynamic_cast<WizCategoryView *>(pCtrl)) {
         //no menu
         //view->showTrashContextMenu(pos);
@@ -2030,11 +2043,14 @@ bool WizCategoryViewTrashItem::acceptDrop(const WIZDOCUMENTDATA &data) const
 
 bool WizCategoryViewTrashItem::acceptDrop(const WizCategoryViewItemBase* pItem) const
 {
+    Q_UNUSED(pItem);
     return false;
 }
 
 void WizCategoryViewTrashItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
 {
+    Q_UNUSED(forceCopy);
+    //
     CWizDocumentDataArray arrayOp;
     for (WIZDOCUMENTDATA doc : arrayDocument)
     {
@@ -2061,35 +2077,33 @@ WizCategoryViewShortcutItem::WizCategoryViewShortcutItem(WizExplorerApp& app,
     , m_location(location)
     , m_bEncrypted(bEncrypted)
 {
-    QIcon icon;
     switch (type) {
     case Document:
     {
         if (bEncrypted)
         {
-            icon = WizLoadSkinIcon(app.userSettings().skin(), "document_badge_encrypted", QSize(), ICON_OPTIONS);
+            setIconName("document_badge_encrypted");
         }
         else
         {
-            icon = WizLoadSkinIcon(app.userSettings().skin(), "document_badge", QSize(), ICON_OPTIONS);
+            setIconName("document_badge");
         }
     }
         break;
     case PersonalFolder:
     case GroupTag:
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_folder", QSize(), ICON_OPTIONS);
+        setIconName("category_folder");
     }
         break;
     case PersonalTag:
     {
-        icon = WizLoadSkinIcon(app.userSettings().skin(), "category_tag", QSize(), ICON_OPTIONS);
+        setIconName("category_tag");
     }
         break;
     }
 
     //
-    setIcon(0, icon);
     setText(0, strName);
 }
 
@@ -2336,8 +2350,7 @@ void WizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewIt
 WizCategoryViewMySharesItem::WizCategoryViewMySharesItem(WizExplorerApp& app, const QString& strName)
     : WizCategoryViewItemBase(app, strName, "", Category_MySharesItem)
 {
-    QIcon icon = WizLoadSkinIcon(app.userSettings().skin(), "category_share", QSize(), ICON_OPTIONS);
-    setIcon(0, icon);
+    setIconName("category_share");
     setText(0, strName);
 }
 

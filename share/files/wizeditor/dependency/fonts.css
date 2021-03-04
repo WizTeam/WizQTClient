@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'wizEditorIcons';
-  src:  url('fonts/wizEditorIcons.eot?5wq4nr');
-  src:  url('fonts/wizEditorIcons.eot?5wq4nr#iefix') format('embedded-opentype'),
-    url('fonts/wizEditorIcons.ttf?5wq4nr') format('truetype'),
-    url('fonts/wizEditorIcons.woff?5wq4nr') format('woff'),
-    url('fonts/wizEditorIcons.svg?5wq4nr#wizEditorIcons') format('svg');
+  src:  url('fonts/wizEditorIcons.eot?s6r2s8');
+  src:  url('fonts/wizEditorIcons.eot?s6r2s8#iefix') format('embedded-opentype'),
+    url('fonts/wizEditorIcons.ttf?s6r2s8') format('truetype'),
+    url('fonts/wizEditorIcons.woff?s6r2s8') format('woff'),
+    url('fonts/wizEditorIcons.svg?s6r2s8#wizEditorIcons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,9 +25,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-down_arrow_small.editor-icon:before {
-  content: "\e900";
-}
 .icon-merge.editor-icon:before {
   content: "\e101";
 }
@@ -69,6 +66,9 @@
 }
 .icon-down_arrow.editor-icon:before {
   content: "\e10e";
+}
+.icon-down_arrow_small.editor-icon:before {
+  content: "\e900";
 }
 .icon-undo.editor-icon:before {
   content: "\e901";
@@ -114,4 +114,19 @@
 }
 .icon-checkmark.editor-icon:before {
   content: "\e90f";
+}
+.icon-rotation_right.editor-icon:before {
+  content: "\e910";
+}
+.icon-rotation_left.editor-icon:before {
+  content: "\e911";
+}
+.icon-zoom.editor-icon:before {
+  content: "\e912";
+}
+.icon-theme.editor-icon:before {
+  content: "\e913";
+}
+.icon-organization.editor-icon:before {
+  content: "\e914";
 }

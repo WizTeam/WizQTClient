@@ -22,7 +22,7 @@
 #include "share/jsoncpp/json/json.h"
 
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 #include "sync/WizAvatarHost.h"
 #include "WizObjectDataDownloader.h"
@@ -128,11 +128,6 @@ void WizDocument::makeSureObjectDataExists()
             ::WizMakeSureAttachmentExistAndBlockWidthDialog(m_db, attach);
         }
     }
-}
-
-bool WizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
-{
-    return m_db.updateDocumentData(m_data, strHtml, strURL, nFlags);
 }
 
 void WizDocument::deleteToTrash()
@@ -647,7 +642,7 @@ QString WizDatabase::getPassword()
         strPassword = ::WizDecryptPassword(strPassword);
     }
 
-    return strPassword;
+    return QString(strPassword);
 }
 
 qint64 WizDatabase::getObjectVersion(const QString& strObjectName)
@@ -1143,6 +1138,7 @@ IWizSyncableDatabase* WizDatabase::getGroupDatabase(const WIZGROUPDATA& group)
 
 void WizDatabase::closeGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
+    Q_UNUSED(pDatabase);
 //    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
 
 //    Q_ASSERT(db);
@@ -1243,7 +1239,7 @@ bool WizDatabase::hasBiz()
 
 bool WizDatabase::isGroupAdmin()
 {
-    if (permission() <= WIZ_USERGROUP_ADMIN)
+    if (permission() <= (int)WIZ_USERGROUP_ADMIN)
         return true;
 
     return false;
@@ -1256,7 +1252,7 @@ bool WizDatabase::isGroupOwner()
 
 bool WizDatabase::isGroupSuper()
 {
-    if (permission() <= WIZ_USERGROUP_SUPER)
+    if (permission() <= (int)WIZ_USERGROUP_SUPER)
         return true;
 
     return false;
@@ -1264,7 +1260,7 @@ bool WizDatabase::isGroupSuper()
 
 bool WizDatabase::isGroupEditor()
 {
-    if (permission() <= WIZ_USERGROUP_EDITOR)
+    if (permission() <= (int)WIZ_USERGROUP_EDITOR)
         return true;
 
     return false;
@@ -1272,7 +1268,7 @@ bool WizDatabase::isGroupEditor()
 
 bool WizDatabase::isGroupAuthor()
 {
-    if (permission() <= WIZ_USERGROUP_AUTHOR)
+    if (permission() <= (int)WIZ_USERGROUP_AUTHOR)
         return true;
 
     return false;
@@ -1280,7 +1276,7 @@ bool WizDatabase::isGroupAuthor()
 
 bool WizDatabase::isGroupReader()
 {
-    if (permission() <= WIZ_USERGROUP_READER)
+    if (permission() <= (int)WIZ_USERGROUP_READER)
         return true;
 
     return false;
@@ -1288,7 +1284,11 @@ bool WizDatabase::isGroupReader()
 
 bool WizDatabase::canEditDocument(const WIZDOCUMENTDATA& data)
 {
-    if (permission() < WIZ_USERGROUP_AUTHOR ||
+    if (data.strType.startsWith("lite")) {
+        return false;
+    }
+    //
+    if (permission() < (int)WIZ_USERGROUP_AUTHOR ||
                 (permission() == WIZ_USERGROUP_AUTHOR && data.strOwner == getUserId())) {
             return true;
     }
@@ -1367,6 +1367,7 @@ bool WizDatabase::setLocalFlags(const QString& strObjectGUID,
 
 void WizDatabase::getAccountKeys(CWizStdStringArray& arrayKey)
 {
+    Q_UNUSED(arrayKey);
     Q_ASSERT(!isGroup());
 }
 
@@ -1380,6 +1381,7 @@ void WizDatabase::setAccountLocalValue(const QString& strKey,
                                         qint64 nServerVersion,
                                         bool bSaveVersion)
 {
+    Q_UNUSED(strValue);
     Q_ASSERT(!isGroup());
 
     if (bSaveVersion) {
@@ -1725,7 +1727,7 @@ QString WizDatabase::getFolders()
     CString str;
     ::WizStringArrayToText(arrayFolder, str, "*");
 
-    return str;
+    return QString(str);
 }
 
 QString WizDatabase::getFoldersPos()
@@ -1945,6 +1947,30 @@ bool WizDatabase::isFolderExists(const QString& folder)
     return pos != arrayExtra.end();
 }
 
+bool WizDatabase::isFolderExists(const QString& folder, QString& exists)
+{
+    CWizStdStringArray arrayFolder;
+    getAllLocations(arrayFolder);
+
+    CWizStdStringArray::const_iterator pos = std::find_if(arrayFolder.begin(), arrayFolder.end(),
+                                                WizCompareString(folder));
+
+    if (pos != arrayFolder.end()) {
+        exists = *pos;
+        return true;
+    }
+
+    CWizStdStringArray arrayExtra;
+    getExtraFolder(arrayExtra);
+    pos = std::find_if(arrayExtra.begin(), arrayExtra.end(), WizCompareString(folder));
+
+    if (pos != arrayExtra.end()) {
+        exists = *pos;
+        return true;
+    }
+    return false;
+}
+
 void WizDatabase::setFoldersPosModified()
 {
     setLocalValueVersion("folders_pos", -1);
@@ -2055,7 +2081,7 @@ bool WizDatabase::setAllBizInfoCore(const CWizBizDataArray& arrayBiz)
 
     setMeta("Bizs", "Count", QString::number(arrayBiz.size()));
     //
-    for (int i = 0; i < arrayBiz.size(); i++)
+    for (int i = 0; i < (int)arrayBiz.size(); i++)
     {
         const WIZBIZDATA& biz = arrayBiz[i];
         QString bizSection = "Biz_" + QString::number(i);
@@ -3162,6 +3188,7 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
                                       const QString& strURL,
                                       int nFlags,
+                                     const QString& images,
                                       bool notifyDataModify /*= true*/)
 {
     QString strProcessedHtml(strHtml);
@@ -3178,13 +3205,13 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     //
     CString strZipFileName = getDocumentFileName(data.strGUID);
     if (!data.nProtected) {
-        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName);
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName, images);
         if (!bZip) {
             return false;
         }
     } else {
         CString strTempFile = Utils::WizPathResolve::tempPath() + data.strGUID + "-decrypted";
-        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strTempFile);
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strTempFile, images);
         if (!bZip) {
             return false;
         }
@@ -3672,7 +3699,7 @@ bool WizDatabase::createDocumentAndInit(const CString& strHtml, \
         bRet = createDocument(strTitle, strName, strLocation, strHtmlUrl, data.nProtected, data);
         if (bRet)
         {
-            bRet = updateDocumentData(data, strHtml, strURL, nFlags);
+            bRet = updateDocumentData(data, strHtml, strURL, nFlags, "");
 
             Q_EMIT documentCreated(data);
         }

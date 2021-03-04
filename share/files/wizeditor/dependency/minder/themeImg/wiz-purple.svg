@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="480px" height="300px" viewBox="0 0 480 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>藤紫</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="藤紫备份" transform="translate(-80.000000, -57.000000)">
+            <g id="藤紫" transform="translate(80.000000, 57.000000)">
+                <rect id="bg" fill="#E9DFFF" x="0" y="0" width="480" height="300"></rect>
+                <path d="M116,250 C182.27417,250 236,205.228475 236,150 C236,94.771525 182.27417,50 116,50" id="椭圆形" stroke="#8251DD"></path>
+                <path d="M244,250 C310.27417,250 364,205.228475 364,150 C364,94.771525 310.27417,50 244,50" id="椭圆形备份" stroke="#8251DD" transform="translate(304.000000, 150.000000) scale(-1, 1) translate(-304.000000, -150.000000) "></path>
+                <line x1="280" y1="149.5" x2="360" y2="149.5" id="直线备份" stroke="#8251DD" stroke-linecap="square"></line>
+                <line x1="120" y1="149.5" x2="200" y2="149.5" id="直线备份-3" stroke="#8251DD" stroke-linecap="square"></line>
+                <rect id="矩形" fill="#FFFFFF" x="200" y="130" width="80" height="40" rx="4"></rect>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#8251DD">
+                    <tspan x="212.052" y="155">思维导图</tspan>
+                </text>
+                <rect id="矩形备份" fill="#DDC4FF" x="340" y="134" width="80" height="32" rx="4"></rect>
+                <rect id="矩形备份-4" fill="#DDC4FF" x="60" y="134" width="80" height="32" rx="4"></rect>
+                <rect id="矩形备份-2" fill="#DDC4FF" x="340" y="34" width="80" height="32" rx="4"></rect>
+                <rect id="矩形备份-5" fill="#DDC4FF" x="60" y="34" width="80" height="32" rx="4"></rect>
+                <rect id="矩形备份-3" fill="#DDC4FF" x="340" y="234" width="80" height="32" rx="4"></rect>
+                <rect id="矩形备份-6" fill="#DDC4FF" x="60" y="234" width="80" height="32" rx="4"></rect>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#6238B0">
+                    <tspan x="351.052" y="155">思维导图</tspan>
+                </text>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#6238B0">
+                    <tspan x="72.052" y="155">思维导图</tspan>
+                </text>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#6238B0">
+                    <tspan x="351.052" y="55">思维导图</tspan>
+                </text>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#6238B0">
+                    <tspan x="72.052" y="55">思维导图</tspan>
+                </text>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#6238B0">
+                    <tspan x="351.052" y="255">思维导图</tspan>
+                </text>
+                <text id="思维导图" font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#6238B0">
+                    <tspan x="72.052" y="255">思维导图</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

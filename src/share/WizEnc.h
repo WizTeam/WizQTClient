@@ -1,11 +1,24 @@
 ﻿#ifndef WIZENC_H
 #define WIZENC_H
 
+#ifdef __APPLE__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wexceptions"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
 #include "cryptopp/aes.h"
 #include "cryptopp/rsa.h"
 #include "cryptopp/randpool.h"
 #include "cryptopp/modes.h"
 #include "cryptopp/osrng.h"
+
+#ifdef __APPLE__
+#pragma clang diagnostic pop
+#endif
 
 #include <QDataStream>
 

@@ -2,6 +2,7 @@
 #define WIZUIBASE_H
 
 #include <QtGui>
+#include <QPalette>
 
 bool isDarkMode();
 QPixmap qpixmapWithTintColor(const QPixmap& pixmap, QColor tintColor);

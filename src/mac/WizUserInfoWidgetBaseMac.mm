@@ -12,6 +12,8 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 bool isHighPixel()
 {
     return qApp->devicePixelRatio() >= 2;
@@ -67,7 +69,7 @@ bool isHighPixel()
 @end
 
 @implementation WizUserInfoView
-- (id)initWithWidget:(WizUserInfoWidgetBaseMac*)object;
+- (id)initWithWidget:(WizUserInfoWidgetBaseMac*)object
 {
     self = [super init];
     m_widget = object;
@@ -132,6 +134,8 @@ bool isHighPixel()
 
 - (void)drawRect:(NSRect)dirtyRect
 {
+    Q_UNUSED(dirtyRect);
+    //
     const int nAvatarWidth = 26;
     //
     CGRect rect = [self frame];
@@ -301,6 +305,7 @@ WizUserInfoWidgetBaseMac::WizUserInfoWidgetBaseMac(QWidget* parent)
     , m_textWidth(0)
     , m_textHeight(0)
 {
+    Q_UNUSED(parent);
     WizUserInfoView* view = [[WizUserInfoView alloc] initWithWidget:this];
 
     [view setAutoresizesSubviews: YES];

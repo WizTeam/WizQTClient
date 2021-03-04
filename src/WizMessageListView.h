@@ -62,6 +62,7 @@ class WizMessageSenderSelector : public WizPopupWidget
     Q_OBJECT
 public:
     WizMessageSenderSelector(WizDatabaseManager& dbMgr, QWidget* parent = 0);
+    void applyTheme();
 
     virtual QSize sizeHint() const;
 
@@ -120,6 +121,7 @@ class WizMessageListTitleBar : public QWidget
     Q_OBJECT
 public:
     WizMessageListTitleBar(WizExplorerApp& app, QWidget* parent = 0);
+    void applyTheme();
 
     void setUnreadMode(bool unread, int unreadCount);
     bool isUnreadMode() const;
@@ -165,6 +167,9 @@ class WizMessageListView : public QListWidget
 
 public:
     explicit WizMessageListView(WizDatabaseManager& dbMgr, QWidget *parent = 0);
+    //
+    void applyTheme();
+    //
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     void setMessages(const CWizMessageDataArray& arrayMsg);

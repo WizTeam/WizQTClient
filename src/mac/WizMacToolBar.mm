@@ -157,6 +157,7 @@ WizMacToolBar::SizeMode WizMacToolBar::sizeMode() const
 
 void WizMacToolBar::setSizeMode(SizeMode sizeMode)
 {
+    Q_UNUSED(sizeMode);
 //    [d->toolbar setDisplayMode : NSToolbarSizeMode(sizeMode)];
 }
 
@@ -263,6 +264,7 @@ void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
 WizMacFixedSpacer::WizMacFixedSpacer(QSize sz, QWidget* parent)
     : m_sz(sz)
 {
+    Q_UNUSED(parent);
 }
 
 void WizMacFixedSpacer::adjustWidth(int width)
@@ -326,6 +328,7 @@ void WizMacFixedSpacer::adjustWidth(int width)
 WizMacToolBarButtonItem::WizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent)
     : m_width(width)
 {
+    Q_UNUSED(parent);
 //    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
 //    [myButton setTitle: WizToNSString(title)];
 //    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];

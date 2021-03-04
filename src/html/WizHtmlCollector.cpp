@@ -8,8 +8,9 @@
 #include <QNetworkDiskCache>
 
 #include "../share/WizHtml2Zip.h"
+#include "../share/WizMisc.h"
 #include "../share/WizObjectDataDownloader.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizLogger.h"
 
 bool WizHtmlFileMap::lookup(const QString& strUrl, QString& strFileName)
@@ -200,6 +201,11 @@ void WizHtmlCollector::processImgTagValue(WizHtmlTag* pTag, const QString& strAt
         return;
 
     QUrl url(strValue);
+    if (url.isRelative()) {
+        QUrl urlBase = m_url;
+        url = urlBase.resolved(strValue);
+    }
+    //
     QString strScheme = url.scheme().toLower();
     if (strScheme == "http" || strScheme == "https" || strScheme == "ftp")
     {
@@ -224,9 +230,9 @@ void WizHtmlCollector::processImgTagValue(WizHtmlTag* pTag, const QString& strAt
             return;
         }
     }
-    else if (strScheme == "file")
+    else if (strScheme == "file" || strScheme.isEmpty())
     {
-        QString resourcePath = m_url.toLocalFile();
+        QString resourcePath = Utils::WizMisc::extractFilePath(m_url.toLocalFile());
         Utils::WizMisc::addBackslash(resourcePath);
         QString filepath = url.toLocalFile();
         if (!filepath.startsWith(resourcePath))
@@ -400,6 +406,44 @@ bool WizHtmlCollector::collect(const QString& strUrl, \
     strHtml = strHtml2;
 
     return true;
+}
+
+void WizHtmlCollector::addImages(const QString& imagesFromEditor)
+{
+    CWizStdStringArray images;
+    ::WizSplitTextToArray(imagesFromEditor, ',', images);
+    for (auto imagePath : images) {
+        //
+        const QUrl url(imagePath);
+        const QString path = url.toLocalFile();
+        //
+        QString strFileName;
+        if (!m_files.lookup(url.toString(), strFileName)) {
+            //
+            TOLOG1("Add image from editor, %1 is not exists", url.toString());
+            //
+            strFileName = url.toLocalFile();
+            if (!strFileName.isEmpty() && !WizPathFileExists(strFileName)) {
+                strFileName.clear();
+            }
+
+            if (strFileName.isEmpty())
+                return;
+            //
+            QString strName = Utils::WizMisc::extractFileName(strFileName);
+            if (!IsRegFileName(strName))
+            {
+                QString strNewFileName = m_strTempPath + ::WizGenGUIDLowerCaseLetterOnly() + Utils::WizMisc::extractFileExt(strFileName);
+                if (WizCopyFile(strFileName, strNewFileName, FALSE))
+                {
+                    strFileName = strNewFileName;
+                }
+            }
+            //
+            m_files.add(url.toString(), strFileName, WIZHTMLFILEDATA::typeResource, false);
+        }
+
+    }
 }
 
 bool WizHtmlCollector::html2Zip(const QString& strExtResourcePath, \

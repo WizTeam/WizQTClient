@@ -136,8 +136,6 @@ int mainCore(int argc, char *argv[])
     QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 #endif
     //
-    QtWebEngine::initialize();
-
 #ifdef BUILD4APPSTORE
     WizIAPHelper helper;
     helper.validteReceiptOnLauch();
@@ -167,6 +165,7 @@ int mainCore(int argc, char *argv[])
 #ifdef Q_OS_MAC
     wizMacInitUncaughtExceptionHandler();
     wizMacRegisterSystemService();
+    wizMacThemeInit();
 
     // init sys local for crash report
     QString sysLocal = QLocale::system().name();

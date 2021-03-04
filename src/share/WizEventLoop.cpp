@@ -7,6 +7,7 @@ const int TIMEOUT_WAIT_SECONDS = 120;
 
 WizAutoTimeOutEventLoop::WizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent /*= 0*/)
     : QEventLoop(parent)
+    , m_reply(pReply)
     , m_error(QNetworkReply::NoError)
     , m_timeOut(false)
     , m_timeOutSeconds(TIMEOUT_WAIT_SECONDS)
@@ -14,7 +15,6 @@ WizAutoTimeOutEventLoop::WizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject 
     , m_lastDownloadBytes(-1)
     , m_uploadBytes(0)
     , m_lastUploadBytes(-1)
-    , m_reply(pReply)
     , m_finished(false)
 {
     m_url = pReply->request().url();
@@ -135,6 +135,8 @@ void WizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 b
 
 void WizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
+    Q_UNUSED(bytesTotal);
+
     m_uploadBytes = bytesSent;
 //    qDebug() << "upload progress changed  " << bytesSent << "  totoal  : " << bytesTotal;
 }

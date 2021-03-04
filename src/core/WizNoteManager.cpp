@@ -10,7 +10,7 @@
 
 #include "share/jsoncpp/json/json.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "sync/WizApiEntry.h"
 #include "sync/WizToken.h"
 #include "share/WizObject.h"

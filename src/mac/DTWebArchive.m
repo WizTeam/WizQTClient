@@ -218,7 +218,7 @@ NSString *WebResourceResponseKey = @"WebResourceResponse";
 
 @implementation DTWebResource (Dictionary)
 
-- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (id)initWithDictionary:(NSDictionary *)dictionary
 {
     NSData *data = nil;
     NSString *frameName = nil;
@@ -295,13 +295,13 @@ NSString *WebResourceResponseKey = @"WebResourceResponse";
 static NSString * const LegacyWebArchiveMainResourceKey = @"WebMainResource";
 static NSString * const LegacyWebArchiveSubresourcesKey = @"WebSubresources";
 static NSString * const LegacyWebArchiveSubframeArchivesKey =@"WebSubframeArchives";
-static NSString * const LegacyWebArchiveResourceDataKey = @"WebResourceData";
-static NSString * const LegacyWebArchiveResourceFrameNameKey = @"WebResourceFrameName";
-static NSString * const LegacyWebArchiveResourceMIMETypeKey = @"WebResourceMIMEType";
-static NSString * const LegacyWebArchiveResourceURLKey = @"WebResourceURL";
-static NSString * const LegacyWebArchiveResourceTextEncodingNameKey = @"WebResourceTextEncodingName";
-static NSString * const LegacyWebArchiveResourceResponseKey = @"WebResourceResponse";
-static NSString * const LegacyWebArchiveResourceResponseVersionKey = @"WebResourceResponseVersion";
+//static NSString * const LegacyWebArchiveResourceDataKey = @"WebResourceData";
+//static NSString * const LegacyWebArchiveResourceFrameNameKey = @"WebResourceFrameName";
+//static NSString * const LegacyWebArchiveResourceMIMETypeKey = @"WebResourceMIMEType";
+//static NSString * const LegacyWebArchiveResourceURLKey = @"WebResourceURL";
+//static NSString * const LegacyWebArchiveResourceTextEncodingNameKey = @"WebResourceTextEncodingName";
+//static NSString * const LegacyWebArchiveResourceResponseKey = @"WebResourceResponse";
+//static NSString * const LegacyWebArchiveResourceResponseVersionKey = @"WebResourceResponseVersion";
 
 NSString * WebArchivePboardType = @"Apple Web Archive pasteboard type";
 

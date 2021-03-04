@@ -4,7 +4,7 @@
 #include <QUdpSocket>
 #include <QThread>
 
-const int MAX_BUF_LEN = 255;
+//const int MAX_BUF_LEN = 255;
 
 WizUdpClient::WizUdpClient(QObject* parent)
     : QObject(parent)
