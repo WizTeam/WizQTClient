@@ -74,7 +74,7 @@ public:
 };
 
 
-const int IMAGE_WIDTH = 80;
+//const int IMAGE_WIDTH = 80;
 
 CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 {
@@ -314,8 +314,8 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const WizDocumentListView *view = dynamic_cast<const WizDocumentListView *>(widget))
             {
-                QSize sz = view->size();
-                QRect rc = vopt->rect;
+                //QSize sz = view->size();
+                //QRect rc = vopt->rect;
 //                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
                 view->drawItem(painter, vopt);
                 //drawDocumentListViewItem(vopt, painter, view);
@@ -509,6 +509,7 @@ private:
 protected:
     virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
     {
+        Q_UNUSED(widget);
         switch (element)
         {
         case CE_PushButton:

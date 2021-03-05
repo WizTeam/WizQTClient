@@ -41,6 +41,8 @@ public:
 
     bool collect(const QString &strUrl, QString &strHtml, bool mainPage, const QString& strTempPath);
     bool html2Zip(const QString& strExtResourcePath, const QString& strZipFileName);
+    //
+    void addImages(const QString& images);
 
 protected:
     virtual void startTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);

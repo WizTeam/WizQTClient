@@ -1,10 +1,14 @@
 .markdown-body {
     margin: 0 auto;
-    padding: 20px 36px;
+    /* padding: 20px 48px; */
 }
 
 .markdown-body.mobile {
     padding: 0;
+}
+
+.markdown-body > p {
+    margin-bottom: 24px;
 }
 
 .markdown-body > *:last-child {
@@ -100,15 +104,15 @@
     /*margin: 1em 0;*/
 /*}*/
 
-.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
+/* .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol,
 .markdown-body dl, .markdown-body pre {
     margin: 0 0 10px;
     margin: 0 0 .83rem;
-}
+} */
 
-.markdown-body li {
+/* .markdown-body li {
     margin: 5px 0;
-}
+} */
 
 .markdown-body li.wiz-md-todo-list-item {
     list-style: none;
@@ -162,10 +166,10 @@
     padding-left: 8px;
 }
 
-.markdown-body ul, .markdown-body ol {
+/* .markdown-body ul, .markdown-body ol {
     padding-left: 34px;
     padding-left: 2.13rem;
-}
+} */
 .markdown-body td ul, .markdown-body td ol {
     padding-left: 16px;
     padding-left: 1rem;
@@ -532,25 +536,18 @@
 /*}*/
 
 
-@media screen and (max-width: 660px) {
-    .markdown-body {
-        padding: 20px 18px;
-    }
-}
-
-
 @media only screen and (-webkit-max-device-width: 1024px),
 only screen and (-o-max-device-width: 1024px),
 only screen and (max-device-width: 1024px),
 only screen and (-webkit-min-device-pixel-ratio: 3),
 only screen and (-o-min-device-pixel-ratio: 3),
 only screen and (min-device-pixel-ratio: 3) {
-    .markdown-body {
+    /* .markdown-body {
         padding: 12px 15px;
     }
     .markdown-body ul, .markdown-body ol {
         padding-left: 40px;
-    }
+    } */
 
     .markdown-body blockquote {
         border-left: 4px solid #c8d4e8;
@@ -558,6 +555,7 @@ only screen and (min-device-pixel-ratio: 3) {
         color: #b3c2dd;
     }
 }
+
 
 /*评论页面修正*/
 .comment-list-item .markdown-body {
@@ -568,4 +566,11 @@ only screen and (min-device-pixel-ratio: 3) {
 .markdown-body .wiz-code-container,
 .markdown-body .wiz-table-body {
     padding: 0;
+}
+
+/* 修正 br 高度*/
+p > br {
+    display: block;
+    margin: 0 0 8px;
+    content: " ";
 }

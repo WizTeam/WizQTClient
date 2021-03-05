@@ -56,7 +56,7 @@
 #include "share/WizObjectDataDownloader.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizPinyin.h"
 #include "widgets/WizFramelessWebDialog.h"
 #include "widgets/WizScreenShotWidget.h"
@@ -236,7 +236,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
             m_doc, SLOT(on_document_data_changed(QString,WizDocumentView*)));
 
     connect(m_doc->titleBar(), SIGNAL(viewNoteInSeparateWindow_request()), SLOT(viewCurrentNoteInSeparateWindow()));
-
+    //
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &WizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
         WizAvatarHost::deleteAvatar(oldId);
@@ -296,6 +296,54 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
         syncMessageTimer->setInterval(3 * 1000 * 60);
         syncMessageTimer->start(3 * 1000 * 60);
     }
+    //
+    applyTheme();
+}
+
+void WizMainWindow::applyTheme()
+{
+    m_category->applyTheme();
+    m_documents->applyTheme();
+    m_msgList->applyTheme();
+    m_doc->applyTheme();
+    m_msgListTitleBar->applyTheme();
+    //
+    QPalette pal = m_noteListWidget->palette();
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#272727"));
+        pal.setColor(QPalette::Base, QColor("#272727"));
+
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    }
+    m_noteListWidget->setPalette(pal);
+    //
+    if (isDarkMode()) {
+        m_noteButtonsContainer->setStyleSheet("background-color:#333333");
+    } else {
+        m_noteButtonsContainer->setStyleSheet("background-color:#f5f5f5");
+    }
+    //
+    if (isDarkMode()) {
+        m_notelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
+        m_messagelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#474747");
+    } else {
+        m_notelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+        m_messagelistHeaderSep->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    }
+    //
+    //message list
+    pal = m_msgListWidget->palette();
+    if (isDarkMode()) {
+        pal.setColor(QPalette::Window, QColor("#272727"));
+        pal.setColor(QPalette::Base, QColor("#272727"));
+    } else {
+        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    }
+    m_msgListWidget->setPalette(pal);
+    m_msgListWidget->setAutoFillBackground(true);
 }
 
 bool WizMainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -381,6 +429,7 @@ void WizMainWindow::on_application_aboutToQuit()
 void WizMainWindow::cleanOnQuit()
 {
     m_quiting = true;
+    qInstallMessageHandler(nullptr);
     //
     WizObjectDownloaderHost::instance()->waitForDone();
     WizKMSyncThread::setQuickThread(NULL);
@@ -1075,7 +1124,7 @@ void WizMainWindow::initDockMenu()
 {
 #ifdef Q_OS_MAC
     m_dockMenu = new QMenu(this);
-    qt_mac_set_dock_menu(m_dockMenu);
+    m_dockMenu->setAsDockMenu();
 
     connect(m_dockMenu, SIGNAL(aboutToShow()),
             SLOT(resetDockMenu()));
@@ -1084,6 +1133,7 @@ void WizMainWindow::initDockMenu()
 
 void WizMainWindow::on_editor_statusChanged(const QString& currentStyle)
 {
+    Q_UNUSED(currentStyle);
 }
 
 void WizMainWindow::createNoteByTemplate(const TemplateData& tmplData)
@@ -1398,7 +1448,7 @@ void WizMainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
         newActions.append(action);
     }
 
-    qSort(newActions.begin(), newActions.end(), caseInsensitiveLessThan);
+    std::sort(newActions.begin(), newActions.end(), caseInsensitiveLessThan);
     for (QAction* action : newActions)
     {
         connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
@@ -1493,6 +1543,8 @@ void WizMainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
     }
     m_templateIAPDialog->showTemplateInfo(tmpl.id, tmpl.strName, tmpl.strThumbUrl);
     m_templateIAPDialog->open();
+#else
+    Q_UNUSED(tmpl);
 #endif
 }
 
@@ -1659,7 +1711,7 @@ void WizMainWindow::onClickedImage(const QString& src, const QString& list)
         CWizStdStringArray files;
         if (d.isArray())
         {
-            for (int i = 0; i < d.size(); i++)
+            for (int i = 0; i < (int)d.size(); i++)
             {
                 QString file = QString::fromStdString(d[i].asString());
                 files.push_back(file);
@@ -1926,8 +1978,6 @@ void WizMainWindow::initClient()
     m_clienWgt = new QWidget(this);
     setCentralWidget(m_clienWgt);
 
-    m_doc->setStyleSheet("{background-color:#f6f6f6");
-
 #else
     setCentralWidget(rootWidget());
     //
@@ -2018,10 +2068,6 @@ void WizMainWindow::initClient()
     m_doc->commentWidget()->setMinimumWidth(isHighPix ? 170 : 195);
     m_doc->web()->setMinimumWidth(576);
 
-    m_doc->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
-                                 "QToolButton {border:0px; padding:0px; border-radius:0px;}"));
-    m_doc->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"));
-
     m_msgListWidget->hide();
     //
     connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
@@ -2059,6 +2105,7 @@ QWidget* WizMainWindow::createNoteListView()
     if (isDarkMode()) {
         noteButtonsContainer->setStyleSheet("background-color:#333333");
     }
+    m_noteButtonsContainer = noteButtonsContainer;
 
     WizViewTypePopupButton* viewBtn = new WizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
@@ -2103,6 +2150,7 @@ QWidget* WizMainWindow::createNoteListView()
     } else {
         line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
+    m_notelistHeaderSep = line2;
 
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
@@ -2125,16 +2173,6 @@ QWidget*WizMainWindow::createMessageListView()
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     m_msgListWidget->setLayout(layoutList);
-    QPalette pal = m_msgListWidget->palette();
-    if (isDarkMode()) {
-        pal.setColor(QPalette::Window, QColor("#272727"));
-        pal.setColor(QPalette::Base, QColor("#272727"));
-    } else {
-        pal.setColor(QPalette::Window, QColor("#F5F5F5"));
-        pal.setColor(QPalette::Base, QColor("#F5F5F5"));
-    }
-    m_msgListWidget->setPalette(pal);
-    m_msgListWidget->setAutoFillBackground(true);
 
     m_msgListTitleBar = new WizMessageListTitleBar(*this, this);
     connect(m_msgListTitleBar, SIGNAL(messageSelector_senderSelected(QString)),
@@ -2155,6 +2193,7 @@ QWidget*WizMainWindow::createMessageListView()
     } else {
         line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
     }
+    m_messagelistHeaderSep = line2;
 
     layoutList->addLayout(titleBarLayout);
     layoutList->addWidget(line2);
@@ -3316,6 +3355,9 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
 
 void WizMainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart, bool bEnd)
 {
+    Q_UNUSED(strKeywords);
+    Q_UNUSED(bEnd);
+    //
     if (bStart) {
         m_documents->setLeadInfoState(DocumentLeadInfo_SearchResult);
         m_documents->setDocuments(arrayDocument);
@@ -3356,6 +3398,8 @@ void WizMainWindow::on_menuButtonClicked()
 
 void WizMainWindow::on_client_splitterMoved(int pos, int index)
 {
+    Q_UNUSED(pos);
+    Q_UNUSED(index);
 #ifndef Q_OS_MAC
     adjustToolBarLayout();
 #endif
@@ -3622,8 +3666,10 @@ void WizMainWindow::on_options_restartForSettings()
 
 void WizMainWindow::resetPermission(const QString& strKbGUID, const QString& strOwner)
 {
+    Q_UNUSED(strOwner);
+
     int nPerm = m_dbMgr.db(strKbGUID).permission();
-    bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
+    //bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
 
     // Admin, Super, do anything
     if (nPerm == WIZ_USERGROUP_ADMIN || nPerm == WIZ_USERGROUP_SUPER)
@@ -3871,6 +3917,7 @@ QObject* WizMainWindow::CreateWizObject(const QString& strObjectID)
 
 void WizMainWindow::SetSavingDocument(bool saving)
 {
+    Q_UNUSED(saving);
 }
 
 void WizMainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
@@ -4513,5 +4560,11 @@ void WizMainWindow::setNeedResetGroups()
 }
 
 
-
+void WizMainWindow::onThemeChanged()
+{
+    applyTheme();
+    m_searchWidget->applyTheme();
+    //
+    emit themeChanged();
+}
 

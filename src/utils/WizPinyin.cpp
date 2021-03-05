@@ -6,7 +6,7 @@
 
 #include "../share/WizQtHelper.h"
 #include "../share/WizMisc.h"
-#include "WizMisc.h"
+#include "WizMisc_utils.h"
 
 
 struct WIZCHINESEWORDPINYINDATA

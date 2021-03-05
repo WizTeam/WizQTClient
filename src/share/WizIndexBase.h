@@ -19,7 +19,7 @@ public:
     WizIndexBase(void);
     ~WizIndexBase(void);
 
-    virtual bool open(const CString& strFileName);
+    virtual bool open(const QString& strFileName, const QString& strKbGUID = NULL);
     bool isOpened();
     void close();
     bool checkTable(const QString& strTableName);

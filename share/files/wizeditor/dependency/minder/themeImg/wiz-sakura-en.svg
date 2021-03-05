@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="480px" height="300px" viewBox="0 0 480 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title></title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-81.000000, -57.000000)">
+            <g transform="translate(81.000000, 57.000000)">
+                <rect fill="#FDF6F6" x="0" y="0" width="480" height="300"></rect>
+                <path d="M115,250 C181.27417,250 235,205.228475 235,150 C235,94.771525 181.27417,50 115,50" stroke="#FFBDAD"></path>
+                <path d="M243,250 C309.27417,250 363,205.228475 363,150 C363,94.771525 309.27417,50 243,50" stroke="#FFBDAD" transform="translate(303.000000, 150.000000) scale(-1, 1) translate(-303.000000, -150.000000) "></path>
+                <line x1="279" y1="149.5" x2="359" y2="149.5" stroke="#FFBDAD" stroke-linecap="square"></line>
+                <line x1="119" y1="149.5" x2="199" y2="149.5" stroke="#FFBDAD" stroke-linecap="square"></line>
+                <rect fill="#FFFFFF" x="199" y="130" width="80" height="40" rx="4"></rect>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#EF403A">
+                    <tspan x="211.052" y="155">Mindmap</tspan>
+                </text>
+                <rect fill="#FFDBDB" x="339" y="134" width="80" height="32" rx="4"></rect>
+                <rect fill="#FFDBDB" x="59" y="134" width="80" height="32" rx="4"></rect>
+                <rect fill="#FFDBDB" x="339" y="34" width="80" height="32" rx="4"></rect>
+                <rect fill="#FFDBDB" x="59" y="34" width="80" height="32" rx="4"></rect>
+                <rect fill="#FFDBDB" x="339" y="234" width="80" height="32" rx="4"></rect>
+                <rect fill="#FFDBDB" x="59" y="234" width="80" height="32" rx="4"></rect>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#DA251F">
+                    <tspan x="350.052" y="155">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#DA251F">
+                    <tspan x="71.052" y="155">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#DA251F">
+                    <tspan x="350.052" y="55">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#DA251F">
+                    <tspan x="71.052" y="55">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#DA251F">
+                    <tspan x="350.052" y="255">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#DA251F">
+                    <tspan x="71.052" y="255">Mindmap</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

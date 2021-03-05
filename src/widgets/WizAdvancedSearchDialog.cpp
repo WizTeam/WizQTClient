@@ -484,6 +484,7 @@ void WizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) con
 
 QRect WizSearchParamItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
 {
+    Q_UNUSED(focused);
     QBrush brush;
     selected ? brush.setColor(Qt::blue) : brush.setColor(Qt::white);
     brush.setStyle(Qt::SolidPattern);

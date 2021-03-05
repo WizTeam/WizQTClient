@@ -42,6 +42,6 @@ class WizChangeCocoaImplementation
     bool _apply;
 };
 
-
+void wizMacThemeInit();
 
 #endif // WIZMACHELPER_MM_H

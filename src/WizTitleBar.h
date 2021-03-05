@@ -38,6 +38,9 @@ class WizTitleBar : public QWidget
 
 public:
     explicit WizTitleBar(WizExplorerApp& app, QWidget *parent);
+    void applyTheme();
+    //
+    //
     WizDocumentView* noteView();
     WizEditorToolBar* editorToolBar();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);

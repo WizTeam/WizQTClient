@@ -92,7 +92,7 @@ public:
     WizDocumentWebViewSaverThread(WizDatabaseManager& dbMgr, QObject* parent);
 
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
-              const QString& strHtmlFile, int nFlags);
+              const QString& strHtmlFile, int nFlags, const QString& images);
 
     //
     void waitForDone();
@@ -104,6 +104,7 @@ private:
         QString html;
         QString htmlFile;
         int flags;
+        QString images;
     };
     //
     std::vector<SAVEDATA> m_arrayData;
@@ -150,6 +151,8 @@ class WizDocumentWebView : public WizWebEngineView
 public:
     WizDocumentWebView(WizExplorerApp& app, QWidget* parent);
     ~WizDocumentWebView();
+    //
+    void applyTheme();
     //
     WizDocumentView* view() const;
     //

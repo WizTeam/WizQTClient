@@ -4,7 +4,7 @@ rm -rf ../WizQTClient-Release-Linux/*
 
 cd ../WizQTClient-Release-Linux
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt5.12.4/5.12.4/gcc_64  ../WizQTClient && \
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=~/Qt/5.12.4/gcc_64  ../WizQTClient && \
 make -j2
 
 cd ..
@@ -60,6 +60,6 @@ cp /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 ./WizNote/lib/
 cd ..
 
 
-./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt5.12.4/5.12.4/gcc_64/bin/qmake
+./WizQTClient/linuxdeployqt ./Package/wiznote.desktop -verbose=1 -appimage -qmake=../Qt/5.12.4/gcc_64/bin/qmake
 
 

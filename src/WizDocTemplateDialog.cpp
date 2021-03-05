@@ -13,7 +13,7 @@
 
 #include "share/jsoncpp/json/json.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "share/WizMisc.h"
 #include "share/WizZip.h"
 #include "share/WizSettings.h"
@@ -206,6 +206,8 @@ void WizDocTemplateDialog::getPurchasedTemplates()
 
 bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
 {
+    Q_UNUSED(dbMgr);
+    //
     if (WizServerTemplate != tmplData.type || tmplData.isFree)
         return true;
 
@@ -357,6 +359,7 @@ void WizDocTemplateDialog::on_btn_cancel_clicked()
 
 void WizDocTemplateDialog::download_templateFile_finished(QString fileName, bool ok)
 {
+    Q_UNUSED(ok);
     qDebug() << "template file downloaded ; " << fileName;
     for (int i = 0; i < ui->treeWidget->topLevelItemCount(); ++i)
     {

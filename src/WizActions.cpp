@@ -31,33 +31,33 @@ WIZACTION* WizActions::actionsData()
     static WIZACTION arrayRoot[] =
     {
     #ifdef Q_OS_LINUX
-        {"actionFile", QObject::tr("&File")},
-        {"actionEdit", QObject::tr("&Edit")},
-        {"actionView", QObject::tr("&View")},
-        {"actionFormat", QObject::tr("For&mat")},
-        {"actionTools", QObject::tr("&Tools")},
-        {"actionWindow", QObject::tr("&Window")},
-        {"actionHelp", QObject::tr("&Help")},
+        {"actionFile", QObject::tr("&File"), "", QKeySequence()},
+        {"actionEdit", QObject::tr("&Edit"), "", QKeySequence()},
+        {"actionView", QObject::tr("&View"), "", QKeySequence()},
+        {"actionFormat", QObject::tr("For&mat"), "", QKeySequence()},
+        {"actionTools", QObject::tr("&Tools"), "", QKeySequence()},
+        {"actionWindow", QObject::tr("&Window"), "", QKeySequence()},
+        {"actionHelp", QObject::tr("&Help"), "", QKeySequence()},
     #else
         // root
-        {"actionFile", QObject::tr("File")},
-        {"actionEdit", QObject::tr("Edit")},
-        {"actionView", QObject::tr("View")},
-        {"actionFormat", QObject::tr("Format")},
-        {"actionTools", QObject::tr("Tools")},
-        {"actionWindow", QObject::tr("Window")},
-        {"actionHelp", QObject::tr("Help")},
+        {"actionFile", QObject::tr("File"), "", QKeySequence()},
+        {"actionEdit", QObject::tr("Edit"), "", QKeySequence()},
+        {"actionView", QObject::tr("View"), "", QKeySequence()},
+        {"actionFormat", QObject::tr("Format"), "", QKeySequence()},
+        {"actionTools", QObject::tr("Tools"), "", QKeySequence()},
+        {"actionWindow", QObject::tr("Window"), "", QKeySequence()},
+        {"actionHelp", QObject::tr("Help"), "", QKeySequence()},
     #endif
 
         // sub
-        {"actionText", QObject::tr("Text")},
-        {"actionList", QObject::tr("List")},
-        {"actionTable", QObject::tr("Table")},
-        {"actionLink", QObject::tr("Link")},
-        {"actionStyle", QObject::tr("Style")},
-        {"actionInsert", QObject::tr("Insert")},
-        {"actionCategoryOption", QObject::tr("Category Option")},
-        {"actionSortBy", QObject::tr("Sort By")}
+        {"actionText", QObject::tr("Text"), "", QKeySequence()},
+        {"actionList", QObject::tr("List"), "", QKeySequence()},
+        {"actionTable", QObject::tr("Table"), "", QKeySequence()},
+        {"actionLink", QObject::tr("Link"), "", QKeySequence()},
+        {"actionStyle", QObject::tr("Style"), "", QKeySequence()},
+        {"actionInsert", QObject::tr("Insert"), "", QKeySequence()},
+        {"actionCategoryOption", QObject::tr("Category Option"), "", QKeySequence()},
+        {"actionSortBy", QObject::tr("Sort By"), "", QKeySequence()}
     };
 
     Q_UNUSED(arrayRoot);
@@ -219,7 +219,7 @@ WizShortcutAction *WizActions::actionFromName(const QString& strActionName)
         return pAction;
     }
 
-    WIZACTION data = {strActionName, strActionName};
+    WIZACTION data = {strActionName, strActionName, "", QKeySequence()};
 
     return addAction(data, false);
 }

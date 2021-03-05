@@ -7,6 +7,8 @@ using namespace Utils;
 
 void WizNotify::sendNotify(const QString& strTile, const QString& strText)
 {
+    Q_UNUSED(strTile);
+    Q_UNUSED(strText);
     /*
     NSUserNotification* userNotification = [[[NSUserNotification alloc] init] autorelease];
     userNotification.title = ::WizToNSString(strTile);

@@ -5,7 +5,7 @@
 #include "share/WizThreads.h"
 #include "share/WizMisc.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "share/jsoncpp/json/json.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
@@ -151,7 +151,7 @@ void saveSvgCore(WizDatabaseManager& dbMgr, const WIZDOCUMENTDATAEX& doc, QStrin
             bool notify = false;    //don't notify
             WizDatabase& db = dbMgr.db(doc.strKbGUID);
             auto note = doc;
-            ret = db.updateDocumentData(note, html, strHtmlFile, 0, notify);
+            ret = db.updateDocumentData(note, html, strHtmlFile, 0, "", notify);
         }
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {

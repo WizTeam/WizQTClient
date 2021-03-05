@@ -52,6 +52,8 @@ public:
 public:
     explicit WizDocumentListView(WizExplorerApp& app, QWidget *parent = 0);
     virtual ~WizDocumentListView();
+    //
+    void applyTheme();
 
     void resetItemsViewType(int type);
 

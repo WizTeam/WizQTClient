@@ -47,6 +47,7 @@ WizDocumentListViewDocumentItem::WizDocumentListViewDocumentItem(WizExplorerApp&
 
 void WizDocumentListViewDocumentItem::resetAvatar(const QString& strFileName)
 {
+    Q_UNUSED(strFileName);
     Q_EMIT thumbnailReloaded();
 }
 
@@ -58,7 +59,11 @@ bool WizDocumentListViewDocumentItem::isAvatarNeedUpdate(const QString& strFileN
 
     QFileInfo info(strFileName);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+    QDateTime tCreated = info.birthTime();
+#else
     QDateTime tCreated = info.created();
+#endif
     QDateTime tNow = QDateTime::currentDateTime();
     if (tCreated.daysTo(tNow) >= 1) { // download avatar before yesterday
         return true;
@@ -852,6 +857,7 @@ bool WizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) con
 
 void WizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
+    Q_UNUSED(nViewType);
     p->save();
     p->fillRect(vopt->rect, Utils::WizStyleHelper::listViewSectionItemBackground());
 

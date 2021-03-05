@@ -40,6 +40,8 @@ public:
     virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
     {
         Q_UNUSED(widget);
+        Q_UNUSED(option);
+        //
 
         painter->setRenderHint(QPainter::SmoothPixmapTransform);
         painter->drawPixmap(pos(), m_pixmap);
@@ -97,7 +99,7 @@ void WizDocumentSelectionView::requestDocuments(const CWizDocumentDataArray& arr
 
     CWizDocumentDataArray::iterator it;
     for(it = m_docs.begin(); it != m_docs.end(); it++) {
-        const WIZDOCUMENTDATAEX& doc = *it;
+        //const WIZDOCUMENTDATAEX& doc = *it;
         //m_thumbCache->load(doc.strKbGUID, doc.strGUID);
     }
 }
@@ -151,7 +153,7 @@ bool WizDocumentSelectionView::isThumbNeedBuild(const WIZABSTRACT& abs)
 
 QPoint WizDocumentSelectionView::getThumbPosition(const WIZABSTRACT& abs)
 {
-    for (int i = 0; i < m_docs.size(); i++) {
+    for (int i = 0; i < (int)m_docs.size(); i++) {
         const WIZDOCUMENTDATAEX& doc = m_docs.at(i);
         if (abs.strKbGUID == doc.strKbGUID && abs.guid == doc.strKbGUID) {
             int x = (size().width() - (WIZ_SELECTION_ITEM_MAX - 1) * WIZ_SELECTION_ITEM_OFFSET_X) / 2 + WIZ_SELECTION_ITEM_OFFSET_X * i;

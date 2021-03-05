@@ -564,6 +564,7 @@ void WizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
 
 void WizPreferenceWindow::on_tabWidget_currentChanged(int index)
 {
+    Q_UNUSED(index);
 //    if (index == 1)
 //    {
 //        setFixedHeight(350);

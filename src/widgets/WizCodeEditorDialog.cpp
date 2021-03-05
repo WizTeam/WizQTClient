@@ -58,6 +58,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(WizExplorerApp& app, WizDocumentWebView
 
 void WizCodeEditorDialog::setCode(const QString& strCode)
 {
+    Q_UNUSED(strCode);
 //    if (!strCode.isEmpty())
 //    {
 //        //m_codeEditor->page()->mainFrame()->setHtml(strCode);

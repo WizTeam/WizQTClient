@@ -41,6 +41,8 @@ class WizDocumentView : public QWidget
 public:
     WizDocumentView(WizExplorerApp& app, QWidget* parent = 0);
     ~WizDocumentView();
+    void applyTheme();
+    //
     virtual QSize sizeHint() const;
     void setSizeHint(QSize size);
 
@@ -73,6 +75,7 @@ protected:
     WizSplitter* m_splitter;
     WizTitleBar* m_title;
     QWidget* m_blankView;
+    QWidget* m_wgtEditor;
 
     WizUserCipherForm* m_passwordView;
     WizDocumentEditStatusSyncThread* m_editStatusSyncThread;

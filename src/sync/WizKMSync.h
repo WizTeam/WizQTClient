@@ -30,7 +30,7 @@ class WizKMSyncEvents : public QObject , public IWizKMSyncEvents
     virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase);
     virtual void onFreeServiceExpr(WIZGROUPDATA group);
     virtual void onVipServiceExpr(WIZGROUPDATA group);
-    virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone);
+    virtual void onUploadDocument(const QString& strTitle, bool bDone);
     virtual void onBeginKb(const QString& strKbGUID);
     virtual void onEndKb(const QString& strKbGUID);
 

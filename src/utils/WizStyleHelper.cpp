@@ -5,6 +5,7 @@
 #include <QRect>
 #include <QTransform>
 #include <QPainter>
+#include <QPainterPath>
 #include <QVector>
 #include <QTextLayout>
 #include <QDebug>
@@ -13,7 +14,7 @@
 
 #include "WizPathResolve.h"
 #include "../share/WizMisc.h"
-#include "../utils/WizMisc.h"
+#include "../utils/WizMisc_utils.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"
 #include "../share/WizUIBase.h"
@@ -288,13 +289,16 @@ QString WizStyleHelper::wizCommonStyleSheet()
 
 QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 {
+    const QString bgColor = isDarkMode() ? "#272727" : "#ffffff";
+    const QString handColor = isDarkMode() ? "#88686868" : "#DADADA";
+    //
     return QString("QScrollBar {\
-            background: #FFFFFF;\
+            background: %8;\
             width: %1px; \
         }\
         QScrollBar::handle:vertical {\
             width: %2px; \
-            background:#DADADA; \
+            background:%9; \
             border-radius:%3px;\
             min-height:%4px; \
             margin-top:%5px; \
@@ -318,6 +322,8 @@ QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
         .arg(WizSmartScaleUI(marginTop))
         .arg(WizSmartScaleUI(3))
         .arg(WizSmartScaleUI(3))
+        .arg(bgColor)
+        .arg(handColor)
         ;
 }
 
@@ -380,7 +386,8 @@ QColor WizStyleHelper::treeViewItemMessageText()
 }
 
 QColor WizStyleHelper::treeViewItemText(bool bSelected, bool bSecondLevel)
-{    
+{
+    Q_UNUSED(bSecondLevel);
     if (bSelected) {
         return QColor(getValue("Category/TextSelected", "#ffffff").toString());
     } else {
@@ -521,7 +528,8 @@ int WizStyleHelper::listViewItemHeight(int nType)
 
 QColor WizStyleHelper::listViewBackground()
 {    
-    return QColor(getValue("Documents/Background", "#ffffff").toString());
+    QString text = getValue("Documents/Background", "#ffffff").toString();
+    return QColor(text);
 }
 
 int WizStyleHelper::listViewItemHorizontalPadding()
@@ -561,26 +569,36 @@ QColor WizStyleHelper::listViewItemBackground(int stat)
 
 QColor WizStyleHelper::listViewItemType(bool bSelected, bool bFocused)
 {
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Type", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Title", "#464646").toString());
 }
 
 QColor WizStyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
 }
 
 QColor WizStyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
 {
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Location", "#3177EE").toString());
 }
 
 QColor WizStyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
-{    
+{
+    Q_UNUSED(bSelected);
+    Q_UNUSED(bFocused);
     return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
 }
 
@@ -1102,7 +1120,21 @@ int WizStyleHelper::editComboFontSize()
 
 QVariant WizStyleHelper::getValue(const QString& key, const QVariant& defaultValue)
 {
-    if (!m_settings) {
+    static bool oldIsDarkMode = isDarkMode();
+    //
+    bool resetSettings = false;
+    if (oldIsDarkMode != isDarkMode()) {
+        oldIsDarkMode = isDarkMode();
+        resetSettings = true;
+    }
+    //
+    if (!m_settings || resetSettings) {
+        //
+        if (m_settings) {
+            delete m_settings;
+            m_settings = nullptr;
+        }
+        //
         QString fileName = WizPathResolve::themePath(themeName()) + "skin.ini";
         if (isDarkMode()) {
             QString darkFileName = WizPathResolve::themePath(themeName()) + "skin_dark.ini";

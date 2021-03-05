@@ -113,7 +113,7 @@ bool WIZKBVALUEVERSIONS::fromJson(const Json::Value& value)
         //
         Json::Value versionsVal = value["versions"];
         //
-        for (int i = 0; i < versionsVal.size(); i++)
+        for (int i = 0; i < (int)versionsVal.size(); i++)
         {
             Json::Value version = versionsVal[i];
             //
@@ -316,6 +316,10 @@ bool WIZTAGDATA::fromJson(const Json::Value& value)
         tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
         nVersion = value["version"].asInt64();
         nPosition = value["pos"].asInt64();
+        //
+        if (strName.isEmpty()) {
+            strName = "Unnamed tag";
+        }
 
     } catch (Json::Exception& e) {
         TOLOG(e.what());
@@ -329,6 +333,7 @@ bool WIZTAGDATA::fromJson(const Json::Value& value)
 
 bool WIZTAGDATA::toJson(QString kbGuid, Json::Value& value) const
 {
+    Q_UNUSED(kbGuid);
     //value["kbGuid"] = kbGuid.toStdString();
     value["tagGuid"] = strGUID.toStdString();
     value["parentTagGuid"] = strParentGUID.toStdString();
@@ -458,6 +463,8 @@ bool WIZDELETEDGUIDDATA::fromJson(const Json::Value& value)
 
 bool WIZDELETEDGUIDDATA::toJson(QString kbGuid, Json::Value& value) const
 {
+    Q_UNUSED(kbGuid);
+
     value["deletedGuid"] = strGUID.toStdString();
     value["type"] = WIZOBJECTDATA::objectTypeToTypeString(eType).toStdString();
     value["created"] = tDeleted.toTime_t() * (Json::UInt64)1000;
@@ -589,8 +596,12 @@ bool WIZDOCUMENTDATAEX::fromJson(const Json::Value& value)
         strStyleGUID = QString::fromStdString(value["styleGuid"].asString());
         //
         QString tags = QString::fromStdString(value["tags"].asString());
-        QStringList sl = tags.split('*');
-        arrayTagGUID.assign(sl.begin(), sl.end());
+        if (!tags.isEmpty()) {
+            QStringList sl = tags.split('*');
+            if (sl.length() > 0) {
+                arrayTagGUID.assign(sl.begin(), sl.end());
+            }
+        }
         //
         nProtected = value["protected"].asInt();
         nAttachmentCount = value["attachmentCount"].asInt();

@@ -346,6 +346,8 @@ QString WizCommonApiEntry::appstoreParam(bool useAndSymbol)
     } else {
         strParam = "appstore=1";
     }
+#else
+    Q_UNUSED(useAndSymbol);
 #endif
 
     return strParam;

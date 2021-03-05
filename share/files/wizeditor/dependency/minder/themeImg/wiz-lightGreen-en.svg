@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="480px" height="300px" viewBox="0 0 480 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title></title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-80.000000, -57.000000)">
+            <g transform="translate(80.000000, 57.000000)">
+                <rect fill="#FFFFFF" x="0" y="0" width="480" height="300"></rect>
+                <path d="M116,250 C182.27417,250 236,205.228475 236,150 C236,94.771525 182.27417,50 116,50" stroke="#A7AFBC"></path>
+                <path d="M244,250 C310.27417,250 364,205.228475 364,150 C364,94.771525 310.27417,50 244,50" stroke="#A7AFBC" transform="translate(304.000000, 150.000000) scale(-1, 1) translate(-304.000000, -150.000000) "></path>
+                <line x1="280" y1="149.5" x2="360" y2="149.5" stroke="#A7AFBC" stroke-linecap="square"></line>
+                <line x1="120" y1="149.5" x2="200" y2="149.5" stroke="#A7AFBC" stroke-linecap="square"></line>
+                <rect stroke="#0E9C6C" fill="#CEF2DF" x="200.5" y="130.5" width="79" height="39" rx="4"></rect>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#257056">
+                    <tspan x="212.052" y="155">Mindmap</tspan>
+                </text>
+                <rect stroke="#00A3BF" fill="#E6FCFF" x="340.5" y="134.5" width="79" height="31" rx="4"></rect>
+                <rect stroke="#00A3BF" fill="#E6FCFF" x="60.5" y="134.5" width="79" height="31" rx="4"></rect>
+                <rect stroke="#00A3BF" fill="#E6FCFF" x="340.5" y="34.5" width="79" height="31" rx="4"></rect>
+                <rect stroke="#00A3BF" fill="#E6FCFF" x="60.5" y="34.5" width="79" height="31" rx="4"></rect>
+                <rect stroke="#00A3BF" fill="#E6FCFF" x="340.5" y="234.5" width="79" height="31" rx="4"></rect>
+                <rect stroke="#00A3BF" fill="#E6FCFF" x="60.5" y="234.5" width="79" height="31" rx="4"></rect>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#008399">
+                    <tspan x="351.052" y="155">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#008399">
+                    <tspan x="72.052" y="155">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#008399">
+                    <tspan x="72.052" y="55">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#008399">
+                    <tspan x="351.052" y="255">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#008399">
+                    <tspan x="351.052" y="55">Mindmap</tspan>
+                </text>
+                <text font-family="SourceHanSansCN-Normal, Source Han Sans CN" font-size="14" font-weight="normal" letter-spacing="0.223999999" fill="#008399">
+                    <tspan x="72.052" y="255">Mindmap</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

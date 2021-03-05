@@ -203,6 +203,7 @@ public:
         , m_strLabel(label)
         , m_strTooltip(tooltip)
     {
+        Q_UNUSED(m_delegate);
     }
 
     NSView* view() { return m_container->cocoaView(); }
@@ -258,6 +259,7 @@ public:
         , m_strTooltip(tooltip)
         , m_width(width)
     {
+        Q_UNUSED(m_delegate);
     }
 private:
     CWizMacToolBarDelegate* m_delegate;
@@ -385,9 +387,10 @@ NSMutableArray *itemIdentifiers(const QList<WizMacToolBarItem *> *items, bool cu
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-    NSWindow* window1 = [[NSApp windows] objectAtIndex:0];
-    NSWindow* window2 = [[NSApp windows] objectAtIndex:1];
-    NSWindow* window3 = [NSApp mainWindow];
+    Q_UNUSED(aNotification);
+//    NSWindow* window1 = [[NSApp windows] objectAtIndex:0];
+//    NSWindow* window2 = [[NSApp windows] objectAtIndex:1];
+//    NSWindow* window3 = [NSApp mainWindow];
     //NSWindow* window4 = [self window];
 
 //    [[self window] makeFirstResponder:[self window]];
@@ -398,7 +401,8 @@ NSMutableArray *itemIdentifiers(const QList<WizMacToolBarItem *> *items, bool cu
 - (BOOL) control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
 //- (BOOL) textShouldEndEditing:(NSText *) textObject;
 {
-    //Q_UNUSED(control);
+    Q_UNUSED(control);
+    Q_UNUSED(fieldEditor);
     //
     if (!m_toolbar)
         return YES;

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "WizKMCore.h"
 #include "utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "WizMisc.h"
 
 
@@ -365,6 +365,8 @@ bool WizIndex::createDocument(const CString& strTitle, const CString& strName, \
                             int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data)
 {
     Q_UNUSED(strOwner);
+    Q_UNUSED(nIconIndex);
+    Q_UNUSED(nSync);
 
     if (strTitle.isEmpty()) {
         TOLOG("NULL Pointer or Document title is empty: CreateDocument:Title!");
@@ -2267,7 +2269,7 @@ bool WizIndex::searchDocumentByTitle(const QString& strTitle,
     if (!sqlToDocumentDataArray(strSQL, arrayDocument))
         return false;
 
-    if (arrayDocument.size() > nMaxCount) {
+    if ((int)arrayDocument.size() > nMaxCount) {
         arrayDocument.resize(nMaxCount);
     }
 
@@ -3299,7 +3301,7 @@ bool WizIndex::searchDocumentByWhere(const QString& strWhere, int nMaxCount, CWi
     if (!sqlToDocumentDataArray(strSQL, arrayDocument))
         return false;
 
-    if (arrayDocument.size() > nMaxCount) {
+    if ((int)arrayDocument.size() > nMaxCount) {
         arrayDocument.resize(nMaxCount);
     }
 

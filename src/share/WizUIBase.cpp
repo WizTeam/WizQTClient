@@ -10,22 +10,22 @@
 #include <QAbstractButton>
 #include <QLineEdit>
 
-static int ComputeOverlay(int upperLayerValue, int lowerLayerValue)
-{
-    int a = lowerLayerValue;
-    int b = upperLayerValue;
-    //
-    if (a < 128)
-    {
-        int ret = 2 * a * b / 255;
-        return ret;
-    }
-    else
-    {
-        int ret = 255 - 2 * (255 - a) * (255 - b) / 255;
-        return ret;
-    }
-}
+//static int ComputeOverlay(int upperLayerValue, int lowerLayerValue)
+//{
+//    int a = lowerLayerValue;
+//    int b = upperLayerValue;
+//    //
+//    if (a < 128)
+//    {
+//        int ret = 2 * a * b / 255;
+//        return ret;
+//    }
+//    else
+//    {
+//        int ret = 255 - 2 * (255 - a) * (255 - b) / 255;
+//        return ret;
+//    }
+//}
 
 QImage qimageWithTintColor(const QImage& image, QColor tintColor)
 {
@@ -56,7 +56,7 @@ QImage qimageWithTintColor(const QImage& image, QColor tintColor)
     int Db = b; //dest alpha = 0xFF;
     int Dg = g; //dest alpha = 0xFF;
     int Dr = r; //dest alpha = 0xFF;
-    int Da = 0xFF;
+    //int Da = 0xFF;
     //
     bool argb = format == QImage::Format_ARGB32_Premultiplied;
     //
@@ -167,5 +167,7 @@ void WizApplyDarkModeStyles(QWidget* widget)
             }
         }
     }
+#else
+    Q_UNUSED(widget);
 #endif
 }

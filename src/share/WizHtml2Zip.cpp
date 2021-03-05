@@ -6,7 +6,7 @@
 
 #include "WizMisc.h"
 #include "utils/WizPathResolve.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include <QDir>
 
 
@@ -14,7 +14,7 @@
 
 bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
                  const QString& strResourcePath, long flags, \
-                 const QString& strZipFileName)
+                 const QString& strZipFileName, const QString& images)
 {
     Q_UNUSED(flags);
 
@@ -27,6 +27,8 @@ bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
     if (!collector.collect(strUrl, strMainHtml, true, strTempPath)) {
         return false;
     }
+
+    collector.addImages(images);
 
     return collector.html2Zip(strResourcePath, strZipFileName);
 }

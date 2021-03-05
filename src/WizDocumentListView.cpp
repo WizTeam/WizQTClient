@@ -116,10 +116,8 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     // setup style
     QString strSkinName = m_app.userSettings().skin();
     setStyle(::WizGetStyle(strSkinName));
-
-    QPalette pal = palette();
-    pal.setColor(QPalette::Base, Utils::WizStyleHelper::listViewBackground());
-    setPalette(pal);
+    //
+    applyTheme();
 
     setCursor(QCursor(Qt::ArrowCursor));
     //
@@ -275,6 +273,12 @@ WizDocumentListView::~WizDocumentListView()
     disconnect();
 }
 
+void WizDocumentListView::applyTheme()
+{
+    QPalette pal = palette();
+    pal.setColor(QPalette::Base, Utils::WizStyleHelper::listViewBackground());
+    setPalette(pal);
+}
 void WizDocumentListView::resizeEvent(QResizeEvent* event)
 {
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
@@ -917,7 +921,7 @@ void WizDocumentListView::resetPermission()
         findAction(WIZACTION_LIST_DOCUMENT_HISTORY)->setEnabled(false);
         //
         int num = numOfEncryptedDocuments(arrayDocument);
-        if (num == arrayDocument.size())
+        if (num == (int)arrayDocument.size())
         {
             setEncryptDocumentActionEnable(false);
         }
@@ -1102,7 +1106,7 @@ QString note2Mime(const CWizDocumentDataArray& arrayDocument)
     CString strMime;
     ::WizStringArrayToText(arrayGUID, strMime, ";");
 
-    return strMime;
+    return QString(strMime);
 }
 
 bool mime2Notes(const QString& mime, WizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
@@ -1189,7 +1193,7 @@ QPixmap CreateDocumentDragBadget(const CWizDocumentDataArray& arrayDocument)
     }
 
     //draw more
-    if (nItemCount < arrayDocument.size())
+    if (nItemCount < (int)arrayDocument.size())
     {
         rcItem.adjust(0, -nItemHeight / 2, 0, -nItemHeight / 2);
         QPen pen(QColor("#3177EE"));
@@ -1205,6 +1209,7 @@ QPixmap CreateDocumentDragBadget(const CWizDocumentDataArray& arrayDocument)
 
 QPixmap createDragImage(const QString& strMime, WizDatabaseManager& dbMgr, Qt::DropActions supportedActions)
 {
+    Q_UNUSED(supportedActions);
     CWizDocumentDataArray arrayDocument;
     if (!mime2Notes(strMime, dbMgr, arrayDocument))
         return QPixmap();
@@ -1951,6 +1956,8 @@ void WizDocumentListView::on_action_showDocumentInFloatWindow()
 {
     WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
         //
+        Q_UNUSED(vRet);
+        //
         ::WizGetAnalyzer().logAction("documentListMenuOpenInFloatWindow");
         WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
         foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
@@ -1974,6 +1981,8 @@ void WizDocumentListView::on_action_encryptDocument()
 {
     WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
         //
+        Q_UNUSED(vRet);
+        //
         ::WizGetAnalyzer().logAction("documentListMenuEncryptDocument");
         foreach (WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
         {
@@ -1987,6 +1996,8 @@ void WizDocumentListView::on_action_encryptDocument()
 void WizDocumentListView::on_action_cancelEncryption()
 {
     WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        Q_UNUSED(vRet);
         //
         ::WizGetAnalyzer().logAction("documentListMenuCancelEncryptionn");
         //
@@ -2267,7 +2278,7 @@ void WizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt
     if (WizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
         p->save();
-        int nRightMargin = WizSmartScaleUI(12);
+        //int nRightMargin = WizSmartScaleUI(12);
         QStyleOptionViewItem newVopt(*vopt);
         //newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
         pItem->draw(p, &newVopt, viewType());
@@ -2326,12 +2337,25 @@ void WizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QSt
 
 void WizDocumentListView::paintEvent(QPaintEvent *e)
 {
-    QListView::paintEvent(e);
-    if (model() && model()->rowCount(rootIndex()) > 0)
-       return;
+    if (model() && model()->rowCount(rootIndex()) > 0) {
+        //
+        QPainter p(viewport());
+        //
+        QRect rc = rect();
+        p.fillRect(rc, Utils::WizStyleHelper::listViewBackground());
+        //
+        QListView::paintEvent(e);
+        //
+        return;
+    }
+    //
     // The view is empty.
-
+    QListView::paintEvent(e);
+    //
     QPainter p(viewport());
+    //
+    QRect rc = rect();
+    p.fillRect(rc, Utils::WizStyleHelper::listViewBackground());
     //
     if (m_emptyFolder.isNull()) {
         m_emptyFolder = QPixmap(Utils::WizStyleHelper::loadPixmap("empty_folder"));
@@ -2346,7 +2370,6 @@ void WizDocumentListView::paintEvent(QPaintEvent *e)
     imageSize.setWidth(int(imageSize.width() / pixmap.devicePixelRatio()));
     imageSize.setHeight(int(imageSize.height() / pixmap.devicePixelRatio()));
 #endif
-    QRect rc = rect();
     //
     QString text = isSearchResult()
             ? tr("No search results...\nTry to change another keyword or advanced searching")

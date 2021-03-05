@@ -15,6 +15,9 @@ class WizTitleEdit : public QLineEdit
 
 public:
     explicit WizTitleEdit(QWidget *parent);
+    void applyTheme();
+    //
+    //
     void resetTitle(const QString& strTitle);
     void setReadOnly(bool b);
 

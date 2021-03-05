@@ -26,6 +26,7 @@ WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
 
     connect(ui->editInput, SIGNAL(textChanged(QString)), SIGNAL(textChanged(QString)));
     //
+
     if (isDarkMode()) {
         ui->editInput->setStyleSheet(QString("background-color:%1").arg(WizColorLineEditorBackground.name()));
         WizApplyDarkModeStyles(this);

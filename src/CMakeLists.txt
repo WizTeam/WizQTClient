@@ -3,14 +3,14 @@ project(WizNote)
 add_subdirectory(test)
 
 set(wiznote_SOURCES_MAC
-    mac/WizSearchWidget.mm
+    mac/WizSearchWidget_mac.mm
     mac/WizMacHelper.mm
     mac/WizMacToolBar.mm
     mac/WizMacToolBarDelegate.mm
     mac/WizMacActionHelper.cpp
     mac/WizUserInfoWidgetBaseMac.mm
     mac/WizUserInfoWidgetBaseMac_mm.cpp
-    utils/WizNotify.mm
+    utils/WizNotify_mac.mm
     mac/WizIAPHelper.mm
     mac/rmstore/RMAppReceipt.mm
     mac/rmstore/RMStoreAppReceiptVerificator.mm
@@ -42,7 +42,7 @@ set(wiznote_FORMS_MAC
 
 set(wiznote_SOURCES
     utils/WizLogger.cpp
-    utils/WizMisc.cpp
+    utils/WizMisc_utils.cpp
     utils/WizPinyin.cpp
     utils/WizNotify.cpp
     share/WizZip.cpp
@@ -305,7 +305,7 @@ set(wiznote_HEADERS
     WizDocumentSelectionView.h
     WizUserVerifyDialog.h
     utils/WizLogger.h
-    utils/WizMisc.h
+    utils/WizMisc_utils.h
     utils/WizPinyin.h
     utils/WizNotify.h
     WizMessageListView.h

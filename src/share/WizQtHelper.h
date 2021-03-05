@@ -21,6 +21,10 @@
 //#include <shlwapi.h>
 #else
 
+#ifdef __APPLE__
+#pragma clang diagnostic ignored "-Wreorder"
+#endif
+
 #ifndef BOOL
     #define BOOL bool
 #endif

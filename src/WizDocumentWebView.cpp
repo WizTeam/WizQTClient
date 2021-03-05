@@ -31,7 +31,7 @@
 #include "WizDef.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizLogger.h"
-#include "utils/WizMisc.h"
+#include "utils/WizMisc_utils.h"
 #include "utils/WizStyleHelper.h"
 
 #include "share/WizMisc.h"
@@ -40,6 +40,7 @@
 #include "share/WizObjectDataDownloader.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizThreads.h"
+#include "share/jsoncpp/json/json.h"
 #include "sync/WizAvatarHost.h"
 #include "sync/WizToken.h"
 #include "sync/WizApiEntry.h"
@@ -116,6 +117,7 @@ void WizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction,
 void WizDocumentWebViewPage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
 {
     Q_UNUSED(sourceID);
+    Q_UNUSED(level);
 
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
@@ -187,6 +189,11 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 
 WizDocumentWebView::~WizDocumentWebView()
 {
+}
+
+void WizDocumentWebView::applyTheme()
+{
+
 }
 void WizDocumentWebView::waitForDone()
 {
@@ -622,7 +629,11 @@ void WizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode 
     // set data
     int seconds = doc.tCreated.secsTo(QDateTime::currentDateTime());
     m_bNewNote = (seconds >= 0 && seconds <= 1) ? true : false;
-    m_bNewNoteTitleInited = m_bNewNote ? false : true;
+    if (doc.strType.isEmpty()) {
+        m_bNewNoteTitleInited = m_bNewNote ? false : true;
+    } else {
+        m_bNewNoteTitleInited = true;
+    }
     //
     setModified(false);
 
@@ -692,14 +703,17 @@ void WizDocumentWebView::replaceDefaultCss(QString& strHtml)
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
     }
     //
+    QString textColor = "#000000";
     if (isDarkMode()) {
         backgroundColor = "#272727";
+        textColor = "#a6a6a6";
     }
     //
 
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
     strCss.replace("/*default-line-height*/", QString("line-height:%1;").arg(lineHeight));
     strCss.replace("/*default-para-spacing*/", QString("margin-top:%1px; margin-bottom:%1px").arg(paraSpacing));
+    strCss.replace("/*default-text-color*/", QString("color: %1;").arg(textColor));
 
     //
     const QString customCssId("wiz_custom_css");
@@ -1018,20 +1032,12 @@ QString WizDocumentWebView::getHighlightKeywords()
     //
     CString ret;
     ::WizStringArrayToText(arr, ret, ",");
-    return ret;
+    return QString(ret);
 }
 
 
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
-    WizDocumentWebView* self = this;
-    if (isDarkMode()) {
-        //
-        QTimer::singleShot(1000, [=] {
-            self->setVisible(true);
-        });
-    }
-    //
     if (!ok)
         return;
     //
@@ -1085,6 +1091,7 @@ bool WizDocumentWebView::isInternalUrl(const QUrl& url)
 
 void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
+    Q_UNUSED(navigationType);
     if (!isMainFrame)
         return;
     //
@@ -1201,7 +1208,11 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
         //
         QString strFileName = m_mapFile.value(data.strGUID);
         //
-        QString strScript = "WizEditor.getContentHtml()";
+        QString strScript = "(function () {"
+                            "  var html = WizEditor.getContentHtml();"
+                            "  var images = WizEditor.img.getAll(true);"
+                            "  return JSON.stringify({ html, images });"
+                            "})();";
         //
         TOLOG("saving note...");
         page()->runJavaScript(strScript, [=](const QVariant& ret){
@@ -1209,18 +1220,24 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
             bool succeeded = false;
             if (ret.type() == QVariant::String)
             {
-                QString html = ret.toString();
-                if (!html.isEmpty())
+                Json::Reader reader;
+                Json::Value d;
+                if (reader.parse(ret.toString().toUtf8().data(), d))
                 {
-                    succeeded = true;
-                    m_currentNoteHtml = html;
-                    ::WizSaveUnicodeTextToUtf8File(m_strNoteHtmlFileName, m_currentNoteHtml);
-                    emit currentHtmlChanged();
-                    //
-                    //qDebug() << m_currentNoteHtml;
-                    //
-                    m_docSaverThread->save(doc, html, strFileName, 0);
-                    TOLOG("save note done...");
+                    QString html = QString::fromUtf8(d["html"].asString().c_str());
+                    QString images = QString::fromUtf8(d["images"].asString().c_str());
+                    if (!html.isEmpty())
+                    {
+                        succeeded = true;
+                        m_currentNoteHtml = html;
+                        ::WizSaveUnicodeTextToUtf8File(m_strNoteHtmlFileName, m_currentNoteHtml);
+                        emit currentHtmlChanged();
+                        //
+                        //qDebug() << m_currentNoteHtml;
+                        //
+                        m_docSaverThread->save(doc, html, strFileName, 0, images);
+                        TOLOG("save note done...");
+                    }
                 }
             }
             //
@@ -1256,7 +1273,7 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
                 QString strFileName = m_mapFile.value(doc.strGUID);
                 if (!strFileName.isEmpty())
                 {
-                    m_docSaverThread->save(doc, strHtml, strFileName, 0);
+                    m_docSaverThread->save(doc, strHtml, strFileName, 0, "");
                 }
             }
         }
@@ -1303,7 +1320,7 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(std::map<QString, QS
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
 #ifdef DEBUG_EDITOR
-    QString strEditorJS = "http://192.168.1.73:8080/libs/wizDocument/wizEditorForMac.js";
+    QString strEditorJS = "http://192.168.1.73:8080/dist/libs/wizEditorForMac.js";
 #else
     QString strEditorJS = "file:///" +  strHtmlEditorPath + "wizEditorForMac.js";
 #endif
@@ -1450,7 +1467,6 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     //
     if (isDarkMode()) {
         page()->setBackgroundColor(QColor("#272727"));
-        setVisible(false);
     }
     //
     m_strNoteHtmlFileName = strFileName;
@@ -1945,7 +1961,7 @@ void WizDocumentWebView::editorCommandExecuteInsertCheckList()
 void WizDocumentWebView::editorCommandExecuteInsertImage()
 {
     static QString initPath = QDir::homePath();
-    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg)"));
+    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg *.jpeg)"));
     if (strImgFileList.isEmpty())
         return;
     //
@@ -1967,7 +1983,7 @@ void WizDocumentWebView::editorCommandExecuteInsertImage()
     //
     CString param;
     WizStringArrayToText(files, param, "*");
-    //
+    //WizEditor.img.insertByPath('./img01.jpg');
     QString script = QString("WizEditor.img.insertByPath('%1');").arg(param);
     page()->runJavaScript(script);
 
@@ -2656,13 +2672,14 @@ WizDocumentWebViewSaverThread::WizDocumentWebViewSaverThread(WizDatabaseManager 
 }
 
 void WizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
-                                          const QString& strHtmlFile, int nFlags)
+                                          const QString& strHtmlFile, int nFlags, const QString& images)
 {
     SAVEDATA data;
     data.doc = doc;
     data.html = strHtml;
     data.htmlFile = strHtmlFile;
     data.flags = nFlags;
+    data.images = images;
     //
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -2762,7 +2779,7 @@ void WizDocumentWebViewSaverThread::run()
         WizDocumentDataLocker locker(doc.strGUID);
         //
         bool notify = false;    //don't notify
-        bool ok = db.updateDocumentData(doc, data.html, data.htmlFile, data.flags, notify);
+        bool ok = db.updateDocumentData(doc, data.html, data.htmlFile, data.flags, data.images, notify);
 
         //
         if (ok)

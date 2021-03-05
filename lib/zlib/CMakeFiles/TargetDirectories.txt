@@ -1,0 +1,4 @@
+/Users/weishijun/WizTeam/WizQTClient/lib/zlib/CMakeFiles/rebuild_cache.dir
+/Users/weishijun/WizTeam/WizQTClient/lib/zlib/CMakeFiles/edit_cache.dir
+/Users/weishijun/WizTeam/WizQTClient/lib/zlib/CMakeFiles/test.dir
+/Users/weishijun/WizTeam/WizQTClient/lib/zlib/CMakeFiles/zlib.dir
