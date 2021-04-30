@@ -9,6 +9,7 @@
 class WizWebEngineView;
 class WizExplorerApp;
 class WizPluginPopupWidget;
+class WizDocumentWebView;
 
 class WizPluginData : public QObject
 {
@@ -50,7 +51,7 @@ private:
 class WizPluginPopupWidget : public WizPopupWidget
 {
 public:
-    WizPluginPopupWidget(WizExplorerApp& app, WizPluginData* data, QWidget* parent);
+    WizPluginPopupWidget(WizExplorerApp& app, WizPluginData* data, WizDocumentWebView* web, QWidget* parent);
 public:
     WizWebEngineView* web() const {return m_web; }
 private:

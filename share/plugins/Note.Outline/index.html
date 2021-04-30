@@ -278,7 +278,7 @@
       pluginData = window.WizPluginData;
       pluginPath = pluginData.path;
       objWindow = objApp.Window;
-      browserObject = objWindow.CurrentDocumentBrowserObject;
+      browserObject = window.WizDocumentBrowser;
       strings = JSON.parse(pluginData.strings);
       objApp.LoadStringFromFile = LoadStringFromFile;
       //
