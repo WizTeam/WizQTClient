@@ -254,7 +254,9 @@ void WizTitleBar::onPluginButtonClicked()
     auto it = m_pluginWidget.find(guid);
     WizPluginPopupWidget* widget;
     if (it == m_pluginWidget.end()) {
-        widget = new WizPluginPopupWidget(m_app, data, this);
+        // passing the current note
+        WizDocumentWebView* web = noteView()->web();
+        widget = new WizPluginPopupWidget(m_app, data, web, this);
         m_pluginWidget.insert(std::make_pair(guid, widget));
     } else {
         widget = it->second;

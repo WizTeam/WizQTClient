@@ -1,6 +1,7 @@
 ﻿#include "WizPlugins.h"
 #include "sync/WizToken.h"
 #include "WizMainWindow.h"
+#include "WizDocumentWebView.h"
 #include "share/WizGlobal.h"
 #include "utils/WizPathResolve.h"
 #include "widgets/WizLocalProgressWebView.h"
@@ -321,7 +322,7 @@ void WizPluginData::initStrings()
 }
 
 
-WizPluginPopupWidget::WizPluginPopupWidget(WizExplorerApp& app, WizPluginData* data, QWidget* parent)
+WizPluginPopupWidget::WizPluginPopupWidget(WizExplorerApp& app, WizPluginData* data, WizDocumentWebView* web, QWidget* parent)
     : WizPopupWidget(parent)
     , m_data(data)
 {
@@ -329,7 +330,8 @@ WizPluginPopupWidget::WizPluginPopupWidget(WizExplorerApp& app, WizPluginData* d
     //
     WizWebEngineViewInjectObjects objects = {
         {"WizPluginData", m_data},
-        {"WizExplorerApp", app.object()}
+        {"WizExplorerApp", app.object()},
+        {"WizDocumentBrowser", web}
     };
     m_web = WizWebEngineView::create(objects, this);
     //
