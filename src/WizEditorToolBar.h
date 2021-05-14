@@ -179,6 +179,7 @@ protected Q_SLOTS:
     void on_editor_justifyRight_triggered();
 
 
+    void on_comboParagraph_shortcutActivated();
     void on_comboParagraph_indexChanged(int index);
     void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
