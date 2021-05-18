@@ -173,6 +173,13 @@ void WizMacToolBar::showInWindow(QWidget *window)
     } else {
         QTimer::singleShot(100, this, SLOT(showInTargetWindow()));
     }
+    //
+    int major = getSystemMajorVersion();
+    if (major >= 11) {
+        NSView *nsview = (NSView *)window->winId();
+        NSWindow *macWindow = [nsview window];
+       macWindow.toolbarStyle = NSWindowToolbarStyleExpanded;
+    }
 }
 
 void WizMacToolBar::setToolBarVisible(bool bVisible)
