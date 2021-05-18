@@ -43,7 +43,8 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     ui->buttonOk->setLockNormalStatus(true);
 
 #ifdef Q_OS_MAC
-    ui->editUserCipher->setStyleSheet("margin-top:4px;padding-bottom:3px;");
+    const QString color = isDarkMode() ? WizColorLineEditorBackground.name() : QString("white");
+    ui->editUserCipher->setStyleSheet(QString("margin-top:4px;padding-bottom:3px;background-color:%1").arg(color));
 #endif
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos", this);

@@ -657,6 +657,10 @@ void WizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
     if (isEditing() && hasFocus())
         return;
 
+    QString strFileName = m_mapFile.value(data.strGUID);
+    if (strFileName.isEmpty()) {
+        return;
+    }
     // reload may triggered when update from server or locally reflected by modify
     m_docLoadThread->load(data, m_currentEditorMode);
 }

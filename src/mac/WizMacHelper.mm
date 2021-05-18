@@ -836,18 +836,31 @@ int getSystemPatchVersion()
 }
 
 //
-bool detectDarkMode(bool force)
+bool detectDarkMode(bool force, const char* value = nullptr)
 {
+    //
     static bool first = true;
     static bool ret = false;
+    //
+    if (value && *value) {
+        if (QString(value) == "dark") {
+            ret = true;
+        } else {
+            ret = false;
+        }
+        return ret;
+    }
+    //
     if (first || force) {
         first = false;
+        ret = false;
         //
         int major = getSystemMajorVersion();
         int minor = getSystemMinorVersion();
         //return false;
         if ((major >= 11) || (major == 10 && minor >= 15)) {
             NSString* appearanceDescription = [NSApplication sharedApplication].effectiveAppearance.debugDescription.lowercaseString;
+            NSLog(@"%@", appearanceDescription);
             if ([appearanceDescription rangeOfString:@"dark"].location != NSNotFound) {
                 ret = true;
             }
@@ -876,11 +889,6 @@ bool detectDarkMode(bool force)
     return ret;
 }
 //
-void resetDarkMode()
-{
-    detectDarkMode(true);
-}
-
 bool isDarkMode()
 {
     return detectDarkMode(false);
@@ -1064,8 +1072,30 @@ QList<WizWindowInfo> WizGetActiveWindows()
 
 -(void)themeChanged:(NSNotification *) notification {
 
+    BOOL switchesAutomatically = [[NSUserDefaults standardUserDefaults] objectForKey: @"AppleInterfaceStyleSwitchesAutomatically"];
+    NSString* appleInterfaceStyle = [[NSUserDefaults standardUserDefaults] objectForKey: @"AppleInterfaceStyle"];
+
+    if (switchesAutomatically) {
+        if (appleInterfaceStyle == nil) {
+            qDebug() << "to lite";
+            detectDarkMode(true, "lite");
+        } else {
+            qDebug() << "to dark";
+            detectDarkMode(true, "dark");
+        }
+    } else {
+        NSString* theme = appleInterfaceStyle; //Just like Mojave
+        QString strTheme = WizToQString(theme);
+        if (strTheme.toLower() == "dark") {
+            qDebug() << "switch theme to dark\n";
+            detectDarkMode(true, "dark");
+        } else {
+            qDebug() << "switch theme to lite\n";
+            detectDarkMode(true, "false");
+        }
+    }
+    //
     Q_UNUSED(notification);
-    resetDarkMode();
     //
     WizMainWindow *window = WizMainWindow::instance();
     if (window) {
