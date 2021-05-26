@@ -8,7 +8,7 @@
 class WizKMSync
 {
 public:
-    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo,
+    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFO& userInfo,
               const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions,
                IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent);
 public:

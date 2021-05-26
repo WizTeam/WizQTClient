@@ -22,6 +22,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strNoticeText = info.strNoticeText;
     strDisplayName = info.strDisplayName;
     strUserEmail = info.strUserEmail;
+    strUserMobile = info.strUserMobile;
     strUserGUID = info.strUserGUID;
     nUserLevel = info.nUserLevel;
     strUserLevelName = info.strUserLevelName;
@@ -42,6 +43,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info, const WIZGROUPDATA& group)
     strNoticeLink = info.strNoticeLink;
     strNoticeText = info.strNoticeText;
     strDisplayName = info.strDisplayName;
+    strUserMobile = info.strUserMobile;
     strUserEmail = info.strUserEmail;
     strUserGUID = info.strUserGUID;
     nUserLevel = info.nUserLevel;
@@ -74,6 +76,7 @@ bool WIZUSERINFO::fromJson(const Json::Value& value)
         Json::Value user = value["user"];
         //
         strUserEmail = QString::fromStdString(user["email"].asString());
+        strUserMobile = QString::fromStdString(user["mobile"].asString());
         strDisplayName = QString::fromStdString(user["displayName"].asString());
         strUserGUID = QString::fromStdString(user["userGuid"].asString());
         tCreated = QDateTime::fromTime_t(user["created"].asInt64() / 1000);
@@ -609,6 +612,8 @@ bool WIZDOCUMENTDATAEX::fromJson(const Json::Value& value)
         tCreated = QDateTime::fromTime_t(value["created"].asInt64() / 1000);
         tModified = QDateTime::fromTime_t(value["modified"].asInt64() / 1000);
         tDataModified = QDateTime::fromTime_t(value["dataModified"].asInt64() / 1000);
+
+        strHtml = QString::fromStdString(value["html"].asString());
 
     } catch (Json::Exception& e) {
         TOLOG(e.what());

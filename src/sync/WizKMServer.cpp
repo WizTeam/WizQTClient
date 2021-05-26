@@ -853,7 +853,7 @@ bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValu
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, QObject* parent)
+WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFO& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, QObject* parent)
     : WizKMApiServerBase(userInfo.strKbServer, parent)
     , m_userInfo(userInfo)
     , m_kbInfo(kbInfo)
@@ -955,6 +955,38 @@ bool WizKMDatabaseServer::getCommentCount(const QString& strDocumentGuid, int& c
     return WithResult::execStandardJsonRequest<int>(*this, urlPath, commentCount);
 }
 
+QString getUserIdFromUserInfo(const WIZUSERINFO& info) {
+    if (!info.strUserEmail.isEmpty()) {
+        return info.strUserEmail;
+    }
+    if (!info.strUserMobile.isEmpty()) {
+        return info.strUserMobile;
+    }
+    return info.strUserGUID;
+}
+
+bool WizKMDatabaseServer::createDocument(QString title, QString type, QString folder, QString tag, WIZDOCUMENTDATAEX& document)
+{
+    auto kbGuid = getKbGuid();
+    QString urlPath = "ks/note/create/" + kbGuid;
+    //
+    Json::Value doc;
+    doc["kbGuid"] = kbGuid.toStdString();
+    doc["type"] = type.toStdString();
+    doc["owner"] = m_userInfo.strUserEmail.toStdString();
+    doc["title"] = title.toStdString();
+    doc["html"] = document.strHtml.toStdString();
+    if (!folder.isEmpty()) {
+        doc["category"] = folder.toStdString();
+    }
+    if (!tag.isEmpty()) {
+        doc["tags"] = tag.toStdString();
+    }
+    //
+    //
+    return WithResult::execStandardJsonRequest(*this, urlPath, document, "POST", doc);
+}
+
 
 void WizKMDatabaseServer::onDocumentObjectDownloadProgress(QUrl url, qint64 downloadSize, qint64 totalSize)
 {
@@ -1028,7 +1060,26 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
             data.name = QString::fromUtf8(resObj["name"].asString().c_str());
             data.url = QString::fromUtf8(resObj["url"].asString().c_str());
             data.size = atoi((resObj["size"].asString().c_str()));
-            data.time = QDateTime::fromTime_t(resObj["time"].asInt64() / 1000);
+            Json::Value time =resObj["time"];
+            Json::ValueType type = time.type();
+            qDebug() << type;
+            if (time.isNull()) {
+                data.time = QDateTime::currentDateTime();
+            } else if (type == Json::ValueType::stringValue) {
+                CString str = QString::fromUtf8(time.asString().c_str());
+                CString strError;
+                WizOleDateTime oleTime;
+                if (WizIso8601StringToDateTime(str, oleTime, strError)) {
+                    data.time = oleTime;
+                } else {
+                    data.time = QDateTime::fromString(str, Qt::ISODate);
+                    if (!data.time.isValid()) {
+                        data.time = QDateTime::currentDateTime();
+                    }
+                }
+            } else {
+                data.time = QDateTime::fromTime_t(time.asInt64() / 1000);
+            }
             serverResources.push_back(data);
         }
     }

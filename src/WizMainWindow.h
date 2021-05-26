@@ -470,6 +470,7 @@ public Q_SLOTS:
     void onAttachmentModified(QString strKbGUID, QString strGUID,QString strFileName,
                               QString strMD5, QDateTime dtLastModified);
     //
+    void createPlusNote(QString kbGuid, QString location, WIZTAGDATA tag);
     //
     void onThemeChanged();
 public:

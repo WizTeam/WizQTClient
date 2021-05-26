@@ -40,6 +40,7 @@
 #include "share/WizThreads.h"
 #include "share/WizWebEngineView.h"
 #include "share/WizEnc.h"
+#include "share/normalbrowserobject.h"
 
 
 #define DOCUMENT_STATUS_NOSTATUS            0x0000
@@ -60,6 +61,7 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     , m_commentWidget(new WizLocalProgressWebView({{"WizExplorerApp", m_app.object()}}, app.mainWindow()))
     , m_title(new WizTitleBar(app, this))
     , m_passwordView(new WizUserCipherForm(app, this))
+    , m_normalWeb(new WizWebEngineView(this))
     , m_defaultViewMode(app.userSettings().noteViewMode())
     , m_transitionView(new WizDocumentTransitionView(this))
     , m_bLocked(false)
@@ -70,6 +72,7 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     , m_sizeHint(QSize(200, 1))
     , m_comments(NULL)
 {
+    //
     QVBoxLayout* layoutDoc = new QVBoxLayout();
     layoutDoc->setContentsMargins(0, 0, 0, 0);
     layoutDoc->setSpacing(0);
@@ -97,6 +100,7 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     m_tab->addWidget(m_msgWidget);
     m_tab->addWidget(m_transitionView);
     m_tab->addWidget(m_blankView);
+    m_tab->addWidget(m_normalWeb);
     m_tab->setCurrentWidget(m_blankView);
     m_tab->setBackgroundRole(QPalette::HighlightedText);
 
@@ -211,6 +215,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     checkThread->start();
     //
     applyTheme();
+    //
+    WizWebEngineView::initWebEngineView(m_normalWeb, {{"WizExplorerApp", m_app.object()}, {"wizQt", new NormalBrowserObject(mainWindow, m_normalWeb, this)}});
 }
 
 WizDocumentView::~WizDocumentView()
@@ -430,7 +436,15 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
         m_noteLoaded = false;
         m_note = data;
         initStat(data, forceEdit);
-
+        //
+        if (data.strType == "collaboration") {
+            QString url = WizCommonApiEntry::newAsServerUrl() + "/note-plus/note/{kbGuid}/{docGuid}?clientType=macos&clientVersion={version}";
+            url = url.replace("{kbGuid}", data.strKbGUID).replace("{docGuid}", data.strGUID).replace("{version}", WIZ_CLIENT_VERSION);
+            viewNormalWeb(QUrl(url));
+            return;
+        }
+        //
+        //
         // download document if not exist
         WizDatabase& db = m_dbMgr.db(data.strKbGUID);
         QString strDocumentFileName = db.getDocumentFileName(data.strGUID);
@@ -709,8 +723,20 @@ void WizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool e
     }
 }
 
+void WizDocumentView::viewNormalWeb(const QUrl& url)
+{
+    m_tab->setCurrentWidget(m_normalWeb);
+    m_normalWeb->load(url);
+}
+
 void WizDocumentView::loadNote(const WIZDOCUMENTDATAEX& doc)
 {
+    if (doc.strType == "collaboration") {
+        QString url = WizCommonApiEntry::newAsServerUrl() + "/note-plus/note/{kbGuid}/{docGuid}?clientType=macos&clientVersion={version}";
+        url = url.replace("{kbGuid}", doc.strKbGUID).replace("{docGuid}", doc.strGUID).replace("{version}", WIZ_CLIENT_VERSION);
+        viewNormalWeb(QUrl(url));
+        return;
+    }
     m_web->viewDocument(doc, m_editorMode);
     m_title->setNote(doc, m_editorMode, m_bLocked);
     //

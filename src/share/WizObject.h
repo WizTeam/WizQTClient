@@ -100,6 +100,9 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     // field: email, account id
     QString strUserEmail;
 
+    // field: email, account id
+    QString strUserMobile;
+
     // field: user_guid
     QString strUserGUID;
 
@@ -362,6 +365,8 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     //
     QString strHighlightTitle;
     QString strHighlightText;
+
+    QString strHtml;
 
     bool bSkipped;
 };

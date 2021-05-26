@@ -69,7 +69,7 @@ int GetSyncStartProgress(WizKMSyncProgress progress)
 }
 
 
-WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
+WizKMSync::WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFO& userInfo, const WIZKBINFO& kbInfo, const WIZKBVALUEVERSIONS& versions, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
     : m_pDatabase(pDatabase)
     , m_userInfo(userInfo)
     , m_pEvents(pEvents)
@@ -1860,14 +1860,14 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
 
 
 
-bool WizUploadDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
+bool WizUploadDatabase(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFO& info, bool bGroup)
 {
     WizKMSync sync(pDatabase, info, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, bGroup, TRUE, NULL);
     bool bRet = sync.sync();
     //
     return bRet;
 }
-bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, bool bGroup)
+bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, const WIZUSERINFO& info, bool bGroup)
 {
     WizKMSync sync(pDatabase, info, WIZKBINFO(), WIZKBVALUEVERSIONS(), pEvents, bGroup, FALSE, NULL);
     bool bRet = sync.sync();

@@ -41,6 +41,7 @@ RESOURCES  += ../resources/wiznote.qrc
 
 SOURCES += \
     mac/WizSearchWidget_mac.mm \
+    share/normalbrowserobject.cpp \
     utils/WizLogger.cpp \
     utils/WizMisc_utils.cpp \
     utils/WizNotify.cpp \
@@ -199,6 +200,7 @@ HEADERS += \
     share/WizZip.h \
     share/WizQtHelper.h \
     share/WizMisc.h \
+    share/normalbrowserobject.h \
     share/sqlite3ext.h \
     share/sqlite3.h \
     share/cppsqlite3.h \

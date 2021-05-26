@@ -24,6 +24,7 @@ class WizObjectDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class QWebEnginePage;
+class QWebEngineView;
 class WizWebEngineView;
 class WizDocumentEditStatusSyncThread;
 class WizDocumentStatusChecker;
@@ -78,6 +79,7 @@ protected:
     QWidget* m_wgtEditor;
 
     WizUserCipherForm* m_passwordView;
+    QWebEngineView* m_normalWeb;
     WizDocumentEditStatusSyncThread* m_editStatusSyncThread;
 //    CWizDocumentStatusCheckThread* m_editStatusCheckThread;
     WizDocumentStatusChecker* m_editStatusChecker;
@@ -122,6 +124,9 @@ public:
     void showCoachingTips();
     //
     void wordCount(std::function<void(const QString&)> callback);
+
+    //
+    void viewNormalWeb(const QUrl& url);
 
 signals:
     void documentSaved(const QString& strGUID, WizDocumentView* viewer);

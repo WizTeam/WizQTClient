@@ -1164,8 +1164,64 @@ void WizMainWindow::createNoteByTemplate(const TemplateData& tmplData)
         });
     }
 }
+
+
+void WizMainWindow::createPlusNote(QString kbGuid, QString location, WIZTAGDATA tag) {
+    //
+    WizExecutingActionDialog::executeAction("", WIZ_THREAD_NETWORK, [=] {
+        QString token = WizToken::token();
+        if (token.isEmpty())
+            return;
+        //
+        WIZUSERINFO info = WizToken::userInfo();
+        //
+        if (!kbGuid.isEmpty()) {
+            info.strKbGUID = kbGuid;
+        }
+        //
+        WIZGROUPDATA group;
+        if (WizDatabaseManager::instance()->db().getGroupData(kbGuid, group))
+        {
+            info = WIZUSERINFO(info, group);
+        }
+        //
+        WizKMDatabaseServer server(info);
+        //
+        WIZDOCUMENTDATAEX document;
+        document.strHtml = "abc";
+        if (!server.createDocument("Untitled", "collaboration", location, tag.strGUID, document)) {
+            return;
+        }
+        //
+        document.strKbGUID = info.strKbGUID;
+        m_dbMgr.db(kbGuid).updateDocument(document);
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_DOWNLOAD, [=] {
+            QString fileName = ::WizDatabaseManager::instance()->db(kbGuid).getDocumentFileName(document.strGUID);
+            WizKMDatabaseServer server(info);
+            WIZDOCUMENTDATAEX documentTemp;
+            server.document_downloadData(document.strGUID, documentTemp, fileName);
+        });
+        //
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+            //
+            WizMainWindow* window = WizMainWindow::instance();
+            if (window) {
+                WIZDOCUMENTDATAEX documentTemp = document;
+//                documentTemp.
+                window->locateDocument(documentTemp);
+                window->viewDocument(document, false);
+            }
+            //
+        });
+        //
+        return;
+    });
+}
+
 void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
 {
+    //
     QFileInfo info(tmplData.strFileName);
     //
     initVariableBeforCreateNote();
@@ -1179,6 +1235,12 @@ void WizMainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     {
         currLocation = m_dbMgr.db(kbGUID).getDefaultNoteLocation();
     }
+    //
+    if (tmplData.buildInName == "collaboration") {
+        createPlusNote(kbGUID, currLocation, currTag);
+        return;
+    }
+    //
     //
     WIZDOCUMENTDATA data;
     data.strKbGUID = kbGUID;

@@ -546,6 +546,17 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     tmplEmpty.strTitle = QObject::tr("Untitled");
     tmplEmpty.isFree = true;
     tmplList.append(tmplEmpty);
+
+    // 内置的note-plus模板
+    TemplateData tmplPlus;
+    tmplPlus.type = BuildInTemplate;
+    tmplPlus.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/newnote.ziw";;
+    tmplPlus.strName = QObject::tr("Co-Editing Note");
+    tmplPlus.strTitle = QObject::tr("Untitled");
+    tmplPlus.buildInName = "collaboration";
+    tmplPlus.isFree = true;
+    tmplList.append(tmplPlus);
+
     //
     // 内置的markdown模板
     TemplateData tmplMarkdown;

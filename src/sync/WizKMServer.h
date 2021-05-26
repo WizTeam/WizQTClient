@@ -125,12 +125,12 @@ class WizKMDatabaseServer: public WizKMApiServerBase
 {
     Q_OBJECT
 public:
-    WizKMDatabaseServer(const WIZUSERINFOBASE& userInfo, const WIZKBINFO& kbInfo = WIZKBINFO(), const WIZKBVALUEVERSIONS& versions = WIZKBVALUEVERSIONS(), QObject* parent = 0);
+    WizKMDatabaseServer(const WIZUSERINFO& userInfo, const WIZKBINFO& kbInfo = WIZKBINFO(), const WIZKBVALUEVERSIONS& versions = WIZKBVALUEVERSIONS(), QObject* parent = 0);
     virtual ~WizKMDatabaseServer();
 
     const WIZKBINFO& kbInfo();
     void setKBInfo(const WIZKBINFO& info);
-    const WIZUSERINFOBASE& userInfo() const { return m_userInfo; }
+    const WIZUSERINFO& userInfo() const { return m_userInfo; }
     //
     bool isGroup() const;
     //
@@ -139,7 +139,7 @@ public:
     void clearLocalError() { m_strLastLocalError.clear(); }
     QString lastLocalError() const { return m_strLastLocalError; }
 protected:
-    WIZUSERINFOBASE m_userInfo;
+    WIZUSERINFO m_userInfo;
     WIZKBINFO m_kbInfo;
     WIZKBVALUEVERSIONS m_valueVersions;
     //
@@ -191,6 +191,8 @@ public:
     bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
     //
     bool getCommentCount(const QString& strDocumentGuid, int& commentCount);
+
+    bool createDocument(QString title, QString type, QString folder, QString tag, WIZDOCUMENTDATAEX& document);
 
 public:
     virtual int getCountPerPage();
